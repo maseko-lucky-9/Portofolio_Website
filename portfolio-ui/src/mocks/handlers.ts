@@ -146,7 +146,7 @@ export const handlers = [
   // Auth
   http.post(`${API_URL}/v1/auth/login`, async ({ request }) => {
     await delay(500);
-    const body = await request.json() as any;
+    const body = await request.json() as { email: string; password: string };
 
     if (body.email === 'admin@example.com' && body.password === 'password') {
       return HttpResponse.json({

@@ -83,13 +83,14 @@ export function useIncrementArticleViews() {
       // Optimistically update the cache
       queryClient.setQueryData(
         queryKeys.articles.detail(slug),
-        (old: any) => {
-          if (!old?.data) return old;
+        (old: unknown) => {
+          const oldData = old as { data?: Article };
+          if (!oldData?.data) return old;
           return {
-            ...old,
+            ...oldData,
             data: {
-              ...old.data,
-              views: (old.data.views || 0) + 1,
+              ...oldData.data,
+              views: (oldData.data.views || 0) + 1,
             },
           };
         }

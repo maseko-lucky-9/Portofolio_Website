@@ -23,7 +23,7 @@ export function ProjectsList() {
     page,
     limit: 9,
     search: search || undefined,
-    status: 'PUBLISHED',
+    status: ProjectStatus.PUBLISHED,
   });
 
   // Loading state with skeletons

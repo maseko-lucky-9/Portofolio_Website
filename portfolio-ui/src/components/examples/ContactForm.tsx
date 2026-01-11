@@ -49,7 +49,7 @@ export function ContactFormExample() {
   });
 
   const onSubmit = (data: ContactFormData) => {
-    submitContact(data, {
+    submitContact(data as any, {
       onSuccess: () => {
         form.reset();
       },

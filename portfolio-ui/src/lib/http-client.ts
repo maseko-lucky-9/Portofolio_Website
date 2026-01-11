@@ -9,7 +9,7 @@
  * - Abort controller support
  */
 
-import { env, apiUrl } from './env';
+import { env, apiUrl } from '../config/env';
 
 // ============================================
 // Types
@@ -231,7 +231,7 @@ class HttpClient {
       ...restOptions
     } = options;
 
-    let url = apiUrl(endpoint);
+    const url = apiUrl(endpoint);
     let attempt = 0;
 
     while (attempt < (skipRetry ? 1 : retry)) {
@@ -343,8 +343,10 @@ class HttpClient {
     const dedupeKey = this.deduplicator.getKey(config.url, config);
     const existingRequest = this.deduplicator.get(dedupeKey);
     if (existingRequest) {
-      const response = await existingRequest.clone();
-      return this.parseResponse<T>(response);
+      const response = await existingRequest;
+      // Clone the response since it can only be read once
+      const clonedResponse = response.clone();
+      return this.parseResponse<T>(clonedResponse);
     }
 
     // Create abort controller for timeout

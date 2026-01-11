@@ -78,7 +78,7 @@ class AnalyticsService {
    */
   async trackPageView(path: string): Promise<void> {
     return this.trackEvent({
-      eventType: 'PAGE_VIEW',
+      eventType: EventType.PAGE_VIEW,
       path,
     });
   }
@@ -88,7 +88,7 @@ class AnalyticsService {
    */
   async trackProjectView(projectId: string): Promise<void> {
     return this.trackEvent({
-      eventType: 'PROJECT_VIEW',
+      eventType: EventType.PROJECT_VIEW,
       projectId,
     });
   }
@@ -98,7 +98,7 @@ class AnalyticsService {
    */
   async trackArticleView(articleId: string): Promise<void> {
     return this.trackEvent({
-      eventType: 'ARTICLE_VIEW',
+      eventType: EventType.ARTICLE_VIEW,
       articleId,
     });
   }
@@ -108,7 +108,7 @@ class AnalyticsService {
    */
   async trackResumeDownload(): Promise<void> {
     return this.trackEvent({
-      eventType: 'RESUME_DOWNLOAD',
+      eventType: EventType.RESUME_DOWNLOAD,
     });
   }
 
@@ -117,7 +117,7 @@ class AnalyticsService {
    */
   async trackExternalLink(url: string): Promise<void> {
     return this.trackEvent({
-      eventType: 'EXTERNAL_LINK',
+      eventType: EventType.EXTERNAL_LINK,
       eventData: { url },
     });
   }
@@ -127,7 +127,7 @@ class AnalyticsService {
    */
   async trackTimeOnPage(path: string, duration: number): Promise<void> {
     return this.trackEvent({
-      eventType: 'TIME_ON_PAGE',
+      eventType: EventType.TIME_ON_PAGE,
       path,
       duration,
     });
@@ -154,7 +154,13 @@ class AnalyticsService {
     topProjects: Array<{ id: string; title: string; views: number }>;
     topArticles: Array<{ id: string; title: string; views: number }>;
   }>> {
-    return httpClient.get<ApiResponse<any>>(`${this.basePath}/overview`);
+    type OverviewData = {
+      totalViews: number;
+      uniqueVisitors: number;
+      topProjects: Array<{ id: string; title: string; views: number }>;
+      topArticles: Array<{ id: string; title: string; views: number }>;
+    };
+    return httpClient.get<ApiResponse<OverviewData>>(`${this.basePath}/overview`);
   }
 }
 
