@@ -1,0 +1,150 @@
+// Custom API Error class
+export class ApiError extends Error {
+  public readonly statusCode: number;
+  public readonly code: string;
+  public readonly details?: unknown;
+  public readonly isOperational: boolean;
+
+  constructor(
+    statusCode: number,
+    message: string,
+    code: string = 'INTERNAL_ERROR',
+    details?: unknown,
+    isOperational: boolean = true
+  ) {
+    super(message);
+    this.statusCode = statusCode;
+    this.code = code;
+    this.details = details;
+    this.isOperational = isOperational;
+
+    Error.captureStackTrace(this, this.constructor);
+  }
+
+  // Factory methods for common errors
+  static badRequest(message: string, details?: unknown): ApiError {
+    return new ApiError(400, message, 'BAD_REQUEST', details);
+  }
+
+  static unauthorized(message: string = 'Unauthorized'): ApiError {
+    return new ApiError(401, message, 'UNAUTHORIZED');
+  }
+
+  static forbidden(message: string = 'Forbidden'): ApiError {
+    return new ApiError(403, message, 'FORBIDDEN');
+  }
+
+  static notFound(resource: string = 'Resource'): ApiError {
+    return new ApiError(404, `${resource} not found`, 'NOT_FOUND');
+  }
+
+  static conflict(message: string, details?: unknown): ApiError {
+    return new ApiError(409, message, 'CONFLICT', details);
+  }
+
+  static unprocessableEntity(message: string, details?: unknown): ApiError {
+    return new ApiError(422, message, 'UNPROCESSABLE_ENTITY', details);
+  }
+
+  static tooManyRequests(message: string = 'Too many requests'): ApiError {
+    return new ApiError(429, message, 'TOO_MANY_REQUESTS');
+  }
+
+  static internal(message: string = 'Internal server error'): ApiError {
+    return new ApiError(500, message, 'INTERNAL_ERROR', undefined, false);
+  }
+
+  static serviceUnavailable(message: string = 'Service unavailable'): ApiError {
+    return new ApiError(503, message, 'SERVICE_UNAVAILABLE');
+  }
+
+  // Validation error helper
+  static validation(errors: Array<{ field: string; message: string }>): ApiError {
+    return new ApiError(400, 'Validation failed', 'VALIDATION_ERROR', { errors });
+  }
+}
+
+// Standard API response format
+export interface ApiResponse<T = unknown> {
+  success: boolean;
+  data?: T;
+  error?: {
+    code: string;
+    message: string;
+    details?: unknown;
+  };
+  meta?: {
+    page?: number;
+    limit?: number;
+    total?: number;
+    totalPages?: number;
+    [key: string]: unknown;
+  };
+}
+
+// Response helper functions
+export const successResponse = <T>(data: T, meta?: ApiResponse['meta']): ApiResponse<T> => ({
+  success: true,
+  data,
+  ...(meta && { meta }),
+});
+
+export const errorResponse = (error: ApiError): ApiResponse => ({
+  success: false,
+  error: {
+    code: error.code,
+    message: error.message,
+    ...(error.details && { details: error.details }),
+  },
+});
+
+// Pagination helper
+export interface PaginationParams {
+  page: number;
+  limit: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}
+
+export interface PaginatedResult<T> {
+  items: T[];
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+export const paginate = <T>(
+  items: T[],
+  total: number,
+  params: PaginationParams
+): PaginatedResult<T> => ({
+  items,
+  meta: {
+    page: params.page,
+    limit: params.limit,
+    total,
+    totalPages: Math.ceil(total / params.limit),
+  },
+});
+
+export const getPaginationParams = (
+  query: { page?: string; limit?: string; sortBy?: string; sortOrder?: string },
+  defaults: { page: number; limit: number; maxLimit: number } = { page: 1, limit: 10, maxLimit: 100 }
+): PaginationParams => {
+  const page = Math.max(1, parseInt(query.page ?? String(defaults.page), 10));
+  const limit = Math.min(
+    defaults.maxLimit,
+    Math.max(1, parseInt(query.limit ?? String(defaults.limit), 10))
+  );
+  const sortOrder = query.sortOrder === 'asc' ? 'asc' : 'desc';
+
+  return {
+    page,
+    limit,
+    sortBy: query.sortBy,
+    sortOrder,
+  };
+};
