@@ -1,0 +1,35 @@
+{
+  "name": "portfolio-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Portfolio full-stack application monorepo",
+  "workspaces": [
+    "portfolio-api",
+    "portfolio-ui",
+    "shared"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "build:shared": "npm run build --workspace=shared",
+    "build:api": "npm run build --workspace=portfolio-api",
+    "build:ui": "npm run build --workspace=portfolio-ui",
+    "dev:api": "npm run dev --workspace=portfolio-api",
+    "dev:ui": "npm run dev --workspace=portfolio-ui",
+    "watch:shared": "npm run watch --workspace=shared",
+    "clean": "npm run clean --workspaces --if-present",
+    "install:all": "npm install",
+    "postinstall": "npm run build:shared"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
+  "keywords": [
+    "portfolio",
+    "monorepo",
+    "typescript",
+    "full-stack"
+  ],
+  "author": "Portfolio",
+  "license": "MIT"
+}
