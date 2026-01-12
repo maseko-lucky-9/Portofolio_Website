@@ -73,7 +73,7 @@ const envSchema = z.object({
   GITHUB_CLIENT_SECRET: z.string().optional(),
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),
-  OAUTH_STATE_SECRET: z.string().min(32).default('change-this-oauth-state-secret'),
+  OAUTH_STATE_SECRET: z.string().min(32).default('0000000000000000000000000000000000000000000000000000000000000000'),
 
   // Cache TTL
   CACHE_TTL_PROJECTS: z.string().transform(Number).default('3600'),
