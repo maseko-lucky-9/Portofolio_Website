@@ -68,21 +68,9 @@ async function registerPlugins(): Promise<void> {
         },
   });
 
-  // CORS
-  await app.register(fastifyCors, {
-    origin: config.cors.origin,
-    credentials: config.cors.credentials,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: [
-      'Content-Type',
-      'Authorization',
-      'X-Requested-With',
-      'X-API-Key',
-      'X-Session-ID',
-      'X-Visitor-ID',
-    ],
-    exposedHeaders: ['X-Request-ID', 'X-Cache-Status'],
-  });
+  // CORS - using centralized security config
+  const { securityConfig } = await import('./config/security.js');
+  await app.register(fastifyCors, securityConfig.cors);
 
   // Cookie support for OAuth
   await app.register(cookie, {

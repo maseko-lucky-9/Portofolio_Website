@@ -158,6 +158,35 @@ export const requireAdmin = requireRole(Role.ADMIN);
 // Editor or Admin
 export const requireEditor = requireRole(Role.EDITOR, Role.ADMIN);
 
+// Permission-based access control
+export const requirePermission = (...permissions: string[]) => {
+  return async (request: FastifyRequest, _reply: FastifyReply): Promise<void> => {
+    const user = (request as AuthenticatedRequest).user;
+
+    if (!user) {
+      throw ApiError.unauthorized('Authentication required');
+    }
+
+    // Import here to avoid circular dependency
+    const { getUserPermissions } = await import('../config/permissions.js');
+    const userPermissions = getUserPermissions(user.role);
+
+    // Admin has all permissions (check if user is admin)
+    if (user.role === Role.ADMIN) {
+      return;
+    }
+
+    // Check if user has required permissions
+    const hasRequiredPermission = permissions.some((perm) =>
+      userPermissions.map(p => p.toString()).includes(perm)
+    );
+
+    if (!hasRequiredPermission) {
+      throw ApiError.forbidden('Insufficient permissions');
+    }
+  };
+};
+
 // API Key authentication
 export const authenticateApiKey = async (
   request: FastifyRequest,
