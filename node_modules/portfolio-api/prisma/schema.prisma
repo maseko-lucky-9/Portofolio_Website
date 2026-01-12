@@ -35,6 +35,7 @@ model User {
   articles      Article[]
   projects      Project[]
   auditLogs     AuditLog[]
+  oauthProviders OAuthProvider[]
 
   @@map("users")
 }
@@ -76,6 +77,25 @@ model ApiKey {
 
   @@index([keyHash])
   @@map("api_keys")
+}
+
+model OAuthProvider {
+  id           String   @id @default(uuid())
+  userId       String   @map("user_id")
+  provider     String   // github, google
+  providerId   String   @map("provider_id")
+  email        String?
+  accessToken  String?  @map("access_token")
+  refreshToken String?  @map("refresh_token")
+  profile      Json?    // Store provider profile data
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([provider, providerId])
+  @@index([userId])
+  @@map("oauth_providers")
 }
 
 // ===========================================

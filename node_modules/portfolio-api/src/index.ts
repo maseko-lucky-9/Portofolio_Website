@@ -7,6 +7,7 @@ import fastifyStatic from '@fastify/static';
 import fastifySensible from '@fastify/sensible';
 import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUi from '@fastify/swagger-ui';
+import cookie from '@fastify/cookie';
 import { config } from './config/index.js';
 import { logger } from './config/logger.js';
 import { connectDatabase } from './config/database.js';
@@ -81,6 +82,12 @@ async function registerPlugins(): Promise<void> {
       'X-Visitor-ID',
     ],
     exposedHeaders: ['X-Request-ID', 'X-Cache-Status'],
+  });
+
+  // Cookie support for OAuth
+  await app.register(cookie, {
+    secret: config.oauth.stateSecret,
+    parseOptions: {},
   });
 
   // Rate limiting
