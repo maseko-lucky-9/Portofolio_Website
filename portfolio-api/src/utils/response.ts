@@ -58,10 +58,16 @@ export function paginatedResponse<T>(
   return response;
 }
 
-function buildPageUrl(baseUrl: URL, page: number): string {
-  const url = new URL(baseUrl);
-  url.searchParams.set('page', page.toString());
-  return url.toString();
+function buildPageUrl(baseUrl: string | URL, page: number): string {
+  try {
+    const url = typeof baseUrl === 'string' ? new URL(baseUrl) : baseUrl;
+    url.searchParams.set('page', page.toString());
+    return url.toString();
+  } catch (error) {
+    // Fallback if URL parsing fails
+    const separator = baseUrl.toString().includes('?') ? '&' : '?';
+    return `${baseUrl}${separator}page=${page}`;
+  }
 }
 
 // ==========================================
