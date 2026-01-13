@@ -1,0 +1,16 @@
+# ==============================================
+# PodDisruptionBudget - Frontend
+# Ensure availability during disruptions
+# ==============================================
+
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: frontend
+  labels:
+    app: frontend
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: frontend

@@ -1,0 +1,39 @@
+# ==============================================
+# Development Environment Values
+# ==============================================
+
+replicaCount: 1
+
+image:
+  tag: develop
+  pullPolicy: Always
+
+resources:
+  requests:
+    memory: "64Mi"
+    cpu: "50m"
+  limits:
+    memory: "128Mi"
+    cpu: "100m"
+
+autoscaling:
+  enabled: false
+
+ingress:
+  hosts:
+    - host: dev.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: frontend-tls-dev
+      hosts:
+        - dev.example.com
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-staging
+
+env:
+  VITE_API_BASE_URL: "https://api-dev.example.com"
+  VITE_DEBUG_MODE: "true"
+  VITE_ENABLE_ANALYTICS: "false"
+  NODE_ENV: "development"

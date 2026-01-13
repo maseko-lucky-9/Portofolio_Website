@@ -1,0 +1,14 @@
+# ==============================================
+# Production ConfigMap Patch
+# ==============================================
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-config
+data:
+  VITE_API_BASE_URL: "https://api.example.com"
+  VITE_DEBUG_MODE: "false"
+  VITE_ENABLE_ANALYTICS: "true"
+  VITE_ENABLE_CODE_DEMO: "true"
+  VITE_ENABLE_COMMENTS: "true"

@@ -1,0 +1,25 @@
+# ==============================================
+# Staging Environment Values
+# ==============================================
+
+replicaCount: 2
+
+image:
+  tag: main
+  pullPolicy: IfNotPresent
+
+ingress:
+  hosts:
+    - host: staging.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: frontend-tls-staging
+      hosts:
+        - staging.example.com
+
+env:
+  VITE_API_BASE_URL: "https://api-staging.example.com"
+  VITE_DEBUG_MODE: "false"
+  VITE_ENABLE_ANALYTICS: "true"

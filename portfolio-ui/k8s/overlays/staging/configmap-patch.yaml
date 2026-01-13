@@ -1,0 +1,12 @@
+# ==============================================
+# Staging ConfigMap Patch
+# ==============================================
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-config
+data:
+  VITE_API_BASE_URL: "https://api-staging.example.com"
+  VITE_DEBUG_MODE: "false"
+  VITE_ENABLE_ANALYTICS: "true"

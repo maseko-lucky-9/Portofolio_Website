@@ -1,0 +1,28 @@
+# ==============================================
+# ConfigMap - Frontend Configuration
+# Environment variables for frontend application
+# ==============================================
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-config
+  labels:
+    app: frontend
+data:
+  # API Configuration
+  VITE_API_BASE_URL: "https://api.example.com"
+  VITE_API_VERSION: "v1"
+  
+  # Application Settings
+  VITE_APP_NAME: "Portfolio"
+  VITE_APP_DESCRIPTION: "My Portfolio Website"
+  
+  # Feature Flags
+  VITE_ENABLE_ANALYTICS: "true"
+  VITE_ENABLE_CODE_DEMO: "true"
+  VITE_ENABLE_COMMENTS: "true"
+  VITE_DEBUG_MODE: "false"
+  
+  # Environment
+  NODE_ENV: "production"

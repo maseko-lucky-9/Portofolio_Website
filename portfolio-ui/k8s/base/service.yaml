@@ -1,0 +1,23 @@
+# ==============================================
+# Kubernetes Service - Frontend
+# ClusterIP service for internal communication
+# ==============================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  labels:
+    app: frontend
+    component: ui
+    tier: frontend
+spec:
+  type: ClusterIP
+  selector:
+    app: frontend
+  ports:
+  - name: http
+    port: 80
+    targetPort: http
+    protocol: TCP
+  sessionAffinity: None
