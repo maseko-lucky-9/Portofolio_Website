@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "backend-api.fullname" . }}
+  labels:
+    {{- include "backend-api.labels" . | nindent 4 }}
+data:
+  PORT: {{ .Values.config.port | quote }}
+  HOST: {{ .Values.config.host | quote }}
+  API_VERSION: {{ .Values.config.apiVersion | quote }}
+  APP_NAME: {{ .Values.config.appName | quote }}
+  
+  # Database settings
+  DB_POOL_MIN: {{ .Values.config.database.poolMin | quote }}
+  DB_POOL_MAX: {{ .Values.config.database.poolMax | quote }}
+  DB_CONNECTION_TIMEOUT: {{ .Values.config.database.connectionTimeout | quote }}
+  
+  # Redis settings
+  REDIS_MAX_RETRIES: {{ .Values.config.redis.maxRetries | quote }}
+  REDIS_RETRY_DELAY: {{ .Values.config.redis.retryDelay | quote }}
+  
+  # CORS settings
+  CORS_ORIGIN: {{ .Values.config.cors.origin | quote }}
+  CORS_CREDENTIALS: {{ .Values.config.cors.credentials | quote }}
+  
+  # Rate limiting
+  RATE_LIMIT_WINDOW: {{ .Values.config.rateLimit.window | quote }}
+  RATE_LIMIT_MAX_ANONYMOUS: {{ .Values.config.rateLimit.maxAnonymous | quote }}
+  RATE_LIMIT_MAX_AUTHENTICATED: {{ .Values.config.rateLimit.maxAuthenticated | quote }}
+  
+  # Features
+  ENABLE_WEBSOCKETS: {{ .Values.config.features.websockets | quote }}
+  ENABLE_CODE_EXECUTION: {{ .Values.config.features.codeExecution | quote }}
+  DEMO_MODE: {{ .Values.config.features.demoMode | quote }}
+  
+  # Logging
+  LOG_LEVEL: {{ .Values.config.logging.level | quote }}
+  LOG_FORMAT: {{ .Values.config.logging.format | quote }}
+  
+  # Monitoring
+  ENABLE_METRICS: {{ .Values.config.monitoring.metrics | quote }}
+  ENABLE_TRACING: {{ .Values.config.monitoring.tracing | quote }}
+  
+  # Email settings
+  SMTP_HOST: {{ .Values.config.email.smtpHost | quote }}
+  SMTP_PORT: {{ .Values.config.email.smtpPort | quote }}
+  SMTP_SECURE: {{ .Values.config.email.smtpSecure | quote }}
+  EMAIL_FROM: {{ .Values.config.email.fromAddress | quote }}

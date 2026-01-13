@@ -1,0 +1,26 @@
+# ==============================================
+# Kubernetes Service - Backend API
+# ClusterIP service for internal communication
+# ==============================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-api
+  labels:
+    app: backend-api
+    component: api
+    tier: backend
+spec:
+  type: ClusterIP
+  selector:
+    app: backend-api
+  ports:
+  - name: http
+    port: 3000
+    targetPort: http
+    protocol: TCP
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800

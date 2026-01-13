@@ -1,0 +1,27 @@
+# ==============================================
+# Deployment Patch - Production
+# Resource adjustments for production environment
+# ==============================================
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-api
+spec:
+  replicas: 3
+  template:
+    spec:
+      containers:
+      - name: backend-api
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        env:
+        - name: LOG_LEVEL
+          value: "warn"
+        - name: DEMO_MODE
+          value: "false"

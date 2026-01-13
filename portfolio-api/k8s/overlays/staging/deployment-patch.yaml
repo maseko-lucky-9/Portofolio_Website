@@ -1,0 +1,27 @@
+# ==============================================
+# Deployment Patch - Staging
+# Resource adjustments for staging environment
+# ==============================================
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-api
+spec:
+  replicas: 2
+  template:
+    spec:
+      containers:
+      - name: backend-api
+        resources:
+          requests:
+            memory: "200Mi"
+            cpu: "150m"
+          limits:
+            memory: "400Mi"
+            cpu: "400m"
+        env:
+        - name: LOG_LEVEL
+          value: "info"
+        - name: DEMO_MODE
+          value: "false"

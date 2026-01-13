@@ -1,0 +1,26 @@
+apiVersion: v2
+name: backend-api
+description: A Helm chart for Portfolio Backend API with PostgreSQL and Redis
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - portfolio
+  - backend
+  - api
+  - fastify
+  - nodejs
+maintainers:
+  - name: Portfolio Developer
+home: https://github.com/maseko-lucky-9/Portofolio_Website
+sources:
+  - https://github.com/maseko-lucky-9/Portofolio_Website
+dependencies:
+  - name: postgresql
+    version: "13.x.x"
+    repository: "https://charts.bitnami.com/bitnami"
+    condition: postgresql.enabled
+  - name: redis
+    version: "18.x.x"
+    repository: "https://charts.bitnami.com/bitnami"
+    condition: redis.enabled

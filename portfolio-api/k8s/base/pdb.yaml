@@ -1,0 +1,17 @@
+# ==============================================
+# PodDisruptionBudget - Backend API
+# Ensure high availability during voluntary disruptions
+# ==============================================
+
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: backend-api
+  labels:
+    app: backend-api
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: backend-api
+  unhealthyPodEvictionPolicy: AlwaysAllow

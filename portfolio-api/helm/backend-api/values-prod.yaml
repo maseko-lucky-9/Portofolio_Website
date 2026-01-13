@@ -1,0 +1,91 @@
+# ==============================================
+# Production Environment Values
+# ==============================================
+
+replicaCount: 3
+
+image:
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "200m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 15
+  targetCPUUtilizationPercentage: 60
+  targetMemoryUtilizationPercentage: 70
+
+ingress:
+  hosts:
+    - host: api.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: backend-api-prod-tls
+      hosts:
+        - api.example.com
+  annotations:
+    nginx.ingress.kubernetes.io/limit-rps: "50"
+    nginx.ingress.kubernetes.io/limit-connections: "25"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/ssl-protocols: "TLSv1.2 TLSv1.3"
+
+config:
+  nodeEnv: production
+  logging:
+    level: "warn"
+    format: "json"
+  features:
+    demoMode: false
+    codeExecution: false
+    websockets: true
+  cors:
+    origin: "https://example.com,https://www.example.com"
+  rateLimit:
+    maxAnonymous: 50
+    maxAuthenticated: 500
+
+postgresql:
+  enabled: true
+  primary:
+    persistence:
+      enabled: true
+      size: 20Gi
+    resources:
+      requests:
+        memory: 512Mi
+        cpu: 400m
+      limits:
+        memory: 2Gi
+        cpu: 2000m
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+
+redis:
+  enabled: true
+  master:
+    persistence:
+      enabled: true
+      size: 10Gi
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 200m
+      limits:
+        memory: 1Gi
+        cpu: 1000m
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true

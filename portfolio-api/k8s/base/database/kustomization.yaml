@@ -1,0 +1,19 @@
+# ==============================================
+# Kustomization - PostgreSQL Database
+# Base database resources
+# ==============================================
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+commonLabels:
+  app.kubernetes.io/name: postgres
+  app.kubernetes.io/component: database
+  app.kubernetes.io/part-of: portfolio
+
+resources:
+- statefulset.yaml
+- service.yaml
+- configmap.yaml
+- secret.yaml
+- backup-cronjob.yaml

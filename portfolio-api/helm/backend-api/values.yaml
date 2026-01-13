@@ -1,0 +1,287 @@
+# ==============================================
+# Helm Values - Backend API
+# Default values for backend-api chart
+# ==============================================
+
+# Global settings
+global:
+  storageClass: "hostpath"
+
+# Replica count
+replicaCount: 2
+
+# Image configuration
+image:
+  repository: ghcr.io/maseko-lucky-9/portofolio_website/backend
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+# Service Account
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+  automountServiceAccountToken: false
+
+# Pod annotations
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "3000"
+  prometheus.io/path: "/api/v1/metrics"
+
+# Pod security context
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  runAsGroup: 1001
+  fsGroup: 1001
+  seccompProfile:
+    type: RuntimeDefault
+
+# Container security context
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+  runAsNonRoot: true
+  runAsUser: 1001
+  capabilities:
+    drop:
+    - ALL
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 3000
+  targetPort: 3000
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/limit-rps: "100"
+    nginx.ingress.kubernetes.io/limit-connections: "50"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/websocket-services: "backend-api"
+  hosts:
+    - host: api.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: backend-api-tls
+      hosts:
+        - api.example.com
+
+# Resource limits
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "200m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+# Autoscaling
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+# Pod Disruption Budget
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+# Network Policy
+networkPolicy:
+  enabled: true
+  policyTypes:
+    - Ingress
+    - Egress
+
+# Probes configuration
+livenessProbe:
+  httpGet:
+    path: /api/v1/health/live
+    port: http
+  initialDelaySeconds: 15
+  periodSeconds: 10
+  timeoutSeconds: 3
+  successThreshold: 1
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /api/v1/health/ready
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  timeoutSeconds: 3
+  successThreshold: 1
+  failureThreshold: 3
+
+startupProbe:
+  httpGet:
+    path: /api/v1/health/live
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  timeoutSeconds: 3
+  successThreshold: 1
+  failureThreshold: 12
+
+# Node selection
+nodeSelector: {}
+tolerations: []
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+    - weight: 100
+      podAffinityTerm:
+        labelSelector:
+          matchExpressions:
+          - key: app
+            operator: In
+            values:
+            - backend-api
+        topologyKey: kubernetes.io/hostname
+
+# Application configuration
+config:
+  nodeEnv: production
+  port: 3000
+  host: "0.0.0.0"
+  apiVersion: "v1"
+  appName: "Portfolio API"
+  
+  # Database
+  database:
+    poolMin: 2
+    poolMax: 10
+    connectionTimeout: 30000
+  
+  # Redis
+  redis:
+    maxRetries: 3
+    retryDelay: 1000
+  
+  # CORS
+  cors:
+    origin: "*"
+    credentials: true
+  
+  # Rate limiting
+  rateLimit:
+    window: 900000
+    maxAnonymous: 100
+    maxAuthenticated: 1000
+  
+  # Features
+  features:
+    websockets: true
+    codeExecution: false
+    demoMode: false
+  
+  # Logging
+  logging:
+    level: "info"
+    format: "json"
+  
+  # Monitoring
+  monitoring:
+    metrics: true
+    tracing: true
+  
+  # Email
+  email:
+    smtpHost: "smtp.gmail.com"
+    smtpPort: 587
+    smtpSecure: false
+    fromAddress: "noreply@example.com"
+
+# Secrets (should be overridden or provided via external-secrets)
+secrets:
+  # Database
+  databaseUrl: "postgresql://user:password@postgres:5432/portfolio"
+  
+  # Redis
+  redisUrl: "redis://redis:6379"
+  
+  # JWT
+  jwtSecret: "your-super-secret-jwt-key-change-this"
+  jwtAccessExpiry: "15m"
+  jwtRefreshExpiry: "7d"
+  
+  # OAuth (optional)
+  githubClientId: ""
+  githubClientSecret: ""
+  googleClientId: ""
+  googleClientSecret: ""
+  
+  # SMTP (optional)
+  smtpUser: ""
+  smtpPass: ""
+  
+  # Monitoring (optional)
+  sentryDsn: ""
+  ipinfoToken: ""
+
+# Database migrations
+migrations:
+  enabled: true
+  image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+
+# PostgreSQL subchart configuration
+postgresql:
+  enabled: true
+  auth:
+    username: portfolio_user
+    password: change-this-password
+    database: portfolio
+  primary:
+    persistence:
+      enabled: true
+      storageClass: "hostpath"
+      size: 10Gi
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 200m
+      limits:
+        memory: 1Gi
+        cpu: 1000m
+  metrics:
+    enabled: true
+
+# Redis subchart configuration
+redis:
+  enabled: true
+  auth:
+    enabled: true
+    password: change-this-password
+  master:
+    persistence:
+      enabled: true
+      storageClass: "hostpath"
+      size: 5Gi
+    resources:
+      requests:
+        memory: 128Mi
+        cpu: 100m
+      limits:
+        memory: 512Mi
+        cpu: 500m
+  metrics:
+    enabled: true

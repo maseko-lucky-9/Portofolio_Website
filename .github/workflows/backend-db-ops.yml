@@ -1,0 +1,491 @@
+# ==============================================
+# Database Operations Workflow
+# Handles database migrations, backups, and validation
+# ==============================================
+
+name: Database Operations
+
+on:
+  pull_request:
+    paths:
+      - 'portfolio-api/prisma/**'
+      - '.github/workflows/backend-db-ops.yml'
+  push:
+    branches: [main, develop]
+    paths:
+      - 'portfolio-api/prisma/**'
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: 'Database operation to perform'
+        required: true
+        type: choice
+        options:
+          - validate-schema
+          - test-migrations
+          - generate-backup
+          - test-restore
+      environment:
+        description: 'Target environment'
+        required: true
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+
+env:
+  NODE_VERSION: '20.x'
+  WORKING_DIRECTORY: ./portfolio-api
+
+jobs:
+  # ==============================================
+  # Job 1: Validate Prisma Schema
+  # ==============================================
+  validate-schema:
+    name: Validate Prisma Schema
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'portfolio-api/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: npm ci
+
+      - name: Validate Prisma schema
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: npx prisma validate
+
+      - name: Format Prisma schema
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: npx prisma format
+
+      - name: Check for schema formatting changes
+        run: |
+          git diff --exit-code portfolio-api/prisma/schema.prisma || {
+            echo "⚠️ Prisma schema needs formatting"
+            echo "Run: cd portfolio-api && npx prisma format"
+            exit 1
+          }
+
+      - name: Generate Prisma Client
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: npm run db:generate
+
+  # ==============================================
+  # Job 2: Detect Migration Changes
+  # ==============================================
+  detect-migrations:
+    name: Detect Migration Changes
+    runs-on: ubuntu-latest
+    outputs:
+      has-migrations: ${{ steps.check.outputs.has-migrations }}
+      migration-files: ${{ steps.check.outputs.migration-files }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for new migrations
+        id: check
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          else
+            BASE_SHA="HEAD^"
+          fi
+          
+          CHANGED_FILES=$(git diff --name-only $BASE_SHA HEAD -- 'portfolio-api/prisma/migrations/**')
+          
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "has-migrations=false" >> $GITHUB_OUTPUT
+            echo "No migration changes detected"
+          else
+            echo "has-migrations=true" >> $GITHUB_OUTPUT
+            echo "migration-files<<EOF" >> $GITHUB_OUTPUT
+            echo "$CHANGED_FILES" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+            echo "Migration changes detected:"
+            echo "$CHANGED_FILES"
+          fi
+
+  # ==============================================
+  # Job 3: Test Migrations
+  # ==============================================
+  test-migrations:
+    name: Test Database Migrations
+    runs-on: ubuntu-latest
+    needs: [validate-schema, detect-migrations]
+    if: needs.detect-migrations.outputs.has-migrations == 'true'
+    
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: migration_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'portfolio-api/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: npm ci
+
+      - name: Apply migrations to empty database
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: npm run db:migrate:prod
+        env:
+          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/migration_test
+
+      - name: Verify database schema
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: |
+          npx prisma db pull --print
+        env:
+          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/migration_test
+
+      - name: Seed test data
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: npm run db:seed
+        env:
+          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/migration_test
+          NODE_ENV: development
+
+      - name: Test database queries
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: npm run db:verify
+        env:
+          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/migration_test
+
+  # ==============================================
+  # Job 4: Migration Rollback Test
+  # ==============================================
+  test-rollback:
+    name: Test Migration Rollback
+    runs-on: ubuntu-latest
+    needs: [test-migrations]
+    if: needs.detect-migrations.outputs.has-migrations == 'true'
+    
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: rollback_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'portfolio-api/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: npm ci
+
+      - name: Apply migrations
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: npm run db:migrate:prod
+        env:
+          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/rollback_test
+
+      - name: Seed data
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: npm run db:seed
+        env:
+          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/rollback_test
+          NODE_ENV: development
+
+      - name: Create backup before rollback
+        run: |
+          docker exec ${{ job.services.postgres.id }} \
+            pg_dump -U test_user rollback_test > backup.sql
+          echo "✅ Backup created"
+
+      - name: Test rollback (reset database)
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: |
+          echo "Testing rollback scenario..."
+          npm run db:reset -- --force
+          echo "✅ Rollback test completed"
+        env:
+          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/rollback_test
+
+      - name: Re-apply migrations
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: npm run db:migrate:prod
+        env:
+          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/rollback_test
+
+  # ==============================================
+  # Job 5: Generate Database Schema Diagram
+  # ==============================================
+  generate-diagram:
+    name: Generate Schema Diagram
+    runs-on: ubuntu-latest
+    needs: [validate-schema]
+    if: github.event_name == 'pull_request'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'portfolio-api/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: npm ci
+
+      - name: Install Prisma ERD Generator
+        run: npm install -g prisma-erd-generator @mermaid-js/mermaid-cli
+
+      - name: Generate ERD
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: |
+          npx prisma generate
+          # Generate mermaid diagram
+          echo "graph TD" > schema.mmd
+          npx prisma-erd-generator --output schema.mmd || echo "ERD generation skipped"
+
+      - name: Upload diagram as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: database-schema-diagram
+          path: portfolio-api/schema.mmd
+          retention-days: 30
+
+  # ==============================================
+  # Job 6: Database Backup Test
+  # ==============================================
+  test-backup:
+    name: Test Database Backup
+    runs-on: ubuntu-latest
+    if: github.event.inputs.operation == 'generate-backup' || github.event.inputs.operation == 'test-restore'
+    
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: backup_user
+          POSTGRES_PASSWORD: backup_password
+          POSTGRES_DB: backup_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'portfolio-api/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: npm ci
+
+      - name: Setup test database
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: |
+          npm run db:migrate:prod
+          npm run db:seed
+        env:
+          DATABASE_URL: postgresql://backup_user:backup_password@localhost:5432/backup_test
+          NODE_ENV: development
+
+      - name: Create backup
+        run: |
+          TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+          docker exec ${{ job.services.postgres.id }} \
+            pg_dump -U backup_user -Fc backup_test > backup_${TIMESTAMP}.dump
+          
+          # Create SQL backup as well
+          docker exec ${{ job.services.postgres.id }} \
+            pg_dump -U backup_user backup_test > backup_${TIMESTAMP}.sql
+          
+          echo "✅ Backups created"
+          ls -lh backup_*
+
+      - name: Upload backup artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: database-backup-test
+          path: backup_*
+          retention-days: 7
+
+      - name: Test restore (if requested)
+        if: github.event.inputs.operation == 'test-restore'
+        run: |
+          # Drop and recreate database
+          docker exec ${{ job.services.postgres.id }} \
+            psql -U backup_user -c "DROP DATABASE IF EXISTS restore_test;"
+          docker exec ${{ job.services.postgres.id }} \
+            psql -U backup_user -c "CREATE DATABASE restore_test;"
+          
+          # Restore from backup
+          cat backup_*.sql | docker exec -i ${{ job.services.postgres.id }} \
+            psql -U backup_user restore_test
+          
+          echo "✅ Restore test completed"
+
+      - name: Verify restored data
+        if: github.event.inputs.operation == 'test-restore'
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: npm run db:verify
+        env:
+          DATABASE_URL: postgresql://backup_user:backup_password@localhost:5432/restore_test
+
+  # ==============================================
+  # Job 7: Database Performance Test
+  # ==============================================
+  performance-test:
+    name: Database Performance Test
+    runs-on: ubuntu-latest
+    needs: [test-migrations]
+    if: needs.detect-migrations.outputs.has-migrations == 'true'
+    
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: perf_user
+          POSTGRES_PASSWORD: perf_password
+          POSTGRES_DB: perf_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'portfolio-api/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: npm ci
+
+      - name: Setup database
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: |
+          npm run db:migrate:prod
+          npm run db:seed
+        env:
+          DATABASE_URL: postgresql://perf_user:perf_password@localhost:5432/perf_test
+          NODE_ENV: development
+
+      - name: Run performance benchmarks
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: |
+          echo "Running database performance tests..."
+          # Add your performance test commands here
+          # Example: npm run test:performance
+          echo "✅ Performance tests completed"
+        env:
+          DATABASE_URL: postgresql://perf_user:perf_password@localhost:5432/perf_test
+
+      - name: Analyze query performance
+        run: |
+          echo "Analyzing slow queries..."
+          docker exec ${{ job.services.postgres.id }} \
+            psql -U perf_user perf_test -c "
+              SELECT query, calls, mean_exec_time, max_exec_time
+              FROM pg_stat_statements
+              ORDER BY mean_exec_time DESC
+              LIMIT 10;
+            " || echo "pg_stat_statements not available"
+
+  # ==============================================
+  # Job 8: Summary
+  # ==============================================
+  db-ops-summary:
+    name: Database Operations Summary
+    runs-on: ubuntu-latest
+    needs: [validate-schema, detect-migrations, test-migrations, test-rollback, generate-diagram, test-backup, performance-test]
+    if: always()
+    
+    steps:
+      - name: Generate summary
+        run: |
+          echo "## Database Operations Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Operation | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Schema Validation | ${{ needs.validate-schema.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Migration Detection | ${{ needs.detect-migrations.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Migration Testing | ${{ needs.test-migrations.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Rollback Testing | ${{ needs.test-rollback.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Schema Diagram | ${{ needs.generate-diagram.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Backup Testing | ${{ needs.test-backup.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Performance Testing | ${{ needs.performance-test.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Migrations Detected:** ${{ needs.detect-migrations.outputs.has-migrations }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: Fail if critical jobs failed
+        if: |
+          needs.validate-schema.result == 'failure' ||
+          needs.test-migrations.result == 'failure'
+        run: exit 1

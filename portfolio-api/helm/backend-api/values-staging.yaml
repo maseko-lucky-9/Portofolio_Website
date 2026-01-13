@@ -1,0 +1,67 @@
+# ==============================================
+# Staging Environment Values
+# ==============================================
+
+replicaCount: 2
+
+image:
+  tag: "main"
+
+resources:
+  requests:
+    memory: "200Mi"
+    cpu: "150m"
+  limits:
+    memory: "400Mi"
+    cpu: "400m"
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 6
+
+ingress:
+  hosts:
+    - host: api-staging.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: backend-api-staging-tls
+      hosts:
+        - api-staging.example.com
+
+config:
+  nodeEnv: production
+  logging:
+    level: "info"
+    format: "json"
+  features:
+    demoMode: false
+    codeExecution: true
+  cors:
+    origin: "https://staging.example.com,https://admin-staging.example.com"
+
+postgresql:
+  primary:
+    persistence:
+      size: 10Gi
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 200m
+      limits:
+        memory: 1Gi
+        cpu: 1000m
+
+redis:
+  master:
+    persistence:
+      size: 5Gi
+    resources:
+      requests:
+        memory: 128Mi
+        cpu: 100m
+      limits:
+        memory: 512Mi
+        cpu: 500m

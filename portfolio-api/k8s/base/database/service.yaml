@@ -1,0 +1,48 @@
+# ==============================================
+# PostgreSQL Service - Headless
+# For StatefulSet DNS resolution
+# ==============================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-headless
+  labels:
+    app: postgres
+    component: database
+    tier: data
+spec:
+  type: ClusterIP
+  clusterIP: None
+  selector:
+    app: postgres
+  ports:
+  - name: postgres
+    port: 5432
+    targetPort: postgres
+    protocol: TCP
+
+---
+# ==============================================
+# PostgreSQL Service - ClusterIP
+# For application connections
+# ==============================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  labels:
+    app: postgres
+    component: database
+    tier: data
+spec:
+  type: ClusterIP
+  selector:
+    app: postgres
+  ports:
+  - name: postgres
+    port: 5432
+    targetPort: postgres
+    protocol: TCP
+  sessionAffinity: ClientIP
