@@ -24,19 +24,19 @@ export declare const createProjectSchema: z.ZodObject<{
     metaDescription: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     tagIds: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
 }, "strip", z.ZodTypeAny, {
+    sortOrder: number;
+    status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
     slug: string;
+    featured: boolean;
     title: string;
     description: string;
     content: string;
-    status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
     techStack: string[];
     images: string[];
-    featured: boolean;
-    sortOrder: number;
     tagIds: string[];
+    category?: string | null | undefined;
     subtitle?: string | null | undefined;
     excerpt?: string | null | undefined;
-    category?: string | null | undefined;
     client?: string | null | undefined;
     year?: number | null | undefined;
     duration?: string | null | undefined;
@@ -52,11 +52,13 @@ export declare const createProjectSchema: z.ZodObject<{
     title: string;
     description: string;
     content: string;
+    sortOrder?: number | undefined;
+    status?: "DRAFT" | "PUBLISHED" | "ARCHIVED" | undefined;
+    category?: string | null | undefined;
+    featured?: boolean | undefined;
     subtitle?: string | null | undefined;
     excerpt?: string | null | undefined;
-    status?: "DRAFT" | "PUBLISHED" | "ARCHIVED" | undefined;
     techStack?: string[] | undefined;
-    category?: string | null | undefined;
     client?: string | null | undefined;
     year?: number | null | undefined;
     duration?: string | null | undefined;
@@ -66,8 +68,6 @@ export declare const createProjectSchema: z.ZodObject<{
     thumbnail?: string | null | undefined;
     images?: string[] | undefined;
     videoUrl?: string | null | undefined;
-    featured?: boolean | undefined;
-    sortOrder?: number | undefined;
     metaTitle?: string | null | undefined;
     metaDescription?: string | null | undefined;
     tagIds?: string[] | undefined;
@@ -97,15 +97,17 @@ export declare const updateProjectSchema: z.ZodObject<{
     metaDescription: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodString>>>;
     tagIds: z.ZodOptional<z.ZodDefault<z.ZodArray<z.ZodString, "many">>>;
 }, "strip", z.ZodTypeAny, {
+    sortOrder?: number | undefined;
+    status?: "DRAFT" | "PUBLISHED" | "ARCHIVED" | undefined;
     slug?: string | undefined;
+    category?: string | null | undefined;
+    featured?: boolean | undefined;
     title?: string | undefined;
     subtitle?: string | null | undefined;
     description?: string | undefined;
     content?: string | undefined;
     excerpt?: string | null | undefined;
-    status?: "DRAFT" | "PUBLISHED" | "ARCHIVED" | undefined;
     techStack?: string[] | undefined;
-    category?: string | null | undefined;
     client?: string | null | undefined;
     year?: number | null | undefined;
     duration?: string | null | undefined;
@@ -115,21 +117,21 @@ export declare const updateProjectSchema: z.ZodObject<{
     thumbnail?: string | null | undefined;
     images?: string[] | undefined;
     videoUrl?: string | null | undefined;
-    featured?: boolean | undefined;
-    sortOrder?: number | undefined;
     metaTitle?: string | null | undefined;
     metaDescription?: string | null | undefined;
     tagIds?: string[] | undefined;
 }, {
+    sortOrder?: number | undefined;
+    status?: "DRAFT" | "PUBLISHED" | "ARCHIVED" | undefined;
     slug?: string | undefined;
+    category?: string | null | undefined;
+    featured?: boolean | undefined;
     title?: string | undefined;
     subtitle?: string | null | undefined;
     description?: string | undefined;
     content?: string | undefined;
     excerpt?: string | null | undefined;
-    status?: "DRAFT" | "PUBLISHED" | "ARCHIVED" | undefined;
     techStack?: string[] | undefined;
-    category?: string | null | undefined;
     client?: string | null | undefined;
     year?: number | null | undefined;
     duration?: string | null | undefined;
@@ -139,8 +141,6 @@ export declare const updateProjectSchema: z.ZodObject<{
     thumbnail?: string | null | undefined;
     images?: string[] | undefined;
     videoUrl?: string | null | undefined;
-    featured?: boolean | undefined;
-    sortOrder?: number | undefined;
     metaTitle?: string | null | undefined;
     metaDescription?: string | null | undefined;
     tagIds?: string[] | undefined;
@@ -156,25 +156,25 @@ export declare const projectQuerySchema: z.ZodObject<{
     sortBy: z.ZodDefault<z.ZodString>;
     sortOrder: z.ZodDefault<z.ZodEnum<["asc", "desc"]>>;
 }, "strip", z.ZodTypeAny, {
-    sortOrder: "asc" | "desc";
     page: number;
     limit: number;
     sortBy: string;
+    sortOrder: "asc" | "desc";
     status?: "DRAFT" | "PUBLISHED" | "ARCHIVED" | undefined;
-    category?: string | undefined;
-    featured?: boolean | undefined;
-    tag?: string | undefined;
     search?: string | undefined;
-}, {
-    status?: "DRAFT" | "PUBLISHED" | "ARCHIVED" | undefined;
     category?: string | undefined;
+    tag?: string | undefined;
     featured?: boolean | undefined;
-    sortOrder?: "asc" | "desc" | undefined;
+}, {
     page?: number | undefined;
     limit?: number | undefined;
-    tag?: string | undefined;
-    search?: string | undefined;
     sortBy?: string | undefined;
+    sortOrder?: "asc" | "desc" | undefined;
+    status?: "DRAFT" | "PUBLISHED" | "ARCHIVED" | undefined;
+    search?: string | undefined;
+    category?: string | undefined;
+    tag?: string | undefined;
+    featured?: boolean | undefined;
 }>;
 export type CreateProjectInput = z.infer<typeof createProjectSchema>;
 export type UpdateProjectInput = z.infer<typeof updateProjectSchema>;
