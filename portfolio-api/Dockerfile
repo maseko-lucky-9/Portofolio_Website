@@ -17,6 +17,9 @@ RUN npm run build
 # Stage 2: Build API
 FROM node:20-alpine AS builder
 
+# Install OpenSSL so Prisma generates the correct engine binary
+RUN apk add --no-cache openssl
+
 WORKDIR /monorepo
 
 # Copy shared package (built) — mirrors monorepo layout
@@ -51,8 +54,8 @@ FROM node:20-alpine
 
 WORKDIR /monorepo
 
-# Install dumb-init for proper signal handling
-RUN apk add --no-cache dumb-init
+# Install dumb-init for proper signal handling + openssl for Prisma engine
+RUN apk add --no-cache dumb-init openssl
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs && \
