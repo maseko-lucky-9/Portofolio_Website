@@ -43,10 +43,18 @@ tmp/
 temp/
 .tmp/
 
-# Lock files (optional - uncomment if you want to exclude)
-# package-lock.json
-# yarn.lock
-# pnpm-lock.yaml
+# Node package files — HARD RULE: never commit these
+package-lock.json
+**/package-lock.json
+yarn.lock
+**/yarn.lock
+pnpm-lock.yaml
+**/pnpm-lock.yaml
+bun.lockb
+*.lockb
+
+# Claude worktrees
+.claude/worktrees/
 
 # Shared package build output
 shared/dist/

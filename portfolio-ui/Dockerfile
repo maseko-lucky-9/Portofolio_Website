@@ -47,7 +47,7 @@ RUN addgroup -g 1001 -S appuser && \
     adduser -S -D -H -u 1001 -h /var/cache/nginx -s /sbin/nologin -G appuser appuser
 
 # Copy nginx config (single-file server block)
-COPY docker/nginx.conf /etc/nginx/nginx.conf
+COPY nginx.conf /etc/nginx/nginx.conf
 
 # Copy built assets
 COPY --from=builder /app/dist /usr/share/nginx/html
