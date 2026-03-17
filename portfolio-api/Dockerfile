@@ -74,6 +74,9 @@ COPY --from=builder --chown=nodejs:nodejs /monorepo/portfolio-api/dist ./dist
 COPY --from=builder --chown=nodejs:nodejs /monorepo/portfolio-api/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder --chown=nodejs:nodejs /monorepo/portfolio-api/prisma ./prisma
 
+# Fix ownership for non-root user (Prisma needs write access to engines dir)
+RUN chown -R nodejs:nodejs /monorepo/portfolio-api/node_modules /monorepo/shared
+
 # Create uploads directory
 RUN mkdir -p uploads && chown nodejs:nodejs uploads
 
