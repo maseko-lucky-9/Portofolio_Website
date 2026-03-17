@@ -372,7 +372,7 @@ export class OAuthService {
           }),
         });
 
-        const githubData = await githubResponse.json();
+        const githubData = await githubResponse.json() as any;
 
         if (githubData.error) {
           throw ApiError.badRequest(`GitHub OAuth error: ${githubData.error_description}`);
@@ -398,7 +398,7 @@ export class OAuthService {
           }),
         });
 
-        const googleData = await googleResponse.json();
+        const googleData = await googleResponse.json() as any;
 
         if (googleData.error) {
           throw ApiError.badRequest(`Google OAuth error: ${googleData.error_description}`);
@@ -427,7 +427,7 @@ export class OAuthService {
           },
         });
 
-        const githubUser = await githubUserResponse.json();
+        const githubUser = await githubUserResponse.json() as any;
 
         // Get primary email
         const githubEmailResponse = await fetch('https://api.github.com/user/emails', {
@@ -437,7 +437,7 @@ export class OAuthService {
           },
         });
 
-        const githubEmails = await githubEmailResponse.json();
+        const githubEmails = await githubEmailResponse.json() as any[];
         const primaryEmail = githubEmails.find((e: any) => e.primary)?.email || githubUser.email;
 
         return {
@@ -455,7 +455,7 @@ export class OAuthService {
           },
         });
 
-        const googleUser = await googleUserResponse.json();
+        const googleUser = await googleUserResponse.json() as any;
 
         return {
           id: googleUser.id,

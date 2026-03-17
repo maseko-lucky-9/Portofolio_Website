@@ -13,13 +13,13 @@ export class NewsletterService {
     });
 
     if (existing) {
-      if (existing.status === 'ACTIVE') {
+      if (existing.isConfirmed && existing.isActive) {
         return {
           message: 'You are already subscribed to the newsletter',
         };
       }
 
-      if (existing.status === 'PENDING') {
+      if (!existing.isConfirmed) {
         // Resend confirmation
         // TODO: Send confirmation email
         logger.info({ email: data.email }, 'Resending newsletter confirmation');
@@ -28,14 +28,15 @@ export class NewsletterService {
         };
       }
 
-      if (existing.status === 'UNSUBSCRIBED') {
+      if (!existing.isActive) {
         // Re-activate
         const token = generateToken(32);
         await prisma.newsletterSubscriber.update({
           where: { email: data.email },
           data: {
-            status: 'PENDING',
-            confirmationToken: token,
+            isConfirmed: false,
+            isActive: true,
+            confirmToken: token,
             confirmedAt: null,
           },
         });
@@ -54,9 +55,7 @@ export class NewsletterService {
       data: {
         email: data.email,
         firstName: data.firstName,
-        lastName: data.lastName,
-        confirmationToken: token,
-        metadata: data.metadata as any,
+        confirmToken: token,
       },
     });
 
@@ -72,8 +71,8 @@ export class NewsletterService {
   async confirmSubscription(token: string): Promise<unknown> {
     const subscriber = await prisma.newsletterSubscriber.findFirst({
       where: {
-        confirmationToken: token,
-        status: 'PENDING',
+        confirmToken: token,
+        isConfirmed: false,
       },
     });
 
@@ -84,8 +83,8 @@ export class NewsletterService {
     await prisma.newsletterSubscriber.update({
       where: { id: subscriber.id },
       data: {
-        status: 'ACTIVE',
-        confirmationToken: null,
+        isConfirmed: true,
+        confirmToken: null,
         confirmedAt: new Date(),
       },
     });
@@ -100,7 +99,7 @@ export class NewsletterService {
     const subscriber = await prisma.newsletterSubscriber.findFirst({
       where: {
         OR: [
-          { confirmationToken: token },
+          { confirmToken: token },
           { unsubscribeToken: token },
         ],
       },
@@ -113,7 +112,7 @@ export class NewsletterService {
     await prisma.newsletterSubscriber.update({
       where: { id: subscriber.id },
       data: {
-        status: 'UNSUBSCRIBED',
+        isActive: false,
         unsubscribedAt: new Date(),
       },
     });
@@ -129,12 +128,12 @@ export class NewsletterService {
   async getSubscribers(options: {
     page: number;
     limit: number;
-    status?: string;
+    active?: boolean;
   }): Promise<unknown> {
-    const { page, limit, status } = options;
+    const { page, limit, active } = options;
 
     const where = {
-      ...(status && { status }),
+      ...(active !== undefined && { isActive: active }),
     };
 
     const [subscribers, total] = await Promise.all([
@@ -147,8 +146,8 @@ export class NewsletterService {
           id: true,
           email: true,
           firstName: true,
-          lastName: true,
-          status: true,
+          isConfirmed: true,
+          isActive: true,
           confirmedAt: true,
           unsubscribedAt: true,
           createdAt: true,
@@ -170,17 +169,17 @@ export class NewsletterService {
 
   // Get subscriber stats (admin)
   async getStats(): Promise<unknown> {
-    const [total, active, pending, unsubscribed] = await Promise.all([
+    const [total, active, confirmed, unsubscribed] = await Promise.all([
       prisma.newsletterSubscriber.count(),
-      prisma.newsletterSubscriber.count({ where: { status: 'ACTIVE' } }),
-      prisma.newsletterSubscriber.count({ where: { status: 'PENDING' } }),
-      prisma.newsletterSubscriber.count({ where: { status: 'UNSUBSCRIBED' } }),
+      prisma.newsletterSubscriber.count({ where: { isActive: true } }),
+      prisma.newsletterSubscriber.count({ where: { isConfirmed: true } }),
+      prisma.newsletterSubscriber.count({ where: { isActive: false } }),
     ]);
 
     return {
       total,
       active,
-      pending,
+      confirmed,
       unsubscribed,
     };
   }

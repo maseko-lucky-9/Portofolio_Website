@@ -1,0 +1,60 @@
+# Git
+.git
+.gitignore
+
+# Node modules (installed inside Docker)
+**/node_modules
+
+# Build artifacts
+**/dist
+**/build
+
+# IDE and editor files
+.vscode
+.idea
+**/.DS_Store
+
+# Documentation (not needed in Docker)
+docs/
+*.md
+!shared/src/**/*.ts
+
+# CI/CD
+.github
+
+# Claude / AI
+.claude
+AGENTS.md
+
+# Test files
+**/tests
+**/test
+**/*.test.*
+**/*.spec.*
+**/vitest.config.*
+**/jest.config.*
+
+# Docker
+**/Dockerfile*
+**/docker-compose*
+
+# K8s manifests
+**/k8s
+
+# Helm charts
+**/helm
+
+# Environment files
+**/.env*
+
+# Lock files
+**/package-lock.json
+**/yarn.lock
+**/pnpm-lock.yaml
+**/bun.lockb
+
+# Execution scripts
+execution/
+
+# Directives
+directives/

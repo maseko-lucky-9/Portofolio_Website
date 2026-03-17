@@ -90,7 +90,7 @@ export interface ApiResponse<T = unknown> {
 export const successResponse = <T>(data: T, meta?: ApiResponse['meta']): ApiResponse<T> => ({
   success: true,
   data,
-  ...(meta && { meta }),
+  ...(meta ? { meta } : {}),
 });
 
 export const errorResponse = (error: ApiError): ApiResponse => ({
@@ -98,7 +98,7 @@ export const errorResponse = (error: ApiError): ApiResponse => ({
   error: {
     code: error.code,
     message: error.message,
-    ...(error.details && { details: error.details }),
+    ...(error.details ? { details: error.details } : {}),
   },
 });
 

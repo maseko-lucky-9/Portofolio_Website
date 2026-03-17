@@ -1,23 +1,41 @@
 # ===========================================
 # Multi-stage Dockerfile for Portfolio API
+# Build context: monorepo root (for shared package access)
 # ===========================================
 
-# Stage 1: Build
+# Stage 1: Build shared package
+FROM node:20-alpine AS shared-builder
+
+WORKDIR /monorepo/shared
+COPY shared/package*.json ./
+# Using npm install instead of npm ci — lock files are not committed
+RUN npm install
+COPY shared/tsconfig.json ./
+COPY shared/src ./src
+RUN npm run build
+
+# Stage 2: Build API
 FROM node:20-alpine AS builder
 
-WORKDIR /app
+WORKDIR /monorepo
 
-# Copy package files
-COPY package*.json ./
-COPY tsconfig.json ./
+# Copy shared package (built) — mirrors monorepo layout
+COPY --from=shared-builder /monorepo/shared ./shared
+
+# Set API as working directory — now "../shared" resolves to /monorepo/shared
+WORKDIR /monorepo/portfolio-api
+
+# Copy API package files
+COPY portfolio-api/package*.json ./
+COPY portfolio-api/tsconfig.json ./
 
 # Install all dependencies (dev included for TypeScript build)
 # Using npm install instead of npm ci — lock files are not committed
 RUN npm install
 
 # Copy source code
-COPY src ./src
-COPY prisma ./prisma
+COPY portfolio-api/src ./src
+COPY portfolio-api/prisma ./prisma
 
 # Generate Prisma client
 RUN npx prisma generate
@@ -25,10 +43,10 @@ RUN npx prisma generate
 # Build TypeScript
 RUN npm run build
 
-# Stage 2: Production
+# Stage 3: Production
 FROM node:20-alpine
 
-WORKDIR /app
+WORKDIR /monorepo
 
 # Install dumb-init for proper signal handling
 RUN apk add --no-cache dumb-init
@@ -37,15 +55,21 @@ RUN apk add --no-cache dumb-init
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001
 
+# Copy shared package (built) for runtime resolution
+COPY --from=shared-builder /monorepo/shared ./shared
+
+# Set API as working directory
+WORKDIR /monorepo/portfolio-api
+
 # Copy package files and install production dependencies only
-COPY package*.json ./
+COPY portfolio-api/package*.json ./
 # Using npm install instead of npm ci — lock files are not committed
 RUN npm install --omit=dev && npm cache clean --force
 
-# Copy built application and node_modules from builder
-COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
-COPY --from=builder --chown=nodejs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder --chown=nodejs:nodejs /app/prisma ./prisma
+# Copy built application and Prisma artifacts from builder
+COPY --from=builder --chown=nodejs:nodejs /monorepo/portfolio-api/dist ./dist
+COPY --from=builder --chown=nodejs:nodejs /monorepo/portfolio-api/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder --chown=nodejs:nodejs /monorepo/portfolio-api/prisma ./prisma
 
 # Create uploads directory
 RUN mkdir -p uploads && chown nodejs:nodejs uploads

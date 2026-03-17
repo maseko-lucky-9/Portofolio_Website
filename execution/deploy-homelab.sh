@@ -54,10 +54,11 @@ echo "  ✓ Namespace ready"
 # -----------------------------------------------
 echo ""
 echo "[3/7] Building backend image..."
+# Build context is monorepo root (backend needs access to shared/ package)
 docker build \
   -t "${REGISTRY}/portfolio-backend:latest" \
   -f "${REPO_ROOT}/portfolio-api/Dockerfile" \
-  "${REPO_ROOT}/portfolio-api"
+  "${REPO_ROOT}"
 echo "  ✓ Backend image built"
 
 echo "  → Pushing to local registry..."

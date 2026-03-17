@@ -86,11 +86,11 @@ export function errorResponse(
       statusCode,
       code,
       message,
-      ...(details && { details }),
+      ...(details ? { details } : {}),
     },
     meta: {
       timestamp: new Date().toISOString(),
-      ...(requestId && { requestId }),
+      ...(requestId ? { requestId } : {}),
     },
   };
 }
