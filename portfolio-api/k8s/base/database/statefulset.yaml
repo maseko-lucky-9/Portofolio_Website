@@ -131,7 +131,7 @@ spec:
     spec:
       accessModes:
       - ReadWriteOnce
-      storageClassName: hostpath
+      storageClassName: microk8s-hostpath
       resources:
         requests:
           storage: 10Gi
