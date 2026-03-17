@@ -29,4 +29,4 @@ images:
 
 replicas:
 - name: backend-api
-  count: 3
+  count: 1  # Single-node homelab — scale up when moving to multi-node

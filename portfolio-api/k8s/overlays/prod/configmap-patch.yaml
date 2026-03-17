@@ -18,7 +18,7 @@ data:
   RATE_LIMIT_MAX_AUTHENTICATED: "500"
   
   # CORS - specific origins only
-  CORS_ORIGIN: "https://example.com,https://www.example.com"
+  CORS_ORIGIN: "http://portfolio.homelab"
   
   # Features
   ENABLE_CODE_EXECUTION: "false"

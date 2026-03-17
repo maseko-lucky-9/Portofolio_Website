@@ -1,6 +1,6 @@
 # ==============================================
-# Ingress Patch - Production
-# Production domain configuration
+# Ingress Patch - Production (Homelab)
+# Tailscale-only, no TLS needed
 # ==============================================
 
 apiVersion: networking.k8s.io/v1
@@ -8,20 +8,14 @@ kind: Ingress
 metadata:
   name: backend-api
   annotations:
-    # Strict rate limiting for production
+    # Rate limiting for production
     nginx.ingress.kubernetes.io/limit-rps: "50"
     nginx.ingress.kubernetes.io/limit-connections: "25"
-    
-    # Additional production hardening
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/ssl-protocols: "TLSv1.2 TLSv1.3"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
 spec:
-  tls:
-  - hosts:
-    - api.example.com
-    secretName: backend-api-prod-tls
+  # No TLS — homelab is Tailscale-only (zero public exposure)
   rules:
-  - host: api.example.com
+  - host: api.portfolio.homelab
     http:
       paths:
       - path: /

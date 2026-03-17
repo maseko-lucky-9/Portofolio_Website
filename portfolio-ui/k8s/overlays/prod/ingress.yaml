@@ -1,5 +1,5 @@
 # ==============================================
-# Production Ingress
+# Production Ingress — Homelab (Tailscale-only)
 # ==============================================
 
 apiVersion: networking.k8s.io/v1
@@ -8,9 +8,7 @@ metadata:
   name: frontend
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/rate-limit: "100"
     nginx.ingress.kubernetes.io/configuration-snippet: |
       more_set_headers "X-Frame-Options: SAMEORIGIN";
@@ -18,23 +16,9 @@ metadata:
       more_set_headers "X-XSS-Protection: 1; mode=block";
 spec:
   ingressClassName: nginx
-  tls:
-  - hosts:
-    - example.com
-    - www.example.com
-    secretName: frontend-tls-prod
+  # No TLS — homelab is Tailscale-only (zero public exposure)
   rules:
-  - host: example.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: frontend
-            port:
-              number: 80
-  - host: www.example.com
+  - host: portfolio.homelab
     http:
       paths:
       - path: /

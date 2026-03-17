@@ -27,7 +27,7 @@ images:
 
 replicas:
 - name: frontend
-  count: 3
+  count: 1  # Single-node homelab — scale up when moving to multi-node
 
 # Production resource adjustments
 patchesJson6902:
@@ -59,7 +59,7 @@ patchesJson6902:
   patch: |-
     - op: replace
       path: /spec/minReplicas
-      value: 3
+      value: 1
     - op: replace
       path: /spec/maxReplicas
-      value: 10
+      value: 3
