@@ -42,14 +42,14 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: '**/package-lock.json'
+          cache-dependency-path: '**/package.json'
 
       - name: Install root dependencies
-        run: npm ci
+        run: npm install
 
       - name: Install frontend dependencies
         working-directory: ${{ env.WORKING_DIRECTORY }}
-        run: npm ci
+        run: npm install
 
       - name: Run ESLint
         working-directory: ${{ env.WORKING_DIRECTORY }}
@@ -79,11 +79,11 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: '**/package-lock.json'
+          cache-dependency-path: '**/package.json'
 
       - name: Install dependencies
         working-directory: ${{ env.WORKING_DIRECTORY }}
-        run: npm ci
+        run: npm install
 
       - name: Run npm audit
         working-directory: ${{ env.WORKING_DIRECTORY }}
@@ -115,14 +115,14 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: '**/package-lock.json'
+          cache-dependency-path: '**/package.json'
 
       - name: Install root dependencies
-        run: npm ci
+        run: npm install
 
       - name: Install frontend dependencies
         working-directory: ${{ env.WORKING_DIRECTORY }}
-        run: npm ci
+        run: npm install
 
       - name: Build application
         working-directory: ${{ env.WORKING_DIRECTORY }}
@@ -163,7 +163,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: '**/package-lock.json'
+          cache-dependency-path: '**/package.json'
 
       - name: Download build artifacts
         uses: actions/download-artifact@v4

@@ -148,11 +148,11 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: 'portfolio-api/package-lock.json'
+          cache-dependency-path: 'portfolio-api/package.json'
 
       - name: Install dependencies
         working-directory: ./portfolio-api
-        run: npm ci
+        run: npm install
 
       - name: Generate Prisma Client
         working-directory: ./portfolio-api

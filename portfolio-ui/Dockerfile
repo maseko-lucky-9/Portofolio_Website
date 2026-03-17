@@ -12,7 +12,8 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install all dependencies (dev included for build tooling)
-RUN npm ci
+# Using npm install instead of npm ci — lock files are not committed
+RUN npm install
 
 # Copy source and config
 COPY tsconfig*.json ./

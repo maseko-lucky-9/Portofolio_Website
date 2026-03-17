@@ -55,11 +55,11 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: 'portfolio-api/package-lock.json'
+          cache-dependency-path: 'portfolio-api/package.json'
 
       - name: Install dependencies
         working-directory: ${{ env.WORKING_DIRECTORY }}
-        run: npm ci
+        run: npm install
 
       - name: Validate Prisma schema
         working-directory: ${{ env.WORKING_DIRECTORY }}
@@ -153,11 +153,11 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: 'portfolio-api/package-lock.json'
+          cache-dependency-path: 'portfolio-api/package.json'
 
       - name: Install dependencies
         working-directory: ${{ env.WORKING_DIRECTORY }}
-        run: npm ci
+        run: npm install
 
       - name: Apply migrations to empty database
         working-directory: ${{ env.WORKING_DIRECTORY }}
@@ -218,11 +218,11 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: 'portfolio-api/package-lock.json'
+          cache-dependency-path: 'portfolio-api/package.json'
 
       - name: Install dependencies
         working-directory: ${{ env.WORKING_DIRECTORY }}
-        run: npm ci
+        run: npm install
 
       - name: Apply migrations
         working-directory: ${{ env.WORKING_DIRECTORY }}
@@ -276,11 +276,11 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: 'portfolio-api/package-lock.json'
+          cache-dependency-path: 'portfolio-api/package.json'
 
       - name: Install dependencies
         working-directory: ${{ env.WORKING_DIRECTORY }}
-        run: npm ci
+        run: npm install
 
       - name: Install Prisma ERD Generator
         run: npm install -g prisma-erd-generator @mermaid-js/mermaid-cli
@@ -332,11 +332,11 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: 'portfolio-api/package-lock.json'
+          cache-dependency-path: 'portfolio-api/package.json'
 
       - name: Install dependencies
         working-directory: ${{ env.WORKING_DIRECTORY }}
-        run: npm ci
+        run: npm install
 
       - name: Setup test database
         working-directory: ${{ env.WORKING_DIRECTORY }}
@@ -422,11 +422,11 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: 'portfolio-api/package-lock.json'
+          cache-dependency-path: 'portfolio-api/package.json'
 
       - name: Install dependencies
         working-directory: ${{ env.WORKING_DIRECTORY }}
-        run: npm ci
+        run: npm install
 
       - name: Setup database
         working-directory: ${{ env.WORKING_DIRECTORY }}
