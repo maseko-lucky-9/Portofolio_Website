@@ -25,6 +25,7 @@ patchesStrategicMerge:
 
 images:
 - name: ghcr.io/maseko-lucky-9/portofolio_website/backend
+  newName: localhost:32000/portfolio-backend
   newTag: latest
 
 replicas:
