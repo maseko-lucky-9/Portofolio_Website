@@ -16,10 +16,12 @@ nameSuffix: -prod
 commonLabels:
   environment: prod
 
+resources:
+- ingress.yaml
+
 patchesStrategicMerge:
 - deployment-patch.yaml
 - configmap-patch.yaml
-- ingress.yaml
 
 images:
 - name: ghcr.io/maseko-lucky-9/portofolio_website/frontend
