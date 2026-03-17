@@ -73,7 +73,7 @@ export async function csrfProtection(
   reply: FastifyReply
 ): Promise<void> {
   const method = request.method;
-  const path = request.routerPath || request.url;
+  const path = request.routeOptions?.url || request.url;
 
   // Skip CSRF check for:
   // 1. Safe methods (GET, HEAD, OPTIONS)

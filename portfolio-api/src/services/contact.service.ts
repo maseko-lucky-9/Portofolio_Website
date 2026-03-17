@@ -2,6 +2,7 @@ import { prisma } from '../config/database.js';
 import { ApiError } from '../utils/errors.js';
 import { ContactInput } from '../utils/validation.js';
 import { logger } from '../config/logger.js';
+import { ContactStatus } from '@prisma/client';
 
 export class ContactService {
   // Submit contact form
@@ -31,9 +32,10 @@ export class ContactService {
         email: data.email,
         subject: data.subject,
         message: data.message,
-        phone: data.phone,
         company: data.company,
-        metadata: metadata as any,
+        ipAddress: metadata?.ip,
+        userAgent: metadata?.userAgent,
+        referrer: metadata?.referer,
       },
     });
 
@@ -55,7 +57,7 @@ export class ContactService {
     const { page, limit, status } = options;
 
     const where = {
-      ...(status && { status }),
+      ...(status && { status: status as ContactStatus }),
     };
 
     const [submissions, total] = await Promise.all([
@@ -105,7 +107,7 @@ export class ContactService {
     const updated = await prisma.contactSubmission.update({
       where: { id },
       data: {
-        status,
+        status: status as ContactStatus,
         notes,
         readAt: status === 'READ' || status === 'REPLIED' ? new Date() : submission.readAt,
       },

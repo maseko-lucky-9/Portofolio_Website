@@ -5,7 +5,7 @@ import { redis } from '../config/redis.js';
 import { createLogger } from '../config/logger.js';
 import { config } from '../config/index.js';
 import { generateSessionId, generateVisitorId } from '../utils/crypto.js';
-import { EventType } from '@prisma/client';
+import { EventType, Prisma } from '@prisma/client';
 
 const logger = createLogger('analytics');
 
@@ -212,7 +212,7 @@ export const trackEvent = async (
         path: data?.path,
         projectId: data?.projectId,
         articleId: data?.articleId,
-        eventData: data?.eventData,
+        eventData: data?.eventData as Prisma.InputJsonValue | undefined,
         duration: data?.duration,
       },
     });

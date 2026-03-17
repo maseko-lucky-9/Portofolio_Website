@@ -96,7 +96,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
     const { refreshToken } = request.body as { refreshToken: string };
     await authService.logout(refreshToken);
     
-    await createAuditLog(request, 'LOGOUT', 'User', (request as AuthenticatedRequest).user.id);
+    await createAuditLog(request, 'LOGOUT', 'User', (request as unknown as AuthenticatedRequest).user.id);
     
     reply.send({
       success: true,
@@ -113,7 +113,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
       security: [{ bearerAuth: [] }],
     },
   }, async (request, reply) => {
-    const user = (request as AuthenticatedRequest).user;
+    const user = (request as unknown as AuthenticatedRequest).user;
     const profile = await authService.getProfile(user.id);
     
     reply.send({
@@ -140,7 +140,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
       },
     },
   }, async (request, reply) => {
-    const user = (request as AuthenticatedRequest).user;
+    const user = (request as unknown as AuthenticatedRequest).user;
     const updated = await authService.updateProfile(user.id, request.body as { firstName?: string; lastName?: string; avatar?: string; bio?: string });
     
     await createAuditLog(request, 'UPDATE', 'User', user.id, undefined, updated);
@@ -168,7 +168,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
       },
     },
   }, async (request, reply) => {
-    const user = (request as AuthenticatedRequest).user;
+    const user = (request as unknown as AuthenticatedRequest).user;
     const { currentPassword, newPassword } = request.body as { currentPassword: string; newPassword: string };
     
     await authService.changePassword(user.id, currentPassword, newPassword);

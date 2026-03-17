@@ -39,7 +39,7 @@ export async function projectRoutes(app: FastifyInstance): Promise<void> {
       page: parseInt(query.page?.toString() || '1'),
       limit: parseInt(query.limit?.toString() || '10'),
       status: query.status as any,
-      featured: query.featured === 'true' ? true : query.featured === 'false' ? false : undefined,
+      featured: (query.featured as any) === 'true' ? true : (query.featured as any) === 'false' ? false : undefined,
       tag: query.tag as string | undefined,
       search: query.search as string | undefined,
       sortBy: (query.sortBy as string) || 'createdAt',
@@ -48,8 +48,15 @@ export async function projectRoutes(app: FastifyInstance): Promise<void> {
     
     const baseUrl = `${request.protocol}://${request.headers.host || request.hostname}/api/v1/projects`;
     return paginatedResponse<ProjectSummary>(
-      result.data,
-      result.meta,
+      result.items as ProjectSummary[],
+      {
+        page: result.meta.page,
+        limit: result.meta.limit,
+        total: result.meta.total,
+        pages: result.meta.totalPages,
+        hasNext: result.meta.page < result.meta.totalPages,
+        hasPrev: result.meta.page > 1,
+      },
       baseUrl
     );
   });
@@ -73,7 +80,7 @@ export async function projectRoutes(app: FastifyInstance): Promise<void> {
   }, async (request, reply) => {
     const { slug } = request.params as { slug: string };
     const project = await projectService.getProjectBySlug(slug);
-    return successResponse<ProjectDetail>(project);
+    return successResponse<ProjectDetail>(project as ProjectDetail);
   });
 
   // Create project (admin)
@@ -118,7 +125,7 @@ export async function projectRoutes(app: FastifyInstance): Promise<void> {
     },
   }, async (request, reply) => {
     const data = request.body as any;
-    const project = await projectService.createProject(data);
+    const project = await projectService.createProject(data, (request as any).user?.id || '');
     return reply.code(201).send(project);
   });
 

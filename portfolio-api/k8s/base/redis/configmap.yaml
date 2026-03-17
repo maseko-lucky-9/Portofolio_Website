@@ -48,7 +48,7 @@ data:
     
     # Security
     # requirepass will be set via command line from secret
-    protected-mode yes
+    protected-mode no
     
     # Limits
     maxclients 10000

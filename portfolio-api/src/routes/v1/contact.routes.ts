@@ -181,7 +181,7 @@ export async function contactRoutes(app: FastifyInstance): Promise<void> {
     const result = await newsletterService.getSubscribers({
       page: parseInt(query.page) || 1,
       limit: parseInt(query.limit) || 20,
-      status: query.status,
+      active: query.active === 'true' ? true : query.active === 'false' ? false : undefined,
     });
     return result;
   });

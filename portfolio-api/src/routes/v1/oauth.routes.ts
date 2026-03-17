@@ -162,7 +162,7 @@ export default async function oauthRoutes(fastify: FastifyInstance) {
         code: string;
         state: string;
       };
-      const user = (request as AuthenticatedRequest).user;
+      const user = (request as unknown as AuthenticatedRequest).user;
 
       // Verify state
       const storedState = oauthStates.get(state);
@@ -208,8 +208,8 @@ export default async function oauthRoutes(fastify: FastifyInstance) {
     '/oauth/unlink/:provider',
     { preHandler: authenticate },
     async (request: FastifyRequest, reply: FastifyReply) => {
-      const { provider } = request.params;
-      const user = (request as AuthenticatedRequest).user;
+      const { provider } = request.params as { provider: string };
+      const user = (request as unknown as AuthenticatedRequest).user;
 
       // Validate provider
       if (provider !== 'github' && provider !== 'google') {
@@ -233,7 +233,7 @@ export default async function oauthRoutes(fastify: FastifyInstance) {
     '/oauth/providers',
     { preHandler: authenticate },
     async (request: FastifyRequest, reply: FastifyReply) => {
-      const user = (request as AuthenticatedRequest).user;
+      const user = (request as unknown as AuthenticatedRequest).user;
 
       const providers = await oauthService.getUserOAuthProviders(user.id);
 

@@ -1,5 +1,6 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { prisma } from '../config/database.js';
+import { Prisma } from '@prisma/client';
 import { createLogger } from '../config/logger.js';
 import { AuthenticatedRequest } from './auth.middleware.js';
 
@@ -49,8 +50,8 @@ export const createAuditLog = async (
         action,
         entity,
         entityId,
-        oldValues: oldValues ?? undefined,
-        newValues: newValues ?? undefined,
+        oldValues: (oldValues ?? undefined) as Prisma.InputJsonValue | undefined,
+        newValues: (newValues ?? undefined) as Prisma.InputJsonValue | undefined,
         userId: user?.id,
         ipAddress: request.ip,
         userAgent: request.headers['user-agent'],

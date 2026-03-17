@@ -43,11 +43,11 @@ export const generateTokens = (user: { id: string; email: string; role: Role }):
   };
 
   const accessToken = jwt.sign(accessPayload, config.auth.jwtSecret, {
-    expiresIn: config.auth.accessExpiry,
+    expiresIn: config.auth.accessExpiry as any,
   });
 
   const refreshToken = jwt.sign(refreshPayload, config.auth.jwtSecret, {
-    expiresIn: config.auth.refreshExpiry,
+    expiresIn: config.auth.refreshExpiry as any,
   });
 
   return { accessToken, refreshToken };
