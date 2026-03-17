@@ -45,7 +45,3 @@ spec:
     jsonPointers:
     - /spec/replicas
   
-  # Health assessment
-  health:
-    readinessGates:
-    - conditionType: "Ready"
