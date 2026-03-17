@@ -68,6 +68,13 @@ const envSchema = z.object({
   GITHUB_TOKEN: z.string().optional(),
   GITHUB_WEBHOOK_SECRET: z.string().optional(),
 
+  // OAuth Providers
+  GITHUB_CLIENT_ID: z.string().optional(),
+  GITHUB_CLIENT_SECRET: z.string().optional(),
+  GOOGLE_CLIENT_ID: z.string().optional(),
+  GOOGLE_CLIENT_SECRET: z.string().optional(),
+  OAUTH_STATE_SECRET: z.string().min(32).default('0000000000000000000000000000000000000000000000000000000000000000'),
+
   // Cache TTL
   CACHE_TTL_PROJECTS: z.string().transform(Number).default('3600'),
   CACHE_TTL_ARTICLES: z.string().transform(Number).default('3600'),
@@ -201,6 +208,22 @@ export const config = {
     token: env.GITHUB_TOKEN,
     webhookSecret: env.GITHUB_WEBHOOK_SECRET,
   },
+
+  // OAuth Configuration
+  oauth: {
+    github: {
+      clientId: env.GITHUB_CLIENT_ID || '',
+      clientSecret: env.GITHUB_CLIENT_SECRET || '',
+    },
+    google: {
+      clientId: env.GOOGLE_CLIENT_ID || '',
+      clientSecret: env.GOOGLE_CLIENT_SECRET || '',
+    },
+    stateSecret: env.OAUTH_STATE_SECRET,
+  },
+
+  // API URL for callbacks
+  apiUrl: env.APP_URL,
 
   // Cache TTL
   cache: {

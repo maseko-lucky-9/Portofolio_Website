@@ -14,6 +14,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { personalData } from "@/data/personal";
+import { useContactForm } from "@/hooks/use-contact";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -27,18 +28,19 @@ const contactSchema = z.object({
   message: z.string().min(20, "Message must be at least 20 characters").max(1000),
 });
 
-type ContactForm = z.infer<typeof contactSchema>;
+type ContactFormData = z.infer<typeof contactSchema>;
 
 export function ContactSection() {
-  const [formData, setFormData] = useState<ContactForm>({
+  const [formData, setFormData] = useState<ContactFormData>({
     name: "",
     email: "",
     subject: "",
     message: "",
   });
-  const [errors, setErrors] = useState<Partial<ContactForm>>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<Partial<ContactFormData>>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const { mutate: submitContact, isPending } = useContactForm();
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -46,7 +48,7 @@ export function ContactSection() {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     // Clear error on change
-    if (errors[name as keyof ContactForm]) {
+    if (errors[name as keyof ContactFormData]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
   };
@@ -54,30 +56,41 @@ export function ContactSection() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validate form
+    // Validate form client-side first
     const result = contactSchema.safeParse(formData);
     if (!result.success) {
-      const fieldErrors: Partial<ContactForm> = {};
+      const fieldErrors: Partial<ContactFormData> = {};
       result.error.errors.forEach((error) => {
         if (error.path[0]) {
-          fieldErrors[error.path[0] as keyof ContactForm] = error.message;
+          fieldErrors[error.path[0] as keyof ContactFormData] = error.message;
         }
       });
       setErrors(fieldErrors);
       return;
     }
 
-    setIsSubmitting(true);
-
-    // Simulate form submission (frontend only)
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    setIsSubmitting(false);
-    setIsSubmitted(true);
-    setFormData({ name: "", email: "", subject: "", message: "" });
-
-    // Reset success message after 5 seconds
-    setTimeout(() => setIsSubmitted(false), 5000);
+    // Submit to API
+    submitContact(
+      {
+        name: result.data.name,
+        email: result.data.email,
+        subject: result.data.subject,
+        message: result.data.message,
+      },
+      {
+        onSuccess: () => {
+          setIsSubmitted(true);
+          setFormData({ name: "", email: "", subject: "", message: "" });
+          setErrors({});
+          // Reset success message after 5 seconds
+          setTimeout(() => setIsSubmitted(false), 5000);
+        },
+        onError: () => {
+          // Global error toast handled by QueryClient config
+          // No additional handling needed here
+        },
+      }
+    );
   };
 
   return (
@@ -292,10 +305,10 @@ export function ContactSection() {
 
                   <Button
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={isPending}
                     className="w-full btn-hero-primary !rounded-lg"
                   >
-                    {isSubmitting ? (
+                    {isPending ? (
                       <>
                         <Loader2 className="w-4 h-4 animate-spin" />
                         Sending...

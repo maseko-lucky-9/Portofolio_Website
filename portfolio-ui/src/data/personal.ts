@@ -7,34 +7,34 @@
 
 export const personalData = {
   // EDIT: Your name
-  name: "Alex Johnson",
+  name: "Thulani Maseko",
   
   // EDIT: Your role/title
   title: "Full-Stack Software Developer",
   
   // EDIT: Your value proposition tagline
-  tagline: "Building scalable web applications with modern technologies. Passionate about clean code, user experience, and solving complex problems.",
+  tagline: "I'm a Software Developer with 7+ years building scalable backend systems/microservices, cloud solutions, and DevOps pipelines. Currently at Capitec Bank, previously at Absa, E4 Strategic, and Invoke Solutions.I specialize in modernizing legacy systems—migrating applications to AWS/Azure and rewriting them using service-oriented architectures and building . Skilled in .NET, Terraform, Kubernetes, and Agile development practices. Microsoft Azure certified.I bring technical expertise, a problem-solving mindset, and a collaborative approach that delivers results across diverse team environments.",
   
   // EDIT: Your email
-  email: "alex@example.com",
+  email: "ltmaseko7@gmail.com",
   
   // EDIT: Your location
-  location: "San Francisco, CA",
+  location: "Johannesburg, ZA",
   
   // EDIT: Your availability status
   availability: "Open to opportunities",
   
   // EDIT: Key metrics to display
   metrics: {
-    projects: "50+",
-    experience: "8 Years",
-    clients: "30+",
+    projects: "20+",
+    experience: "7 Years",
+    clients: "10+",
   },
   
   // EDIT: Social links
   social: {
-    github: "https://github.com/yourusername",
-    linkedin: "https://linkedin.com/in/yourusername",
+    github: "https://github.com/maseko-lucky-9",
+    linkedin: "www.linkedin.com/in/thulani-maseko-819587127",
     twitter: "https://twitter.com/yourusername",
     calendar: "https://cal.com/yourusername",
   },
@@ -48,7 +48,7 @@ export const personalData = {
 
 export const seoData = {
   // EDIT: SEO title
-  title: "Alex Johnson | Full-Stack Software Developer",
+  title: "Thulani Maseko | Full-Stack Software Developer",
   
   // EDIT: Meta description
   description: "Professional software developer portfolio showcasing full-stack web development expertise in React, TypeScript, Node.js, and cloud technologies.",

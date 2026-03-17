@@ -1,6 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { healthRoutes } from './v1/health.routes.js';
 import { authRoutes } from './v1/auth.routes.js';
+import oauthRoutes from './v1/oauth.routes.js';
 import { projectRoutes } from './v1/project.routes.js';
 import { articleRoutes } from './v1/article.routes.js';
 import { tagRoutes } from './v1/tag.routes.js';
@@ -27,6 +28,7 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
       // Register route modules
       await api.register(healthRoutes, { prefix: '/health' });
       await api.register(authRoutes, { prefix: '/auth' });
+      await api.register(oauthRoutes, { prefix: '/auth' });
       await api.register(projectRoutes, { prefix: '/projects' });
       await api.register(articleRoutes, { prefix: '/articles' });
       await api.register(tagRoutes, { prefix: '/tags' });

@@ -143,6 +143,32 @@ class AuthService {
   getAccessToken(): string | null {
     return httpClient.getAccessToken();
   }
+
+  /**
+   * Initiate OAuth login flow
+   */
+  loginWithOAuth(provider: 'github' | 'google'): void {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+    window.location.href = `${apiUrl}/api/v1/auth/oauth/${provider}`;
+  }
+
+  /**
+   * Get linked OAuth providers
+   */
+  async getOAuthProviders(): Promise<
+    ApiResponse<{ providers: Array<{ provider: string; email: string | null; linkedAt: Date }> }>
+  > {
+    return httpClient.get<
+      ApiResponse<{ providers: Array<{ provider: string; email: string | null; linkedAt: Date }> }>
+    >(`${this.basePath}/oauth/providers`);
+  }
+
+  /**
+   * Unlink OAuth provider from account
+   */
+  async unlinkOAuthProvider(provider: 'github' | 'google'): Promise<ApiResponse<void>> {
+    return httpClient.delete<ApiResponse<void>>(`${this.basePath}/oauth/unlink/${provider}`);
+  }
 }
 
 export const authService = new AuthService();

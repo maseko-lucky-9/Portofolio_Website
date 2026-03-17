@@ -1,0 +1,31 @@
+# ==============================================
+# Kustomization - Backend API Staging
+# Staging environment specific configuration
+# ==============================================
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: staging
+
+namePrefix: staging-
+
+commonLabels:
+  environment: staging
+  app.kubernetes.io/instance: staging
+
+bases:
+- ../../base
+
+patchesStrategicMerge:
+- deployment-patch.yaml
+- configmap-patch.yaml
+- ingress-patch.yaml
+
+images:
+- name: ghcr.io/maseko-lucky-9/portofolio_website/backend
+  newTag: main
+
+replicas:
+- name: backend-api
+  count: 2

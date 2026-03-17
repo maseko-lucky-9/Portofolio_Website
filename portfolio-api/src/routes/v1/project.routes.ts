@@ -46,7 +46,7 @@ export async function projectRoutes(app: FastifyInstance): Promise<void> {
       sortOrder: (query.sortOrder as 'asc' | 'desc') || 'desc',
     });
     
-    const baseUrl = `${request.protocol}://${request.hostname}/api/v1/projects`;
+    const baseUrl = `${request.protocol}://${request.headers.host || request.hostname}/api/v1/projects`;
     return paginatedResponse<ProjectSummary>(
       result.data,
       result.meta,

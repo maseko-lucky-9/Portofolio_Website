@@ -1,0 +1,53 @@
+# ==============================================
+# Production Environment Values
+# ==============================================
+
+replicaCount: 3
+
+image:
+  tag: latest
+  pullPolicy: IfNotPresent
+
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "200m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+autoscaling:
+  minReplicas: 3
+  maxReplicas: 10
+
+ingress:
+  hosts:
+    - host: example.com
+      paths:
+        - path: /
+          pathType: Prefix
+    - host: www.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: frontend-tls-prod
+      hosts:
+        - example.com
+        - www.example.com
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "8080"
+  prometheus.io/path: "/metrics"
+
+env:
+  VITE_API_BASE_URL: "https://api.example.com"
+  VITE_DEBUG_MODE: "false"
+  VITE_ENABLE_ANALYTICS: "true"
+  VITE_ENABLE_CODE_DEMO: "true"
+  VITE_ENABLE_COMMENTS: "true"

@@ -1,0 +1,71 @@
+# ==============================================
+# Development Environment Values
+# ==============================================
+
+replicaCount: 1
+
+image:
+  tag: "develop"
+
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "256Mi"
+    cpu: "250m"
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+
+ingress:
+  hosts:
+    - host: api-dev.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: backend-api-dev-tls
+      hosts:
+        - api-dev.example.com
+  annotations:
+    nginx.ingress.kubernetes.io/limit-rps: "1000"
+    nginx.ingress.kubernetes.io/limit-connections: "500"
+
+config:
+  nodeEnv: development
+  logging:
+    level: "debug"
+    format: "pretty"
+  features:
+    demoMode: true
+    codeExecution: true
+  rateLimit:
+    maxAnonymous: 1000
+    maxAuthenticated: 5000
+
+postgresql:
+  primary:
+    persistence:
+      size: 5Gi
+    resources:
+      requests:
+        memory: 128Mi
+        cpu: 100m
+      limits:
+        memory: 512Mi
+        cpu: 500m
+
+redis:
+  master:
+    persistence:
+      size: 2Gi
+    resources:
+      requests:
+        memory: 64Mi
+        cpu: 50m
+      limits:
+        memory: 256Mi
+        cpu: 250m

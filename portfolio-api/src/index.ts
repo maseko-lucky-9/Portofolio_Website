@@ -7,6 +7,7 @@ import fastifyStatic from '@fastify/static';
 import fastifySensible from '@fastify/sensible';
 import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUi from '@fastify/swagger-ui';
+import cookie from '@fastify/cookie';
 import { config } from './config/index.js';
 import { logger } from './config/logger.js';
 import { connectDatabase } from './config/database.js';
@@ -67,20 +68,14 @@ async function registerPlugins(): Promise<void> {
         },
   });
 
-  // CORS
-  await app.register(fastifyCors, {
-    origin: config.cors.origin,
-    credentials: config.cors.credentials,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: [
-      'Content-Type',
-      'Authorization',
-      'X-Requested-With',
-      'X-API-Key',
-      'X-Session-ID',
-      'X-Visitor-ID',
-    ],
-    exposedHeaders: ['X-Request-ID', 'X-Cache-Status'],
+  // CORS - using centralized security config
+  const { securityConfig } = await import('./config/security.js');
+  await app.register(fastifyCors, securityConfig.cors);
+
+  // Cookie support for OAuth
+  await app.register(cookie, {
+    secret: config.oauth.stateSecret,
+    parseOptions: {},
   });
 
   // Rate limiting

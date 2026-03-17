@@ -1,8 +1,9 @@
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { ArrowDown, Github, Linkedin, Twitter, Download, Calendar } from "lucide-react";
 import { personalData } from "@/data/personal";
 
 export function HeroSection() {
+  const prefersReducedMotion = useReducedMotion();
   const scrollToProjects = () => {
     document.querySelector("#projects")?.scrollIntoView({ behavior: "smooth" });
   };
@@ -17,10 +18,10 @@ export function HeroSection() {
       className="relative min-h-screen flex items-center justify-center overflow-hidden"
       style={{ background: "var(--gradient-hero)" }}
     >
-      {/* Background decoration */}
+      {/* Background decoration — disabled for users with prefers-reduced-motion */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
-          animate={{
+          animate={prefersReducedMotion ? {} : {
             scale: [1, 1.2, 1],
             rotate: [0, 180, 360],
           }}
@@ -32,7 +33,7 @@ export function HeroSection() {
           className="absolute -top-1/2 -right-1/2 w-full h-full bg-gradient-to-br from-primary/10 to-secondary/10 rounded-full blur-3xl"
         />
         <motion.div
-          animate={{
+          animate={prefersReducedMotion ? {} : {
             scale: [1.2, 1, 1.2],
             rotate: [360, 180, 0],
           }}
@@ -175,6 +176,9 @@ export function HeroSection() {
               <img
                 src={personalData.profileImage}
                 alt={personalData.name}
+                fetchPriority="high"
+                width={320}
+                height={320}
                 className="relative z-10 w-full h-full rounded-full object-cover border-4 border-background"
               />
             </motion.div>

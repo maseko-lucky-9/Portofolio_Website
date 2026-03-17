@@ -1,0 +1,17 @@
+# ==============================================
+# Production Deployment Patch
+# ==============================================
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 3
+  template:
+    metadata:
+      annotations:
+        environment: prod
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/metrics"

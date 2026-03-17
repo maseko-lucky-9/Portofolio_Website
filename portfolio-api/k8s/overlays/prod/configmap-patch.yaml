@@ -1,0 +1,29 @@
+# ==============================================
+# ConfigMap Patch - Production
+# Production-specific configuration
+# ==============================================
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+data:
+  # Production settings
+  LOG_LEVEL: "warn"
+  LOG_FORMAT: "json"
+  DEMO_MODE: "false"
+  
+  # Strict rate limits
+  RATE_LIMIT_MAX_ANONYMOUS: "50"
+  RATE_LIMIT_MAX_AUTHENTICATED: "500"
+  
+  # CORS - specific origins only
+  CORS_ORIGIN: "https://example.com,https://www.example.com"
+  
+  # Features
+  ENABLE_CODE_EXECUTION: "false"
+  ENABLE_WEBSOCKETS: "true"
+  
+  # Monitoring
+  ENABLE_METRICS: "true"
+  ENABLE_TRACING: "true"

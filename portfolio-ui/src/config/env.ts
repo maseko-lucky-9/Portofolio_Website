@@ -29,6 +29,8 @@ export const env = {
   appDescription: import.meta.env.VITE_APP_DESCRIPTION || 'My Portfolio Website',
 
   // Feature Flags
+  useApi: toBool(import.meta.env.VITE_USE_API, false),
+  enableMsw: toBool(import.meta.env.VITE_ENABLE_MSW, false),
   enableAnalytics: toBool(import.meta.env.VITE_ENABLE_ANALYTICS, true),
   enableCodeExecution: toBool(import.meta.env.VITE_ENABLE_CODE_EXECUTION, true),
   enableComments: toBool(import.meta.env.VITE_ENABLE_COMMENTS, true),
