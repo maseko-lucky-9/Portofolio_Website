@@ -85,12 +85,12 @@ docker push "${REGISTRY}/portfolio-frontend:latest"
 echo "  ✓ Frontend image pushed"
 
 # -----------------------------------------------
-# Step 5: Create secrets (idempotent)
+# Step 5: Create/update secrets (idempotent)
 # -----------------------------------------------
 echo ""
 echo "[5/7] Creating secrets (if not already present)..."
 
-# PostgreSQL secrets
+# PostgreSQL secrets (used by base database deployment — no kustomize prefix)
 if ! microk8s kubectl get secret postgres-secrets -n "${NAMESPACE}" &>/dev/null; then
   PG_PASS=$(openssl rand -base64 32)
   microk8s kubectl create secret generic postgres-secrets \
@@ -99,15 +99,12 @@ if ! microk8s kubectl get secret postgres-secrets -n "${NAMESPACE}" &>/dev/null;
     --from-literal=postgres-password="${PG_PASS}" \
     --namespace="${NAMESPACE}"
   echo "  ✓ PostgreSQL secrets created"
-
-  # Store PG_PASS for backend-secrets construction
-  export PG_PASS
 else
   echo "  ✓ PostgreSQL secrets already exist"
   PG_PASS=$(microk8s kubectl get secret postgres-secrets -n "${NAMESPACE}" -o jsonpath='{.data.password}' | base64 -d)
 fi
 
-# Redis secrets
+# Redis secrets (used by base redis deployment — no kustomize prefix)
 if ! microk8s kubectl get secret redis-secrets -n "${NAMESPACE}" &>/dev/null; then
   REDIS_PASS=$(openssl rand -base64 32)
   microk8s kubectl create secret generic redis-secrets \
@@ -118,20 +115,13 @@ else
   echo "  ✓ Redis secrets already exist"
 fi
 
-# Backend API secrets
-if ! microk8s kubectl get secret backend-secrets -n "${NAMESPACE}" &>/dev/null; then
-  JWT_SECRET=$(openssl rand -hex 32)
-  microk8s kubectl create secret generic backend-secrets \
-    --from-literal=database-url="postgresql://portfolio_user:${PG_PASS}@prod-postgres:5432/portfolio" \
-    --from-literal=redis-url="redis://prod-redis:6379" \
-    --from-literal=jwt-secret="${JWT_SECRET}" \
-    --from-literal=jwt-access-expiry="15m" \
-    --from-literal=jwt-refresh-expiry="7d" \
-    --namespace="${NAMESPACE}"
-  echo "  ✓ Backend secrets created"
-else
-  echo "  ✓ Backend secrets already exist"
-fi
+# Generate JWT secret for backend
+JWT_SECRET=$(openssl rand -hex 32)
+
+# Backend secrets will be patched AFTER kustomize creates them (kustomize adds namePrefix "prod-")
+# Store credentials for later patching
+BACKEND_DB_URL="postgresql://portfolio_user:${PG_PASS}@postgres:5432/portfolio"
+BACKEND_REDIS_URL="redis://redis:6379"
 
 # -----------------------------------------------
 # Step 6: Deploy via kustomize
@@ -139,18 +129,18 @@ fi
 echo ""
 echo "[6/7] Deploying via kustomize..."
 
-# Database first
+# Database first — explicitly set namespace (base has no namespace)
 echo "  → Deploying PostgreSQL..."
-microk8s kubectl apply -k "${REPO_ROOT}/portfolio-api/k8s/base/database/" 2>&1 | sed 's/^/    /'
+microk8s kubectl apply -k "${REPO_ROOT}/portfolio-api/k8s/base/database/" -n "${NAMESPACE}" 2>&1 | sed 's/^/    /'
 
 echo "  → Deploying Redis..."
-microk8s kubectl apply -k "${REPO_ROOT}/portfolio-api/k8s/base/redis/" 2>&1 | sed 's/^/    /'
+microk8s kubectl apply -k "${REPO_ROOT}/portfolio-api/k8s/base/redis/" -n "${NAMESPACE}" 2>&1 | sed 's/^/    /'
 
 echo "  → Waiting for database to be ready (up to 120s)..."
-microk8s kubectl wait --for=condition=ready pod -l app=postgres -n "${NAMESPACE}" --timeout=120s 2>&1 | sed 's/^/    /' || echo "    ⚠ Postgres not ready yet — continuing anyway"
+microk8s kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=postgres -n "${NAMESPACE}" --timeout=120s 2>&1 | sed 's/^/    /' || echo "    ⚠ Postgres not ready yet — continuing anyway"
 
 echo "  → Waiting for Redis to be ready (up to 60s)..."
-microk8s kubectl wait --for=condition=ready pod -l app=redis -n "${NAMESPACE}" --timeout=60s 2>&1 | sed 's/^/    /' || echo "    ⚠ Redis not ready yet — continuing anyway"
+microk8s kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=redis -n "${NAMESPACE}" --timeout=60s 2>&1 | sed 's/^/    /' || echo "    ⚠ Redis not ready yet — continuing anyway"
 
 # Backend API
 echo "  → Deploying Backend API..."
@@ -159,6 +149,22 @@ microk8s kubectl apply -k "${REPO_ROOT}/portfolio-api/k8s/overlays/prod/" 2>&1 |
 # Frontend
 echo "  → Deploying Frontend..."
 microk8s kubectl apply -k "${REPO_ROOT}/portfolio-ui/k8s/overlays/prod/" 2>&1 | sed 's/^/    /'
+
+# Patch kustomize-created backend secrets with real credentials
+echo "  → Patching prod-backend-secrets with real credentials..."
+microk8s kubectl create secret generic prod-backend-secrets \
+  --from-literal=database-url="${BACKEND_DB_URL}" \
+  --from-literal=redis-url="${BACKEND_REDIS_URL}" \
+  --from-literal=jwt-secret="${JWT_SECRET}" \
+  --from-literal=jwt-access-expiry="15m" \
+  --from-literal=jwt-refresh-expiry="7d" \
+  --namespace="${NAMESPACE}" \
+  --dry-run=client -o yaml | microk8s kubectl apply -f -
+echo "  ✓ Backend secrets patched"
+
+# Restart backend pods to pick up the new secrets
+echo "  → Restarting backend pods..."
+microk8s kubectl rollout restart deployment/prod-backend-api -n "${NAMESPACE}" 2>&1 | sed 's/^/    /'
 
 echo "  ✓ All manifests applied"
 
