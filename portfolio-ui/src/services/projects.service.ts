@@ -39,7 +39,7 @@ class ProjectsService extends BaseService<Project> {
    */
   async getFeatured(limit: number = 6): Promise<ApiResponse<Project[]>> {
     return httpClient.get<ApiResponse<Project[]>>(
-      `${this.basePath}/featured?limit=${limit}`
+      `${this.basePath}?featured=true&limit=${limit}`
     );
   }
 

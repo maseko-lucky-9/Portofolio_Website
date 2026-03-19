@@ -167,8 +167,7 @@ export function SkillsSection() {
                     <div className="h-2 bg-muted rounded-full overflow-hidden">
                       <motion.div
                         initial={{ width: 0 }}
-                        whileInView={{ width: `${skill.proficiency}%` }}
-                        viewport={{ once: true }}
+                        animate={{ width: `${skill.proficiency}%` }}
                         transition={{ duration: 0.8, delay: index * 0.05 }}
                         className="h-full rounded-full"
                         style={{

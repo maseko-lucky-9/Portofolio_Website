@@ -64,7 +64,7 @@ export function BlogSection() {
     status: ArticleStatus.PUBLISHED,
     limit: 3,
     sortBy: "publishedAt",
-    order: "desc",
+    sortOrder: "desc",
   });
 
   const blogPosts: DisplayBlogPost[] = useMemo(() => {

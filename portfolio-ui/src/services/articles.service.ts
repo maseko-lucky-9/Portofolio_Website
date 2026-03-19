@@ -39,7 +39,7 @@ class ArticlesService extends BaseService<Article> {
    */
   async getFeatured(limit: number = 6): Promise<ApiResponse<Article[]>> {
     return httpClient.get<ApiResponse<Article[]>>(
-      `${this.basePath}/featured?limit=${limit}`
+      `${this.basePath}?featured=true&limit=${limit}`
     );
   }
 

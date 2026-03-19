@@ -53,7 +53,7 @@ export const apiUrl = (path: string): string => {
   const base = env.apiUrl.replace(/\/$/, ''); // Remove trailing slash
   const version = env.apiVersion;
   const cleanPath = path.startsWith('/') ? path : `/${path}`;
-  return `${base}/${version}${cleanPath}`;
+  return `${base}/api/${version}${cleanPath}`;
 };
 
 /**

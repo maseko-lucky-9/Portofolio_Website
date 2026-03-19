@@ -20,7 +20,7 @@ import type {
 // ===========================================
 
 class ContactService {
-  private readonly basePath = '/contact';
+  private readonly basePath = '/contact/submit';
 
   /**
    * Submit contact form

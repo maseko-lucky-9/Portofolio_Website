@@ -42,8 +42,8 @@ export const personalData = {
   // EDIT: Resume file path
   resumeUrl: "/resume.pdf",
   
-  // EDIT: Profile image — drop your headshot at public/images/profile.jpg
-  profileImage: "/images/profile.jpg",
+  // EDIT: Profile image — replace with your headshot URL or drop file at public/images/profile.jpg
+  profileImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face",
 };
 
 export const seoData = {
