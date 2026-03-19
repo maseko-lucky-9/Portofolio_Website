@@ -11,13 +11,10 @@ metadata:
     # Relaxed rate limiting for dev
     nginx.ingress.kubernetes.io/limit-rps: "1000"
     nginx.ingress.kubernetes.io/limit-connections: "500"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
 spec:
-  tls:
-  - hosts:
-    - api-dev.example.com
-    secretName: backend-api-dev-tls
   rules:
-  - host: api-dev.example.com
+  - host: api.portfolio.homelab
     http:
       paths:
       - path: /

@@ -9,15 +9,10 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    cert-manager.io/cluster-issuer: "letsencrypt-staging"
 spec:
   ingressClassName: public
-  tls:
-  - hosts:
-    - dev.example.com
-    secretName: frontend-tls-dev
   rules:
-  - host: dev.example.com
+  - host: portfolio.homelab
     http:
       paths:
       - path: /
