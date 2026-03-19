@@ -39,5 +39,14 @@ export default defineConfig(({ mode }) => {
     define: {
       __APP_VERSION__: JSON.stringify(process.env.npm_package_version || '1.0.0'),
     },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            'three-vendor': ['three', '@react-three/fiber', '@react-three/drei'],
+          },
+        },
+      },
+    },
   };
 });

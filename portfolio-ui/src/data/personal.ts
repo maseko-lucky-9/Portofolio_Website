@@ -13,7 +13,7 @@ export const personalData = {
   title: "Full-Stack Software Developer",
   
   // EDIT: Your value proposition tagline
-  tagline: "I'm a Software Developer with 7+ years building scalable backend systems/microservices, cloud solutions, and DevOps pipelines. Currently at Capitec Bank, previously at Absa, E4 Strategic, and Invoke Solutions.I specialize in modernizing legacy systems—migrating applications to AWS/Azure and rewriting them using service-oriented architectures and building . Skilled in .NET, Terraform, Kubernetes, and Agile development practices. Microsoft Azure certified.I bring technical expertise, a problem-solving mindset, and a collaborative approach that delivers results across diverse team environments.",
+  tagline: "I modernize legacy systems into cloud-native platforms. 7+ years turning complex requirements into scalable, maintainable solutions across fintech and enterprise.",
   
   // EDIT: Your email
   email: "ltmaseko7@gmail.com",
@@ -34,7 +34,7 @@ export const personalData = {
   // EDIT: Social links
   social: {
     github: "https://github.com/maseko-lucky-9",
-    linkedin: "www.linkedin.com/in/thulani-maseko-819587127",
+    linkedin: "https://www.linkedin.com/in/thulani-maseko-819587127",
     twitter: "https://twitter.com/yourusername",
     calendar: "https://cal.com/yourusername",
   },
@@ -42,8 +42,8 @@ export const personalData = {
   // EDIT: Resume file path
   resumeUrl: "/resume.pdf",
   
-  // EDIT: Profile image (optional - can use placeholder)
-  profileImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face",
+  // EDIT: Profile image — drop your headshot at public/images/profile.jpg
+  profileImage: "/images/profile.jpg",
 };
 
 export const seoData = {

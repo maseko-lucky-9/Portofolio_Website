@@ -79,7 +79,7 @@ export function BlogSection() {
   }, [apiResponse]);
 
   return (
-    <section id="blog" className="py-20 bg-muted/30">
+    <section id="blog" aria-labelledby="blog-heading" className="py-20 bg-muted/30">
       <div className="section-container">
         {/* Section Header */}
         <motion.div
@@ -88,7 +88,7 @@ export function BlogSection() {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <h2 className="section-title">Latest Articles</h2>
+          <h2 id="blog-heading" className="section-title">Latest Articles</h2>
           <p className="section-subtitle mx-auto">
             Thoughts, tutorials, and insights on software development.
           </p>

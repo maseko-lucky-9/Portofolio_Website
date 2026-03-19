@@ -100,7 +100,7 @@ export function ProjectsSection() {
     : projects;
 
   return (
-    <section id="projects" className="py-20">
+    <section id="projects" aria-labelledby="projects-heading" className="py-20">
       <div className="section-container">
         {/* Section Header */}
         <motion.div
@@ -109,7 +109,7 @@ export function ProjectsSection() {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <h2 className="section-title">Featured Projects</h2>
+          <h2 id="projects-heading" className="section-title">Featured Projects</h2>
           <p className="section-subtitle mx-auto">
             A selection of projects showcasing my expertise in building scalable,
             user-focused applications.
@@ -149,7 +149,7 @@ export function ProjectsSection() {
 
         {/* Loading State */}
         {isLoading && (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {Array.from({ length: 6 }).map((_, i) => (
               <ProjectCardSkeleton key={i} />
             ))}
@@ -176,7 +176,7 @@ export function ProjectsSection() {
 
         {/* Projects Grid */}
         {!isLoading && filteredProjects.length > 0 && (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             <AnimatePresence mode="popLayout">
               {filteredProjects.map((project, index) => (
                 <motion.article

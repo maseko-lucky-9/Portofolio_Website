@@ -35,6 +35,12 @@ const Index = () => {
   return (
     <ThemeProvider>
       <div className="min-h-screen bg-background">
+        <a
+          href="#about"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[60] focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-lg focus:outline-none"
+        >
+          Skip to main content
+        </a>
         <Navbar />
         <main>
           <HeroSection />

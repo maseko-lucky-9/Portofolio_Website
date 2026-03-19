@@ -39,7 +39,7 @@ export function SkillsSection() {
   };
 
   return (
-    <section id="skills" className="py-20 bg-muted/30">
+    <section id="skills" aria-labelledby="skills-heading" className="py-20 bg-muted/30">
       <div className="section-container">
         {/* Section Header */}
         <motion.div
@@ -48,7 +48,7 @@ export function SkillsSection() {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <h2 className="section-title">Skills & Expertise</h2>
+          <h2 id="skills-heading" className="section-title">Skills & Expertise</h2>
           <p className="section-subtitle mx-auto">
             A T-shaped developer with deep expertise in specific areas and broad knowledge
             across the stack.
@@ -95,7 +95,7 @@ export function SkillsSection() {
             className="skill-radar-container"
           >
             <h3 className="text-lg font-semibold mb-4 capitalize">{activeCategory} Skills</h3>
-            <div className="h-80">
+            <div className="h-64 sm:h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart data={currentRadarData}>
                   <PolarGrid stroke="hsl(var(--border))" />

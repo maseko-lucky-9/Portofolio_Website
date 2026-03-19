@@ -1,6 +1,7 @@
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowDown, Github, Linkedin, Twitter, Download, Calendar } from "lucide-react";
+import { ArrowDown, Github, Linkedin, Twitter } from "lucide-react";
 import { personalData } from "@/data/personal";
+import { AuroraBackground } from "@/components/AuroraBackground";
 
 export function HeroSection() {
   const prefersReducedMotion = useReducedMotion();
@@ -15,36 +16,12 @@ export function HeroSection() {
   return (
     <section
       id="about"
+      aria-labelledby="hero-heading"
       className="relative min-h-screen flex items-center justify-center overflow-hidden"
       style={{ background: "var(--gradient-hero)" }}
     >
-      {/* Background decoration — disabled for users with prefers-reduced-motion */}
-      <div className="absolute inset-0 overflow-hidden">
-        <motion.div
-          animate={prefersReducedMotion ? {} : {
-            scale: [1, 1.2, 1],
-            rotate: [0, 180, 360],
-          }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            ease: "linear",
-          }}
-          className="absolute -top-1/2 -right-1/2 w-full h-full bg-gradient-to-br from-primary/10 to-secondary/10 rounded-full blur-3xl"
-        />
-        <motion.div
-          animate={prefersReducedMotion ? {} : {
-            scale: [1.2, 1, 1.2],
-            rotate: [360, 180, 0],
-          }}
-          transition={{
-            duration: 25,
-            repeat: Infinity,
-            ease: "linear",
-          }}
-          className="absolute -bottom-1/2 -left-1/2 w-full h-full bg-gradient-to-tr from-secondary/10 to-primary/10 rounded-full blur-3xl"
-        />
-      </div>
+      {/* Aurora WebGL background with CSS gradient fallback */}
+      <AuroraBackground />
 
       <div className="section-container relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -74,10 +51,11 @@ export function HeroSection() {
 
             {/* Name & Title */}
             <motion.h1
+              id="hero-heading"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4"
+              className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 tracking-tight"
             >
               {/* EDIT: Your name */}
               Hi, I'm{" "}
@@ -99,7 +77,7 @@ export function HeroSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="text-lg text-muted-foreground max-w-xl mb-8 mx-auto lg:mx-0"
+              className="text-lg text-muted-foreground max-w-xl mb-8 mx-auto lg:mx-0 leading-relaxed"
             >
               {/* EDIT: Your value proposition */}
               {personalData.tagline}
@@ -132,7 +110,7 @@ export function HeroSection() {
                 href={personalData.social.github}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-3 rounded-full bg-muted hover:bg-primary hover:text-primary-foreground transition-all duration-300"
+                className="p-3 rounded-full bg-muted hover:bg-primary hover:text-primary-foreground hover:scale-110 transition-all duration-300 focus-visible:ring-2 focus-visible:ring-primary/20"
                 aria-label="GitHub"
               >
                 <Github className="w-5 h-5" />
@@ -141,7 +119,7 @@ export function HeroSection() {
                 href={personalData.social.linkedin}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-3 rounded-full bg-muted hover:bg-primary hover:text-primary-foreground transition-all duration-300"
+                className="p-3 rounded-full bg-muted hover:bg-primary hover:text-primary-foreground hover:scale-110 transition-all duration-300 focus-visible:ring-2 focus-visible:ring-primary/20"
                 aria-label="LinkedIn"
               >
                 <Linkedin className="w-5 h-5" />
@@ -150,7 +128,7 @@ export function HeroSection() {
                 href={personalData.social.twitter}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-3 rounded-full bg-muted hover:bg-primary hover:text-primary-foreground transition-all duration-300"
+                className="p-3 rounded-full bg-muted hover:bg-primary hover:text-primary-foreground hover:scale-110 transition-all duration-300 focus-visible:ring-2 focus-visible:ring-primary/20"
                 aria-label="Twitter"
               >
                 <Twitter className="w-5 h-5" />
@@ -196,8 +174,7 @@ export function HeroSection() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.8 + index * 0.1 }}
-                  className="text-center p-4 rounded-xl bg-card border"
-                  style={{ boxShadow: "var(--shadow-md)" }}
+                  className="text-center p-4 rounded-xl glass-card"
                 >
                   <div className="text-2xl lg:text-3xl font-bold text-gradient-primary">
                     {metric.value}
@@ -218,7 +195,7 @@ export function HeroSection() {
         className="absolute bottom-8 left-1/2 -translate-x-1/2"
       >
         <motion.div
-          animate={{ y: [0, 10, 0] }}
+          animate={{ y: [0, 10, 0], opacity: [0.5, 1, 0.5] }}
           transition={{ duration: 1.5, repeat: Infinity }}
           className="flex flex-col items-center gap-2 text-muted-foreground"
         >

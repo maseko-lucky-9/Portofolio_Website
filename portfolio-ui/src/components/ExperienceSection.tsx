@@ -4,7 +4,7 @@ import { experiences } from "@/data/experience";
 
 export function ExperienceSection() {
   return (
-    <section id="experience" className="py-20">
+    <section id="experience" aria-labelledby="experience-heading" className="py-20">
       <div className="section-container">
         {/* Section Header */}
         <motion.div
@@ -13,7 +13,7 @@ export function ExperienceSection() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="section-title">Experience</h2>
+          <h2 id="experience-heading" className="section-title">Experience</h2>
           <p className="section-subtitle mx-auto">
             My professional journey building products and leading teams.
           </p>

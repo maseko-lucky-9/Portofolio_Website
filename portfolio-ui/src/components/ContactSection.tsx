@@ -94,7 +94,7 @@ export function ContactSection() {
   };
 
   return (
-    <section id="contact" className="py-20">
+    <section id="contact" aria-labelledby="contact-heading" className="py-20">
       <div className="section-container">
         {/* Section Header */}
         <motion.div
@@ -103,7 +103,7 @@ export function ContactSection() {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <h2 className="section-title">Get in Touch</h2>
+          <h2 id="contact-heading" className="section-title">Get in Touch</h2>
           <p className="section-subtitle mx-auto">
             Have a project in mind or want to discuss opportunities? I'd love to hear from
             you.
@@ -217,10 +217,7 @@ export function ContactSection() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
           >
-            <div
-              className="rounded-xl border bg-card p-6 md:p-8"
-              style={{ boxShadow: "var(--shadow-lg)" }}
-            >
+            <div className="glass-card p-6 md:p-8">
               <h3 className="text-xl font-bold mb-6">Send a Message</h3>
 
               {isSubmitted ? (

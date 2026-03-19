@@ -58,3 +58,4 @@ bun.lockb
 
 # Shared package build output
 shared/dist/
+.claude/settings.local.json

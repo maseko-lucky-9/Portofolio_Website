@@ -135,6 +135,10 @@
     scroll-behavior: smooth;
   }
 
+  *:focus-visible {
+    @apply outline-2 outline-offset-2 outline-primary;
+  }
+
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-family: 'Inter', system-ui, sans-serif;
@@ -176,6 +180,7 @@
   .card-project:hover {
     @apply -translate-y-2;
     box-shadow: var(--shadow-lg), var(--shadow-glow);
+    border-color: hsl(var(--primary) / 0.3);
   }
 
   /* Tech badge */
@@ -184,7 +189,7 @@
   }
 
   .tech-badge:hover {
-    @apply bg-primary text-primary-foreground;
+    @apply bg-primary text-primary-foreground scale-105;
   }
 
   /* Section styling */
@@ -193,7 +198,7 @@
   }
 
   .section-title {
-    @apply text-3xl md:text-4xl font-bold text-foreground mb-4;
+    @apply text-3xl md:text-4xl font-bold text-foreground mb-4 tracking-tight;
   }
 
   .section-subtitle {
@@ -229,9 +234,9 @@
 
   /* Skill radar */
   .skill-radar-container {
-    @apply relative rounded-xl border bg-card p-6;
+    @apply relative rounded-xl border bg-card/80 backdrop-blur-lg p-6;
     background: var(--gradient-card);
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }
 
   /* Navigation */
@@ -246,6 +251,7 @@
 
   .nav-link:hover::after {
     @apply w-full;
+    box-shadow: 0 2px 8px hsl(var(--primary) / 0.4);
   }
 
   .nav-link.active {
@@ -295,9 +301,31 @@
     to { opacity: 1; }
   }
 
-  /* Glass effect */
+  /* Glass effect — enhanced glassmorphism */
   .glass {
-    @apply backdrop-blur-lg bg-background/80 border border-border/50;
+    @apply backdrop-blur-xl bg-background/70 border border-white/10;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  .dark .glass {
+    @apply bg-background/60 border-white/5;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+
+  /* Glass card variant for metric cards, skill containers */
+  .glass-card {
+    @apply backdrop-blur-lg bg-card/80 border border-white/10 rounded-xl;
+    box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    transition: all 0.3s ease;
+  }
+
+  .glass-card:hover {
+    box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  .dark .glass-card {
+    @apply bg-card/60 border-white/5;
+    box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255, 255, 255, 0.03);
   }
 
   /* Scrollbar styling */
