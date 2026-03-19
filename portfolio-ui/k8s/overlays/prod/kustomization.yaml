@@ -13,8 +13,11 @@ bases:
 
 nameSuffix: -prod
 
-commonLabels:
-  environment: prod
+labels:
+- pairs:
+    environment: prod
+  includeSelectors: false
+  includeTemplates: true
 
 resources:
 - ingress.yaml

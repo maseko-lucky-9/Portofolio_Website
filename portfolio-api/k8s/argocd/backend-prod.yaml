@@ -52,4 +52,12 @@ spec:
     jsonPointers:
     - /spec/minReplicas
     - /spec/maxReplicas
+  - kind: Secret
+    name: prod-backend-secrets
+    jsonPointers:
+    - /data
+  - kind: NetworkPolicy
+    name: prod-backend-api
+    jsonPointers:
+    - /spec/egress
   

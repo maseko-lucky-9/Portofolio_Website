@@ -33,12 +33,7 @@ metadata:
     # WebSocket support
     nginx.ingress.kubernetes.io/websocket-services: "backend-api"
     
-    # Security headers
-    nginx.ingress.kubernetes.io/configuration-snippet: |
-      more_set_headers "X-Content-Type-Options: nosniff";
-      more_set_headers "X-Frame-Options: DENY";
-      more_set_headers "X-XSS-Protection: 1; mode=block";
-      more_set_headers "Referrer-Policy: strict-origin-when-cross-origin";
+    # Security headers are set globally via the nginx configmap custom-headers
 spec:
   ingressClassName: public
   tls:

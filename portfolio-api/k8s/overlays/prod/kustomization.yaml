@@ -10,9 +10,12 @@ namespace: prod
 
 namePrefix: prod-
 
-commonLabels:
-  environment: prod
-  app.kubernetes.io/instance: prod
+labels:
+- pairs:
+    environment: prod
+    app.kubernetes.io/instance: prod
+  includeSelectors: false
+  includeTemplates: true
 
 bases:
 - ../../base
