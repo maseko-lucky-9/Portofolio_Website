@@ -17,6 +17,9 @@ spec:
   selector:
     matchLabels:
       app: backend-api
+      app.kubernetes.io/name: backend-api
+      app.kubernetes.io/component: api
+      app.kubernetes.io/part-of: portfolio
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -26,6 +29,9 @@ spec:
     metadata:
       labels:
         app: backend-api
+        app.kubernetes.io/name: backend-api
+        app.kubernetes.io/component: api
+        app.kubernetes.io/part-of: portfolio
         component: api
         tier: backend
       annotations:
