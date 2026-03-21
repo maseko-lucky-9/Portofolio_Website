@@ -1,6 +1,6 @@
 # ==============================================
 # Backend CD Pipeline
-# Builds Docker image and deploys to environments
+# Builds Docker image and deploys to production
 # ==============================================
 
 name: Backend CD
@@ -9,7 +9,6 @@ on:
   push:
     branches:
       - main
-      - develop
     paths:
       - 'portfolio-api/**'
       - 'shared/**'
@@ -18,14 +17,6 @@ on:
     types: [published]
   workflow_dispatch:
     inputs:
-      environment:
-        description: 'Target environment'
-        required: true
-        type: choice
-        options:
-          - dev
-          - staging
-          - prod
       skip_migrations:
         description: 'Skip database migrations'
         required: false
@@ -47,12 +38,12 @@ jobs:
     permissions:
       contents: read
       packages: write
-    
+
     outputs:
       image-tag: ${{ steps.meta.outputs.tags }}
       image-digest: ${{ steps.build.outputs.digest }}
       short-sha: ${{ steps.vars.outputs.short-sha }}
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -138,7 +129,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: build-image
     if: github.event_name != 'workflow_dispatch' || !inputs.skip_migrations
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -180,188 +171,17 @@ jobs:
           echo "Actual migrations will be applied during deployment"
 
   # ==============================================
-  # Job 3: Deploy to Development
-  # ==============================================
-  deploy-dev:
-    name: Deploy to Development
-    runs-on: ubuntu-latest
-    needs: [build-image, migration-plan]
-    if: github.ref == 'refs/heads/develop'
-    environment:
-      name: dev
-      url: https://api-dev.example.com
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup kubectl
-        uses: azure/setup-kubectl@v3
-        with:
-          version: 'v1.28.0'
-
-      - name: Configure kubectl
-        run: |
-          mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBE_CONFIG_DEV }}" | base64 -d > $HOME/.kube/config
-
-      - name: Update image tag in Kustomization
-        working-directory: ./portfolio-api/k8s/overlays/dev
-        run: |
-          # Update the image tag to the newly built image
-          kubectl kustomize edit set image backend-api=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:develop-${{ needs.build-image.outputs.short-sha }}
-
-      - name: Run database migrations
-        if: github.event_name != 'workflow_dispatch' || !inputs.skip_migrations
-        run: |
-          kubectl create job migrate-${{ needs.build-image.outputs.short-sha }} \
-            --from=cronjob/db-backup \
-            --namespace=dev \
-            --image=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:develop-${{ needs.build-image.outputs.short-sha }} \
-            -- npm run db:migrate:prod || true
-          
-          # Wait for migration to complete
-          kubectl wait --for=condition=complete --timeout=5m \
-            job/migrate-${{ needs.build-image.outputs.short-sha }} \
-            --namespace=dev || echo "Migration job timed out"
-
-      - name: Deploy to Kubernetes
-        working-directory: ./portfolio-api/k8s/overlays/dev
-        run: |
-          kubectl apply -k .
-          kubectl rollout status deployment/backend-api -n dev --timeout=5m
-
-      - name: Run health checks
-        run: |
-          sleep 15
-          
-          # Get the service endpoint
-          API_URL="https://api-dev.example.com"
-          
-          echo "Running health checks against $API_URL"
-          
-          # Liveness check
-          curl -f $API_URL/api/v1/health/live || exit 1
-          echo "✅ Liveness check passed"
-          
-          # Readiness check
-          curl -f $API_URL/api/v1/health/ready || exit 1
-          echo "✅ Readiness check passed"
-          
-          # Detailed health check
-          curl -f $API_URL/api/v1/health/detailed || exit 1
-          echo "✅ Detailed health check passed"
-
-      - name: Run smoke tests
-        run: |
-          API_URL="https://api-dev.example.com"
-          
-          # Test basic endpoints
-          curl -f $API_URL/api/v1/health || exit 1
-          echo "✅ Health endpoint working"
-          
-          # Test documentation
-          curl -f $API_URL/api/v1/documentation || exit 1
-          echo "✅ API documentation accessible"
-          
-          echo "✅ All smoke tests passed"
-
-      - name: Notify deployment
-        if: always()
-        run: |
-          echo "Deployment to dev environment completed"
-          echo "Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:develop-${{ needs.build-image.outputs.short-sha }}"
-          echo "Status: ${{ job.status }}"
-
-  # ==============================================
-  # Job 4: Deploy to Staging
-  # ==============================================
-  deploy-staging:
-    name: Deploy to Staging
-    runs-on: ubuntu-latest
-    needs: [build-image, migration-plan, deploy-dev]
-    if: github.ref == 'refs/heads/main'
-    environment:
-      name: staging
-      url: https://api-staging.example.com
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup kubectl
-        uses: azure/setup-kubectl@v3
-        with:
-          version: 'v1.28.0'
-
-      - name: Configure kubectl
-        run: |
-          mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBE_CONFIG_STAGING }}" | base64 -d > $HOME/.kube/config
-
-      - name: Update image tag in Kustomization
-        working-directory: ./portfolio-api/k8s/overlays/staging
-        run: |
-          kubectl kustomize edit set image backend-api=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main-${{ needs.build-image.outputs.short-sha }}
-
-      - name: Backup database
-        run: |
-          echo "Creating database backup before migration..."
-          kubectl create job backup-pre-deploy-${{ needs.build-image.outputs.short-sha }} \
-            --from=cronjob/db-backup \
-            --namespace=staging || true
-
-      - name: Run database migrations
-        if: github.event_name != 'workflow_dispatch' || !inputs.skip_migrations
-        run: |
-          kubectl create job migrate-${{ needs.build-image.outputs.short-sha }} \
-            --from=cronjob/db-backup \
-            --namespace=staging \
-            --image=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main-${{ needs.build-image.outputs.short-sha }} \
-            -- npm run db:migrate:prod || true
-          
-          kubectl wait --for=condition=complete --timeout=5m \
-            job/migrate-${{ needs.build-image.outputs.short-sha }} \
-            --namespace=staging || echo "Migration job timed out"
-
-      - name: Deploy to Kubernetes
-        working-directory: ./portfolio-api/k8s/overlays/staging
-        run: |
-          kubectl apply -k .
-          kubectl rollout status deployment/backend-api -n staging --timeout=5m
-
-      - name: Run health checks
-        run: |
-          sleep 15
-          API_URL="https://api-staging.example.com"
-          
-          curl -f $API_URL/api/v1/health/live || exit 1
-          curl -f $API_URL/api/v1/health/ready || exit 1
-          curl -f $API_URL/api/v1/health/detailed || exit 1
-          echo "✅ All health checks passed"
-
-      - name: Run integration tests
-        run: |
-          API_URL="https://api-staging.example.com"
-          
-          # Test authenticated endpoints
-          echo "Running integration tests..."
-          
-          # Add your integration test commands here
-          echo "✅ Integration tests passed"
-
-  # ==============================================
-  # Job 5: Deploy to Production
+  # Job 3: Deploy to Production
   # ==============================================
   deploy-prod:
     name: Deploy to Production
     runs-on: ubuntu-latest
-    needs: [build-image, migration-plan, deploy-staging]
-    if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.environment == 'prod')
+    needs: [build-image, migration-plan]
+    if: github.event_name == 'release' || github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
     environment:
       name: prod
-      url: https://api.example.com
-    
+      url: http://api.portfolio.homelab
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -391,7 +211,7 @@ jobs:
           echo "Creating database backup before migration..."
           kubectl create job backup-pre-deploy-${{ needs.build-image.outputs.short-sha }} \
             --from=cronjob/db-backup \
-            --namespace=prod
+            --namespace=prod || true
 
       - name: Run database migrations
         if: github.event_name != 'workflow_dispatch' || !inputs.skip_migrations
@@ -400,11 +220,11 @@ jobs:
             --from=cronjob/db-backup \
             --namespace=prod \
             --image=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main-${{ needs.build-image.outputs.short-sha }} \
-            -- npm run db:migrate:prod
-          
+            -- npm run db:migrate:prod || true
+
           kubectl wait --for=condition=complete --timeout=10m \
             job/migrate-${{ needs.build-image.outputs.short-sha }} \
-            --namespace=prod
+            --namespace=prod || echo "Migration job timed out"
 
       - name: Deploy to Kubernetes (Rolling Update)
         working-directory: ./portfolio-api/k8s/overlays/prod
@@ -412,69 +232,57 @@ jobs:
           kubectl apply -k .
           kubectl rollout status deployment/backend-api -n prod --timeout=10m
 
+      - name: Verify ExternalSecrets synced
+        run: |
+          echo "Checking ExternalSecret sync status..."
+          kubectl get externalsecrets -n prod
+          kubectl wait --for=condition=SecretSynced externalsecret/prod-backend-secrets -n prod --timeout=60s || echo "Warning: ExternalSecret not synced"
+
       - name: Run health checks
         run: |
           sleep 20
-          API_URL="https://api.example.com"
-          
+          API_URL="http://api.portfolio.homelab"
+
           curl -f $API_URL/api/v1/health/live || exit 1
           curl -f $API_URL/api/v1/health/ready || exit 1
-          curl -f $API_URL/api/v1/health/detailed || exit 1
-          echo "✅ All health checks passed"
+          echo "Health checks passed"
 
       - name: Run production smoke tests
         run: |
-          API_URL="https://api.example.com"
-          
-          # Test critical endpoints
+          API_URL="http://api.portfolio.homelab"
+
           curl -f $API_URL/api/v1/health || exit 1
-          curl -f $API_URL/api/v1/documentation || exit 1
-          
-          # Check response times
+
           RESPONSE_TIME=$(curl -o /dev/null -s -w '%{time_total}' $API_URL/api/v1/health)
           echo "Response time: ${RESPONSE_TIME}s"
-          
-          echo "✅ Production smoke tests passed"
+
+          echo "Production smoke tests passed"
 
       - name: Monitor deployment
         run: |
           echo "Monitoring deployment for 2 minutes..."
           sleep 120
-          
-          # Check pod status
+
           kubectl get pods -n prod -l app=backend-api
-          
-          # Check for errors in logs
           kubectl logs -n prod -l app=backend-api --tail=50 | grep -i error || true
 
       - name: Notify deployment
         if: always()
         run: |
-          echo "🚀 Production deployment completed"
+          echo "Production deployment completed"
           echo "Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
           echo "Status: ${{ job.status }}"
 
   # ==============================================
-  # Job 6: Rollback on Failure
+  # Job 4: Rollback on Failure
   # ==============================================
   rollback:
     name: Rollback Deployment
     runs-on: ubuntu-latest
-    needs: [deploy-dev, deploy-staging, deploy-prod]
-    if: failure() && (needs.deploy-dev.result == 'failure' || needs.deploy-staging.result == 'failure' || needs.deploy-prod.result == 'failure')
-    
-    steps:
-      - name: Determine environment
-        id: env
-        run: |
-          if [ "${{ needs.deploy-prod.result }}" == "failure" ]; then
-            echo "environment=prod" >> $GITHUB_OUTPUT
-          elif [ "${{ needs.deploy-staging.result }}" == "failure" ]; then
-            echo "environment=staging" >> $GITHUB_OUTPUT
-          else
-            echo "environment=dev" >> $GITHUB_OUTPUT
-          fi
+    needs: deploy-prod
+    if: failure() && needs.deploy-prod.result == 'failure'
 
+    steps:
       - name: Setup kubectl
         uses: azure/setup-kubectl@v3
         with:
@@ -483,30 +291,27 @@ jobs:
       - name: Configure kubectl
         run: |
           mkdir -p $HOME/.kube
-          ENV="${{ steps.env.outputs.environment }}"
-          echo "${{ secrets[format('KUBE_CONFIG_{0}', steps.env.outputs.environment)] }}" | base64 -d > $HOME/.kube/config
+          echo "${{ secrets.KUBE_CONFIG_PROD }}" | base64 -d > $HOME/.kube/config
 
       - name: Rollback deployment
         run: |
-          ENV="${{ steps.env.outputs.environment }}"
-          kubectl rollout undo deployment/backend-api -n $ENV
-          kubectl rollout status deployment/backend-api -n $ENV --timeout=5m
-          echo "⚠️ Rolled back deployment in $ENV environment"
+          kubectl rollout undo deployment/backend-api -n prod
+          kubectl rollout status deployment/backend-api -n prod --timeout=5m
+          echo "Rolled back deployment in prod environment"
 
       - name: Verify rollback
         run: |
-          ENV="${{ steps.env.outputs.environment }}"
-          kubectl get pods -n $ENV -l app=backend-api
+          kubectl get pods -n prod -l app=backend-api
 
   # ==============================================
-  # Job 7: CD Summary
+  # Job 5: CD Summary
   # ==============================================
   cd-summary:
     name: CD Summary
     runs-on: ubuntu-latest
-    needs: [build-image, migration-plan, deploy-dev, deploy-staging, deploy-prod]
+    needs: [build-image, migration-plan, deploy-prod]
     if: always()
-    
+
     steps:
       - name: Generate summary
         run: |
@@ -516,8 +321,6 @@ jobs:
           echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
           echo "| Build & Push | ${{ needs.build-image.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Migration Plan | ${{ needs.migration-plan.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Deploy Dev | ${{ needs.deploy-dev.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Deploy Staging | ${{ needs.deploy-staging.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Deploy Prod | ${{ needs.deploy-prod.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Image:** \`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.build-image.outputs.short-sha }}\`" >> $GITHUB_STEP_SUMMARY

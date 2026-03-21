@@ -20,7 +20,8 @@ resources:
 - deployment.yaml
 - service.yaml
 - configmap.yaml
-- secret.yaml
+# secret.yaml removed — secrets managed by ExternalSecrets (Vault)
+# Template kept in repo as documentation reference
 - serviceaccount.yaml
 - hpa.yaml
 - pdb.yaml

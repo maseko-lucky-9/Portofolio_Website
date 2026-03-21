@@ -1,88 +1,4 @@
 # ==============================================
-# ArgoCD Application - Backend Database (Dev)
-# PostgreSQL and Redis for development
-# ==============================================
-
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: backend-database-dev
-  namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "5"
-spec:
-  project: default
-  
-  source:
-    repoURL: https://github.com/maseko-lucky-9/Portofolio_Website.git
-    targetRevision: develop
-    path: portfolio-api/k8s/base
-    directory:
-      recurse: true
-      include: '{database/*,redis/*}'
-  
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: dev
-  
-  syncPolicy:
-    automated:
-      prune: false
-      selfHeal: true
-      allowEmpty: false
-    syncOptions:
-    - CreateNamespace=true
-    retry:
-      limit: 3
-      backoff:
-        duration: 5s
-        factor: 2
-        maxDuration: 3m
-
----
-# ==============================================
-# ArgoCD Application - Backend Database (Staging)
-# PostgreSQL and Redis for staging
-# ==============================================
-
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: backend-database-staging
-  namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "15"
-spec:
-  project: default
-  
-  source:
-    repoURL: https://github.com/maseko-lucky-9/Portofolio_Website.git
-    targetRevision: main
-    path: portfolio-api/k8s/base
-    directory:
-      recurse: true
-      include: '{database/*,redis/*}'
-  
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: staging
-  
-  syncPolicy:
-    automated:
-      prune: false
-      selfHeal: true
-      allowEmpty: false
-    syncOptions:
-    - CreateNamespace=true
-    retry:
-      limit: 3
-      backoff:
-        duration: 5s
-        factor: 2
-        maxDuration: 3m
-
----
-# ==============================================
 # ArgoCD Application - Backend Database (Prod)
 # PostgreSQL and Redis for production
 # ==============================================
@@ -96,7 +12,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "25"
 spec:
   project: default
-  
+
   source:
     repoURL: https://github.com/maseko-lucky-9/Portofolio_Website.git
     targetRevision: main
@@ -104,11 +20,11 @@ spec:
     directory:
       recurse: true
       include: '{database/*,redis/*}'
-  
+
   destination:
     server: https://kubernetes.default.svc
     namespace: prod
-  
+
   syncPolicy:
     automated:
       prune: false

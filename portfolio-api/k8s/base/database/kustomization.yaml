@@ -15,5 +15,6 @@ resources:
 - statefulset.yaml
 - service.yaml
 - configmap.yaml
-- secret.yaml
+# secret.yaml removed — secrets managed by ExternalSecrets (Vault)
+- external-secret.yaml
 - backup-cronjob.yaml

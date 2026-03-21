@@ -1,0 +1,19 @@
+# ==============================================
+# Kustomization - Vault ESO Resources
+# ServiceAccount and SecretStore for External
+# Secrets Operator integration with HashiCorp Vault
+# ==============================================
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+labels:
+- pairs:
+    app.kubernetes.io/component: vault-integration
+    app.kubernetes.io/part-of: portfolio
+  includeSelectors: false
+  includeTemplates: true
+
+resources:
+- service-account.yaml
+- secret-store.yaml

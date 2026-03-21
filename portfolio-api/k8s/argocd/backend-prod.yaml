@@ -52,10 +52,7 @@ spec:
     jsonPointers:
     - /spec/minReplicas
     - /spec/maxReplicas
-  - kind: Secret
-    name: prod-backend-secrets
-    jsonPointers:
-    - /data
+  # Secret ignoreDifferences removed — ESO manages prod-backend-secrets
   - kind: NetworkPolicy
     name: prod-backend-api
     jsonPointers:
