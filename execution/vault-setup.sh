@@ -24,6 +24,8 @@ VAULT_POD="vault-0"
 VAULT_ADDR="https://127.0.0.1:8200"
 APP_NAMESPACE="prod"
 VAULT_SECRET_PATH="portfolio/live"
+# NOTE: The Vault KV engine is mounted at 'kv/', not 'secret/'
+# vault kv put kv/${VAULT_SECRET_PATH} ...
 POLICY_NAME="portfolio-readonly"
 K8S_AUTH_ROLE="portfolio-live"
 SERVICE_ACCOUNT="portfolio-external-secrets"
@@ -83,13 +85,13 @@ log_success "Authenticated to Vault"
 
 # ── Step 2: Generate and seed secrets ────────────────────
 echo ""
-log "Checking if secrets already exist at 'secret/${VAULT_SECRET_PATH}'..."
+log "Checking if secrets already exist at 'kv/${VAULT_SECRET_PATH}'..."
 
-EXISTING=$(vault_exec "kv get -format=json secret/${VAULT_SECRET_PATH}" 2>/dev/null || echo "")
+EXISTING=$(vault_exec "kv get -format=json kv/${VAULT_SECRET_PATH}" 2>/dev/null || echo "")
 
 SEED_SECRETS=false
 if [ -n "$EXISTING" ] && echo "$EXISTING" | grep -q '"data"'; then
-    log_warning "Secrets already exist at secret/${VAULT_SECRET_PATH}"
+    log_warning "Secrets already exist at kv/${VAULT_SECRET_PATH}"
     echo ""
     read -r -p "  Overwrite existing secrets? [y/N]: " OVERWRITE
     if [[ "$OVERWRITE" =~ ^[Yy]$ ]]; then
@@ -108,7 +110,7 @@ if [ "$SEED_SECRETS" = "true" ]; then
     REDIS_PASS=$(openssl rand -base64 32)
     JWT_SECRET=$(openssl rand -hex 32)
 
-    vault_exec "kv put secret/${VAULT_SECRET_PATH} \
+    vault_exec "kv put kv/${VAULT_SECRET_PATH} \
         database-url=\"postgresql://portfolio_user:${PG_PASS}@postgres:5432/portfolio\" \
         postgres-username=\"portfolio_user\" \
         postgres-password=\"${PG_PASS}\" \
@@ -119,7 +121,7 @@ if [ "$SEED_SECRETS" = "true" ]; then
         jwt-access-expiry=\"15m\" \
         jwt-refresh-expiry=\"7d\""
 
-    log_success "Secrets seeded at secret/${VAULT_SECRET_PATH}"
+    log_success "Secrets seeded at kv/${VAULT_SECRET_PATH}"
 fi
 
 # ── Step 3: Apply Vault policy ───────────────────────────
@@ -155,9 +157,9 @@ echo ""
 log "Verifying setup..."
 
 # Verify secrets are readable
-VERIFY=$(vault_exec "kv get -format=json secret/${VAULT_SECRET_PATH}" 2>/dev/null || echo "")
+VERIFY=$(vault_exec "kv get -format=json kv/${VAULT_SECRET_PATH}" 2>/dev/null || echo "")
 if [ -n "$VERIFY" ] && echo "$VERIFY" | grep -q "jwt-secret"; then
-    log_success "Secrets verified at secret/${VAULT_SECRET_PATH}"
+    log_success "Secrets verified at kv/${VAULT_SECRET_PATH}"
 else
     log_error "Failed to verify secrets"
     exit 1
@@ -186,7 +188,7 @@ echo -e "${GREEN}================================================${NC}"
 echo -e "${GREEN}  Vault setup complete!${NC}"
 echo -e "${GREEN}================================================${NC}"
 echo ""
-echo "Secrets path:    secret/${VAULT_SECRET_PATH}"
+echo "Secrets path:    kv/${VAULT_SECRET_PATH}"
 echo "Policy:          ${POLICY_NAME}"
 echo "K8s auth role:   ${K8S_AUTH_ROLE}"
 echo "Service account: ${SERVICE_ACCOUNT} (namespace: ${APP_NAMESPACE})"

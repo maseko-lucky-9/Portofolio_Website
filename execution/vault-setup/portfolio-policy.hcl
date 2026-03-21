@@ -4,12 +4,12 @@
 # ─────────────────────────────────────────────────────────
 
 # Read portfolio live secrets
-path "secret/data/portfolio/live" {
+path "kv/data/portfolio/live" {
   capabilities = ["read"]
 }
 
 # List secret metadata (for ESO discovery and debugging)
-path "secret/metadata/portfolio/*" {
+path "kv/metadata/portfolio/*" {
   capabilities = ["read", "list"]
 }
 
