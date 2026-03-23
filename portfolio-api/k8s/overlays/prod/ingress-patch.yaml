@@ -14,6 +14,7 @@ metadata:
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
 spec:
   # No TLS — homelab is Tailscale-only (zero public exposure)
+  tls: []
   rules:
   - host: api.portfolio.homelab
     http:
