@@ -3,6 +3,8 @@ import { ArrowDown, Github, Linkedin, Twitter } from "lucide-react";
 import { personalData } from "@/data/personal";
 import { AuroraBackground } from "@/components/AuroraBackground";
 
+const springTransition = { type: "spring", stiffness: 260, damping: 24 };
+
 export function HeroSection() {
   const prefersReducedMotion = useReducedMotion();
   const scrollToProjects = () => {
@@ -20,75 +22,83 @@ export function HeroSection() {
       className="relative min-h-screen flex items-center justify-center overflow-hidden"
       style={{ background: "var(--gradient-hero)" }}
     >
-      {/* Aurora WebGL background with CSS gradient fallback */}
+      {/* Aurora WebGL background */}
       <AuroraBackground />
 
+      {/* Ambient glow blobs — light mode */}
+      {!prefersReducedMotion && (
+        <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden>
+          <div className="absolute top-1/4 -left-1/4 w-[600px] h-[600px] rounded-full opacity-[0.07] dark:opacity-[0.05] bg-primary blur-[120px] animate-blob" />
+          <div className="absolute bottom-1/4 -right-1/4 w-[500px] h-[500px] rounded-full opacity-[0.06] dark:opacity-[0.04] bg-secondary blur-[100px] animate-blob-delay" />
+        </div>
+      )}
+
       <div className="section-container relative z-10">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Left Column - Text Content */}
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          {/* Left — Text content */}
           <motion.div
-            initial={{ opacity: 0, x: -50 }}
+            initial={{ opacity: 0, x: -40 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
+            transition={{ duration: 0.7, ...springTransition }}
             className="text-center lg:text-left"
           >
-            {/* Status Badge */}
+            {/* Availability badge */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/10 border border-secondary/20 mb-6"
+              transition={{ delay: 0.15, ...springTransition }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-7"
+              style={{
+                background: "hsl(var(--secondary) / 0.08)",
+                border: "1px solid hsl(var(--secondary) / 0.25)",
+              }}
             >
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-secondary"></span>
+              <span className="relative flex h-2 w-2 flex-shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-70" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-secondary" />
               </span>
-              <span className="text-sm font-medium text-secondary">
-                {/* EDIT: Your availability status */}
-                {personalData.availability}
-              </span>
+              <span className="text-sm font-medium text-secondary">{personalData.availability}</span>
             </motion.div>
 
-            {/* Name & Title */}
+            {/* Name */}
             <motion.h1
               id="hero-heading"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 tracking-tight"
+              transition={{ delay: 0.25, ...springTransition }}
+              className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-bold mb-4"
+              style={{ letterSpacing: "-0.03em", lineHeight: "1.05" }}
             >
-              {/* EDIT: Your name */}
               Hi, I'm{" "}
               <span className="text-gradient-primary">{personalData.name}</span>
             </motion.h1>
 
+            {/* Title */}
             <motion.h2
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
+              transition={{ delay: 0.35, ...springTransition }}
               className="text-xl sm:text-2xl lg:text-3xl font-semibold text-muted-foreground mb-6"
             >
-              {/* EDIT: Your title */}
               {personalData.title}
             </motion.h2>
 
             {/* Tagline */}
             <motion.p
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              className="text-lg text-muted-foreground max-w-xl mb-8 mx-auto lg:mx-0 leading-relaxed"
+              transition={{ delay: 0.45, ...springTransition }}
+              className="text-base md:text-lg text-muted-foreground max-w-xl mb-9 mx-auto lg:mx-0 leading-relaxed"
             >
-              {/* EDIT: Your value proposition */}
               {personalData.tagline}
             </motion.p>
 
-            {/* CTA Buttons */}
+            {/* CTAs */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 }}
-              className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8"
+              transition={{ delay: 0.55, ...springTransition }}
+              className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start mb-9"
             >
               <button onClick={scrollToProjects} className="btn-hero-primary">
                 View My Work
@@ -99,87 +109,118 @@ export function HeroSection() {
               </button>
             </motion.div>
 
-            {/* Social Links */}
+            {/* Social links */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.7 }}
-              className="flex gap-4 justify-center lg:justify-start"
+              transition={{ delay: 0.65, ...springTransition }}
+              className="flex gap-3 justify-center lg:justify-start"
             >
-              <a
-                href={personalData.social.github}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-3 rounded-full bg-muted hover:bg-primary hover:text-primary-foreground hover:scale-110 transition-all duration-300 focus-visible:ring-2 focus-visible:ring-primary/20"
-                aria-label="GitHub"
-              >
-                <Github className="w-5 h-5" />
-              </a>
-              <a
-                href={personalData.social.linkedin}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-3 rounded-full bg-muted hover:bg-primary hover:text-primary-foreground hover:scale-110 transition-all duration-300 focus-visible:ring-2 focus-visible:ring-primary/20"
-                aria-label="LinkedIn"
-              >
-                <Linkedin className="w-5 h-5" />
-              </a>
-              <a
-                href={personalData.social.twitter}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-3 rounded-full bg-muted hover:bg-primary hover:text-primary-foreground hover:scale-110 transition-all duration-300 focus-visible:ring-2 focus-visible:ring-primary/20"
-                aria-label="Twitter"
-              >
-                <Twitter className="w-5 h-5" />
-              </a>
+              {[
+                { href: personalData.social.github, Icon: Github, label: "GitHub" },
+                { href: personalData.social.linkedin, Icon: Linkedin, label: "LinkedIn" },
+                { href: personalData.social.twitter, Icon: Twitter, label: "Twitter" },
+              ].map(({ href, Icon, label }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={label}
+                  className="p-3 rounded-xl transition-all focus-visible:ring-2 focus-visible:ring-primary/30"
+                  style={{
+                    background: "hsl(var(--muted))",
+                    border: "1px solid hsl(var(--border))",
+                    transition: "all 250ms cubic-bezier(0.16, 1, 0.3, 1)",
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = "hsl(var(--primary))";
+                    (e.currentTarget as HTMLElement).style.color = "hsl(var(--primary-foreground))";
+                    (e.currentTarget as HTMLElement).style.transform = "translateY(-3px) scale(1.08)";
+                    (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-glow)";
+                    (e.currentTarget as HTMLElement).style.borderColor = "transparent";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = "hsl(var(--muted))";
+                    (e.currentTarget as HTMLElement).style.color = "";
+                    (e.currentTarget as HTMLElement).style.transform = "";
+                    (e.currentTarget as HTMLElement).style.boxShadow = "";
+                    (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--border))";
+                  }}
+                >
+                  <Icon className="w-5 h-5" />
+                </a>
+              ))}
             </motion.div>
           </motion.div>
 
-          {/* Right Column - Metrics */}
+          {/* Right — Profile + metrics */}
           <motion.div
-            initial={{ opacity: 0, x: 50 }}
+            initial={{ opacity: 0, x: 40 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-            className="relative"
+            transition={{ duration: 0.7, delay: 0.2, ...springTransition }}
+            className="relative flex flex-col items-center"
           >
-            {/* Profile Image */}
+            {/* Profile image with premium gradient ring */}
             <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
+              initial={{ scale: 0.85, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.5, duration: 0.5 }}
-              className="relative mx-auto w-64 h-64 lg:w-80 lg:h-80 mb-8"
+              transition={{ delay: 0.4, duration: 0.6, ...springTransition }}
+              className="relative mx-auto w-56 h-56 sm:w-72 sm:h-72 lg:w-80 lg:h-80 mb-9"
             >
-              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary to-secondary animate-pulse-glow" />
+              {/* Outer glow ring */}
+              <div
+                className="absolute inset-0 rounded-full animate-pulse-glow"
+                style={{ background: "var(--gradient-primary)", padding: "3px" }}
+              >
+                <div className="w-full h-full rounded-full bg-background" />
+              </div>
+              {/* Inner gradient ring */}
+              <div
+                className="absolute inset-[3px] rounded-full"
+                style={{ background: "var(--gradient-primary)" }}
+              />
+              {/* Photo */}
               <img
                 src={personalData.profileImage}
-                alt={personalData.name}
+                alt={`${personalData.name} profile photo`}
                 fetchPriority="high"
                 width={320}
                 height={320}
-                className="relative z-10 w-full h-full rounded-full object-cover border-4 border-background"
+                className="absolute inset-[5px] z-10 w-[calc(100%-10px)] h-[calc(100%-10px)] rounded-full object-cover"
               />
+              {/* Floating badge */}
+              <motion.div
+                animate={{ y: [0, -6, 0] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute -bottom-3 -right-3 z-20 px-3 py-1.5 rounded-xl text-xs font-semibold text-primary-foreground"
+                style={{
+                  background: "var(--gradient-primary)",
+                  boxShadow: "var(--shadow-glow)",
+                }}
+              >
+                Open to work
+              </motion.div>
             </motion.div>
 
-            {/* Metrics Grid */}
-            <div className="grid grid-cols-3 gap-4">
-              {/* EDIT: Your metrics */}
+            {/* Metrics grid */}
+            <div className="grid grid-cols-3 gap-4 w-full max-w-sm">
               {[
                 { label: "Projects", value: personalData.metrics.projects },
-                { label: "Experience", value: personalData.metrics.experience },
+                { label: "Years Exp.", value: personalData.metrics.experience },
                 { label: "Clients", value: personalData.metrics.clients },
               ].map((metric, index) => (
                 <motion.div
                   key={metric.label}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.8 + index * 0.1 }}
-                  className="text-center p-4 rounded-xl glass-card"
+                  transition={{ delay: 0.7 + index * 0.1, ...springTransition }}
+                  className="text-center p-4 rounded-2xl glass-card"
                 >
-                  <div className="text-2xl lg:text-3xl font-bold text-gradient-primary">
+                  <div className="text-2xl lg:text-3xl font-bold text-gradient-primary mb-0.5">
                     {metric.value}
                   </div>
-                  <div className="text-sm text-muted-foreground">{metric.label}</div>
+                  <div className="text-xs text-muted-foreground font-medium">{metric.label}</div>
                 </motion.div>
               ))}
             </div>
@@ -187,21 +228,25 @@ export function HeroSection() {
         </div>
       </div>
 
-      {/* Scroll Indicator */}
+      {/* Scroll indicator */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 1.2 }}
+        transition={{ delay: 1.4 }}
         className="absolute bottom-8 left-1/2 -translate-x-1/2"
       >
-        <motion.div
-          animate={{ y: [0, 10, 0], opacity: [0.5, 1, 0.5] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
-          className="flex flex-col items-center gap-2 text-muted-foreground"
+        <motion.button
+          onClick={scrollToProjects}
+          animate={{ y: [0, 8, 0], opacity: [0.4, 0.9, 0.4] }}
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          className="flex flex-col items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+          aria-label="Scroll to projects"
         >
-          <span className="text-xs uppercase tracking-widest">Scroll</span>
-          <ArrowDown className="w-4 h-4" />
-        </motion.div>
+          <span className="text-[10px] uppercase tracking-[0.2em] font-medium">Scroll</span>
+          <div className="w-5 h-8 rounded-full border border-current flex items-start justify-center pt-1.5">
+            <div className="w-1 h-2 rounded-full bg-current" />
+          </div>
+        </motion.button>
       </motion.div>
     </section>
   );

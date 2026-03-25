@@ -20,6 +20,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 
+const springTransition = { type: "spring", stiffness: 260, damping: 26 };
+
 // Form validation schema
 const contactSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(100),
@@ -94,15 +96,19 @@ export function ContactSection() {
   };
 
   return (
-    <section id="contact" aria-labelledby="contact-heading" className="py-20">
+    <section id="contact" aria-labelledby="contact-heading" className="py-20 section-mesh">
       <div className="section-container">
         {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
+          transition={springTransition}
           className="text-center mb-12"
         >
+          <span className="inline-block text-xs font-semibold uppercase tracking-[0.18em] text-primary mb-3">
+            Contact
+          </span>
           <h2 id="contact-heading" className="section-title">Get in Touch</h2>
           <p className="section-subtitle mx-auto">
             Have a project in mind or want to discuss opportunities? I'd love to hear from
@@ -116,13 +122,17 @@ export function ContactSection() {
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
+            transition={springTransition}
           >
             <h3 className="text-xl font-bold mb-6">Let's Connect</h3>
 
             <div className="space-y-6">
               {/* Email */}
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                <div
+                  className="w-12 h-12 rounded-xl flex items-center justify-center transition-all"
+                  style={{ background: "hsl(var(--primary) / 0.08)", border: "1px solid hsl(var(--primary) / 0.15)" }}
+                >
                   <Mail className="w-5 h-5 text-primary" />
                 </div>
                 <div>
@@ -138,7 +148,10 @@ export function ContactSection() {
 
               {/* Location */}
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center">
+                <div
+                  className="w-12 h-12 rounded-xl flex items-center justify-center transition-all"
+                  style={{ background: "hsl(var(--secondary) / 0.08)", border: "1px solid hsl(var(--secondary) / 0.15)" }}
+                >
                   <MapPin className="w-5 h-5 text-secondary" />
                 </div>
                 <div>
@@ -155,7 +168,26 @@ export function ContactSection() {
                     href={personalData.social.github}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-10 h-10 rounded-lg bg-card border flex items-center justify-center hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all"
+                    className="w-10 h-10 rounded-xl flex items-center justify-center transition-all"
+                    style={{
+                      background: "hsl(var(--muted))",
+                      border: "1px solid hsl(var(--border))",
+                      transition: "all 250ms cubic-bezier(0.16, 1, 0.3, 1)",
+                    }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLElement).style.background = "hsl(var(--primary))";
+                      (e.currentTarget as HTMLElement).style.color = "hsl(var(--primary-foreground))";
+                      (e.currentTarget as HTMLElement).style.transform = "translateY(-3px) scale(1.08)";
+                      (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-glow)";
+                      (e.currentTarget as HTMLElement).style.borderColor = "transparent";
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLElement).style.background = "hsl(var(--muted))";
+                      (e.currentTarget as HTMLElement).style.color = "";
+                      (e.currentTarget as HTMLElement).style.transform = "";
+                      (e.currentTarget as HTMLElement).style.boxShadow = "";
+                      (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--border))";
+                    }}
                     aria-label="GitHub"
                   >
                     <Github className="w-5 h-5" />
@@ -164,7 +196,26 @@ export function ContactSection() {
                     href={personalData.social.linkedin}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-10 h-10 rounded-lg bg-card border flex items-center justify-center hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all"
+                    className="w-10 h-10 rounded-xl flex items-center justify-center transition-all"
+                    style={{
+                      background: "hsl(var(--muted))",
+                      border: "1px solid hsl(var(--border))",
+                      transition: "all 250ms cubic-bezier(0.16, 1, 0.3, 1)",
+                    }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLElement).style.background = "hsl(var(--primary))";
+                      (e.currentTarget as HTMLElement).style.color = "hsl(var(--primary-foreground))";
+                      (e.currentTarget as HTMLElement).style.transform = "translateY(-3px) scale(1.08)";
+                      (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-glow)";
+                      (e.currentTarget as HTMLElement).style.borderColor = "transparent";
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLElement).style.background = "hsl(var(--muted))";
+                      (e.currentTarget as HTMLElement).style.color = "";
+                      (e.currentTarget as HTMLElement).style.transform = "";
+                      (e.currentTarget as HTMLElement).style.boxShadow = "";
+                      (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--border))";
+                    }}
                     aria-label="LinkedIn"
                   >
                     <Linkedin className="w-5 h-5" />
@@ -173,7 +224,26 @@ export function ContactSection() {
                     href={personalData.social.twitter}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-10 h-10 rounded-lg bg-card border flex items-center justify-center hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all"
+                    className="w-10 h-10 rounded-xl flex items-center justify-center transition-all"
+                    style={{
+                      background: "hsl(var(--muted))",
+                      border: "1px solid hsl(var(--border))",
+                      transition: "all 250ms cubic-bezier(0.16, 1, 0.3, 1)",
+                    }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLElement).style.background = "hsl(var(--primary))";
+                      (e.currentTarget as HTMLElement).style.color = "hsl(var(--primary-foreground))";
+                      (e.currentTarget as HTMLElement).style.transform = "translateY(-3px) scale(1.08)";
+                      (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-glow)";
+                      (e.currentTarget as HTMLElement).style.borderColor = "transparent";
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLElement).style.background = "hsl(var(--muted))";
+                      (e.currentTarget as HTMLElement).style.color = "";
+                      (e.currentTarget as HTMLElement).style.transform = "";
+                      (e.currentTarget as HTMLElement).style.boxShadow = "";
+                      (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--border))";
+                    }}
                     aria-label="Twitter"
                   >
                     <Twitter className="w-5 h-5" />
@@ -186,7 +256,23 @@ export function ContactSection() {
                 <a
                   href={personalData.resumeUrl}
                   download
-                  className="flex items-center gap-3 w-full p-4 rounded-xl border bg-card hover:bg-accent transition-colors"
+                  className="flex items-center gap-3 w-full p-4 rounded-xl border transition-all"
+                  style={{
+                    background: "var(--gradient-card)",
+                    boxShadow: "var(--shadow-sm)",
+                    borderColor: "hsl(var(--border))",
+                    transition: "all 300ms cubic-bezier(0.16, 1, 0.3, 1)",
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)";
+                    (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-lg), var(--shadow-glow)";
+                    (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--primary) / 0.3)";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.transform = "";
+                    (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-sm)";
+                    (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--border))";
+                  }}
                 >
                   <Download className="w-5 h-5 text-primary" />
                   <div>
@@ -199,7 +285,23 @@ export function ContactSection() {
                   href={personalData.social.calendar}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 w-full p-4 rounded-xl border bg-card hover:bg-accent transition-colors"
+                  className="flex items-center gap-3 w-full p-4 rounded-xl border transition-all"
+                  style={{
+                    background: "var(--gradient-card)",
+                    boxShadow: "var(--shadow-sm)",
+                    borderColor: "hsl(var(--border))",
+                    transition: "all 300ms cubic-bezier(0.16, 1, 0.3, 1)",
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)";
+                    (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-lg), var(--shadow-glow)";
+                    (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--primary) / 0.3)";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.transform = "";
+                    (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-sm)";
+                    (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--border))";
+                  }}
                 >
                   <Calendar className="w-5 h-5 text-secondary" />
                   <div>
@@ -216,6 +318,7 @@ export function ContactSection() {
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
+            transition={springTransition}
           >
             <div className="glass-card p-6 md:p-8">
               <h3 className="text-xl font-bold mb-6">Send a Message</h3>
@@ -224,9 +327,13 @@ export function ContactSection() {
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
+                  transition={springTransition}
                   className="flex flex-col items-center justify-center py-12 text-center"
                 >
-                  <div className="w-16 h-16 rounded-full bg-secondary/10 flex items-center justify-center mb-4">
+                  <div
+                    className="w-16 h-16 rounded-full flex items-center justify-center mb-4"
+                    style={{ background: "hsl(var(--secondary) / 0.08)", border: "1px solid hsl(var(--secondary) / 0.2)" }}
+                  >
                     <CheckCircle className="w-8 h-8 text-secondary" />
                   </div>
                   <h4 className="text-lg font-bold mb-2">Message Sent!</h4>

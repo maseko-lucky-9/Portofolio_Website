@@ -9,6 +9,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ArticleStatus } from "@/types/api";
 import type { Article } from "@/types/api";
 
+const springTransition = { type: "spring", stiffness: 260, damping: 26 };
+
 // Map API Article to the shape the blog template expects
 interface DisplayBlogPost {
   id: string;
@@ -38,7 +40,7 @@ function mapArticle(article: Article): DisplayBlogPost {
 
 function BlogCardSkeleton() {
   return (
-    <div className="rounded-xl border bg-card overflow-hidden">
+    <div className="rounded-2xl border bg-card overflow-hidden">
       <Skeleton className="h-48 w-full rounded-none" />
       <div className="p-6 space-y-3">
         <Skeleton className="h-3 w-24" />
@@ -79,15 +81,19 @@ export function BlogSection() {
   }, [apiResponse]);
 
   return (
-    <section id="blog" aria-labelledby="blog-heading" className="py-20 bg-muted/30">
+    <section id="blog" aria-labelledby="blog-heading" className="py-20 bg-muted/30 section-mesh">
       <div className="section-container">
         {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
+          transition={springTransition}
           className="text-center mb-12"
         >
+          <span className="inline-block text-xs font-semibold uppercase tracking-[0.18em] text-primary mb-3">
+            Blog
+          </span>
           <h2 id="blog-heading" className="section-title">Latest Articles</h2>
           <p className="section-subtitle mx-auto">
             Thoughts, tutorials, and insights on software development.
@@ -99,6 +105,7 @@ export function BlogSection() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
+            transition={springTransition}
             className="flex items-center justify-center gap-2 mb-8 p-3 rounded-lg bg-destructive/10 text-destructive text-sm"
           >
             <AlertCircle className="w-4 h-4" />
@@ -130,15 +137,30 @@ export function BlogSection() {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
+                transition={{ ...springTransition, delay: index * 0.1 }}
                 className="group"
               >
                 <a
                   href={post.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block rounded-xl border bg-card overflow-hidden transition-all hover:-translate-y-2"
-                  style={{ boxShadow: "var(--shadow-md)" }}
+                  className="block rounded-2xl border overflow-hidden transition-all"
+                  style={{
+                    background: "var(--gradient-card)",
+                    boxShadow: "var(--shadow-md)",
+                    borderColor: "hsl(var(--border))",
+                    transition: "all 300ms cubic-bezier(0.16, 1, 0.3, 1)",
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.transform = "translateY(-4px)";
+                    (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-xl), var(--shadow-glow)";
+                    (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--primary) / 0.35)";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.transform = "";
+                    (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-md)";
+                    (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--border))";
+                  }}
                 >
                   {/* Image */}
                   <div className="relative h-48 overflow-hidden">
@@ -153,7 +175,10 @@ export function BlogSection() {
                     <div className="absolute inset-0 bg-gradient-to-t from-background/60 to-transparent" />
 
                     {/* Read time badge */}
-                    <div className="absolute top-4 right-4 flex items-center gap-1 px-2.5 py-1 rounded-full bg-background/90 text-xs font-medium">
+                    <div
+                      className="absolute top-4 right-4 flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium backdrop-blur-md"
+                      style={{ background: "hsl(var(--background) / 0.85)", border: "1px solid hsl(var(--border) / 0.5)" }}
+                    >
                       <Clock className="w-3 h-3" />
                       {post.readTime}
                     </div>
@@ -178,10 +203,7 @@ export function BlogSection() {
                     {post.tags.length > 0 && (
                       <div className="flex flex-wrap gap-1.5 mb-4">
                         {post.tags.map((tag) => (
-                          <span
-                            key={tag}
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-accent text-accent-foreground text-xs"
-                          >
+                          <span key={tag} className="tech-badge text-xs">
                             <Tag className="w-2.5 h-2.5" />
                             {tag}
                           </span>
@@ -206,9 +228,15 @@ export function BlogSection() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
+            transition={springTransition}
             className="flex flex-col items-center justify-center py-16 text-center"
           >
-            <FileText className="w-12 h-12 text-muted-foreground/50 mb-4" />
+            <div
+              className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
+              style={{ background: "hsl(var(--primary) / 0.1)" }}
+            >
+              <FileText className="w-8 h-8 text-primary/60" />
+            </div>
             <p className="text-lg font-medium text-muted-foreground mb-2">No articles yet</p>
             <p className="text-sm text-muted-foreground">
               Check back soon for articles and tutorials.
@@ -222,12 +250,10 @@ export function BlogSection() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
+            transition={springTransition}
             className="text-center mt-12"
           >
-            <a
-              href="/blog"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg border hover:bg-accent transition-colors font-medium"
-            >
+            <a href="/blog" className="btn-hero-secondary">
               View All Articles
               <ArrowRight className="w-4 h-4" />
             </a>

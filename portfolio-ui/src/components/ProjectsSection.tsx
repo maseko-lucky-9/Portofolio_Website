@@ -70,6 +70,8 @@ function ProjectCardSkeleton() {
   );
 }
 
+const springTransition = { type: "spring", stiffness: 260, damping: 26 };
+
 export function ProjectsSection() {
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
 
@@ -100,7 +102,7 @@ export function ProjectsSection() {
     : projects;
 
   return (
-    <section id="projects" aria-labelledby="projects-heading" className="py-20">
+    <section id="projects" aria-labelledby="projects-heading" className="py-20 section-mesh">
       <div className="section-container">
         {/* Section Header */}
         <motion.div
@@ -109,6 +111,9 @@ export function ProjectsSection() {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
+          <span className="inline-block text-xs font-semibold uppercase tracking-[0.18em] text-primary mb-3">
+            Portfolio
+          </span>
           <h2 id="projects-heading" className="section-title">Featured Projects</h2>
           <p className="section-subtitle mx-auto">
             A selection of projects showcasing my expertise in building scalable,
@@ -185,7 +190,7 @@ export function ProjectsSection() {
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
-                  transition={{ duration: 0.3, delay: index * 0.1 }}
+                  transition={{ delay: index * 0.08, ...springTransition }}
                   className="card-project group"
                 >
                   {/* Thumbnail */}
@@ -308,7 +313,10 @@ export function ProjectsSection() {
             animate={{ opacity: 1 }}
             className="flex flex-col items-center justify-center py-16 text-center"
           >
-            <FolderOpen className="w-12 h-12 text-muted-foreground/50 mb-4" />
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
+              style={{ background: "hsl(var(--primary) / 0.08)", border: "1px solid hsl(var(--primary) / 0.15)" }}>
+              <FolderOpen className="w-8 h-8 text-primary" />
+            </div>
             <p className="text-lg font-medium text-muted-foreground mb-2">
               {activeFilter ? "No projects found" : "No projects yet"}
             </p>

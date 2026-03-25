@@ -5,6 +5,8 @@ import { Play, Copy, Check, Terminal } from "lucide-react";
 import { codeExamples } from "@/data/codeExamples";
 import { useTheme } from "@/contexts/ThemeContext";
 
+const springTransition = { type: "spring", stiffness: 260, damping: 26 };
+
 export function CodeDemoSection() {
   const [activeExample, setActiveExample] = useState(codeExamples[0]);
   const [output, setOutput] = useState<string>(activeExample.output || "");
@@ -30,15 +32,19 @@ export function CodeDemoSection() {
   }, [activeExample]);
 
   return (
-    <section id="code-demo" className="py-20 bg-muted/30">
+    <section id="code-demo" className="py-20 bg-muted/30 section-mesh">
       <div className="section-container">
         {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
+          transition={springTransition}
           className="text-center mb-12"
         >
+          <span className="inline-block text-xs font-semibold uppercase tracking-[0.18em] text-primary mb-3">
+            Live Code
+          </span>
           <h2 className="section-title">Interactive Code Demo</h2>
           <p className="section-subtitle mx-auto">
             Explore my coding style with live examples. Try running the code to see it in
@@ -51,7 +57,7 @@ export function CodeDemoSection() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ delay: 0.1 }}
+          transition={{ ...springTransition, delay: 0.1 }}
           className="flex flex-wrap justify-center gap-2 mb-8"
         >
           {codeExamples.map((example) => (
@@ -61,11 +67,17 @@ export function CodeDemoSection() {
                 setActiveExample(example);
                 setOutput(example.output || "");
               }}
-              className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
+              className={`inline-flex items-center rounded-xl px-4 py-2 font-medium text-sm transition-all ${
                 activeExample.id === example.id
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-card border hover:border-primary"
+                  ? "text-primary-foreground"
+                  : "border hover:border-primary"
               }`}
+              style={{
+                ...(activeExample.id === example.id
+                  ? { background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }
+                  : { background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }),
+                transition: "all 200ms cubic-bezier(0.16, 1, 0.3, 1)",
+              }}
             >
               {example.title}
             </button>
@@ -77,17 +89,20 @@ export function CodeDemoSection() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ delay: 0.2 }}
+          transition={{ ...springTransition, delay: 0.2 }}
           className="max-w-4xl mx-auto"
         >
           <div className="code-editor-wrapper">
             {/* Editor Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b bg-muted/50">
+            <div
+              className="flex items-center justify-between px-4 py-3 border-b"
+              style={{ background: "hsl(var(--muted) / 0.5)" }}
+            >
               <div className="flex items-center gap-3">
                 <div className="flex gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-destructive/80" />
-                  <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
-                  <div className="w-3 h-3 rounded-full bg-secondary/80" />
+                  <div className="w-3 h-3 rounded-full bg-red-500/80" />
+                  <div className="w-3 h-3 rounded-full bg-amber-500/80" />
+                  <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
                 </div>
                 <span className="text-sm font-medium">{activeExample.title}</span>
                 <span className="text-xs text-muted-foreground">
@@ -97,7 +112,8 @@ export function CodeDemoSection() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleCopy}
-                  className="p-2 rounded-lg hover:bg-accent transition-colors"
+                  className="p-2 rounded-lg transition-all hover:bg-accent"
+                  style={{ transition: "all 200ms cubic-bezier(0.16, 1, 0.3, 1)" }}
                   aria-label="Copy code"
                 >
                   {copied ? (
@@ -109,7 +125,11 @@ export function CodeDemoSection() {
                 <button
                   onClick={handleRunCode}
                   disabled={isRunning}
-                  className="flex items-center gap-2 px-4 py-1.5 rounded-lg bg-secondary text-secondary-foreground text-sm font-medium hover:opacity-90 disabled:opacity-50 transition-all"
+                  className="flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-medium text-secondary-foreground hover:opacity-90 disabled:opacity-50 transition-all"
+                  style={{
+                    background: "var(--gradient-secondary)",
+                    boxShadow: "var(--shadow-glow-secondary)",
+                  }}
                 >
                   <Play className="w-4 h-4" />
                   {isRunning ? "Running..." : "Run Code"}
@@ -138,8 +158,11 @@ export function CodeDemoSection() {
             </div>
 
             {/* Output */}
-            <div className="border-t bg-muted/30">
-              <div className="flex items-center gap-2 px-4 py-2 border-b bg-muted/50">
+            <div className="border-t" style={{ background: "hsl(var(--muted) / 0.3)" }}>
+              <div
+                className="flex items-center gap-2 px-4 py-2 border-b"
+                style={{ background: "hsl(var(--muted) / 0.5)" }}
+              >
                 <Terminal className="w-4 h-4 text-muted-foreground" />
                 <span className="text-sm font-medium">Output</span>
               </div>
