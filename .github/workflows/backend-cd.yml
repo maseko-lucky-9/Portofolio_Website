@@ -2,6 +2,12 @@
 # Backend CD Pipeline
 # Builds Docker image and deploys to production
 # ==============================================
+# Required secrets:
+#   GITHUB_TOKEN              - automatic (packages:write needed)
+#   TAILSCALE_OAUTH_CLIENT_ID - Tailscale OAuth client ID (tag:ci must exist)
+#   TAILSCALE_OAUTH_SECRET    - Tailscale OAuth secret
+#   HOMELAB_SSH_KEY           - SSH private key for svc-ai-agent@homelab
+# ==============================================
 
 name: Backend CD
 
@@ -26,11 +32,13 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}/backend
+  HOMELAB_HOST: 100.114.75.127
+  HOMELAB_USER: svc-ai-agent
   NODE_VERSION: '20.x'
 
 jobs:
   # ==============================================
-  # Job 1: Build and Push Docker Image
+  # Job 1: Build and Push Docker Image to GHCR
   # ==============================================
   build-image:
     name: Build & Push Docker Image
@@ -38,6 +46,7 @@ jobs:
     permissions:
       contents: read
       packages: write
+      security-events: write
 
     outputs:
       image-tag: ${{ steps.meta.outputs.tags }}
@@ -150,6 +159,7 @@ jobs:
         run: npm run db:generate
 
       - name: Check for pending migrations
+        id: check-migrations
         working-directory: ./portfolio-api
         run: |
           echo "Checking for pending migrations..."
@@ -161,20 +171,23 @@ jobs:
             echo "No migrations directory found"
             echo "migration-count=0" >> $GITHUB_OUTPUT
           fi
-        id: check-migrations
 
       - name: Generate migration SQL (dry run)
         if: steps.check-migrations.outputs.migration-count > 0
         working-directory: ./portfolio-api
         run: |
-          echo "This is a dry-run to preview migration changes"
+          echo "Dry-run: ${{ steps.check-migrations.outputs.migration-count }} pending migration(s)"
           echo "Actual migrations will be applied during deployment"
 
   # ==============================================
-  # Job 3: Deploy to Production
+  # Job 3: Mirror Image & Deploy to Homelab
+  #
+  # Connects via Tailscale → SSHes into homelab →
+  # pulls from GHCR → pushes to localhost:32000 →
+  # rolling restart → in-cluster smoke test → cleanup
   # ==============================================
-  deploy-prod:
-    name: Deploy to Production
+  deploy-homelab:
+    name: Deploy to Homelab
     runs-on: ubuntu-latest
     needs: [build-image, migration-plan]
     if: github.event_name == 'release' || github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
@@ -183,95 +196,54 @@ jobs:
       url: http://api.portfolio.homelab
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup kubectl
-        uses: azure/setup-kubectl@v3
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@v2
         with:
-          version: 'v1.28.0'
+          oauth-client-id: ${{ secrets.TAILSCALE_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TAILSCALE_OAUTH_SECRET }}
+          tags: tag:ci
 
-      - name: Configure kubectl
-        run: |
-          mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBE_CONFIG_PROD }}" | base64 -d > $HOME/.kube/config
+      - name: Mirror image & deploy
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+        with:
+          host: ${{ env.HOMELAB_HOST }}
+          username: ${{ env.HOMELAB_USER }}
+          key: ${{ secrets.HOMELAB_SSH_KEY }}
+          envs: GHCR_TOKEN,GITHUB_ACTOR
+          command_timeout: 10m
+          script: |
+            set -euo pipefail
 
-      - name: Update image tag in Kustomization
-        working-directory: ./portfolio-api/k8s/overlays/prod
-        run: |
-          if [ "${{ github.event_name }}" == "release" ]; then
-            TAG="${{ github.event.release.tag_name }}"
-          else
-            TAG="main-${{ needs.build-image.outputs.short-sha }}"
-          fi
-          kubectl kustomize edit set image backend-api=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$TAG
+            # 1. Mirror ghcr.io → homelab local registry
+            echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+            docker pull ghcr.io/maseko-lucky-9/portofolio_website/backend:latest
+            docker tag  ghcr.io/maseko-lucky-9/portofolio_website/backend:latest \
+                        localhost:32000/portfolio-backend:latest
+            docker push localhost:32000/portfolio-backend:latest
+            docker logout ghcr.io
 
-      - name: Backup database
-        run: |
-          echo "Creating database backup before migration..."
-          kubectl create job backup-pre-deploy-${{ needs.build-image.outputs.short-sha }} \
-            --from=cronjob/db-backup \
-            --namespace=prod || true
+            # 2. Verify ExternalSecrets are synced before rolling out
+            kubectl wait --for=condition=SecretSynced externalsecret/prod-backend-secrets \
+              -n prod --timeout=60s || echo "Warning: ExternalSecret not synced — proceeding"
 
-      - name: Run database migrations
-        if: github.event_name != 'workflow_dispatch' || !inputs.skip_migrations
-        run: |
-          kubectl create job migrate-${{ needs.build-image.outputs.short-sha }} \
-            --from=cronjob/db-backup \
-            --namespace=prod \
-            --image=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main-${{ needs.build-image.outputs.short-sha }} \
-            -- npm run db:migrate:prod || true
+            # 3. Rolling update — force pods to pull new image
+            kubectl rollout restart deployment/prod-backend-api -n prod
+            kubectl rollout status deployment/prod-backend-api -n prod --timeout=5m
 
-          kubectl wait --for=condition=complete --timeout=10m \
-            job/migrate-${{ needs.build-image.outputs.short-sha }} \
-            --namespace=prod || echo "Migration job timed out"
+            # 4. Smoke test in-cluster (no external DNS dependency)
+            sleep 5
+            kubectl exec -n prod deployment/prod-backend-api -- \
+              curl -sf http://localhost:3000/api/v1/health/live
+            kubectl exec -n prod deployment/prod-backend-api -- \
+              curl -sf http://localhost:3000/api/v1/health/ready
+            echo "Smoke tests passed"
 
-      - name: Deploy to Kubernetes (Rolling Update)
-        working-directory: ./portfolio-api/k8s/overlays/prod
-        run: |
-          kubectl apply -k .
-          kubectl rollout status deployment/backend-api -n prod --timeout=10m
-
-      - name: Verify ExternalSecrets synced
-        run: |
-          echo "Checking ExternalSecret sync status..."
-          kubectl get externalsecrets -n prod
-          kubectl wait --for=condition=SecretSynced externalsecret/prod-backend-secrets -n prod --timeout=60s || echo "Warning: ExternalSecret not synced"
-
-      - name: Run health checks
-        run: |
-          sleep 20
-          API_URL="http://api.portfolio.homelab"
-
-          curl -f $API_URL/api/v1/health/live || exit 1
-          curl -f $API_URL/api/v1/health/ready || exit 1
-          echo "Health checks passed"
-
-      - name: Run production smoke tests
-        run: |
-          API_URL="http://api.portfolio.homelab"
-
-          curl -f $API_URL/api/v1/health || exit 1
-
-          RESPONSE_TIME=$(curl -o /dev/null -s -w '%{time_total}' $API_URL/api/v1/health)
-          echo "Response time: ${RESPONSE_TIME}s"
-
-          echo "Production smoke tests passed"
-
-      - name: Monitor deployment
-        run: |
-          echo "Monitoring deployment for 2 minutes..."
-          sleep 120
-
-          kubectl get pods -n prod -l app=backend-api
-          kubectl logs -n prod -l app=backend-api --tail=50 | grep -i error || true
-
-      - name: Notify deployment
-        if: always()
-        run: |
-          echo "Production deployment completed"
-          echo "Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
-          echo "Status: ${{ job.status }}"
+            # 5. Cleanup (hard rule — no dangling images)
+            docker image rm ghcr.io/maseko-lucky-9/portofolio_website/backend:latest 2>/dev/null || true
+            docker image prune -f
 
   # ==============================================
   # Job 4: Rollback on Failure
@@ -279,29 +251,30 @@ jobs:
   rollback:
     name: Rollback Deployment
     runs-on: ubuntu-latest
-    needs: deploy-prod
-    if: failure() && needs.deploy-prod.result == 'failure'
+    needs: deploy-homelab
+    if: failure() && needs.deploy-homelab.result == 'failure'
 
     steps:
-      - name: Setup kubectl
-        uses: azure/setup-kubectl@v3
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@v2
         with:
-          version: 'v1.28.0'
-
-      - name: Configure kubectl
-        run: |
-          mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBE_CONFIG_PROD }}" | base64 -d > $HOME/.kube/config
+          oauth-client-id: ${{ secrets.TAILSCALE_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TAILSCALE_OAUTH_SECRET }}
+          tags: tag:ci
 
       - name: Rollback deployment
-        run: |
-          kubectl rollout undo deployment/backend-api -n prod
-          kubectl rollout status deployment/backend-api -n prod --timeout=5m
-          echo "Rolled back deployment in prod environment"
-
-      - name: Verify rollback
-        run: |
-          kubectl get pods -n prod -l app=backend-api
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ env.HOMELAB_HOST }}
+          username: ${{ env.HOMELAB_USER }}
+          key: ${{ secrets.HOMELAB_SSH_KEY }}
+          command_timeout: 5m
+          script: |
+            set -euo pipefail
+            kubectl rollout undo deployment/prod-backend-api -n prod
+            kubectl rollout status deployment/prod-backend-api -n prod --timeout=5m
+            kubectl get pods -n prod -l app=backend-api
+            echo "Rollback completed"
 
   # ==============================================
   # Job 5: CD Summary
@@ -309,7 +282,7 @@ jobs:
   cd-summary:
     name: CD Summary
     runs-on: ubuntu-latest
-    needs: [build-image, migration-plan, deploy-prod]
+    needs: [build-image, migration-plan, deploy-homelab]
     if: always()
 
     steps:
@@ -321,6 +294,6 @@ jobs:
           echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
           echo "| Build & Push | ${{ needs.build-image.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Migration Plan | ${{ needs.migration-plan.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Deploy Prod | ${{ needs.deploy-prod.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Deploy Homelab | ${{ needs.deploy-homelab.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Image:** \`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.build-image.outputs.short-sha }}\`" >> $GITHUB_STEP_SUMMARY
