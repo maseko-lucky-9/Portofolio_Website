@@ -12,9 +12,8 @@ metadata:
     component: api
     tier: backend
   annotations:
-    # SSL/TLS
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
-    
+    # SSL/TLS — configured per overlay (prod uses Tailscale-only, no cert-manager)
+
     # Rate limiting
     nginx.ingress.kubernetes.io/limit-rps: "100"
     nginx.ingress.kubernetes.io/limit-connections: "50"
