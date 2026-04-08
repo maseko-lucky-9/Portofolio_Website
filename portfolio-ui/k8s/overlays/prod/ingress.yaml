@@ -8,11 +8,15 @@ metadata:
   name: frontend
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
     nginx.ingress.kubernetes.io/rate-limit: "100"
 spec:
   ingressClassName: public
-  # No TLS — homelab is Tailscale-only (zero public exposure)
+  tls:
+    - secretName: homelab-tls
+      hosts:
+        - portfolio.homelab
   rules:
   - host: portfolio.homelab
     http:
