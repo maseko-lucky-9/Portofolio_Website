@@ -11,6 +11,7 @@ metadata:
     # Rate limiting for production
     nginx.ingress.kubernetes.io/limit-rps: "50"
     nginx.ingress.kubernetes.io/limit-connections: "25"
+    cert-manager.io/cluster-issuer: homelab-ca
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
 spec:
