@@ -31,12 +31,12 @@ export const personalData = {
     clients: "10+",
   },
 
-  // EDIT: Social links — twitter & calendar must be non-empty https URLs (per personal.test.ts)
+  // EDIT: Social links — github + linkedin required; twitter + calendar optional (empty until set up)
   social: {
     github: "https://github.com/maseko-lucky-9",
     linkedin: "https://www.linkedin.com/in/thulani-maseko-819587127/",
-    twitter: "https://twitter.com/yourusername",
-    calendar: "https://cal.com/yourusername",
+    twitter: "",
+    calendar: "",
   },
 
   // EDIT: Resume file path

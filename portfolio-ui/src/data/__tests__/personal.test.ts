@@ -18,18 +18,17 @@ describe("personalData validation", () => {
     expect(personalData.name.trim().length).toBeGreaterThan(0);
   });
 
-  it("all social URLs are defined", () => {
+  it("required social URLs (github, linkedin) are non-empty", () => {
     expect(personalData.social.github).toBeDefined();
     expect(personalData.social.github.length).toBeGreaterThan(0);
 
     expect(personalData.social.linkedin).toBeDefined();
     expect(personalData.social.linkedin.length).toBeGreaterThan(0);
+  });
 
-    expect(personalData.social.twitter).toBeDefined();
-    expect(personalData.social.twitter.length).toBeGreaterThan(0);
-
-    expect(personalData.social.calendar).toBeDefined();
-    expect(personalData.social.calendar.length).toBeGreaterThan(0);
+  it("optional social URLs (twitter, calendar) are defined as strings (may be empty)", () => {
+    expect(typeof personalData.social.twitter).toBe("string");
+    expect(typeof personalData.social.calendar).toBe("string");
   });
 
   it("GitHub URL starts with https://", () => {

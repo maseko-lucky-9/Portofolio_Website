@@ -1,0 +1,26 @@
+# Cloudflare Workers Static Assets deploy for the portfolio SPA.
+# Per global CLAUDE.md: must use [assets] directive (NOT pages_build_output_dir).
+# Build artifact: portfolio-ui/dist/ (Vite output).
+#
+# Deploy:    npx wrangler deploy
+# Local dev: npx wrangler dev
+# Preview:   npx wrangler versions deploy
+
+name = "prudentia-digital-portfolio"
+compatibility_date = "2025-04-26"
+workers_dev = true
+
+[assets]
+directory = "./dist"
+# Vite SPA needs all unmatched routes to fall through to index.html
+not_found_handling = "single-page-application"
+
+# Custom domain wiring (uncomment + replace once DNS is ready):
+# routes = [
+#   { pattern = "prudentiadigital.co.za", custom_domain = true },
+#   { pattern = "www.prudentiadigital.co.za", custom_domain = true },
+# ]
+
+# Observability is on by default in 2025+ wrangler.
+[observability]
+enabled = true

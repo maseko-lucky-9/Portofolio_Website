@@ -10,10 +10,10 @@ test.describe("Hero Section", () => {
     await expect(page.locator("#about").getByText("Thulani")).toBeVisible();
 
     // Title should be visible
-    await expect(page.locator("#about").getByText("Full-Stack Software Developer")).toBeVisible();
+    await expect(page.locator("#about").getByText(/Senior Backend.*DevOps.*Kubernetes Engineer/)).toBeVisible();
 
     // Availability badge
-    await expect(page.getByText("Open to opportunities")).toBeVisible();
+    await expect(page.getByText(/Available for K8s.*microservices/)).toBeVisible();
   });
 
   test("CTA buttons are present", async ({ page }) => {
@@ -23,7 +23,7 @@ test.describe("Hero Section", () => {
 
   test("metric cards display values", async ({ page }) => {
     await expect(page.getByText("20+")).toBeVisible();
-    await expect(page.getByText("7 Years")).toBeVisible();
+    await expect(page.getByText("8+ Years", { exact: true })).toBeVisible();
     await expect(page.getByText("10+")).toBeVisible();
   });
 

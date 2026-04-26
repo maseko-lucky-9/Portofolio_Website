@@ -33,6 +33,6 @@ test.describe("Contact Section", () => {
 
   test("contact info is displayed", async ({ page }) => {
     await expect(page.getByText("ltmaseko7@gmail.com")).toBeVisible();
-    await expect(page.getByText("Johannesburg, ZA")).toBeVisible();
+    await expect(page.getByText(/Gauteng.*South Africa/)).toBeVisible();
   });
 });
