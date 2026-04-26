@@ -8,51 +8,53 @@
 export const personalData = {
   // EDIT: Your name
   name: "Thulani Maseko",
-  
+
   // EDIT: Your role/title
-  title: "Full-Stack Software Developer",
-  
-  // EDIT: Your value proposition tagline
-  tagline: "I modernize legacy systems into cloud-native platforms. 7+ years turning complex requirements into scalable, maintainable solutions across fintech and enterprise.",
-  
+  title: "Senior Backend & DevOps / Kubernetes Engineer",
+
+  // EDIT: Your value proposition tagline (must be < 200 chars per personal.test.ts)
+  tagline: "8+ years building production Kubernetes platforms and .NET microservices for South African banking. AWS · Terraform · ArgoCD · Helm. Microsoft Certified: Azure Developer Associate.",
+
   // EDIT: Your email
   email: "ltmaseko7@gmail.com",
-  
+
   // EDIT: Your location
-  location: "Johannesburg, ZA",
-  
+  location: "Gauteng, South Africa (GMT+2)",
+
   // EDIT: Your availability status
-  availability: "Open to opportunities",
-  
+  availability: "Available for K8s, IaC, and .NET microservices contracts",
+
   // EDIT: Key metrics to display
   metrics: {
     projects: "20+",
-    experience: "7 Years",
+    experience: "8+ Years",
     clients: "10+",
   },
-  
-  // EDIT: Social links
+
+  // EDIT: Social links — twitter & calendar must be non-empty https URLs (per personal.test.ts)
   social: {
     github: "https://github.com/maseko-lucky-9",
-    linkedin: "https://www.linkedin.com/in/thulani-maseko-819587127",
+    linkedin: "https://www.linkedin.com/in/thulani-maseko-819587127/",
     twitter: "https://twitter.com/yourusername",
     calendar: "https://cal.com/yourusername",
   },
-  
+
   // EDIT: Resume file path
   resumeUrl: "/resume.pdf",
-  
-  // EDIT: Profile image — replace with your headshot URL or drop file at public/images/profile.jpg
-  profileImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face",
+
+  // EDIT: Profile image — local headshot at public/images/profile.jpg
+  profileImage: "/images/profile.jpg",
 };
 
 export const seoData = {
   // EDIT: SEO title
-  title: "Thulani Maseko | Full-Stack Software Developer",
-  
+  title: "Thulani Maseko — Senior Kubernetes & DevOps Engineer | Prudentia Digital",
+
   // EDIT: Meta description
-  description: "Professional software developer portfolio showcasing full-stack web development expertise in React, TypeScript, Node.js, and cloud technologies.",
-  
+  description:
+    "Senior Backend & DevOps / Kubernetes Engineer in South Africa. 8+ years building production banking systems with .NET, AWS EKS, Terraform, ArgoCD, Kafka. Microsoft Certified Azure Developer Associate.",
+
   // EDIT: Keywords
-  keywords: "software developer, full-stack, react, typescript, node.js, portfolio",
+  keywords:
+    "kubernetes engineer, devops engineer south africa, aws eks consultant, terraform freelancer, .net microservices, hire kubernetes consultant, prudentia digital, thulani maseko",
 };

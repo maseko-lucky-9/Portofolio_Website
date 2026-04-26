@@ -59,3 +59,4 @@ bun.lockb
 # Shared package build output
 shared/dist/
 .claude/settings.local.json
+node_modules/.package-lock.json

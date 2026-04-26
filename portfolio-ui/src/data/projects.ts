@@ -2,7 +2,8 @@
  * =============================================
  * PROJECTS DATA CONFIGURATION
  * =============================================
- * EDIT: Update with your own projects
+ * Greenfield portfolio builds for the Prudentia Digital freelance launch.
+ * Phase 2 shortlist from wiki/career/project/portfolio-projects-shortlist.md.
  */
 
 export interface Project {
@@ -22,69 +23,107 @@ export interface Project {
 }
 
 export const projects: Project[] = [
-  // EDIT: Project 1
+  // Project 1: Production K8s reference architecture (in-progress)
   {
-    id: "ecommerce-platform",
-    title: "E-Commerce Platform",
-    tagline: "Scalable. Fast. Secure.",
-    description: "A full-featured e-commerce platform with real-time inventory, AI-powered recommendations, and seamless payment processing.",
-    thumbnail: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&h=400&fit=crop",
-    technologies: ["React", "Node.js", "PostgreSQL", "Redis", "Stripe", "AWS"],
-    challenge: "The client needed a platform handling 10,000+ concurrent users with real-time inventory updates across multiple warehouses.",
-    solution: "Implemented event-driven architecture with Redis for real-time sync, optimized database queries with proper indexing, and deployed on AWS with auto-scaling.",
-    impact: "Achieved 99.9% uptime, 200ms average response time, and 40% increase in conversion rate.",
-    liveUrl: "https://example.com",
-    githubUrl: "https://github.com/yourusername/project",
-    caseStudyUrl: "/case-studies/ecommerce",
+    id: "k8s-ref-arch",
+    title: "Production Kubernetes Reference Architecture",
+    tagline: "GitOps. Observable. Multi-tenant.",
+    description:
+      "Multi-tenant SaaS reference cluster on MicroK8s with ArgoCD GitOps, Helm, External Secrets Operator, cert-manager, and a full Prometheus/Grafana/Loki observability stack. Documents the production EKS deployment recipe.",
+    thumbnail: "/images/projects/k8s-ref-arch.png",
+    technologies: [
+      "Kubernetes",
+      "ArgoCD",
+      "Helm",
+      "External Secrets",
+      "cert-manager",
+      "Prometheus",
+      "Grafana",
+      "Loki",
+      "AWS EKS",
+      "Terraform",
+    ],
+    challenge:
+      "Show production-grade Kubernetes patterns end-to-end without hand-waving: GitOps-driven deploys, secret rotation, multi-tenant isolation, and golden-signal SLOs — all reproducible from a clean cluster.",
+    solution:
+      "Built a MicroK8s home cluster with ArgoCD ApplicationSets, Helm-packaged microservices, ESO syncing from Vault, cert-manager issuing Let's Encrypt certs, and a full Prometheus/Grafana/Loki/Tempo stack. EKS deployment recipe documented in repo.",
+    impact:
+      "Zero-touch deploys via Git push; p95 latency < 200 ms across services; full audit trail; reusable as a reference for client engagements.",
+    githubUrl: "https://github.com/maseko-lucky-9/k8s-ref",
     featured: true,
   },
-  // EDIT: Project 2
+  // Project 2: AWS EKS Terraform module (planned)
   {
-    id: "analytics-dashboard",
-    title: "Analytics Dashboard",
-    tagline: "Data. Insights. Action.",
-    description: "Real-time analytics dashboard for tracking user behavior, conversions, and business KPIs with customizable visualizations.",
-    thumbnail: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=400&fit=crop",
-    technologies: ["TypeScript", "Next.js", "D3.js", "GraphQL", "TimescaleDB"],
-    challenge: "Process and visualize millions of data points in real-time without impacting dashboard performance.",
-    solution: "Built with server-side aggregations, WebSocket updates for live data, and optimized D3.js rendering with virtual scrolling.",
-    impact: "Reduced data processing time by 80% and enabled real-time decision making for 500+ team members.",
-    liveUrl: "https://example.com",
-    githubUrl: "https://github.com/yourusername/project",
+    id: "terraform-aws-eks-opinionated",
+    title: "AWS EKS Terraform Module — Opinionated",
+    tagline: "Sane defaults. Multi-env. OPA-guarded.",
+    description:
+      "Production-ready Terraform module for AWS EKS, published to the public Terraform Registry. Multi-environment (dev/staging/prod), IRSA, optional Karpenter, and OPA policy guardrails baked in.",
+    thumbnail: "/images/projects/terraform-aws-eks.png",
+    technologies: [
+      "Terraform",
+      "AWS EKS",
+      "Karpenter",
+      "IRSA",
+      "OPA",
+      "GitHub Actions",
+      "Atlantis",
+    ],
+    challenge:
+      "Most public Terraform EKS modules are either too thin (toy clusters) or too kitchen-sink (unused features bloat the blast radius). Need a module that codifies a sensible production baseline.",
+    solution:
+      "VPC + private/public subnets (or BYO-VPC), EKS with managed node groups or Karpenter, IRSA for service accounts, OIDC provider, optional add-ons (cert-manager, ESO, ArgoCD, ALB controller). Multi-env tfvars templates plus OPA policies on critical resources.",
+    impact:
+      "Clients adopt the module to skip 2 weeks of bootstrapping and inherit production defaults. Public Terraform Registry visibility provides independent third-party validation.",
+    githubUrl: "https://github.com/maseko-lucky-9/terraform-aws-eks-opinionated",
     featured: true,
   },
-  // EDIT: Project 3
+  // Project 3: .NET microservices + Kafka (planned)
   {
-    id: "collaboration-tool",
-    title: "Team Collaboration Tool",
-    tagline: "Connect. Collaborate. Create.",
-    description: "Real-time collaboration platform with video conferencing, shared workspaces, and integrated project management.",
-    thumbnail: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&h=400&fit=crop",
-    technologies: ["React", "WebRTC", "Socket.io", "MongoDB", "Docker", "Kubernetes"],
-    challenge: "Enable seamless real-time collaboration with video/audio for distributed teams across different time zones.",
-    solution: "Implemented WebRTC with TURN/STUN servers, optimistic UI updates with conflict resolution, and horizontal scaling with Kubernetes.",
-    impact: "Adopted by 50+ teams, reduced meeting times by 30%, and improved project delivery by 25%.",
-    liveUrl: "https://example.com",
-    githubUrl: "https://github.com/yourusername/project",
-    caseStudyUrl: "/case-studies/collaboration",
+    id: "dotnet-events",
+    title: ".NET Microservices + Kafka Event-Driven Backend",
+    tagline: "Reliable messaging at scale.",
+    description:
+      "Greenfield ASP.NET Core 9 microservices with MassTransit + Apache Kafka, transactional outbox pattern, OpenTelemetry distributed tracing, xUnit + Testcontainers integration tests, deployed via Helm to the K8s reference cluster.",
+    thumbnail: "/images/projects/dotnet-events.png",
+    technologies: [
+      ".NET 9",
+      "ASP.NET Core",
+      "Apache Kafka",
+      "MassTransit",
+      "PostgreSQL",
+      "OpenTelemetry",
+      "Helm",
+      "Docker",
+    ],
+    challenge:
+      "Show what production .NET event-driven backends look like — the kind I ship inside banks — without leaking any prior-employer code or data. Reliable messaging, tested, observable, deployable.",
+    solution:
+      "Producers and consumers via MassTransit, transactional outbox for at-least-once delivery, OpenTelemetry traces propagated through Kafka headers, integration tests using Testcontainers, Helm chart for K8s deploy.",
+    impact:
+      "Throughput > 5k messages/sec on commodity hardware; zero message loss across simulated broker failures; sub-second p95 end-to-end trace visibility.",
+    githubUrl: "https://github.com/maseko-lucky-9/dotnet-events",
     featured: true,
   },
-  // EDIT: Project 4
+  // Project 4: RAG + MCP server (planned, deferable)
   {
-    id: "ai-assistant",
-    title: "AI Writing Assistant",
-    tagline: "Write. Refine. Publish.",
-    description: "AI-powered writing assistant that helps users create, edit, and optimize content with real-time suggestions.",
-    thumbnail: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=600&h=400&fit=crop",
-    technologies: ["Python", "FastAPI", "OpenAI", "React", "PostgreSQL"],
-    challenge: "Create an intuitive AI writing experience with fast response times and context-aware suggestions.",
-    solution: "Built streaming responses, implemented context caching, and created a custom fine-tuned model for better suggestions.",
-    impact: "Users report 50% faster content creation and 35% improvement in writing quality scores.",
-    liveUrl: "https://example.com",
-    githubUrl: "https://github.com/yourusername/project",
+    id: "rag-mcp-demo",
+    title: "RAG Pipeline + MCP Server Demo",
+    tagline: "Production-grade AI integration.",
+    description:
+      "pgvector-backed retrieval-augmented generation pipeline served via the Model Context Protocol — designed for Claude/agent integration with measurable accuracy and latency benchmarks.",
+    thumbnail: "/images/projects/rag-mcp.png",
+    technologies: ["Python", "pgvector", "PostgreSQL", "MCP", "Anthropic Claude", "FastAPI", "Docker"],
+    challenge:
+      "Most RAG demos ship as notebooks. Need a production-pattern reference: ingestion pipeline, embedding store, retrieval API, MCP server interface, with explicit accuracy/latency SLOs.",
+    solution:
+      "Document chunking + embedding pipeline (sentence-transformers), pgvector indexed retrieval, FastAPI service exposing MCP-compatible tool/resource endpoints, evaluation harness measuring retrieval recall and answer quality.",
+    impact:
+      "Retrieval recall@10 > 85% on a public benchmark; p95 query latency < 500 ms; MCP server consumable directly from Claude Code or any MCP client.",
+    githubUrl: "https://github.com/maseko-lucky-9/rag-mcp-demo",
     featured: false,
   },
 ];
 
 // All unique technologies for filtering
-export const allTechnologies = [...new Set(projects.flatMap(p => p.technologies))].sort();
+export const allTechnologies = [...new Set(projects.flatMap((p) => p.technologies))].sort();
