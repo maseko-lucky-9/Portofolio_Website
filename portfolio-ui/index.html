@@ -3,21 +3,128 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Thulani Maseko | Software Developer Portfolio</title>
-    <meta name="description" content="Professional software developer portfolio showcasing full-stack web development expertise in React, TypeScript, Node.js, and cloud technologies." />
+    <title>Thulani Maseko | Software Developer &amp; DevOps Engineer</title>
+    <meta name="description" content="Thulani Maseko — senior software developer and DevOps engineer based in Gauteng, South Africa. Specialising in Kubernetes operations, Terraform IaC, and .NET backend engineering." />
     <meta name="author" content="Thulani Maseko" />
-    <meta name="keywords" content="software developer, full-stack, react, typescript, node.js, portfolio" />
-    
-    <!-- Open Graph -->
-    <meta property="og:title" content="Thulani Maseko | Software Developer Portfolio" />
-    <meta property="og:description" content="Professional software developer portfolio showcasing full-stack web development expertise." />
-    <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <meta name="keywords" content="software developer, DevOps, Kubernetes, Terraform, .NET, ASP.NET Core, Azure, South Africa, freelance, Prudentia Digital" />
+    <link rel="canonical" href="https://prudentiadigital.co.za/" />
 
+    <!-- Open Graph ─────────────────────────────────────────────────────── -->
+    <meta property="og:site_name" content="Prudentia Digital" />
+    <meta property="og:title" content="Thulani Maseko | Software Developer &amp; DevOps Engineer" />
+    <meta property="og:description" content="Senior developer specialising in Kubernetes operations, Terraform IaC, and .NET backend engineering. Available for freelance engagements." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://prudentiadigital.co.za/" />
+    <meta property="og:locale" content="en_ZA" />
+    <!-- OG image: create a 1200×630 social card at /images/og-card.png and
+         replace this URL. Until then the generic brand image is used. -->
+    <meta property="og:image" content="https://prudentiadigital.co.za/images/og-card.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Thulani Maseko — Software Developer &amp; DevOps Engineer" />
+
+    <!-- Twitter / X card ────────────────────────────────────────────────── -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@yourusername" />
-    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
-    
+    <meta name="twitter:title" content="Thulani Maseko | Software Developer &amp; DevOps Engineer" />
+    <meta name="twitter:description" content="Senior developer specialising in Kubernetes, Terraform, and .NET. Available for freelance engagements." />
+    <meta name="twitter:image" content="https://prudentiadigital.co.za/images/og-card.png" />
+
+    <!-- schema.org structured data ─────────────────────────────────────── -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Person",
+          "@id": "https://prudentiadigital.co.za/#thulani",
+          "name": "Thulani Maseko",
+          "jobTitle": "Software Developer & DevOps Engineer",
+          "description": "Senior software developer and DevOps engineer based in Gauteng, South Africa, specialising in Kubernetes operations, Terraform IaC, and .NET backend engineering.",
+          "url": "https://prudentiadigital.co.za/",
+          "email": "ltmaseko7@gmail.com",
+          "address": {
+            "@type": "PostalAddress",
+            "addressRegion": "Gauteng",
+            "addressCountry": "ZA"
+          },
+          "sameAs": [
+            "https://github.com/maseko-lucky-9",
+            "https://www.linkedin.com/in/thulani-maseko"
+          ],
+          "knowsAbout": [
+            "Kubernetes",
+            "ArgoCD",
+            "Terraform",
+            "ASP.NET Core",
+            "C#",
+            "React",
+            "TypeScript",
+            "Azure",
+            "AWS",
+            "DevOps"
+          ]
+        },
+        {
+          "@type": "ProfessionalService",
+          "@id": "https://prudentiadigital.co.za/#prudentia-digital",
+          "name": "Prudentia Digital",
+          "url": "https://prudentiadigital.co.za/",
+          "description": "Freelance software development and DevOps engineering services.",
+          "founder": { "@id": "https://prudentiadigital.co.za/#thulani" },
+          "address": {
+            "@type": "PostalAddress",
+            "addressRegion": "Gauteng",
+            "addressCountry": "ZA"
+          },
+          "areaServed": "Worldwide",
+          "hasOfferCatalog": {
+            "@type": "OfferCatalog",
+            "name": "Services",
+            "itemListElement": [
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "Kubernetes Operations",
+                  "description": "End-to-end cluster lifecycle management — MicroK8s / EKS bootstrap, ArgoCD GitOps, Helm chart authoring, Prometheus/Grafana observability, Cloudflare Tunnel exposure."
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "Terraform / Infrastructure as Code",
+                  "description": "Declarative infrastructure on AWS and Azure — reusable Terraform module authoring, CI/CD pipeline integration, Policy-as-Code with OPA."
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": ".NET Backend Engineering",
+                  "description": "Production-grade APIs and microservices with C# and ASP.NET Core — Clean Architecture, DDD, Azure integrations, EF Core, OpenTelemetry."
+                }
+              }
+            ]
+          }
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://prudentiadigital.co.za/#website",
+          "url": "https://prudentiadigital.co.za/",
+          "name": "Thulani Maseko | Software Developer Portfolio",
+          "description": "Portfolio and professional profile of Thulani Maseko.",
+          "publisher": { "@id": "https://prudentiadigital.co.za/#thulani" }
+        }
+      ]
+    }
+    </script>
+
+    <!-- Plausible analytics — privacy-first, no cookies, GDPR compliant.
+         Register prudentiadigital.co.za at https://plausible.io before traffic
+         appears in the dashboard. The script is a no-op until then. -->
+    <script defer data-domain="prudentiadigital.co.za" src="https://plausible.io/js/script.js"></script>
+
     <!-- Fonts are self-hosted via @fontsource (see src/index.css).
          Google Fonts CDN links removed to eliminate third-party round-trip
          and reduce Speed Index / CLS from font-swap jitter. -->
