@@ -13,6 +13,8 @@ import { LazySection } from "@/components/LazySection";
 // LazySection so Monaco never loads until the user scrolls to that section.
 const CodeDemoSection = lazy(() => import("@/components/CodeDemoSection").then(m => ({ default: m.CodeDemoSection })));
 const ExperienceSection = lazy(() => import("@/components/ExperienceSection").then(m => ({ default: m.ExperienceSection })));
+const ServicesSection = lazy(() => import("@/components/ServicesSection").then(m => ({ default: m.ServicesSection })));
+const CaseStudiesSection = lazy(() => import("@/components/CaseStudiesSection").then(m => ({ default: m.CaseStudiesSection })));
 const BlogSection = lazy(() => import("@/components/BlogSection").then(m => ({ default: m.BlogSection })));
 const ContactSection = lazy(() => import("@/components/ContactSection").then(m => ({ default: m.ContactSection })));
 
@@ -60,6 +62,16 @@ const Index = () => {
           <LazySection minHeight="600px">
             <Suspense fallback={<SectionFallback />}>
               <ExperienceSection />
+            </Suspense>
+          </LazySection>
+          <LazySection minHeight="700px">
+            <Suspense fallback={<SectionFallback />}>
+              <ServicesSection />
+            </Suspense>
+          </LazySection>
+          <LazySection minHeight="600px">
+            <Suspense fallback={<SectionFallback />}>
+              <CaseStudiesSection />
             </Suspense>
           </LazySection>
           <LazySection minHeight="600px">

@@ -1,0 +1,222 @@
+import { motion } from "framer-motion";
+import { Server, Cloud, Code2, CheckCircle2, ArrowRight } from "lucide-react";
+
+const springTransition = { type: "spring", stiffness: 260, damping: 26 };
+
+interface Service {
+  id: string;
+  icon: React.ElementType;
+  label: string;
+  title: string;
+  description: string;
+  capabilities: string[];
+  stack: string[];
+  /** Tailwind gradient classes for the icon background */
+  gradient: string;
+  /** Tailwind border + ring colour on hover */
+  accent: string;
+}
+
+const services: Service[] = [
+  {
+    id: "k8s-ops",
+    icon: Server,
+    label: "DevOps",
+    title: "Kubernetes Operations",
+    description:
+      "End-to-end cluster lifecycle management — from bootstrap to production-grade GitOps. I build opinionated, observable K8s platforms that teams actually want to use.",
+    capabilities: [
+      "MicroK8s / EKS cluster setup and hardening",
+      "ArgoCD App-of-Apps GitOps pattern",
+      "Helm chart authoring and chart museum hosting",
+      "Prometheus + Grafana observability stack",
+      "Cloudflare Tunnel or ingress-nginx public exposure",
+      "External Secrets Operator for secret management",
+    ],
+    stack: ["Kubernetes", "ArgoCD", "Helm", "Prometheus", "Grafana", "cert-manager"],
+    gradient: "from-blue-500/20 to-indigo-500/20",
+    accent: "hover:border-blue-500/40",
+  },
+  {
+    id: "iac",
+    icon: Cloud,
+    label: "Infrastructure",
+    title: "Terraform / IaC",
+    description:
+      "Declarative, auditable infrastructure that lives in git alongside application code. I write modular Terraform that can be handed off to a team without ceremony.",
+    capabilities: [
+      "AWS and Azure resource provisioning",
+      "Reusable Terraform module authoring",
+      "GitHub Actions / Azure DevOps CI pipelines",
+      "State backend configuration (S3, Azure Blob)",
+      "Policy-as-code with OPA / Sentinel",
+      "Cost estimation and resource tagging strategy",
+    ],
+    stack: ["Terraform", "Azure", "AWS", "GitHub Actions", "OPA", "Terragrunt"],
+    gradient: "from-emerald-500/20 to-teal-500/20",
+    accent: "hover:border-emerald-500/40",
+  },
+  {
+    id: "dotnet",
+    icon: Code2,
+    label: "Backend",
+    title: ".NET Backend Engineering",
+    description:
+      "Production-grade APIs and microservices built with C# and ASP.NET Core. Emphasis on clean architecture, testability, and Azure-native integrations.",
+    capabilities: [
+      "RESTful and gRPC API development",
+      "Clean Architecture / Domain-Driven Design",
+      "Azure Service Bus / Event Hub event streaming",
+      "Entity Framework Core with migration safety",
+      "xUnit + Integration test coverage",
+      "OpenTelemetry instrumentation",
+    ],
+    stack: ["C#", "ASP.NET Core", "Azure", "EF Core", "xUnit", "Docker"],
+    gradient: "from-violet-500/20 to-purple-500/20",
+    accent: "hover:border-violet-500/40",
+  },
+];
+
+export function ServicesSection() {
+  return (
+    <section
+      id="services"
+      aria-labelledby="services-heading"
+      className="py-20 md:py-28 relative overflow-hidden"
+      style={{ background: "hsl(var(--muted) / 0.3)" }}
+    >
+      {/* Top divider */}
+      <div
+        className="absolute inset-x-0 top-0 h-px"
+        style={{
+          background:
+            "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.2), transparent)",
+        }}
+      />
+
+      <div className="section-container !py-0 py-20 md:py-28">
+        {/* Section header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={springTransition}
+          className="text-center mb-16"
+        >
+          <span className="inline-block text-xs font-semibold uppercase tracking-[0.18em] text-primary mb-3">
+            What I Offer
+          </span>
+          <h2 id="services-heading" className="section-title">
+            Services
+          </h2>
+          <p className="section-subtitle mx-auto">
+            Focused freelance engagements across three disciplines — shipped to production,
+            not just delivered as a handover document.
+          </p>
+        </motion.div>
+
+        {/* Service cards grid */}
+        <div className="grid md:grid-cols-3 gap-8">
+          {services.map((service, index) => {
+            const Icon = service.icon;
+            return (
+              <motion.article
+                key={service.id}
+                initial={{ opacity: 0, y: 28 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ delay: index * 0.1, ...springTransition }}
+                whileHover={{ y: -6 }}
+                className={`relative rounded-2xl border bg-card p-8 flex flex-col gap-6 transition-all duration-300 ${service.accent}`}
+                style={{
+                  boxShadow: "var(--shadow-md)",
+                  borderColor: "hsl(var(--border))",
+                }}
+                aria-labelledby={`service-${service.id}-heading`}
+              >
+                {/* Icon + label */}
+                <div className="flex items-start justify-between">
+                  <div
+                    className={`inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br ${service.gradient}`}
+                  >
+                    <Icon className="w-7 h-7 text-foreground" aria-hidden="true" />
+                  </div>
+                  <span className="tech-badge text-xs">{service.label}</span>
+                </div>
+
+                {/* Title + description */}
+                <div>
+                  <h3
+                    id={`service-${service.id}-heading`}
+                    className="text-xl font-bold text-foreground mb-3 tracking-tight"
+                  >
+                    {service.title}
+                  </h3>
+                  <p className="text-muted-foreground leading-relaxed text-sm">
+                    {service.description}
+                  </p>
+                </div>
+
+                {/* Capabilities list */}
+                <ul className="space-y-2 flex-1">
+                  {service.capabilities.map((cap) => (
+                    <li key={cap} className="flex items-start gap-2.5 text-sm text-muted-foreground">
+                      <CheckCircle2
+                        className="w-4 h-4 mt-0.5 shrink-0 text-primary"
+                        aria-hidden="true"
+                      />
+                      {cap}
+                    </li>
+                  ))}
+                </ul>
+
+                {/* Tech stack chips */}
+                <div className="flex flex-wrap gap-2 pt-2 border-t border-border/60">
+                  {service.stack.map((tech) => (
+                    <span key={tech} className="tech-badge text-xs">
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+              </motion.article>
+            );
+          })}
+        </div>
+
+        {/* CTA strip */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.35, ...springTransition }}
+          className="mt-14 text-center"
+        >
+          <p className="text-muted-foreground mb-6 text-sm">
+            Need something that spans two or all three disciplines?{" "}
+            <span className="text-foreground font-medium">Let's scope it together.</span>
+          </p>
+          <a
+            href="#contact"
+            className="btn-hero-secondary inline-flex items-center gap-2"
+            onClick={(e) => {
+              e.preventDefault();
+              document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
+            }}
+          >
+            Get in touch
+            <ArrowRight className="w-4 h-4" aria-hidden="true" />
+          </a>
+        </motion.div>
+      </div>
+
+      {/* Bottom divider */}
+      <div
+        className="absolute inset-x-0 bottom-0 h-px"
+        style={{
+          background:
+            "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.15), transparent)",
+        }}
+      />
+    </section>
+  );
+}
