@@ -6,8 +6,11 @@ import { SkillsSection } from "@/components/SkillsSection";
 import { ProjectsSection } from "@/components/ProjectsSection";
 import { Footer } from "@/components/Footer";
 import { Skeleton } from "@/components/ui/skeleton";
+import { LazySection } from "@/components/LazySection";
 
-// Lazy-load below-fold sections (CodeDemoSection includes heavy Monaco Editor)
+// Lazy-load below-fold sections.
+// CodeDemoSection includes heavy Monaco Editor (~900 KB CDN JS) — wrapped in
+// LazySection so Monaco never loads until the user scrolls to that section.
 const CodeDemoSection = lazy(() => import("@/components/CodeDemoSection").then(m => ({ default: m.CodeDemoSection })));
 const ExperienceSection = lazy(() => import("@/components/ExperienceSection").then(m => ({ default: m.ExperienceSection })));
 const BlogSection = lazy(() => import("@/components/BlogSection").then(m => ({ default: m.BlogSection })));
@@ -46,18 +49,29 @@ const Index = () => {
           <HeroSection />
           <SkillsSection />
           <ProjectsSection />
-          <Suspense fallback={<SectionFallback />}>
-            <CodeDemoSection />
-          </Suspense>
-          <Suspense fallback={<SectionFallback />}>
-            <ExperienceSection />
-          </Suspense>
-          <Suspense fallback={<SectionFallback />}>
-            <BlogSection />
-          </Suspense>
-          <Suspense fallback={<SectionFallback />}>
-            <ContactSection />
-          </Suspense>
+          {/* LazySection defers the Suspense boundary until the section
+              approaches the viewport — prevents Monaco / ContactSection / etc.
+              from loading their chunks during the initial page load. */}
+          <LazySection minHeight="700px">
+            <Suspense fallback={<SectionFallback />}>
+              <CodeDemoSection />
+            </Suspense>
+          </LazySection>
+          <LazySection minHeight="600px">
+            <Suspense fallback={<SectionFallback />}>
+              <ExperienceSection />
+            </Suspense>
+          </LazySection>
+          <LazySection minHeight="600px">
+            <Suspense fallback={<SectionFallback />}>
+              <BlogSection />
+            </Suspense>
+          </LazySection>
+          <LazySection minHeight="700px">
+            <Suspense fallback={<SectionFallback />}>
+              <ContactSection />
+            </Suspense>
+          </LazySection>
         </main>
         <Footer />
       </div>

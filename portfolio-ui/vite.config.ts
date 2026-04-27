@@ -46,6 +46,15 @@ export default defineConfig(({ mode }) => {
       __APP_VERSION__: JSON.stringify(process.env.npm_package_version || '1.0.0'),
     },
     build: {
+      // Exclude three-vendor from automatic <link rel="modulepreload"> injection.
+      // three-vendor is only needed by AuroraCanvas, which is lazy-imported AFTER
+      // first paint — there is no value preloading it on every page visit.
+      // All other chunks (ContactSection, BlogSection, etc.) are still preloaded.
+      modulePreload: {
+        polyfill: true,
+        resolveDependencies: (_filename, deps) =>
+          deps.filter((dep) => !dep.includes("three-vendor")),
+      },
       rollupOptions: {
         output: {
           manualChunks: {
