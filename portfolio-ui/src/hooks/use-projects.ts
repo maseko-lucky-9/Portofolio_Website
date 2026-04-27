@@ -8,6 +8,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { projectsService } from '@/services/projects.service';
 import { queryKeys } from '@/lib/react-query';
+import { env } from '@/config/env';
 import type {
   Project,
   ProjectQueryParams,
@@ -40,12 +41,16 @@ export function useProject(slug: string | undefined) {
 
 /**
  * Get featured projects
+ * Only runs when env.useApi is true — prevents spurious network requests in
+ * static/e2e mode and avoids the rapid isLoading→isError re-render that
+ * destabilises DOM handles during framer-motion animation windows.
  */
 export function useFeaturedProjects(limit?: number) {
   return useQuery({
     queryKey: queryKeys.projects.featured(),
     queryFn: () => projectsService.getFeatured(limit),
     staleTime: 10 * 60 * 1000, // 10 minutes
+    enabled: env.useApi,
   });
 }
 

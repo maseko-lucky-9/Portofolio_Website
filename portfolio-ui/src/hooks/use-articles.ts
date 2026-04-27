@@ -8,6 +8,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { articlesService } from '@/services/articles.service';
 import { queryKeys } from '@/lib/react-query';
+import { env } from '@/config/env';
 import type {
   Article,
   ArticleQueryParams,
@@ -17,12 +18,15 @@ import type {
 
 /**
  * Get all articles with pagination
+ * Only runs when env.useApi is true — same guard as useFeaturedArticles.
+ * When VITE_USE_API=false, callers fall through to their static-data path.
  */
 export function useArticles(params?: ArticleQueryParams) {
   return useQuery({
     queryKey: queryKeys.articles.list(params),
     queryFn: () => articlesService.getArticles(params),
     staleTime: 60 * 1000, // 1 minute
+    enabled: env.useApi,
   });
 }
 
@@ -40,12 +44,14 @@ export function useArticle(slug: string | undefined) {
 
 /**
  * Get featured articles
+ * Only runs when env.useApi is true — see useFeaturedProjects for rationale.
  */
 export function useFeaturedArticles(limit?: number) {
   return useQuery({
     queryKey: queryKeys.articles.featured(),
     queryFn: () => articlesService.getFeatured(limit),
     staleTime: 10 * 60 * 1000, // 10 minutes
+    enabled: env.useApi,
   });
 }
 

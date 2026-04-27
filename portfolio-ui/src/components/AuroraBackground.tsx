@@ -208,8 +208,14 @@ export function AuroraBackground() {
     };
   }, []);
 
-  // Reduced motion or fallback
-  if (prefersReducedMotion) {
+  // Skip WebGL entirely when:
+  //  • VITE_DISABLE_WEBGL=true is baked into the build (Playwright e2e builds)
+  //  • user prefers reduced motion at the OS/browser level
+  // Both conditions avoid Three.js trying to create a WebGL context, which
+  // crashes in headless Chromium and on devices without GPU support.
+  const skipWebGL = import.meta.env.VITE_DISABLE_WEBGL === 'true' || prefersReducedMotion;
+
+  if (skipWebGL) {
     return (
       <div className="absolute inset-0 overflow-hidden">
         <CSSGradientFallback />

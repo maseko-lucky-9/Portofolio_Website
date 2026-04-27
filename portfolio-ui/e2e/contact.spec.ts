@@ -3,6 +3,10 @@ import { test, expect } from "@playwright/test";
 test.describe("Contact Section", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
+    // ContactSection is lazy-loaded (React.lazy + Suspense). Wait for it to
+    // attach to the DOM before scrolling — otherwise scrollIntoViewIfNeeded()
+    // throws "element is not attached to the DOM".
+    await page.locator("#contact").waitFor({ state: "attached", timeout: 15000 });
     await page.locator("#contact").scrollIntoViewIfNeeded();
     await page.waitForTimeout(500);
   });

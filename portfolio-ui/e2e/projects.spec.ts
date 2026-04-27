@@ -3,10 +3,11 @@ import { test, expect } from "@playwright/test";
 test.describe("Projects Section", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
-    // Scroll to projects section and wait for data to load (API timeout + static fallback)
+    // ProjectsSection is eagerly loaded (no Suspense). With VITE_USE_API=false,
+    // static data renders immediately — no loading skeleton to wait for.
     await page.locator("#projects").scrollIntoViewIfNeeded();
-    // Wait for either project cards or empty state to appear
-    await page.waitForSelector(".card-project, [class*='FolderOpen']", { timeout: 15000 }).catch(() => {});
+    // Short wait for card animations to settle (framer-motion initial → animate)
+    await page.waitForSelector(".card-project", { timeout: 5000 }).catch(() => {});
   });
 
   test("displays section heading", async ({ page }) => {
