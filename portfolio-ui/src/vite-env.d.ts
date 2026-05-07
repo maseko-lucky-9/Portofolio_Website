@@ -33,3 +33,11 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
+
+/**
+ * Build-time constants injected via Vite `define`.
+ * - __APP_VERSION__: from package.json
+ * - __SHIPPED_COUNT__: total commits on HEAD at build time
+ */
+declare const __APP_VERSION__: string;
+declare const __SHIPPED_COUNT__: string;
