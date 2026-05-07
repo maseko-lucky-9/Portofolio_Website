@@ -75,6 +75,7 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.11.3",
     "@eslint/js": "^9.32.0",
     "@playwright/test": "^1.58.2",
     "@tailwindcss/typography": "^0.5.16",
@@ -104,7 +105,7 @@
   },
   "optionalDependencies": {
     "@swc/core-darwin-arm64": "^1.15.32",
-    "@swc/core-linux-x64-gnu": "^1.15.32",
-    "@swc/core-linux-arm64-gnu": "^1.15.32"
+    "@swc/core-linux-arm64-gnu": "^1.15.32",
+    "@swc/core-linux-x64-gnu": "^1.15.32"
   }
 }
