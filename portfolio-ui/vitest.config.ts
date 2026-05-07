@@ -9,6 +9,11 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  // Mirror build-time defines so modules consuming them load under jsdom.
+  define: {
+    __APP_VERSION__: JSON.stringify("0.0.0-test"),
+    __SHIPPED_COUNT__: JSON.stringify("0"),
+  },
   test: {
     globals: true,
     environment: "jsdom",

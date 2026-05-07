@@ -75,13 +75,15 @@ describe("HeroSection", () => {
   it("renders metric labels", () => {
     renderHeroSection();
     expect(screen.getByText("Projects")).toBeInTheDocument();
-    expect(screen.getByText("Experience")).toBeInTheDocument();
+    // UI now uses abbreviated label "Years Exp." instead of "Experience"
+    expect(screen.getByText(/Years Exp\.?/i)).toBeInTheDocument();
     expect(screen.getByText("Clients")).toBeInTheDocument();
   });
 
   it("renders profile image with correct alt text", () => {
     renderHeroSection();
-    const profileImage = screen.getByAltText(personalData.name);
+    // alt is "${name} profile photo" — assert with a partial regex match.
+    const profileImage = screen.getByAltText(new RegExp(personalData.name, "i"));
     expect(profileImage).toBeInTheDocument();
     expect(profileImage.tagName).toBe("IMG");
   });

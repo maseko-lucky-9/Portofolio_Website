@@ -1,9 +1,51 @@
+import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowDown, Github, Linkedin, Twitter } from "lucide-react";
 import { personalData } from "@/data/personal";
 import { AuroraBackground } from "@/components/AuroraBackground";
 
 const springTransition = { type: "spring", stiffness: 260, damping: 24 };
+
+// Build-time commit count — reflects real shipping cadence, no runtime cost.
+const SHIPPED_TOTAL = Number.parseInt(__SHIPPED_COUNT__, 10) || 0;
+
+/**
+ * `shipped: <n>` meter — quiet signal of real, shipping work.
+ * 600ms count-up on first paint; static under prefers-reduced-motion.
+ */
+function ShippedMeter({ reduced }: { reduced: boolean }) {
+  const [n, setN] = useState(reduced ? SHIPPED_TOTAL : 0);
+
+  useEffect(() => {
+    if (reduced || SHIPPED_TOTAL === 0) {
+      setN(SHIPPED_TOTAL);
+      return;
+    }
+    const start = performance.now();
+    const dur = 600;
+    let rafId = 0;
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / dur);
+      // ease-out cubic
+      const eased = 1 - Math.pow(1 - t, 3);
+      setN(Math.round(SHIPPED_TOTAL * eased));
+      if (t < 1) rafId = requestAnimationFrame(tick);
+    };
+    rafId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafId);
+  }, [reduced]);
+
+  return (
+    <div
+      aria-label={`shipped: ${SHIPPED_TOTAL} commits`}
+      className="pointer-events-none absolute top-6 right-6 z-20 hidden font-mono text-[11px] tracking-tight sm:block"
+      style={{ color: "hsl(var(--secondary))", opacity: 0.85 }}
+    >
+      <span className="opacity-60">shipped:</span>{" "}
+      <span tabIndex={-1}>{n}</span>
+    </div>
+  );
+}
 
 export function HeroSection() {
   const prefersReducedMotion = useReducedMotion();
@@ -24,6 +66,9 @@ export function HeroSection() {
     >
       {/* Aurora WebGL background */}
       <AuroraBackground />
+
+      {/* Quiet operator signal — real shipping cadence */}
+      <ShippedMeter reduced={!!prefersReducedMotion} />
 
       {/* Ambient glow blobs — light mode */}
       {!prefersReducedMotion && (
