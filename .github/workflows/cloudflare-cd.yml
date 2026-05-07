@@ -43,14 +43,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Note: this repo intentionally does NOT commit package-lock.json
+      # (see .gitignore). That precludes setup-node's `cache: npm` (needs a
+      # lockfile to compute the cache key) and `npm ci` (needs a lockfile,
+      # period). We use `npm install` and rely on the npm registry cache.
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
-          cache: 'npm'
 
       - name: Install dependencies (workspace root)
-        run: npm ci --include=optional
+        run: npm install --include=optional --no-audit --no-fund
         env:
           HUSKY: '0'
 
