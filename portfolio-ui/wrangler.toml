@@ -10,16 +10,15 @@ name = "prudentia-digital-portfolio"
 compatibility_date = "2025-04-26"
 workers_dev = true
 
+# Personal portfolio — no production custom domain assigned yet.
+# The company domain prudentiadigital.co.za belongs to the
+# `prudentia-digital` worker (see prudentia-digital-website/wrangler.toml)
+# and must NOT be claimed here.
+
 [assets]
 directory = "./dist"
 # Vite SPA needs all unmatched routes to fall through to index.html
 not_found_handling = "single-page-application"
-
-# Custom domain wiring (uncomment + replace once DNS is ready):
-# routes = [
-#   { pattern = "prudentiadigital.co.za", custom_domain = true },
-#   { pattern = "www.prudentiadigital.co.za", custom_domain = true },
-# ]
 
 # Observability is on by default in 2025+ wrangler.
 [observability]
