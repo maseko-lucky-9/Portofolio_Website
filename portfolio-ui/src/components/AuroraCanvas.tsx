@@ -115,14 +115,16 @@ void main() {
   aurora = smoothstep(0.3, 0.7, aurora);
   aurora *= (0.7 + 0.3 * breath); // Breathing modulation
 
-  // Color palette: blue → violet → emerald
-  vec3 blue    = vec3(0.145, 0.388, 0.922);  // #2563eb
-  vec3 violet  = vec3(0.545, 0.310, 0.839);  // #8b4fd7
-  vec3 emerald = vec3(0.157, 0.714, 0.482);  // #28b67b
+  // Color palette — quiet operator: warm coral, deep coral shade, electric mint
+  // Coral leads (70%), mint counterpoints (30%) per palette spec
+  vec3 coral     = vec3(1.000, 0.478, 0.353);  // #FF7A5A — primary
+  vec3 coralDeep = vec3(0.945, 0.388, 0.247);  // #F1633F — coral shade
+  vec3 mint      = vec3(0.369, 0.918, 0.831);  // #5EEAD4 — accent
 
-  // Blend colors using noise layers
-  vec3 color = mix(blue, violet, n1);
-  color = mix(color, emerald, n2 * 0.4);
+  // Blend: coral spectrum first (n1 drives coral→coral-deep), then mint highlight
+  // n2 weighting at 0.30 keeps mint as counterpoint, never dominant
+  vec3 color = mix(coral, coralDeep, n1);
+  color = mix(color, mint, n2 * 0.30);
 
   // Vignette — soft fade at edges
   float vignette = 1.0 - smoothstep(0.4, 1.2, length(vUv - 0.5) * 1.5);
