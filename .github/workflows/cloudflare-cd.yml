@@ -1,0 +1,85 @@
+# ==============================================
+# Portfolio CD — Cloudflare Workers
+# ==============================================
+# Builds portfolio-ui and deploys to the prudentia-digital-portfolio worker
+# on workers.dev via the official wrangler-action.
+#
+# Required repository secrets:
+#   CF_API_TOKEN   - Cloudflare API token, scoped: Account → Workers Scripts → Edit
+#   CF_ACCOUNT_ID  - Cloudflare account ID
+#
+# Optional repository variables (build-time, not secrets):
+#   VITE_API_URL          - frontend → backend base URL (defaults to '' for static-only)
+#   VITE_ENABLE_ANALYTICS - 'true' / 'false'
+#
+# Note: This workflow uses no untrusted github.event.* inputs in run: blocks.
+# All shell commands operate on static literals only.
+# ==============================================
+
+name: Portfolio CD (Cloudflare)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'portfolio-ui/**'
+      - 'shared/**'
+      - '.github/workflows/cloudflare-cd.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: cloudflare-cd-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Build & Deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies (workspace root)
+        run: npm ci --include=optional
+        env:
+          HUSKY: '0'
+
+      - name: Build portfolio-ui
+        run: npm run build --workspace=portfolio-ui
+        env:
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
+          VITE_ENABLE_ANALYTICS: ${{ vars.VITE_ENABLE_ANALYTICS || 'false' }}
+
+      - name: Smoke-check build artefact
+        run: |
+          test -f portfolio-ui/dist/index.html || (echo "::error::dist/index.html missing" && exit 1)
+          du -sh portfolio-ui/dist/assets/*.js | sort -h | tail -5
+
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CF_API_TOKEN }}
+          accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          workingDirectory: portfolio-ui
+          command: deploy
+
+      - name: Smoke-check deployed worker
+        env:
+          DEPLOYED_URL: https://prudentia-digital-portfolio.masekotlg.workers.dev
+        run: |
+          sleep 5
+          status=$(curl -s -o /dev/null -w "%{http_code}" "$DEPLOYED_URL" || echo "000")
+          echo "GET $DEPLOYED_URL -> HTTP $status"
+          if [ "$status" != "200" ]; then
+            echo "::warning::Smoke check returned HTTP $status (may be propagation lag)"
+          fi
