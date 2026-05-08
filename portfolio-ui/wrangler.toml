@@ -5,6 +5,13 @@
 # Deploy:    npx wrangler deploy
 # Local dev: npx wrangler dev
 # Preview:   npx wrangler versions deploy
+#
+# Workers Builds (Cloudflare-native CI):
+#   This file is the source of truth. Dashboard build settings should
+#   mirror the [build] block below. On wrangler v3.109.0+, drift between
+#   dashboard and wrangler.toml triggers an auto-generated PR after build.
+#   Build env vars (NODE_VERSION=20, HUSKY=0, VITE_*) are dashboard-only —
+#   wrangler.toml [vars] is runtime, not build-time.
 
 name = "prudentia-digital-portfolio"
 compatibility_date = "2025-04-26"
@@ -14,6 +21,14 @@ workers_dev = true
 # The company domain prudentiadigital.co.za belongs to the
 # `prudentia-digital` worker (see prudentia-digital-website/wrangler.toml)
 # and must NOT be claimed here.
+
+# Workers Builds runs this from the wrangler.toml directory (portfolio-ui/).
+# `cd ..` ascends to the monorepo root so npm workspaces resolve correctly,
+# then builds only the UI workspace (skipping portfolio-api which needs
+# DB envs not present in build CI). --include=optional ensures the
+# platform-specific @swc/core-linux-x64-gnu binary is installed.
+[build]
+command = "cd .. && npm install --include=optional --no-audit --no-fund && npm run build:ui"
 
 [assets]
 directory = "./dist"
