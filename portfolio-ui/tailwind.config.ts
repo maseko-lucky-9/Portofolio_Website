@@ -44,6 +44,13 @@ export default {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
         },
+        "brand-violet": {
+          DEFAULT: "hsl(var(--brand-violet))",
+          foreground: "hsl(var(--brand-violet-foreground))",
+        },
+        "skill-frontend": "hsl(var(--skill-frontend))",
+        "skill-backend": "hsl(var(--skill-backend))",
+        "skill-devops": "hsl(var(--skill-devops))",
         popover: {
           DEFAULT: "hsl(var(--popover))",
           foreground: "hsl(var(--popover-foreground))",
