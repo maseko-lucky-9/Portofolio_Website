@@ -12,8 +12,7 @@ test.describe("Contact Section", () => {
   });
 
   test("displays section heading", async ({ page }) => {
-    // exact:true prevents case-insensitive match with ServicesSection CTA "Get in touch"
-    await expect(page.getByText("Get in Touch", { exact: true })).toBeVisible();
+    await expect(page.getByText("Say hi", { exact: true })).toBeVisible();
   });
 
   test("contact form renders all fields", async ({ page }) => {

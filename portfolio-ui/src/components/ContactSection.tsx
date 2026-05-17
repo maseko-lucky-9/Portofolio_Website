@@ -109,7 +109,7 @@ export function ContactSection() {
           <span className="inline-block text-xs font-semibold uppercase tracking-[0.18em] text-primary mb-3">
             Contact
           </span>
-          <h2 id="contact-heading" className="section-title">Get in Touch</h2>
+          <h2 id="contact-heading" className="section-title">Say hi</h2>
           <p className="section-subtitle mx-auto">
             Have a project in mind or want to discuss opportunities? I'd love to hear from
             you.

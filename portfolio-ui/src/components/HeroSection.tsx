@@ -146,7 +146,7 @@ export function HeroSection() {
               className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start mb-9"
             >
               <button onClick={scrollToProjects} className="btn-hero-primary">
-                View My Work
+                See what I've built
                 <ArrowDown className="w-4 h-4" />
               </button>
               <button onClick={scrollToContact} className="btn-hero-secondary">

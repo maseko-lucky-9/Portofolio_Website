@@ -94,9 +94,9 @@ export function BlogSection() {
           <span className="inline-block text-xs font-semibold uppercase tracking-[0.18em] text-primary mb-3">
             Blog
           </span>
-          <h2 id="blog-heading" className="section-title">Latest Articles</h2>
+          <h2 id="blog-heading" className="section-title">Notes</h2>
           <p className="section-subtitle mx-auto">
-            Thoughts, tutorials, and insights on software development.
+            Working notes on software I've shipped.
           </p>
         </motion.div>
 
