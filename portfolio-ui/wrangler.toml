@@ -13,14 +13,23 @@
 #   Build env vars (NODE_VERSION=20, HUSKY=0, VITE_*) are dashboard-only —
 #   wrangler.toml [vars] is runtime, not build-time.
 
-name = "prudentia-digital-portfolio"
+name = "thulani-portfolio"
 compatibility_date = "2025-04-26"
 workers_dev = true
 
-# Personal portfolio — no production custom domain assigned yet.
-# The company domain prudentiadigital.co.za belongs to the
-# `prudentia-digital` worker (see prudentia-digital-website/wrangler.toml)
-# and must NOT be claimed here.
+# Personal portfolio for Thulani Maseko — deploys to
+# `thulani-portfolio.<account>.workers.dev`. No production custom domain
+# assigned yet.
+#
+# The company brand `Prudentia Digital` and its domain prudentiadigital.co.za
+# belong to a separate worker (`prudentia-digital-website`, in the
+# ~/Repo/apps/prudentia-digital-website repo) and must NOT be claimed
+# here. The previous worker name `prudentia-digital-portfolio` (deployed
+# from this same wrangler.toml) was misleading — the portfolio is a
+# personal surface, not a Prudentia Digital surface. After this rename
+# lands, the old worker can be deleted via
+# `wrangler delete prudentia-digital-portfolio` or the Cloudflare
+# dashboard (Workers & Pages → prudentia-digital-portfolio → Delete).
 
 # Workers Builds runs this from the wrangler.toml directory (portfolio-ui/).
 # `cd ..` ascends to the monorepo root so npm workspaces resolve correctly,
