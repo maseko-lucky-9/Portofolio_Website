@@ -1,0 +1,91 @@
+# ==============================================
+# Portfolio CD — Cloudflare Workers
+# ==============================================
+# Builds portfolio-ui and deploys to the `thulani-portfolio` worker on
+# workers.dev via the official wrangler-action.
+#
+# This workflow REPLACES the previously-removed cloudflare-cd.yml (PR #6).
+# Reason for restoring: the Cloudflare Workers Builds Git integration was
+# uploading versions on git push but not promoting them to deployments,
+# leaving the workers.dev URL serving 404 between merges. A
+# GitHub-Actions-driven `wrangler deploy` runs in full deploy mode (upload
+# + promote) deterministically on every push to main.
+#
+# Required repository secrets:
+#   CF_API_TOKEN   - Cloudflare API token, scoped: Account -> Workers Scripts -> Edit
+#   CF_ACCOUNT_ID  - Cloudflare account ID (1ddc6b389e8661e7a6948805382d1ec4)
+#
+# Optional repository variables (build-time, not secrets):
+#   VITE_API_URL          - frontend -> backend base URL
+#   VITE_ENABLE_ANALYTICS - 'true' / 'false'
+#
+# Security: no untrusted github.event.* inputs are referenced in any run:
+# block. All shell commands operate on static literals only.
+# ==============================================
+
+name: Portfolio CD (Cloudflare)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'portfolio-ui/**'
+      - 'shared/**'
+      - '.github/workflows/cloudflare-cd.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: cloudflare-cd-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Build & Deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Install dependencies (workspace root)
+        run: npm install --include=optional --no-audit --no-fund
+        env:
+          HUSKY: '0'
+
+      - name: Build portfolio-ui
+        run: npm run build --workspace=portfolio-ui
+        env:
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
+          VITE_ENABLE_ANALYTICS: ${{ vars.VITE_ENABLE_ANALYTICS || 'false' }}
+
+      - name: Smoke-check build artefact
+        run: |
+          test -f portfolio-ui/dist/index.html || (echo "::error::dist/index.html missing" && exit 1)
+          du -sh portfolio-ui/dist/assets/*.js | sort -h | tail -5
+
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CF_API_TOKEN }}
+          accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          workingDirectory: portfolio-ui
+          command: deploy
+
+      - name: Smoke-check deployed worker
+        env:
+          DEPLOYED_URL: https://thulani-portfolio.masekotlg.workers.dev
+        run: |
+          sleep 5
+          status=$(curl -s -o /dev/null -w "%{http_code}" "$DEPLOYED_URL" || echo "000")
+          echo "GET $DEPLOYED_URL -> HTTP $status"
+          if [ "$status" != "200" ]; then
+            echo "::warning::Smoke check returned HTTP $status (may be propagation lag)"
+          fi
