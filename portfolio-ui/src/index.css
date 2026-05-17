@@ -69,9 +69,17 @@
 
     --radius: 0.875rem;
 
-    /* Spring easing */
+    /* Motion grammar — durations + easings (paired with src/lib/motion.ts) */
+    --duration-instant: 100ms;
+    --duration-fast: 180ms;
+    --duration-base: 280ms;
+    --duration-slow: 480ms;
+
     --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
     --ease-out: cubic-bezier(0, 0, 0.2, 1);
+    --ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
+    --ease-decelerate: cubic-bezier(0, 0, 0.2, 1);
+    --ease-accelerate: cubic-bezier(0.4, 0, 1, 1);
 
     /* Gradient tokens — coral → mint → bone (refreshed to use new primary/secondary) */
     --gradient-primary: linear-gradient(135deg, hsl(10, 100%, 62%), hsl(20, 95%, 58%));
@@ -211,36 +219,39 @@
     @apply inline-flex items-center justify-center gap-2 rounded-xl px-7 py-3.5 font-semibold text-sm text-primary-foreground transition-all;
     background: var(--gradient-primary);
     box-shadow: var(--shadow-md), var(--shadow-glow);
-    transition-duration: 250ms;
+    transition-duration: var(--duration-base);
     transition-timing-function: var(--ease-spring);
+    /* Magnetic offset (set by useMagnetic; 0 when not magnetised). */
+    transform: translate(var(--magnetic-x, 0), var(--magnetic-y, 0));
   }
 
   .btn-hero-primary:hover {
-    transform: translateY(-2px) scale(1.02);
+    transform: translate(var(--magnetic-x, 0), calc(var(--magnetic-y, 0) - 2px)) scale(1.02);
     box-shadow: var(--shadow-xl), 0 0 32px hsl(var(--primary) / 0.45);
   }
 
   .btn-hero-primary:active {
-    transform: translateY(0) scale(0.98);
+    transform: translate(var(--magnetic-x, 0), var(--magnetic-y, 0)) scale(0.98);
   }
 
   .btn-hero-secondary {
     @apply inline-flex items-center justify-center gap-2 rounded-xl px-7 py-3.5 font-semibold text-sm text-primary transition-all;
     border: 1.5px solid hsl(var(--primary) / 0.4);
     background: hsl(var(--primary) / 0.05);
-    transition-duration: 250ms;
+    transition-duration: var(--duration-base);
     transition-timing-function: var(--ease-spring);
+    transform: translate(var(--magnetic-x, 0), var(--magnetic-y, 0));
   }
 
   .btn-hero-secondary:hover {
     background: hsl(var(--primary) / 0.10);
     border-color: hsl(var(--primary) / 0.7);
-    transform: translateY(-2px) scale(1.02);
+    transform: translate(var(--magnetic-x, 0), calc(var(--magnetic-y, 0) - 2px)) scale(1.02);
     box-shadow: var(--shadow-glow);
   }
 
   .btn-hero-secondary:active {
-    transform: translateY(0) scale(0.98);
+    transform: translate(var(--magnetic-x, 0), var(--magnetic-y, 0)) scale(0.98);
   }
 
   /* ── Project cards ── */

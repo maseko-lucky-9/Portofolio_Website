@@ -3,6 +3,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { ArrowDown, Github, Linkedin, Twitter } from "lucide-react";
 import { personalData } from "@/data/personal";
 import { AuroraBackground } from "@/components/AuroraBackground";
+import { useMagnetic } from "@/lib/motion";
 
 const springTransition = { type: "spring", stiffness: 260, damping: 24 };
 
@@ -49,6 +50,10 @@ function ShippedMeter({ reduced }: { reduced: boolean }) {
 
 export function HeroSection() {
   const prefersReducedMotion = useReducedMotion();
+  // Subtle magnetic-cursor effect on the two primary CTAs (Plan 3).
+  // 5 px is the senior-eng-taste sweet spot — felt, not seen.
+  const primaryCtaRef = useMagnetic<HTMLButtonElement>(5);
+  const secondaryCtaRef = useMagnetic<HTMLButtonElement>(5);
   const scrollToProjects = () => {
     document.querySelector("#projects")?.scrollIntoView({ behavior: "smooth" });
   };
@@ -151,11 +156,11 @@ export function HeroSection() {
               transition={{ delay: 0.55, ...springTransition }}
               className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start mb-9"
             >
-              <button onClick={scrollToProjects} className="btn-hero-primary">
+              <button ref={primaryCtaRef} onClick={scrollToProjects} className="btn-hero-primary">
                 See what I've built
                 <ArrowDown className="w-4 h-4" />
               </button>
-              <button onClick={scrollToContact} className="btn-hero-secondary">
+              <button ref={secondaryCtaRef} onClick={scrollToContact} className="btn-hero-secondary">
                 Contact Me
               </button>
             </motion.div>
