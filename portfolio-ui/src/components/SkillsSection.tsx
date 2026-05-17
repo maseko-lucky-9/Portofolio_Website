@@ -20,16 +20,27 @@ const categoryIcons = {
   devops: Cloud,
 };
 
+// Category colours read from CSS tokens (--skill-frontend|backend|devops)
+// so dark/light mode and future palette shifts cascade automatically.
 const categoryColors: Record<SkillCategory, string> = {
-  frontend: "hsl(232, 85%, 65%)",
-  backend: "hsl(158, 74%, 44%)",
-  devops: "hsl(280, 65%, 62%)",
+  frontend: "hsl(var(--skill-frontend))",
+  backend: "hsl(var(--skill-backend))",
+  devops: "hsl(var(--skill-devops))",
+};
+
+// Companion "tinted shadow" colours (~33% alpha on the category hue) for
+// elevation glows. Kept as a separate map because Tailwind's `/alpha`
+// syntax can't be composed with bare `hsl(var(--x))` strings inline.
+const categoryShadows: Record<SkillCategory, string> = {
+  frontend: "hsl(var(--skill-frontend) / 0.33)",
+  backend: "hsl(var(--skill-backend) / 0.33)",
+  devops: "hsl(var(--skill-devops) / 0.33)",
 };
 
 const categoryGradients: Record<SkillCategory, string> = {
-  frontend: "linear-gradient(90deg, hsl(232, 85%, 65%), hsl(258, 78%, 60%))",
-  backend: "linear-gradient(90deg, hsl(158, 74%, 44%), hsl(172, 70%, 38%))",
-  devops: "linear-gradient(90deg, hsl(280, 65%, 62%), hsl(300, 60%, 55%))",
+  frontend: "linear-gradient(90deg, hsl(var(--skill-frontend)), hsl(var(--brand-violet)))",
+  backend: "linear-gradient(90deg, hsl(var(--skill-backend)), hsl(var(--secondary)))",
+  devops: "linear-gradient(90deg, hsl(var(--skill-devops)), hsl(var(--brand-violet)))",
 };
 
 export function SkillsSection() {
@@ -51,7 +62,7 @@ export function SkillsSection() {
       id="skills"
       aria-labelledby="skills-heading"
       className="py-20 md:py-28 relative overflow-hidden"
-      style={{ background: "hsl(var(--muted) / 0.4)" }}
+      style={{ background: "hsl(var(--muted) / var(--opacity-soft))" }}
     >
       {/* Subtle top gradient fade */}
       <div
@@ -99,7 +110,7 @@ export function SkillsSection() {
                   color: isActive ? "#fff" : "hsl(var(--foreground))",
                   border: isActive ? "1px solid transparent" : "1px solid hsl(var(--border))",
                   boxShadow: isActive
-                    ? `0 4px 20px ${categoryColors[category]}55`
+                    ? `0 4px 20px ${categoryShadows[category]}`
                     : "var(--shadow-sm)",
                   transform: isActive ? "scale(1.04)" : "scale(1)",
                   transition: "all 300ms cubic-bezier(0.16, 1, 0.3, 1)",

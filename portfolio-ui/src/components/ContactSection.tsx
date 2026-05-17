@@ -164,90 +164,22 @@ export function ContactSection() {
               <div className="pt-4">
                 <p className="text-sm text-muted-foreground mb-4">Connect with me</p>
                 <div className="flex gap-3">
-                  <a
-                    href={personalData.social.github}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-10 h-10 rounded-xl flex items-center justify-center transition-all"
-                    style={{
-                      background: "hsl(var(--muted))",
-                      border: "1px solid hsl(var(--border))",
-                      transition: "all 250ms cubic-bezier(0.16, 1, 0.3, 1)",
-                    }}
-                    onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLElement).style.background = "hsl(var(--primary))";
-                      (e.currentTarget as HTMLElement).style.color = "hsl(var(--primary-foreground))";
-                      (e.currentTarget as HTMLElement).style.transform = "translateY(-3px) scale(1.08)";
-                      (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-glow)";
-                      (e.currentTarget as HTMLElement).style.borderColor = "transparent";
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLElement).style.background = "hsl(var(--muted))";
-                      (e.currentTarget as HTMLElement).style.color = "";
-                      (e.currentTarget as HTMLElement).style.transform = "";
-                      (e.currentTarget as HTMLElement).style.boxShadow = "";
-                      (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--border))";
-                    }}
-                    aria-label="GitHub"
-                  >
-                    <Github className="w-5 h-5" />
-                  </a>
-                  <a
-                    href={personalData.social.linkedin}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-10 h-10 rounded-xl flex items-center justify-center transition-all"
-                    style={{
-                      background: "hsl(var(--muted))",
-                      border: "1px solid hsl(var(--border))",
-                      transition: "all 250ms cubic-bezier(0.16, 1, 0.3, 1)",
-                    }}
-                    onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLElement).style.background = "hsl(var(--primary))";
-                      (e.currentTarget as HTMLElement).style.color = "hsl(var(--primary-foreground))";
-                      (e.currentTarget as HTMLElement).style.transform = "translateY(-3px) scale(1.08)";
-                      (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-glow)";
-                      (e.currentTarget as HTMLElement).style.borderColor = "transparent";
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLElement).style.background = "hsl(var(--muted))";
-                      (e.currentTarget as HTMLElement).style.color = "";
-                      (e.currentTarget as HTMLElement).style.transform = "";
-                      (e.currentTarget as HTMLElement).style.boxShadow = "";
-                      (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--border))";
-                    }}
-                    aria-label="LinkedIn"
-                  >
-                    <Linkedin className="w-5 h-5" />
-                  </a>
-                  <a
-                    href={personalData.social.twitter}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-10 h-10 rounded-xl flex items-center justify-center transition-all"
-                    style={{
-                      background: "hsl(var(--muted))",
-                      border: "1px solid hsl(var(--border))",
-                      transition: "all 250ms cubic-bezier(0.16, 1, 0.3, 1)",
-                    }}
-                    onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLElement).style.background = "hsl(var(--primary))";
-                      (e.currentTarget as HTMLElement).style.color = "hsl(var(--primary-foreground))";
-                      (e.currentTarget as HTMLElement).style.transform = "translateY(-3px) scale(1.08)";
-                      (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-glow)";
-                      (e.currentTarget as HTMLElement).style.borderColor = "transparent";
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLElement).style.background = "hsl(var(--muted))";
-                      (e.currentTarget as HTMLElement).style.color = "";
-                      (e.currentTarget as HTMLElement).style.transform = "";
-                      (e.currentTarget as HTMLElement).style.boxShadow = "";
-                      (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--border))";
-                    }}
-                    aria-label="Twitter"
-                  >
-                    <Twitter className="w-5 h-5" />
-                  </a>
+                  {[
+                    { href: personalData.social.github, Icon: Github, label: "GitHub" },
+                    { href: personalData.social.linkedin, Icon: Linkedin, label: "LinkedIn" },
+                    { href: personalData.social.twitter, Icon: Twitter, label: "Twitter" },
+                  ].map(({ href, Icon, label }) => (
+                    <a
+                      key={label}
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={label}
+                      className="social-link w-10 h-10"
+                    >
+                      <Icon className="w-5 h-5" />
+                    </a>
+                  ))}
                 </div>
               </div>
 
