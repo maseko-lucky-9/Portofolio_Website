@@ -5,6 +5,7 @@ import { HeroSection } from "@/components/HeroSection";
 import { SkillsSection } from "@/components/SkillsSection";
 import { ProjectsSection } from "@/components/ProjectsSection";
 import { Footer } from "@/components/Footer";
+import { ScrollProgress } from "@/components/ScrollProgress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LazySection } from "@/components/LazySection";
 
@@ -46,6 +47,7 @@ const Index = () => {
         >
           Skip to main content
         </a>
+        <ScrollProgress />
         <Navbar />
         <main>
           <HeroSection />
