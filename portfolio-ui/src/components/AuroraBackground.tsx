@@ -16,8 +16,8 @@
  *   • user prefers-reduced-motion at OS/browser level
  */
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
-import { useReducedMotion } from "framer-motion";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useShouldRenderWebGL } from "@/lib/motion";
 
 // Dynamically imported — Three.js code lives here, NOT in this module.
 // React.lazy defers the import() call until the component actually renders,
@@ -34,7 +34,7 @@ export function CSSGradientFallback() {
 }
 
 export function AuroraBackground() {
-  const prefersReducedMotion = useReducedMotion();
+  const shouldRenderWebGL = useShouldRenderWebGL();
   const { resolvedTheme } = useTheme();
   const mouseRef = useRef({ x: 0, y: 0 });
   const lastMouseUpdate = useRef(0);
@@ -64,13 +64,10 @@ export function AuroraBackground() {
     };
   }, []);
 
-  // Skip WebGL entirely when:
-  //  • VITE_DISABLE_WEBGL=true is baked into the build (Playwright e2e builds)
-  //  • user prefers reduced motion at the OS/browser level
-  const skipWebGL = import.meta.env.VITE_DISABLE_WEBGL === "true" || prefersReducedMotion;
-
-  // SSR / first-paint: always show CSS gradient (Three.js not loaded yet)
-  if (skipWebGL || !mounted) {
+  // useShouldRenderWebGL composes every skip condition (Plan 4):
+  // build flag, reduced motion, ?lite=1, saveData, slow connection.
+  // First paint also stays on CSS until `mounted` flips after first frame.
+  if (!shouldRenderWebGL || !mounted) {
     return (
       <div className="absolute inset-0 overflow-hidden">
         <CSSGradientFallback />
