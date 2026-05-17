@@ -6,6 +6,8 @@ import { SkillsSection } from "@/components/SkillsSection";
 import { ProjectsSection } from "@/components/ProjectsSection";
 import { Footer } from "@/components/Footer";
 import { ScrollProgress } from "@/components/ScrollProgress";
+import { SmoothScroll } from "@/components/SmoothScroll";
+import { CustomCursor } from "@/components/CustomCursor";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LazySection } from "@/components/LazySection";
 
@@ -47,6 +49,8 @@ const Index = () => {
         >
           Skip to main content
         </a>
+        <SmoothScroll />
+        <CustomCursor />
         <ScrollProgress />
         <Navbar />
         <main>

@@ -164,6 +164,113 @@ export function useShouldRenderWebGL(): boolean {
 }
 
 /**
+ * Returns true when smooth-scroll (Lenis) should hijack native scroll.
+ * Stricter than useShouldRenderWebGL — Lenis affects every scroll
+ * interaction on the page, so any hint of degradation kills it.
+ *
+ * Skips on:
+ *   • prefers-reduced-motion (OS preference)
+ *   • `?lite=1` (the same kill switch that disables WebGL)
+ *   • `?nomo=1` (motion-specific kill switch — disables smooth scroll
+ *     and custom cursor without touching WebGL)
+ *   • slow connections / Data Saver (smooth-scroll's JS cost isn't
+ *     justified when bandwidth is precious)
+ *   • coarse-pointer devices (touch — smooth scroll competes with
+ *     native momentum scroll on mobile, always worse)
+ *
+ * SSR-safe: server snapshot is always false; the client effect upgrades.
+ */
+export function useShouldRenderSmoothScroll(): boolean {
+  const prefersReducedMotion = useReducedMotion();
+  const flagsAllow = useSyncExternalStore(
+    subscribeToFlagSources,
+    () =>
+      !hasLiteParam() &&
+      !hasNoMotionParam() &&
+      !hasSlowConnection() &&
+      !hasCoarsePointer(),
+    () => false,
+  );
+  if (prefersReducedMotion) return false;
+  return flagsAllow;
+}
+
+/** Returns true if `?nomo=1` is present in the URL. SSR-safe. */
+function hasNoMotionParam(): boolean {
+  if (typeof window === "undefined") return false;
+  return new URLSearchParams(window.location.search).get("nomo") === "1";
+}
+
+/** Returns true on coarse-pointer (touch) devices. SSR-safe. */
+function hasCoarsePointer(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia?.("(pointer: coarse)").matches ?? false;
+}
+
+// ─── Input-modality tracker (Plan 5) ────────────────────────────────
+// Module-level state shared across all useInputModality consumers so
+// they reach the same conclusion identically.
+let lastKeyboardAt = -Infinity;
+let lastPointerKind: "mouse" | "pen" | "touch" = "mouse";
+const modalityListeners = new Set<() => void>();
+
+function subscribeToModality(callback: () => void): () => void {
+  if (typeof window === "undefined") return () => {};
+  modalityListeners.add(callback);
+  // Bind the global window listeners once on first subscriber.
+  if (modalityListeners.size === 1) {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return; // Only Tab signals keyboard nav.
+      lastKeyboardAt = performance.now();
+      modalityListeners.forEach((fn) => fn());
+    };
+    const onPointer = (e: PointerEvent) => {
+      lastPointerKind = e.pointerType as "mouse" | "pen" | "touch";
+      modalityListeners.forEach((fn) => fn());
+    };
+    window.addEventListener("keydown", onKey);
+    window.addEventListener("pointerdown", onPointer);
+    modalityCleanup = () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("pointerdown", onPointer);
+    };
+  }
+  return () => {
+    modalityListeners.delete(callback);
+    if (modalityListeners.size === 0) {
+      modalityCleanup?.();
+      modalityCleanup = null;
+    }
+  };
+}
+let modalityCleanup: (() => void) | null = null;
+
+/**
+ * Tracks the user's current primary input modality so motion features
+ * (custom cursor, magnetic effects) can suppress themselves when the
+ * user switches to keyboard / screen-reader navigation.
+ *
+ * Returns one of:
+ *   • "pointer" — last interaction was mouse / pen / trackpad
+ *   • "keyboard" — Tab pressed within the last `keyboardWindowMs`
+ *   • "touch" — pointerdown with pointerType === "touch"
+ */
+export function useInputModality(
+  keyboardWindowMs: number = 5000,
+): "pointer" | "keyboard" | "touch" {
+  return useSyncExternalStore(
+    subscribeToModality,
+    () => {
+      if (lastPointerKind === "touch") return "touch" as const;
+      const since = performance.now() - lastKeyboardAt;
+      if (since < keyboardWindowMs) return "keyboard" as const;
+      return "pointer" as const;
+    },
+    () => "pointer" as const, // SSR default
+  );
+}
+
+/**
  * Subtle magnetic-cursor effect for buttons / nav links.
  *
  * Tracks pointer position relative to the element's centre and writes
