@@ -13,7 +13,7 @@ export const personalData = {
   title: "Senior Backend & DevOps / Kubernetes Engineer",
 
   // EDIT: Your value proposition tagline (must be < 200 chars per personal.test.ts)
-  tagline: "8+ years building production Kubernetes platforms and .NET microservices for South African banking. AWS · Terraform · ArgoCD · Helm. Microsoft Certified: Azure Developer Associate.",
+  tagline: "I build production Kubernetes platforms and .NET services. 8+ years, mostly South African banking. AWS · Terraform · ArgoCD · Helm. Microsoft Certified: Azure Developer Associate.",
 
   // EDIT: Your email
   email: "ltmaseko7@gmail.com",
@@ -42,19 +42,39 @@ export const personalData = {
   // EDIT: Resume file path
   resumeUrl: "/resume.pdf",
 
-  // EDIT: Profile image — local headshot at public/images/profile.jpg
-  profileImage: "/images/profile.jpg",
+  // EDIT: Profile image — local headshot. AVIF/WebP/JPEG variants live at
+  // public/brand/photo/thulani-{256,512,1024}.{avif,webp,jpg}. The base path
+  // here is the JPEG fallback used by older browsers; <picture> sources
+  // upgrade to WebP/AVIF where supported.
+  profileImage: "/brand/photo/thulani-512.jpg",
+  profileImageSources: {
+    avif: {
+      sm: "/brand/photo/thulani-256.avif",
+      md: "/brand/photo/thulani-512.avif",
+      lg: "/brand/photo/thulani-1024.avif",
+    },
+    webp: {
+      sm: "/brand/photo/thulani-256.webp",
+      md: "/brand/photo/thulani-512.webp",
+      lg: "/brand/photo/thulani-1024.webp",
+    },
+    jpg: {
+      sm: "/brand/photo/thulani-256.jpg",
+      md: "/brand/photo/thulani-512.jpg",
+      lg: "/brand/photo/thulani-1024.jpg",
+    },
+  },
 };
 
 export const seoData = {
   // EDIT: SEO title
-  title: "Thulani Maseko — Senior Kubernetes & DevOps Engineer | Prudentia Digital",
+  title: "Thulani Maseko — senior software developer",
 
   // EDIT: Meta description
   description:
-    "Senior Backend & DevOps / Kubernetes Engineer in South Africa. 8+ years building production banking systems with .NET, AWS EKS, Terraform, ArgoCD, Kafka. Microsoft Certified Azure Developer Associate.",
+    "I build production Kubernetes platforms and .NET services. 8+ years, mostly South African banking. AWS · Terraform · ArgoCD. Microsoft Certified Azure Developer Associate.",
 
   // EDIT: Keywords
   keywords:
-    "kubernetes engineer, devops engineer south africa, aws eks consultant, terraform freelancer, .net microservices, hire kubernetes consultant, prudentia digital, thulani maseko",
+    "kubernetes engineer, devops engineer south africa, aws eks consultant, terraform freelancer, .net microservices, hire kubernetes consultant, thulani maseko",
 };

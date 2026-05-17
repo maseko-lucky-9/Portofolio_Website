@@ -55,9 +55,9 @@ describe("HeroSection", () => {
     expect(linkedinLink).toHaveAttribute("href", personalData.social.linkedin);
   });
 
-  it('renders "View My Work" button', () => {
+  it('renders projects CTA button', () => {
     renderHeroSection();
-    expect(screen.getByText("View My Work")).toBeInTheDocument();
+    expect(screen.getByText("See what I've built")).toBeInTheDocument();
   });
 
   it('renders "Contact Me" button', () => {

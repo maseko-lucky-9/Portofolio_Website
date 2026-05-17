@@ -146,7 +146,7 @@ export function HeroSection() {
               className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start mb-9"
             >
               <button onClick={scrollToProjects} className="btn-hero-primary">
-                View My Work
+                See what I've built
                 <ArrowDown className="w-4 h-4" />
               </button>
               <button onClick={scrollToContact} className="btn-hero-secondary">
@@ -226,14 +226,28 @@ export function HeroSection() {
                 style={{ background: "var(--gradient-primary)" }}
               />
               {/* Photo */}
-              <img
-                src={personalData.profileImage}
-                alt={`${personalData.name} profile photo`}
-                fetchPriority="high"
-                width={320}
-                height={320}
-                className="absolute inset-[5px] z-10 w-[calc(100%-10px)] h-[calc(100%-10px)] rounded-full object-cover"
-              />
+              <picture>
+                <source
+                  type="image/avif"
+                  srcSet={`${personalData.profileImageSources.avif.sm} 256w, ${personalData.profileImageSources.avif.md} 512w, ${personalData.profileImageSources.avif.lg} 1024w`}
+                  sizes="(min-width: 1024px) 320px, 240px"
+                />
+                <source
+                  type="image/webp"
+                  srcSet={`${personalData.profileImageSources.webp.sm} 256w, ${personalData.profileImageSources.webp.md} 512w, ${personalData.profileImageSources.webp.lg} 1024w`}
+                  sizes="(min-width: 1024px) 320px, 240px"
+                />
+                <img
+                  src={personalData.profileImage}
+                  srcSet={`${personalData.profileImageSources.jpg.sm} 256w, ${personalData.profileImageSources.jpg.md} 512w, ${personalData.profileImageSources.jpg.lg} 1024w`}
+                  sizes="(min-width: 1024px) 320px, 240px"
+                  alt={`${personalData.name} profile photo`}
+                  fetchPriority="high"
+                  width={320}
+                  height={320}
+                  className="absolute inset-[5px] z-10 w-[calc(100%-10px)] h-[calc(100%-10px)] rounded-full object-cover"
+                />
+              </picture>
               {/* Floating badge */}
               <motion.div
                 animate={{ y: [0, -6, 0] }}

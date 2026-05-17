@@ -116,8 +116,7 @@ export function ProjectsSection() {
           </span>
           <h2 id="projects-heading" className="section-title">Featured Projects</h2>
           <p className="section-subtitle mx-auto">
-            A selection of projects showcasing my expertise in building scalable,
-            user-focused applications.
+            Things I've shipped to production — banking, infra, internal platforms.
           </p>
         </motion.div>
 

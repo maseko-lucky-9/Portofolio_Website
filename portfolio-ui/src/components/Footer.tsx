@@ -1,5 +1,6 @@
 import { Github, Linkedin, Twitter } from "lucide-react";
 import { personalData } from "@/data/personal";
+import { Logo } from "@/components/ui/Logo";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -35,10 +36,9 @@ export function Footer() {
             <a
               href="#"
               onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-              className="text-xl font-bold inline-block mb-2 transition-opacity hover:opacity-80"
+              className="inline-block mb-2 transition-opacity hover:opacity-80"
             >
-              <span className="text-gradient-primary">{personalData.name.split(" ")[0]}</span>
-              <span className="text-muted-foreground font-medium">.dev</span>
+              <Logo size="lg" />
             </a>
             <p className="text-sm text-muted-foreground">{personalData.title}</p>
           </div>

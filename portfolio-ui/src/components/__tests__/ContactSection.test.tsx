@@ -30,9 +30,9 @@ function renderContactSection() {
 }
 
 describe("ContactSection", () => {
-  it('renders "Get in Touch" heading', () => {
+  it('renders contact heading', () => {
     renderContactSection();
-    expect(screen.getByText("Get in Touch")).toBeInTheDocument();
+    expect(screen.getByText("Say hi")).toBeInTheDocument();
   });
 
   it("renders name form field", () => {
