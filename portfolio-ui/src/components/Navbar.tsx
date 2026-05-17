@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Menu, X, Sun, Moon, Monitor } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
-import { personalData } from "@/data/personal";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/ui/Logo";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -74,10 +74,10 @@ export function Navbar() {
       </AnimatePresence>
 
       <div className="section-container !py-0 relative flex items-center justify-between">
-        {/* Logo */}
+        {/* Brand */}
         <motion.a
           href="#"
-          className="text-lg font-bold z-10"
+          className="z-10"
           whileHover={{ scale: 1.04 }}
           transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
           onClick={(e) => {
@@ -85,8 +85,7 @@ export function Navbar() {
             window.scrollTo({ top: 0, behavior: "smooth" });
           }}
         >
-          <span className="text-gradient-primary">{personalData.name.split(" ")[0]}</span>
-          <span className="text-muted-foreground font-medium">.dev</span>
+          <Logo size="md" />
         </motion.a>
 
         {/* Desktop navigation */}
