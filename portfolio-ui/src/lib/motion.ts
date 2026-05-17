@@ -7,7 +7,7 @@
  * Plan 3 of the v2 ladder: micro-interactions only. No scroll-jacking,
  * no R3F, no custom cursor (Plans 4–5).
  */
-import { useEffect, useRef, type RefObject } from "react";
+import { useEffect, useRef, useSyncExternalStore, type RefObject } from "react";
 import {
   useReducedMotion,
   type Transition,
@@ -89,6 +89,78 @@ export function useMotionProps<T extends Record<string, unknown>>(
 ): T | Record<string, never> {
   const prefersReducedMotion = useReducedMotion();
   return prefersReducedMotion ? {} : animated;
+}
+
+// ─── R3F feature-flag layer (Plan 4) ────────────────────────────────
+// Composes every condition under which a WebGL/Three.js scene should be
+// skipped in favour of a static or CSS fallback. Single source of truth
+// so every R3F entry point (AuroraBackground today; future scenes
+// tomorrow) reaches the same decision identically.
+
+/** Returns true if `?lite=1` is present in the URL. SSR-safe. */
+function hasLiteParam(): boolean {
+  if (typeof window === "undefined") return false;
+  return new URLSearchParams(window.location.search).get("lite") === "1";
+}
+
+/**
+ * Returns true on slow connections or when the user enabled Data Saver.
+ * Uses the Network Information API (Chromium / Edge / Opera). Always
+ * returns false where the API is missing (Safari, Firefox).
+ */
+function hasSlowConnection(): boolean {
+  if (typeof navigator === "undefined") return false;
+  // The Network Information API is non-standard; type it locally.
+  type NetInfo = {
+    saveData?: boolean;
+    effectiveType?: "slow-2g" | "2g" | "3g" | "4g";
+  };
+  const conn = (navigator as Navigator & { connection?: NetInfo }).connection;
+  if (!conn) return false;
+  if (conn.saveData) return true;
+  const slow: Array<NetInfo["effectiveType"]> = ["slow-2g", "2g", "3g"];
+  return conn.effectiveType ? slow.includes(conn.effectiveType) : false;
+}
+
+/**
+ * Subscribes to URL changes (popstate) and connection-info changes so the
+ * hook re-evaluates when the user toggles `?lite=1` or the connection
+ * shifts. `useSyncExternalStore` keeps SSR safe and dedupes notifications.
+ */
+function subscribeToFlagSources(callback: () => void): () => void {
+  if (typeof window === "undefined") return () => {};
+  window.addEventListener("popstate", callback);
+  const conn = (navigator as Navigator & { connection?: EventTarget }).connection;
+  conn?.addEventListener?.("change", callback);
+  return () => {
+    window.removeEventListener("popstate", callback);
+    conn?.removeEventListener?.("change", callback);
+  };
+}
+
+/**
+ * Returns true when the runtime should render WebGL scenes. Returns
+ * false when ANY of the following holds:
+ *   • `import.meta.env.VITE_DISABLE_WEBGL === "true"` (Playwright builds)
+ *   • prefers-reduced-motion at the OS / browser level
+ *   • `?lite=1` URL query param (manual feature-flag kill switch;
+ *     toggled by the user, sometimes by recruiters on slow corp wifi)
+ *   • `navigator.connection.saveData === true`
+ *   • `navigator.connection.effectiveType` is `slow-2g | 2g | 3g`
+ *
+ * SSR-safe: returns false until the client hydrates (we never paint
+ * WebGL before the first client render anyway).
+ */
+export function useShouldRenderWebGL(): boolean {
+  const prefersReducedMotion = useReducedMotion();
+  const flagsAllow = useSyncExternalStore(
+    subscribeToFlagSources,
+    () => !hasLiteParam() && !hasSlowConnection(),
+    () => false, // SSR snapshot: assume false; client effect upgrades.
+  );
+  if (import.meta.env.VITE_DISABLE_WEBGL === "true") return false;
+  if (prefersReducedMotion) return false;
+  return flagsAllow;
 }
 
 /**
