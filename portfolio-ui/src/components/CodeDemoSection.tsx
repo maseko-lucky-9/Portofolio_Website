@@ -32,7 +32,11 @@ export function CodeDemoSection() {
   }, [activeExample]);
 
   return (
-    <section id="code-demo" className="py-20 bg-muted/30 section-mesh">
+    <section
+      id="code-demo"
+      className="py-20 section-mesh"
+      style={{ background: "hsl(var(--muted) / var(--opacity-soft))" }}
+    >
       <div className="section-container">
         {/* Section Header */}
         <motion.div

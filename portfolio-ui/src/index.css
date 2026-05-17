@@ -20,13 +20,29 @@
 
 @layer base {
   :root {
-    /* Brand — Quiet Operator: warm coral primary, electric mint accent */
-    --primary: 12 100% 67%;
+    /* Brand — Quiet Operator: deepened coral primary, electric mint, violet signal */
+    --primary: 10 100% 62%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 12 100% 75%;
+    --primary-glow: 10 100% 70%;
 
-    --secondary: 170 76% 64%;
+    --secondary: 168 82% 54%;
     --secondary-foreground: 222 30% 10%;
+
+    /* Brand signal — violet, used for emphasis/CTA in additive contexts.
+       Independent of --accent so shadcn ghost/hover primitives stay subtle. */
+    --brand-violet: 262 78% 60%;
+    --brand-violet-foreground: 0 0% 100%;
+
+    /* Skills category tokens — replaces hardcoded HSL in SkillsSection.tsx */
+    --skill-frontend: 232 85% 55%;
+    --skill-backend: 158 80% 38%;
+    --skill-devops: 280 72% 55%;
+
+    /* Opacity scale — unitless numbers consumed via Tailwind arbitrary-value
+       classes (bg-muted/[var(--opacity-soft)]) or inline style alpha. */
+    --opacity-subtle: 0.06;
+    --opacity-soft: 0.30;
+    --opacity-overlay: 0.80;
 
     /* Light mode — bone, warm not white */
     --background: 40 30% 96%;
@@ -49,7 +65,7 @@
 
     --border: 40 15% 86%;
     --input: 40 15% 86%;
-    --ring: 12 100% 67%;
+    --ring: 10 100% 62%;
 
     --radius: 0.875rem;
 
@@ -57,12 +73,12 @@
     --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
     --ease-out: cubic-bezier(0, 0, 0.2, 1);
 
-    /* Gradient tokens — coral → mint → bone */
-    --gradient-primary: linear-gradient(135deg, hsl(12, 100%, 67%), hsl(20, 95%, 60%));
-    --gradient-secondary: linear-gradient(135deg, hsl(170, 76%, 64%), hsl(180, 70%, 52%));
+    /* Gradient tokens — coral → mint → bone (refreshed to use new primary/secondary) */
+    --gradient-primary: linear-gradient(135deg, hsl(10, 100%, 62%), hsl(20, 95%, 58%));
+    --gradient-secondary: linear-gradient(135deg, hsl(168, 82%, 54%), hsl(180, 75%, 48%));
     --gradient-hero: linear-gradient(160deg, hsl(40, 30%, 96%) 0%, hsl(20, 50%, 95%) 50%, hsl(170, 40%, 95%) 100%);
     --gradient-card: linear-gradient(180deg, hsl(0, 0%, 100%) 0%, hsl(40, 25%, 98%) 100%);
-    --gradient-mesh: radial-gradient(ellipse 80% 60% at 50% -10%, hsl(12, 100%, 88% / 0.55) 0%, transparent 70%);
+    --gradient-mesh: radial-gradient(ellipse 80% 60% at 50% -10%, hsl(10, 100%, 85% / 0.55) 0%, transparent 70%);
 
     /* Shadow scale (structural, theme-neutral) */
     --shadow-xs: 0 1px 2px hsl(220 13% 10% / 0.04);
@@ -70,18 +86,19 @@
     --shadow-md: 0 4px 8px -2px hsl(220 13% 10% / 0.08), 0 2px 4px -2px hsl(220 13% 10% / 0.06);
     --shadow-lg: 0 12px 24px -4px hsl(220 13% 10% / 0.10), 0 4px 8px -4px hsl(220 13% 10% / 0.06);
     --shadow-xl: 0 24px 48px -8px hsl(220 13% 10% / 0.14), 0 8px 16px -8px hsl(220 13% 10% / 0.08);
-    --shadow-glow: 0 0 0 1px hsl(12 100% 67% / 0.14), 0 4px 16px hsl(12 100% 67% / 0.22);
-    --shadow-glow-secondary: 0 0 0 1px hsl(170 76% 64% / 0.14), 0 4px 16px hsl(170 76% 64% / 0.22);
+    --shadow-glow: 0 0 0 1px hsl(10 100% 62% / 0.14), 0 4px 16px hsl(10 100% 62% / 0.22);
+    --shadow-glow-secondary: 0 0 0 1px hsl(168 82% 54% / 0.14), 0 4px 16px hsl(168 82% 54% / 0.22);
+    --shadow-glow-violet: 0 0 0 1px hsl(262 78% 60% / 0.16), 0 4px 16px hsl(262 78% 60% / 0.24);
 
     /* Sidebar tokens */
     --sidebar-background: 40 25% 98%;
     --sidebar-foreground: 222 15% 30%;
-    --sidebar-primary: 12 100% 67%;
+    --sidebar-primary: 10 100% 62%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 170 76% 92%;
     --sidebar-accent-foreground: 170 80% 22%;
     --sidebar-border: 40 15% 86%;
-    --sidebar-ring: 12 100% 67%;
+    --sidebar-ring: 10 100% 62%;
   }
 
   .dark {
@@ -95,12 +112,23 @@
     --popover: 222 25% 9%;
     --popover-foreground: 40 30% 95%;
 
-    --primary: 12 100% 67%;
+    --primary: 10 100% 66%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 12 100% 75%;
+    --primary-glow: 10 100% 72%;
 
-    --secondary: 170 76% 64%;
+    --secondary: 168 82% 58%;
     --secondary-foreground: 222 30% 10%;
+
+    --brand-violet: 262 82% 68%;
+    --brand-violet-foreground: 0 0% 100%;
+
+    --skill-frontend: 232 90% 70%;
+    --skill-backend: 158 75% 52%;
+    --skill-devops: 280 80% 68%;
+
+    --opacity-subtle: 0.06;
+    --opacity-soft: 0.30;
+    --opacity-overlay: 0.80;
 
     --muted: 222 20% 14%;
     --muted-foreground: 40 15% 65%;
@@ -113,14 +141,14 @@
 
     --border: 222 20% 16%;
     --input: 222 20% 16%;
-    --ring: 12 100% 67%;
+    --ring: 10 100% 66%;
 
     /* Dark gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(12, 100%, 67%), hsl(20, 95%, 58%));
-    --gradient-secondary: linear-gradient(135deg, hsl(170, 76%, 64%), hsl(180, 70%, 52%));
+    --gradient-primary: linear-gradient(135deg, hsl(10, 100%, 66%), hsl(20, 95%, 58%));
+    --gradient-secondary: linear-gradient(135deg, hsl(168, 82%, 58%), hsl(180, 75%, 52%));
     --gradient-hero: linear-gradient(160deg, hsl(222, 30%, 6%) 0%, hsl(220, 28%, 7%) 50%, hsl(218, 25%, 8%) 100%);
     --gradient-card: linear-gradient(180deg, hsl(222, 25%, 9%) 0%, hsl(222, 28%, 7%) 100%);
-    --gradient-mesh: radial-gradient(ellipse 80% 60% at 50% -10%, hsl(12, 100%, 65% / 0.10) 0%, transparent 70%);
+    --gradient-mesh: radial-gradient(ellipse 80% 60% at 50% -10%, hsl(10, 100%, 66% / 0.12) 0%, transparent 70%);
 
     /* Dark shadows */
     --shadow-xs: 0 1px 2px hsl(0 0% 0% / 0.20);
@@ -128,18 +156,19 @@
     --shadow-md: 0 4px 8px -2px hsl(0 0% 0% / 0.40), 0 2px 4px -2px hsl(0 0% 0% / 0.30);
     --shadow-lg: 0 12px 24px -4px hsl(0 0% 0% / 0.50), 0 4px 8px -4px hsl(0 0% 0% / 0.35);
     --shadow-xl: 0 24px 48px -8px hsl(0 0% 0% / 0.60), 0 8px 16px -8px hsl(0 0% 0% / 0.40);
-    --shadow-glow: 0 0 0 1px hsl(12 100% 67% / 0.22), 0 4px 20px hsl(12 100% 67% / 0.28);
-    --shadow-glow-secondary: 0 0 0 1px hsl(170 76% 64% / 0.20), 0 4px 20px hsl(170 76% 64% / 0.25);
+    --shadow-glow: 0 0 0 1px hsl(10 100% 66% / 0.22), 0 4px 20px hsl(10 100% 66% / 0.30);
+    --shadow-glow-secondary: 0 0 0 1px hsl(168 82% 58% / 0.20), 0 4px 20px hsl(168 82% 58% / 0.28);
+    --shadow-glow-violet: 0 0 0 1px hsl(262 82% 68% / 0.22), 0 4px 20px hsl(262 82% 68% / 0.30);
 
     /* Dark sidebar */
     --sidebar-background: 222 30% 7%;
     --sidebar-foreground: 40 25% 88%;
-    --sidebar-primary: 12 100% 67%;
+    --sidebar-primary: 10 100% 66%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 170 50% 16%;
     --sidebar-accent-foreground: 170 76% 70%;
     --sidebar-border: 222 20% 16%;
-    --sidebar-ring: 12 100% 67%;
+    --sidebar-ring: 10 100% 66%;
   }
 }
 
@@ -245,6 +274,29 @@
     color: hsl(var(--primary-foreground));
     transform: scale(1.06);
     box-shadow: var(--shadow-glow);
+  }
+
+  /* ── Social link (token-driven; replaces inline onMouseEnter/Leave) ── */
+  .social-link {
+    @apply inline-flex items-center justify-center rounded-xl transition-all;
+    background: hsl(var(--muted));
+    color: hsl(var(--foreground));
+    border: 1px solid hsl(var(--border));
+    transition-duration: 200ms;
+    transition-timing-function: var(--ease-spring);
+  }
+
+  .social-link:hover {
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+    border-color: transparent;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-glow);
+  }
+
+  .social-link:focus-visible {
+    outline: 2px solid hsl(var(--primary) / 0.45);
+    outline-offset: 2px;
   }
 
   /* ── Section layout ── */

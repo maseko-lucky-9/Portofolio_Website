@@ -69,25 +69,7 @@ export function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={label}
-                className="w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200"
-                style={{
-                  background: "hsl(var(--muted))",
-                  border: "1px solid hsl(var(--border))",
-                }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = "hsl(var(--primary))";
-                  (e.currentTarget as HTMLElement).style.color = "hsl(var(--primary-foreground))";
-                  (e.currentTarget as HTMLElement).style.borderColor = "transparent";
-                  (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)";
-                  (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-glow)";
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = "hsl(var(--muted))";
-                  (e.currentTarget as HTMLElement).style.color = "";
-                  (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--border))";
-                  (e.currentTarget as HTMLElement).style.transform = "";
-                  (e.currentTarget as HTMLElement).style.boxShadow = "";
-                }}
+                className="social-link w-9 h-9"
               >
                 <Icon className="w-4 h-4" />
               </a>

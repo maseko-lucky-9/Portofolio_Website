@@ -81,7 +81,12 @@ export function BlogSection() {
   }, [apiResponse]);
 
   return (
-    <section id="blog" aria-labelledby="blog-heading" className="py-20 bg-muted/30 section-mesh">
+    <section
+      id="blog"
+      aria-labelledby="blog-heading"
+      className="py-20 section-mesh"
+      style={{ background: "hsl(var(--muted) / var(--opacity-soft))" }}
+    >
       <div className="section-container">
         {/* Section Header */}
         <motion.div
@@ -172,7 +177,13 @@ export function BlogSection() {
                       height={250}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-background/60 to-transparent" />
+                    <div
+                      className="absolute inset-0"
+                      style={{
+                        background:
+                          "linear-gradient(to top, hsl(var(--background) / var(--opacity-overlay)), transparent)",
+                      }}
+                    />
 
                     {/* Read time badge */}
                     <div

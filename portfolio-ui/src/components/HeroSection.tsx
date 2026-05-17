@@ -73,8 +73,14 @@ export function HeroSection() {
       {/* Ambient glow blobs — light mode */}
       {!prefersReducedMotion && (
         <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden>
-          <div className="absolute top-1/4 -left-1/4 w-[600px] h-[600px] rounded-full opacity-[0.07] dark:opacity-[0.05] bg-primary blur-[120px] animate-blob" />
-          <div className="absolute bottom-1/4 -right-1/4 w-[500px] h-[500px] rounded-full opacity-[0.06] dark:opacity-[0.04] bg-secondary blur-[100px] animate-blob-delay" />
+          <div
+            className="absolute top-1/4 -left-1/4 w-[600px] h-[600px] rounded-full bg-primary blur-[120px] animate-blob"
+            style={{ opacity: "var(--opacity-subtle)" }}
+          />
+          <div
+            className="absolute bottom-1/4 -right-1/4 w-[500px] h-[500px] rounded-full bg-secondary blur-[100px] animate-blob-delay"
+            style={{ opacity: "var(--opacity-subtle)" }}
+          />
         </div>
       )}
 
