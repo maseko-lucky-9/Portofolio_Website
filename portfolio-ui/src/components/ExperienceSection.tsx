@@ -157,7 +157,7 @@ function ExperienceRow({
           <span className="experience-card-bar" aria-hidden="true" />
 
           {/* Step number */}
-          <div className="font-mono text-[13px] tracking-wider text-[oklch(var(--primary)/0.8)] mb-3">
+          <div className="font-sans uppercase text-[10px] tracking-[0.18em] font-semibold text-[oklch(var(--primary)/0.8)] mb-3">
             {stepNumber}
           </div>
 
@@ -202,30 +202,36 @@ function ExperienceRow({
             </p>
           )}
 
-          {/* Expanded details */}
-          {reduceMotion ? (
-            <div hidden={!isOpen}>{expandedPanel}</div>
-          ) : (
-            <AnimatePresence initial={false}>
-              {isOpen && (
-                <motion.div
-                  key="details"
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={springTransition}
-                  style={{ willChange: "height", overflow: "hidden" }}
-                >
-                  {expandedPanel}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          )}
+          {/* Expanded details — grid-template-rows transition replaces
+              motion height:"auto" to avoid animating layout properties.
+              motion-reduce:transition-none honors prefers-reduced-motion
+              (snap, no animation). */}
+          <div
+            className="grid transition-[grid-template-rows] motion-reduce:transition-none"
+            style={{
+              gridTemplateRows: isOpen ? "1fr" : "0fr",
+              transitionDuration: "var(--duration-base)",
+              transitionTimingFunction: "var(--ease-spring)",
+            }}
+            aria-hidden={!isOpen}
+          >
+            <div
+              className="overflow-hidden"
+              style={{
+                opacity: isOpen ? 1 : 0,
+                transition: reduceMotion
+                  ? "none"
+                  : "opacity var(--duration-base) var(--ease-spring)",
+              }}
+            >
+              {expandedPanel}
+            </div>
+          </div>
 
           {/* Pill */}
           {pillText && (
             <div
-              className="inline-flex items-center mt-4 px-3 py-1 rounded-full font-mono uppercase tracking-[0.15em] text-[10px]"
+              className="inline-flex items-center mt-4 px-3 py-1 rounded-full font-sans uppercase tracking-[0.18em] font-semibold text-[10px]"
               style={{
                 background: "oklch(var(--primary) / 0.08)",
                 color: "oklch(var(--primary))",
@@ -290,7 +296,7 @@ export function ExperienceSection() {
           transition={springTransition}
           className="text-center mb-16"
         >
-          <span className="inline-block text-xs font-mono uppercase tracking-[0.2em] text-[oklch(var(--primary)/0.8)] mb-3">
+          <span className="inline-block text-[10px] font-sans uppercase tracking-[0.18em] font-semibold text-[oklch(var(--primary)/0.8)] mb-3">
             Career
           </span>
           <h2 id="experience-heading" className="section-title">
