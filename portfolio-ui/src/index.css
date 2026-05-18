@@ -347,6 +347,49 @@
     background: linear-gradient(to bottom, hsl(var(--primary) / 0.4), hsl(var(--border)));
   }
 
+  /* ── Zigzag timeline (Chase-style) ── */
+  .timeline-spine {
+    @apply absolute top-0 bottom-0 w-[2px] z-0 pointer-events-none;
+    background: linear-gradient(
+      to bottom,
+      hsl(var(--primary) / 0.5),
+      hsl(var(--primary) / 0.2),
+      transparent
+    );
+  }
+
+  .timeline-node {
+    @apply absolute w-[18px] h-[18px] rounded-full z-10;
+    border: 2px solid hsl(var(--primary));
+    background: hsl(var(--background));
+    box-shadow:
+      0 0 0 4px hsl(var(--background)),
+      var(--shadow-glow);
+  }
+
+  .timeline-node::after {
+    content: "";
+    @apply absolute rounded-full;
+    inset: 4px;
+    background: hsl(var(--primary));
+  }
+
+  .timeline-grid-bg {
+    @apply absolute inset-0 -z-10 pointer-events-none;
+    color: hsl(var(--border));
+    opacity: 0.06;
+  }
+
+  .experience-card-bar {
+    @apply absolute top-0 left-0 right-0 h-[2px] rounded-t-xl pointer-events-none;
+    background: linear-gradient(
+      to right,
+      hsl(var(--primary)),
+      hsl(var(--primary) / 0.5) 40%,
+      transparent
+    );
+  }
+
   /* ── Code editor ── */
   .code-editor-wrapper {
     @apply rounded-2xl overflow-hidden border bg-card;
