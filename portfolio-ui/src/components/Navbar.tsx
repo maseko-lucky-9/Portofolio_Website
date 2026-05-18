@@ -161,11 +161,9 @@ export function Navbar() {
             <div
               className="mx-4 mt-2 rounded-2xl overflow-hidden"
               style={{
-                backdropFilter: "blur(20px)",
-                WebkitBackdropFilter: "blur(20px)",
-                background: "oklch(var(--card) / 0.9)",
-                border: "1px solid oklch(var(--border) / 0.7)",
-                boxShadow: "var(--shadow-xl)",
+                background: "oklch(var(--card))",
+                border: "1px solid oklch(var(--border))",
+                boxShadow: "var(--shadow-lg)",
               }}
             >
               <div className="flex flex-col p-3 gap-1">
