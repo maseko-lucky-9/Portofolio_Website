@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { execFileSync } from "node:child_process";
 import { componentTagger } from "lovable-tagger";
+import { visualizer } from "rollup-plugin-visualizer";
 
 // Build-time commit count for the `shipped:` meter in the hero.
 // execFileSync with array args — no shell, no injection surface.
@@ -52,7 +53,17 @@ export default defineConfig(({ mode }) => {
       host: "::",
       port: 8080,
     },
-    plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
+    plugins: [
+      react(),
+      mode === "development" && componentTagger(),
+      process.env.ANALYZE === "true" &&
+        visualizer({
+          filename: "docs/perf/bundle-report.html",
+          gzipSize: true,
+          brotliSize: true,
+          template: "treemap",
+        }),
+    ].filter(Boolean),
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),

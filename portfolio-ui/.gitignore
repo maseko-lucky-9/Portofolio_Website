@@ -23,3 +23,9 @@ dist-ssr
 *.sln
 *.sw?
 assets-source/
+
+# Local perf artifacts — keep baseline.md tracked, ignore large HTML/JSON reports
+docs/perf/*.html
+docs/perf/*-trace.json
+docs/perf/*-lighthouse-*.json
+
