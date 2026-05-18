@@ -9,7 +9,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ArticleStatus } from "@/types/api";
 import type { Article } from "@/types/api";
 
-const springTransition = { type: "spring", stiffness: 260, damping: 26 };
+import { SPRING_DEFAULT as springTransition } from "@/lib/motion";
+// (re-exported as `springTransition` to minimize diff)
 
 // Map API Article to the shape the blog template expects
 interface DisplayBlogPost {

@@ -65,16 +65,20 @@ class ArticlesService extends BaseService<Article> {
 
   /**
    * Create article (admin)
+   *
+   * `tags` is a branded string template type at the API contract layer.
+   * Service boundary accepts raw `string[]` from forms; runtime
+   * validation belongs to the API contract, not the service.
    */
   async createArticle(data: CreateArticleData): Promise<ApiResponse<Article>> {
-    return this.create(data);
+    return this.create(data as unknown as Partial<Article>);
   }
 
   /**
    * Update article (admin)
    */
   async updateArticle(data: UpdateArticleData): Promise<ApiResponse<Article>> {
-    return this.update(data.id, data);
+    return this.update(data.id, data as unknown as Partial<Article>);
   }
 
   /**

@@ -5,7 +5,8 @@ import { Play, Copy, Check, Terminal } from "lucide-react";
 import { codeExamples } from "@/data/codeExamples";
 import { useTheme } from "@/contexts/ThemeContext";
 
-const springTransition = { type: "spring", stiffness: 260, damping: 26 };
+import { SPRING_DEFAULT as springTransition } from "@/lib/motion";
+// (re-exported as `springTransition` to minimize diff)
 
 export function CodeDemoSection() {
   const [activeExample, setActiveExample] = useState(codeExamples[0]);

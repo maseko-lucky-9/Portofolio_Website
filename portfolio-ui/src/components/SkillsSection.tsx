@@ -12,7 +12,8 @@ import {
 import { Code2, Server, Cloud } from "lucide-react";
 import { skills, radarSkills, SkillCategory } from "@/data/skills";
 
-const springTransition = { type: "spring", stiffness: 280, damping: 26 };
+import { SPRING_SKILLS as springTransition } from "@/lib/motion";
+// (re-exported as `springTransition` to minimize diff)
 
 const categoryIcons = {
   frontend: Code2,

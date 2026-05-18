@@ -397,6 +397,9 @@ export interface ProjectQueryParams {
   search?: string;
   sortBy?: 'createdAt' | 'updatedAt' | 'views' | 'title' | 'sortOrder';
   order?: 'asc' | 'desc';
+  // Index signature — allows the interface to flow through the generic
+  // Record<string, unknown> shape used by service-base buildQueryString.
+  [key: string]: unknown;
 }
 
 export interface ArticleQueryParams {
@@ -407,7 +410,9 @@ export interface ArticleQueryParams {
   tag?: string;
   search?: string;
   sortBy?: 'createdAt' | 'publishedAt' | 'views' | 'title';
+  sortOrder?: 'asc' | 'desc'; // alias for `order`; emitted by some consumers.
   order?: 'asc' | 'desc';
+  [key: string]: unknown;
 }
 
 export interface AnalyticsQueryParams {

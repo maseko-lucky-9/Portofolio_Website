@@ -5,7 +5,8 @@ import { personalData } from "@/data/personal";
 import { PaperBackground } from "@/components/PaperBackground";
 import { useMagnetic } from "@/lib/motion";
 
-const springTransition = { type: "spring", stiffness: 260, damping: 24 };
+import { SPRING_HERO as springTransition } from "@/lib/motion";
+// (re-exported as `springTransition` to minimize diff)
 
 // Build-time commit count — reflects real shipping cadence, no runtime cost.
 const SHIPPED_TOTAL = Number.parseInt(__SHIPPED_COUNT__, 10) || 0;

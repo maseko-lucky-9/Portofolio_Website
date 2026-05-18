@@ -70,7 +70,8 @@ function ProjectCardSkeleton() {
   );
 }
 
-const springTransition = { type: "spring", stiffness: 260, damping: 26 };
+import { SPRING_DEFAULT as springTransition } from "@/lib/motion";
+// (re-exported as `springTransition` to minimize diff)
 
 export function ProjectsSection() {
   const [activeFilter, setActiveFilter] = useState<string | null>(null);

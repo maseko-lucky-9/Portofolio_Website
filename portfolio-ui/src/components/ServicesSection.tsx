@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
 import { Server, Cloud, Code2, CheckCircle2, ArrowRight } from "lucide-react";
 
-const springTransition = { type: "spring", stiffness: 260, damping: 26 };
+import { SPRING_DEFAULT as springTransition } from "@/lib/motion";
+// (re-exported as `springTransition` to minimize diff)
 
 interface Service {
   id: string;

@@ -24,6 +24,27 @@ export const DURATION = {
   slow: 0.48,
 } as const;
 
+// ─── Spring transitions (typed) ─────────────────────────────────────
+// Centralized to satisfy framer-motion's Transition<any> type — inline
+// object literals with `type: "spring"` infer as `string` not the
+// literal, which trips TS2322. Three tuples in actual use across the
+// codebase (enumerated 2026-05-18 via the audit-remediation pass).
+export const SPRING_DEFAULT: Transition = {
+  type: "spring",
+  stiffness: 260,
+  damping: 26,
+};
+export const SPRING_HERO: Transition = {
+  type: "spring",
+  stiffness: 260,
+  damping: 24,
+};
+export const SPRING_SKILLS: Transition = {
+  type: "spring",
+  stiffness: 280,
+  damping: 26,
+};
+
 // ─── Easing curves ──────────────────────────────────────────────────
 // Reference: Linear / Stripe / Material 3 style.
 export const EASE = {

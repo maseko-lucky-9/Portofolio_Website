@@ -20,7 +20,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 
-const springTransition = { type: "spring", stiffness: 260, damping: 26 };
+import { SPRING_DEFAULT as springTransition } from "@/lib/motion";
+// (re-exported as `springTransition` to minimize diff)
 
 // Form validation schema
 const contactSchema = z.object({
