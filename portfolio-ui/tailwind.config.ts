@@ -47,8 +47,6 @@ export default {
         primary: {
           DEFAULT: "oklch(var(--primary))",
           foreground: "oklch(var(--primary-foreground))",
-          // primary-glow stays HSL — Phase 9 delete candidate
-          glow: "hsl(var(--primary-glow))",
         },
         secondary: {
           DEFAULT: "oklch(var(--secondary))",
@@ -66,14 +64,6 @@ export default {
           DEFAULT: "oklch(var(--accent))",
           foreground: "oklch(var(--accent-foreground))",
         },
-        // Phase 9 delete — keep on HSL.
-        "brand-violet": {
-          DEFAULT: "hsl(var(--brand-violet))",
-          foreground: "hsl(var(--brand-violet-foreground))",
-        },
-        "skill-frontend": "hsl(var(--skill-frontend))",
-        "skill-backend": "hsl(var(--skill-backend))",
-        "skill-devops": "hsl(var(--skill-devops))",
         popover: {
           DEFAULT: "oklch(var(--popover))",
           foreground: "oklch(var(--popover-foreground))",

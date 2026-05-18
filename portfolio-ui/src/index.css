@@ -22,31 +22,22 @@
   =============================================
   DESIGN SYSTEM — Developer Portfolio
   =============================================
-  Neutrals + semantic-role tokens in OKLCH bare-component form.
-  Consumers wrap with oklch(var(--token)) or oklch(var(--token) / a).
-  Phase 1 migration 2026-05-18. Spring easing unchanged.
-
-  Tokens slated for Phase 9 deletion (brand-violet, skill-*, gradient-*,
-  shadow-glow*, primary-glow) remain on HSL — no migration value.
+  All tokens in OKLCH bare-component form. Consumers wrap with
+  oklch(var(--token)) or oklch(var(--token) / a). Single coral accent.
+  Phase 9 token sweep 2026-05-18: design-vocabulary orphans removed
+  (--gradient-*, --shadow-glow*, --brand-violet, --skill-*, --primary-glow,
+  .text-gradient-*, .gradient-border).
 */
 
 @layer base {
   :root {
-    /* Brand — coral retuned in OKLCH, perceptually equivalent. */
+    /* Brand — coral retuned in OKLCH. */
     --primary: 0.66 0.18 35;
     --primary-foreground: 0.99 0.005 70;
-    --primary-glow: 10 100% 70%; /* HSL — Phase 9 delete candidate */
 
-    /* Secondary semantic role (shadcn-required). OKLCH. */
+    /* Secondary semantic role (shadcn-required). */
     --secondary: 0.93 0.012 75;
     --secondary-foreground: 0.18 0.012 50;
-
-    /* DESIGN-VOCABULARY ORPHANS — Phase 9 delete (HSL retained). */
-    --brand-violet: 262 78% 60%;
-    --brand-violet-foreground: 0 0% 100%;
-    --skill-frontend: 232 85% 55%;
-    --skill-backend: 158 80% 38%;
-    --skill-devops: 280 72% 55%;
 
     /* Opacity scale. */
     --opacity-subtle: 0.06;
@@ -90,22 +81,12 @@
     --ease-decelerate: cubic-bezier(0, 0, 0.2, 1);
     --ease-accelerate: cubic-bezier(0.4, 0, 1, 1);
 
-    /* Gradient tokens — coral → mint → bone (refreshed to use new primary/secondary) */
-    --gradient-primary: linear-gradient(135deg, hsl(10, 100%, 62%), hsl(20, 95%, 58%));
-    --gradient-secondary: linear-gradient(135deg, hsl(168, 82%, 54%), hsl(180, 75%, 48%));
-    --gradient-hero: linear-gradient(160deg, hsl(40, 30%, 96%) 0%, hsl(20, 50%, 95%) 50%, hsl(170, 40%, 95%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(0, 0%, 100%) 0%, hsl(40, 25%, 98%) 100%);
-    --gradient-mesh: radial-gradient(ellipse 80% 60% at 50% -10%, hsl(10, 100%, 85% / 0.55) 0%, transparent 70%);
-
-    /* Shadow scale (structural, theme-neutral) */
+    /* Shadow scale (structural, theme-neutral). */
     --shadow-xs: 0 1px 2px hsl(220 13% 10% / 0.04);
     --shadow-sm: 0 1px 3px hsl(220 13% 10% / 0.06), 0 1px 2px hsl(220 13% 10% / 0.04);
     --shadow-md: 0 4px 8px -2px hsl(220 13% 10% / 0.08), 0 2px 4px -2px hsl(220 13% 10% / 0.06);
     --shadow-lg: 0 12px 24px -4px hsl(220 13% 10% / 0.10), 0 4px 8px -4px hsl(220 13% 10% / 0.06);
     --shadow-xl: 0 24px 48px -8px hsl(220 13% 10% / 0.14), 0 8px 16px -8px hsl(220 13% 10% / 0.08);
-    --shadow-glow: 0 0 0 1px hsl(10 100% 62% / 0.14), 0 4px 16px hsl(10 100% 62% / 0.22);
-    --shadow-glow-secondary: 0 0 0 1px hsl(168 82% 54% / 0.14), 0 4px 16px hsl(168 82% 54% / 0.22);
-    --shadow-glow-violet: 0 0 0 1px hsl(262 78% 60% / 0.16), 0 4px 16px hsl(262 78% 60% / 0.24);
 
     /* Sidebar tokens — OKLCH. */
     --sidebar-background: 0.98 0.006 70;
@@ -131,17 +112,9 @@
 
     --primary: 0.66 0.18 35;
     --primary-foreground: 0.18 0.012 50;
-    --primary-glow: 10 100% 72%; /* HSL — Phase 9 delete candidate */
 
     --secondary: 0.26 0.012 50;
     --secondary-foreground: 0.93 0.012 75;
-
-    /* DESIGN-VOCABULARY ORPHANS — Phase 9 delete (HSL retained). */
-    --brand-violet: 262 82% 68%;
-    --brand-violet-foreground: 0 0% 100%;
-    --skill-frontend: 232 90% 70%;
-    --skill-backend: 158 75% 52%;
-    --skill-devops: 280 80% 68%;
 
     --opacity-subtle: 0.06;
     --opacity-soft: 0.30;
@@ -160,22 +133,12 @@
     --input: 0.32 0.014 50;
     --ring: 0.66 0.18 35;
 
-    /* Dark gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(10, 100%, 66%), hsl(20, 95%, 58%));
-    --gradient-secondary: linear-gradient(135deg, hsl(168, 82%, 58%), hsl(180, 75%, 52%));
-    --gradient-hero: linear-gradient(160deg, hsl(222, 30%, 6%) 0%, hsl(220, 28%, 7%) 50%, hsl(218, 25%, 8%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(222, 25%, 9%) 0%, hsl(222, 28%, 7%) 100%);
-    --gradient-mesh: radial-gradient(ellipse 80% 60% at 50% -10%, hsl(10, 100%, 66% / 0.12) 0%, transparent 70%);
-
     /* Dark shadows */
     --shadow-xs: 0 1px 2px hsl(0 0% 0% / 0.20);
     --shadow-sm: 0 1px 3px hsl(0 0% 0% / 0.30), 0 1px 2px hsl(0 0% 0% / 0.20);
     --shadow-md: 0 4px 8px -2px hsl(0 0% 0% / 0.40), 0 2px 4px -2px hsl(0 0% 0% / 0.30);
     --shadow-lg: 0 12px 24px -4px hsl(0 0% 0% / 0.50), 0 4px 8px -4px hsl(0 0% 0% / 0.35);
     --shadow-xl: 0 24px 48px -8px hsl(0 0% 0% / 0.60), 0 8px 16px -8px hsl(0 0% 0% / 0.40);
-    --shadow-glow: 0 0 0 1px hsl(10 100% 66% / 0.22), 0 4px 20px hsl(10 100% 66% / 0.30);
-    --shadow-glow-secondary: 0 0 0 1px hsl(168 82% 58% / 0.20), 0 4px 20px hsl(168 82% 58% / 0.28);
-    --shadow-glow-violet: 0 0 0 1px hsl(262 82% 68% / 0.22), 0 4px 20px hsl(262 82% 68% / 0.30);
 
     /* Dark sidebar — OKLCH. */
     --sidebar-background: 0.20 0.012 50;
@@ -243,8 +206,8 @@
   /* ── Hero CTA buttons ── */
   .btn-hero-primary {
     @apply inline-flex items-center justify-center gap-2 rounded-xl px-7 py-3.5 font-semibold text-sm text-primary-foreground transition-all;
-    background: var(--gradient-primary);
-    box-shadow: var(--shadow-md), var(--shadow-glow);
+    background: oklch(var(--primary));
+    box-shadow: var(--shadow-md), var(--shadow-sm);
     transition-duration: var(--duration-base);
     transition-timing-function: var(--ease-spring);
     /* Magnetic offset (set by useMagnetic; 0 when not magnetised). */
@@ -273,7 +236,7 @@
     background: oklch(var(--primary) / 0.10);
     border-color: oklch(var(--primary) / 0.7);
     transform: translate(var(--magnetic-x, 0), calc(var(--magnetic-y, 0) - 2px)) scale(1.02);
-    box-shadow: var(--shadow-glow);
+    box-shadow: var(--shadow-sm);
   }
 
   .btn-hero-secondary:active {
@@ -283,7 +246,7 @@
   /* ── Project cards ── */
   .card-project {
     @apply rounded-2xl border bg-card overflow-hidden transition-all;
-    background: var(--gradient-card);
+    background: oklch(var(--card));
     box-shadow: var(--shadow-md);
     border-color: oklch(var(--border));
     transition-duration: 300ms;
@@ -292,7 +255,7 @@
 
   .card-project:hover {
     transform: translateY(-4px);
-    box-shadow: var(--shadow-xl), var(--shadow-glow);
+    box-shadow: var(--shadow-xl), var(--shadow-sm);
     border-color: oklch(var(--primary) / 0.35);
   }
 
@@ -310,7 +273,7 @@
     background: oklch(var(--primary));
     color: oklch(var(--primary-foreground));
     transform: scale(1.06);
-    box-shadow: var(--shadow-glow);
+    box-shadow: var(--shadow-sm);
   }
 
   /* ── Social link (token-driven; replaces inline onMouseEnter/Leave) ── */
@@ -328,7 +291,7 @@
     color: oklch(var(--primary-foreground));
     border-color: transparent;
     transform: translateY(-2px);
-    box-shadow: var(--shadow-glow);
+    box-shadow: var(--shadow-sm);
   }
 
   .social-link:focus-visible {
@@ -350,22 +313,11 @@
     @apply text-base md:text-lg text-muted-foreground mb-12 max-w-2xl leading-relaxed;
   }
 
-  /* ── Gradient text ── */
-  .text-gradient-primary {
-    @apply bg-clip-text text-transparent;
-    background-image: var(--gradient-primary);
-  }
-
-  .text-gradient-secondary {
-    @apply bg-clip-text text-transparent;
-    background-image: var(--gradient-secondary);
-  }
-
   /* ── Timeline ── */
   .timeline-dot {
     @apply w-3.5 h-3.5 rounded-full;
-    background: var(--gradient-primary);
-    box-shadow: 0 0 0 3px oklch(var(--background)), 0 0 0 5px oklch(var(--primary) / 0.3), var(--shadow-glow);
+    background: oklch(var(--primary));
+    box-shadow: 0 0 0 3px oklch(var(--background)), 0 0 0 5px oklch(var(--primary) / 0.3), var(--shadow-sm);
   }
 
   .timeline-line {
@@ -390,7 +342,7 @@
     background: oklch(var(--background));
     box-shadow:
       0 0 0 4px oklch(var(--background)),
-      var(--shadow-glow);
+      var(--shadow-sm);
   }
 
   .timeline-node::after {
@@ -425,7 +377,7 @@
   /* ── Skill radar ── */
   .skill-radar-container {
     @apply relative rounded-2xl border bg-card p-6;
-    background: var(--gradient-card);
+    background: oklch(var(--card));
     box-shadow: var(--shadow-md);
   }
 
@@ -438,7 +390,7 @@
   .nav-link::after {
     content: '';
     @apply absolute -bottom-0.5 left-0 w-0 h-px transition-all;
-    background: var(--gradient-primary);
+    background: oklch(var(--primary));
     transition-duration: 250ms;
     transition-timing-function: var(--ease-spring);
   }
@@ -468,7 +420,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: var(--gradient-mesh);
+    background: transparent;
     pointer-events: none;
     z-index: 0;
   }
@@ -527,7 +479,7 @@
   }
 
   @keyframes pulseGlow {
-    0%, 100% { box-shadow: var(--shadow-glow); }
+    0%, 100% { box-shadow: var(--shadow-sm); }
     50% { box-shadow: 0 0 0 1px oklch(var(--primary) / 0.3), 0 8px 32px oklch(var(--primary) / 0.50); }
   }
 
@@ -596,25 +548,6 @@
     box-shadow: none;
   }
 
-  /* ── Gradient border utility ── */
-  .gradient-border {
-    position: relative;
-    border-radius: inherit;
-  }
-
-  .gradient-border::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 1px;
-    background: var(--gradient-primary);
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
-  }
 
   /* ── Scrollbar ── */
   .custom-scrollbar::-webkit-scrollbar { width: 5px; }
