@@ -41,7 +41,20 @@ export function SmoothScroll() {
     }
     rafId = requestAnimationFrame(raf);
 
+    // Pause Lenis when the tab is hidden. Use the documented start/stop
+    // API rather than skipping rAF — manual skipping fights Lenis's internal
+    // lerp state and causes a visible jump on resume.
+    const onVisibility = () => {
+      if (document.hidden) {
+        lenis.stop();
+      } else {
+        lenis.start();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+
     return () => {
+      document.removeEventListener("visibilitychange", onVisibility);
       cancelAnimationFrame(rafId);
       lenis.destroy();
     };

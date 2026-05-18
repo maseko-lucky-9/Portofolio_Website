@@ -37,50 +37,82 @@ export function CustomCursor() {
     setShouldRender(true);
   }, []);
 
-  // Pointer-tracking loop.
+  // Pointer-tracking loop with idle / tab-hidden pause.
+  // The RAF runs only while the pointer is moving or settling. After 2 s of
+  // inactivity it pauses and the cursor fades to opacity 0; the next
+  // `pointermove` resumes it. This recovers ~1 ms / frame of main-thread
+  // budget on idle desktop sessions.
   useEffect(() => {
     if (!shouldRender || prefersReducedMotion || modality !== "pointer") return;
     let rafId = 0;
+    let idleTimer: ReturnType<typeof setTimeout> | null = null;
     let tx = 0;
     let ty = 0;
     let cx = 0;
     let cy = 0;
-
-    const onMove = (e: PointerEvent) => {
-      tx = e.clientX;
-      ty = e.clientY;
-      setActive(true);
-    };
-    const onLeave = () => setActive(false);
-    const onOver = (e: PointerEvent) => {
-      const target = e.target as Element | null;
-      setHover(!!target?.closest?.(HOVER_SELECTOR));
-    };
+    let running = false;
 
     const tick = () => {
-      // Smooth lerp toward target — dot tighter than ring for layered feel.
       cx += (tx - cx) * 0.25;
       cy += (ty - cy) * 0.25;
       if (ringRef.current) {
         ringRef.current.style.transform = `translate3d(${cx}px, ${cy}px, 0) translate(-50%, -50%)`;
       }
       if (dotRef.current) {
-        // Dot tracks the target directly (no lerp) for crisper feedback.
         dotRef.current.style.transform = `translate3d(${tx}px, ${ty}px, 0) translate(-50%, -50%)`;
       }
       rafId = requestAnimationFrame(tick);
+    };
+    const start = () => {
+      if (running || document.hidden) return;
+      running = true;
+      rafId = requestAnimationFrame(tick);
+    };
+    const stop = () => {
+      running = false;
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = 0;
+    };
+    const scheduleIdle = () => {
+      if (idleTimer) clearTimeout(idleTimer);
+      idleTimer = setTimeout(() => {
+        stop();
+        setActive(false);
+      }, 2000);
+    };
+
+    const onMove = (e: PointerEvent) => {
+      tx = e.clientX;
+      ty = e.clientY;
+      setActive(true);
+      start();
+      scheduleIdle();
+    };
+    const onLeave = () => {
+      setActive(false);
+      stop();
+      if (idleTimer) clearTimeout(idleTimer);
+    };
+    const onOver = (e: PointerEvent) => {
+      const target = e.target as Element | null;
+      setHover(!!target?.closest?.(HOVER_SELECTOR));
+    };
+    const onVisibility = () => {
+      if (document.hidden) stop();
     };
 
     window.addEventListener("pointermove", onMove);
     window.addEventListener("pointerover", onOver);
     document.addEventListener("pointerleave", onLeave);
-    rafId = requestAnimationFrame(tick);
+    document.addEventListener("visibilitychange", onVisibility);
 
     return () => {
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerover", onOver);
       document.removeEventListener("pointerleave", onLeave);
-      cancelAnimationFrame(rafId);
+      document.removeEventListener("visibilitychange", onVisibility);
+      if (idleTimer) clearTimeout(idleTimer);
+      stop();
     };
   }, [shouldRender, prefersReducedMotion, modality]);
 

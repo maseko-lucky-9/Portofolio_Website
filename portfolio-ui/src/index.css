@@ -428,6 +428,14 @@
     background-size: 200% 100%;
   }
 
+  /* One-shot variant — runs once during the bar fill, then stops.
+     Used by SkillsSection to avoid a perpetual loop after reveal. */
+  .animate-shimmer-once {
+    animation: shimmer 1.4s linear 1 forwards;
+    background-size: 200% 100%;
+    will-change: background-position;
+  }
+
   .animate-blob {
     animation: blobDrift 12s ease-in-out infinite;
   }
@@ -435,6 +443,13 @@
   .animate-blob-delay {
     animation: blobDrift 14s ease-in-out infinite reverse;
     animation-delay: -4s;
+  }
+
+  /* Hero pauses its blob animations when scrolled out of view.
+     The .hero-paused class is toggled by an IntersectionObserver. */
+  .hero-paused .animate-blob,
+  .hero-paused .animate-blob-delay {
+    animation-play-state: paused;
   }
 
   @keyframes float {

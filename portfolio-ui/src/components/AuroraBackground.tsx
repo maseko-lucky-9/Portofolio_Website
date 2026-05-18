@@ -38,16 +38,31 @@ export function AuroraBackground() {
   const { resolvedTheme } = useTheme();
   const mouseRef = useRef({ x: 0, y: 0 });
   const lastMouseUpdate = useRef(0);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Gate: show CSS gradient on first render, upgrade to WebGL after first paint.
   // Using a ref-based flag rather than state prevents a synchronous double-render.
   const [mounted, setMounted] = useState(false);
+  // Pause the WebGL render loop when the hero is scrolled out of view.
+  // The Canvas stays mounted (no context teardown) — frameloop just freezes.
+  const [inView, setInView] = useState(true);
 
   useEffect(() => {
     // This runs after the browser has painted the first frame.
     // Setting mounted triggers a re-render that swaps in LazyAuroraCanvas.
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(
+      ([entry]) => setInView(entry.isIntersecting),
+      { threshold: 0 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [mounted]);
 
   const opacity = resolvedTheme === "dark" ? 0.35 : 0.25;
 
@@ -77,6 +92,7 @@ export function AuroraBackground() {
 
   return (
     <div
+      ref={containerRef}
       className="absolute inset-0 overflow-hidden"
       onMouseMove={handleMouseMove}
     >
@@ -88,7 +104,7 @@ export function AuroraBackground() {
           </div>
         }
       >
-        <LazyAuroraCanvas opacity={opacity} mouseRef={mouseRef} />
+        <LazyAuroraCanvas opacity={opacity} mouseRef={mouseRef} inView={inView} />
       </Suspense>
     </div>
   );

@@ -188,19 +188,27 @@ function AuroraMesh({ opacity, mouseRef }: AuroraMeshProps) {
 export interface AuroraCanvasProps {
   opacity: number;
   mouseRef: React.RefObject<{ x: number; y: number }>;
+  /** When false (hero scrolled out of view) the R3F render loop is suspended. */
+  inView?: boolean;
 }
 
 /**
  * Default export so React.lazy(() => import('./AuroraCanvas')) works without
  * a named-export re-wrap.
+ *
+ * `frameloop` switches between "always" (visible) and "never" (off-screen) so
+ * the GPU stays idle whenever the hero is scrolled past. We deliberately do
+ * NOT use "demand" — the shader is time-driven (Perlin noise), so demand
+ * mode would freeze it whenever the mouse stopped moving.
  */
-export default function AuroraCanvas({ opacity, mouseRef }: AuroraCanvasProps) {
+export default function AuroraCanvas({ opacity, mouseRef, inView = true }: AuroraCanvasProps) {
   return (
     <Canvas
       dpr={[1, Math.min(window.devicePixelRatio, 2)]}
       gl={{ antialias: false, alpha: true }}
       camera={{ position: [0, 0, 1] }}
       style={{ position: "absolute", inset: 0 }}
+      frameloop={inView ? "always" : "never"}
     >
       <AuroraMesh opacity={opacity} mouseRef={mouseRef} />
     </Canvas>
