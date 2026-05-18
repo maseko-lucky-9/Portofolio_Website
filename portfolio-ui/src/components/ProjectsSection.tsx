@@ -249,7 +249,7 @@ export function ProjectsSection() {
                     </div>
 
                     {project.tagline && (
-                      <p className="text-sm font-medium text-gradient-primary mb-3">
+                      <p className="text-sm font-medium text-foreground mb-3">
                         {project.tagline}
                       </p>
                     )}

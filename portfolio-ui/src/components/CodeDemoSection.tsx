@@ -78,7 +78,7 @@ export function CodeDemoSection() {
               }`}
               style={{
                 ...(activeExample.id === example.id
-                  ? { background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }
+                  ? { background: "oklch(var(--primary))", boxShadow: "var(--shadow-sm)" }
                   : { background: "oklch(var(--card))", borderColor: "oklch(var(--border))" }),
                 transition: "all 200ms cubic-bezier(0.16, 1, 0.3, 1)",
               }}
@@ -131,8 +131,8 @@ export function CodeDemoSection() {
                   disabled={isRunning}
                   className="flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-medium text-secondary-foreground hover:opacity-90 disabled:opacity-50 transition-all"
                   style={{
-                    background: "var(--gradient-secondary)",
-                    boxShadow: "var(--shadow-glow-secondary)",
+                    background: "oklch(var(--foreground))",
+                    boxShadow: "var(--shadow-sm)",
                   }}
                 >
                   <Play className="w-4 h-4" />

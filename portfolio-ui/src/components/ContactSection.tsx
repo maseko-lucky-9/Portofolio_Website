@@ -190,14 +190,14 @@ export function ContactSection() {
                   download
                   className="flex items-center gap-3 w-full p-4 rounded-xl border transition-all"
                   style={{
-                    background: "var(--gradient-card)",
+                    background: "oklch(var(--card))",
                     boxShadow: "var(--shadow-sm)",
                     borderColor: "oklch(var(--border))",
                     transition: "all 300ms cubic-bezier(0.16, 1, 0.3, 1)",
                   }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)";
-                    (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-lg), var(--shadow-glow)";
+                    (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-sm)";
                     (e.currentTarget as HTMLElement).style.borderColor = "oklch(var(--primary) / 0.3)";
                   }}
                   onMouseLeave={(e) => {
@@ -219,14 +219,14 @@ export function ContactSection() {
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 w-full p-4 rounded-xl border transition-all"
                   style={{
-                    background: "var(--gradient-card)",
+                    background: "oklch(var(--card))",
                     boxShadow: "var(--shadow-sm)",
                     borderColor: "oklch(var(--border))",
                     transition: "all 300ms cubic-bezier(0.16, 1, 0.3, 1)",
                   }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)";
-                    (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-lg), var(--shadow-glow)";
+                    (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-sm)";
                     (e.currentTarget as HTMLElement).style.borderColor = "oklch(var(--primary) / 0.3)";
                   }}
                   onMouseLeave={(e) => {

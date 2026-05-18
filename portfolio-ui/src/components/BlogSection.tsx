@@ -151,14 +151,14 @@ export function BlogSection() {
                   rel="noopener noreferrer"
                   className="block rounded-2xl border overflow-hidden transition-all"
                   style={{
-                    background: "var(--gradient-card)",
+                    background: "oklch(var(--card))",
                     boxShadow: "var(--shadow-md)",
                     borderColor: "oklch(var(--border))",
                     transition: "all 300ms cubic-bezier(0.16, 1, 0.3, 1)",
                   }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLElement).style.transform = "translateY(-4px)";
-                    (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-xl), var(--shadow-glow)";
+                    (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-sm)";
                     (e.currentTarget as HTMLElement).style.borderColor = "oklch(var(--primary) / 0.35)";
                   }}
                   onMouseLeave={(e) => {

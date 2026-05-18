@@ -84,7 +84,7 @@ export function Footer() {
         >
           <p className="text-xs text-muted-foreground">
             © {currentYear}{" "}
-            <span className="text-gradient-primary font-medium">{personalData.name}</span>
+            <span className="text-foreground font-medium">{personalData.name}</span>
             {" "}· Crafted with precision &amp; care.
           </p>
         </div>
