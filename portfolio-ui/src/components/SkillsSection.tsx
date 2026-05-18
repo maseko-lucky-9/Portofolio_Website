@@ -20,28 +20,12 @@ const categoryIcons = {
   devops: Cloud,
 };
 
-// Category colours read from CSS tokens (--skill-frontend|backend|devops)
-// so dark/light mode and future palette shifts cascade automatically.
-const categoryColors: Record<SkillCategory, string> = {
-  frontend: "hsl(var(--skill-frontend))",
-  backend: "hsl(var(--skill-backend))",
-  devops: "hsl(var(--skill-devops))",
-};
-
-// Companion "tinted shadow" colours (~33% alpha on the category hue) for
-// elevation glows. Kept as a separate map because Tailwind's `/alpha`
-// syntax can't be composed with bare `hsl(var(--x))` strings inline.
-const categoryShadows: Record<SkillCategory, string> = {
-  frontend: "hsl(var(--skill-frontend) / 0.33)",
-  backend: "hsl(var(--skill-backend) / 0.33)",
-  devops: "hsl(var(--skill-devops) / 0.33)",
-};
-
-const categoryGradients: Record<SkillCategory, string> = {
-  frontend: "linear-gradient(90deg, hsl(var(--skill-frontend)), hsl(var(--brand-violet)))",
-  backend: "linear-gradient(90deg, hsl(var(--skill-backend)), oklch(var(--secondary)))",
-  devops: "linear-gradient(90deg, hsl(var(--skill-devops)), hsl(var(--brand-violet)))",
-};
+// Single-accent design: category grouping preserved (frontend / backend
+// / devops sections still drive grouping and toggle state), but visual
+// treatment is monochromatic. The brand accent (coral) is reserved for
+// the active category indicator and skill-bar fill — the single
+// intentional accent moment in this section.
+const ACCENT_COLOR = "oklch(var(--primary))";
 
 export function SkillsSection() {
   const [activeCategory, setActiveCategory] = useState<SkillCategory>("frontend");
@@ -104,15 +88,15 @@ export function SkillsSection() {
               <button
                 key={category}
                 onClick={() => setActiveCategory(category)}
-                className="flex items-center gap-2 px-6 py-3 rounded-full font-medium text-sm transition-all"
+                data-active={isActive ? "true" : "false"}
+                className="flex items-center gap-2 px-6 py-3 rounded-full font-medium text-sm transition-all
+                           bg-card text-foreground border border-border
+                           data-[active=true]:bg-primary
+                           data-[active=true]:text-primary-foreground
+                           data-[active=true]:border-primary
+                           hover:border-foreground/30"
                 style={{
-                  background: isActive ? categoryGradients[category] : "oklch(var(--card))",
-                  color: isActive ? "#fff" : "oklch(var(--foreground))",
-                  border: isActive ? "1px solid transparent" : "1px solid oklch(var(--border))",
-                  boxShadow: isActive
-                    ? `0 4px 20px ${categoryShadows[category]}`
-                    : "var(--shadow-sm)",
-                  transform: isActive ? "scale(1.04)" : "scale(1)",
+                  boxShadow: "var(--shadow-sm)",
                   transition: "all 300ms cubic-bezier(0.16, 1, 0.3, 1)",
                 }}
               >
@@ -135,7 +119,7 @@ export function SkillsSection() {
             <div className="flex items-center gap-2 mb-6">
               <div
                 className="w-2 h-6 rounded-full"
-                style={{ background: categoryGradients[activeCategory] }}
+                style={{ background: ACCENT_COLOR }}
               />
               <h3 className="text-base font-semibold capitalize">{activeCategory} Radar</h3>
             </div>
@@ -155,8 +139,8 @@ export function SkillsSection() {
                   <Radar
                     name="Proficiency"
                     dataKey="value"
-                    stroke={categoryColors[activeCategory]}
-                    fill={categoryColors[activeCategory]}
+                    stroke={ACCENT_COLOR}
+                    fill={ACCENT_COLOR}
                     fillOpacity={0.25}
                     strokeWidth={2}
                   />
@@ -185,7 +169,7 @@ export function SkillsSection() {
             <div className="flex items-center gap-2 mb-6">
               <div
                 className="w-2 h-6 rounded-full"
-                style={{ background: categoryGradients[activeCategory] }}
+                style={{ background: ACCENT_COLOR }}
               />
               <h3 className="text-base font-semibold">Technologies &amp; Tools</h3>
             </div>
@@ -234,7 +218,7 @@ export function SkillsSection() {
                         style={{
                           width: `${skill.proficiency}%`,
                           transformOrigin: "left center",
-                          background: categoryGradients[activeCategory],
+                          background: ACCENT_COLOR,
                           willChange: "transform",
                         }}
                       />
