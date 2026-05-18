@@ -271,6 +271,8 @@ export function HeroSection() {
                   sizes="(min-width: 1024px) 320px, 240px"
                   alt={`${personalData.name} profile photo`}
                   fetchPriority="high"
+                  decoding="async"
+                  loading="eager"
                   width={320}
                   height={320}
                   className="absolute inset-[5px] z-10 w-[calc(100%-10px)] h-[calc(100%-10px)] rounded-full object-cover"

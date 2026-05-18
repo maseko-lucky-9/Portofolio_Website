@@ -47,3 +47,19 @@ Lighthouse / DevTools trace artifacts: see sibling files
 - CSS gzipped (36 KB) is already lean; the original P2 target of "≤ 80 KB" referred to raw size. Hold gzipped.
 - three-vendor is already excluded from modulepreload (`vite.config.ts:71-75`); not on critical path.
 - Real reduction lever is main JS gzipped (-80 KB possible by splitting framer-motion + lenis + radix into vendor chunks and lazying `ProjectsSection`).
+
+## Result — post P0/P1/P2 (perf/render-pass-1)
+
+Measured via `size-limit` (gzip, headless Chrome) after all three priority tiers:
+
+| Asset                              | Baseline (gz) | After (gz) | Δ          |
+| ---------------------------------- | ------------- | ---------- | ---------- |
+| `index-*.js` (main, critical path) | 230 KB        | 74.76 KB   | **−155 KB**|
+| `motion-vendor-*.js` (preloaded)   | —             | 46.70 KB   | new        |
+| `charts-vendor-*.js` (lazy only)   | —             | 99.31 KB   | new        |
+| `index-*.css`                      | 36.44 KB      | 36.36 KB   | flat       |
+| `three-vendor-*.js` (deferred)     | 268.23 KB     | 267.48 KB  | flat       |
+
+**Critical-path JS (main + motion-vendor): 121.46 KB gz** vs 230 KB baseline → **−47%**.
+
+Skill bars, hero loops, Aurora canvas, Lenis, and CustomCursor all gate themselves now: no CPU spent off-screen or when the tab is hidden. Size-limit (`npm run size`) wired up so future PRs fail if any chunk regresses past the headroom-allowed thresholds.

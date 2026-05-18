@@ -139,6 +139,20 @@
     <!-- Fonts are self-hosted via @fontsource (see src/index.css).
          Google Fonts CDN links removed to eliminate third-party round-trip
          and reduce Speed Index / CLS from font-swap jitter. -->
+
+    <!-- LCP image preload — hero profile photo at the mobile breakpoint.
+         The <picture> in HeroSection picks AVIF if supported, then WebP, then
+         JPEG. Preloading the AVIF at 512w covers the most common viewport;
+         desktop hits the 1024w via srcset and skips the preloaded copy. -->
+    <link
+      rel="preload"
+      as="image"
+      type="image/avif"
+      href="/brand/photo/thulani-512.avif"
+      imagesrcset="/brand/photo/thulani-256.avif 256w, /brand/photo/thulani-512.avif 512w, /brand/photo/thulani-1024.avif 1024w"
+      imagesizes="(min-width: 1024px) 320px, 240px"
+      fetchpriority="high"
+    />
   </head>
 
   <body>
