@@ -75,15 +75,5 @@ function PaperBackgroundImpl() {
   );
 }
 
-/**
- * Memoized — props-less, never re-renders after mount. Cheaper than the
- * aurora it replaces by several orders of magnitude.
- */
+// Memoized — props-less, never re-renders after mount.
 export const PaperBackground = memo(PaperBackgroundImpl);
-
-/**
- * Back-compat shim: HeroSection imported {AuroraBackground} historically.
- * Re-exporting the new component under the old name lets us flip the
- * implementation without touching call sites if we ever want to A/B.
- * Kept un-exported by default — callers should migrate to PaperBackground.
- */

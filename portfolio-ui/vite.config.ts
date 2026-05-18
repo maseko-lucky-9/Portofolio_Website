@@ -75,24 +75,17 @@ export default defineConfig(({ mode }) => {
       __SHIPPED_COUNT__: JSON.stringify(getCommitCount()),
     },
     build: {
-      // Exclude three-vendor from automatic <link rel="modulepreload"> injection.
-      // three-vendor is only needed by AuroraCanvas, which is lazy-imported AFTER
-      // first paint — there is no value preloading it on every page visit.
-      // All other chunks (ContactSection, BlogSection, etc.) are still preloaded.
+      // Exclude charts-vendor from automatic <link rel="modulepreload">
+      // injection — only loaded by SkillsSection (lazy + IO-gated).
+      // (three-vendor chunk removed in phase-7 audit remediation.)
       modulePreload: {
         polyfill: true,
         resolveDependencies: (_filename, deps) =>
-          deps.filter(
-            (dep) =>
-              !dep.includes("three-vendor") &&
-              // charts-vendor is only loaded by SkillsSection (lazy + IO-gated)
-              !dep.includes("charts-vendor"),
-          ),
+          deps.filter((dep) => !dep.includes("charts-vendor")),
       },
       rollupOptions: {
         output: {
           manualChunks: {
-            'three-vendor': ['three', '@react-three/fiber', '@react-three/drei'],
             // Animation libs share a vendor chunk — used across multiple eager
             // and lazy sections, so isolating them lets the browser cache once.
             'motion-vendor': ['framer-motion', 'lenis'],
