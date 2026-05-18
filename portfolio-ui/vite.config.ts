@@ -82,12 +82,23 @@ export default defineConfig(({ mode }) => {
       modulePreload: {
         polyfill: true,
         resolveDependencies: (_filename, deps) =>
-          deps.filter((dep) => !dep.includes("three-vendor")),
+          deps.filter(
+            (dep) =>
+              !dep.includes("three-vendor") &&
+              // charts-vendor is only loaded by SkillsSection (lazy + IO-gated)
+              !dep.includes("charts-vendor"),
+          ),
       },
       rollupOptions: {
         output: {
           manualChunks: {
             'three-vendor': ['three', '@react-three/fiber', '@react-three/drei'],
+            // Animation libs share a vendor chunk — used across multiple eager
+            // and lazy sections, so isolating them lets the browser cache once.
+            'motion-vendor': ['framer-motion', 'lenis'],
+            // Recharts (+ d3-scale/shape/interpolate) only used in SkillsSection
+            // (lazy) — co-locating it here ensures the main chunk stays lean.
+            'charts-vendor': ['recharts'],
           },
         },
       },
