@@ -30,7 +30,7 @@ function PaperBackgroundImpl() {
           top: "96px",
           height: "1px",
           background:
-            "linear-gradient(to right, transparent 0%, hsl(var(--border)) 12%, hsl(var(--border)) 88%, transparent 100%)",
+            "linear-gradient(to right, transparent 0%, oklch(var(--border)) 12%, oklch(var(--border)) 88%, transparent 100%)",
           opacity: 0.55,
         }}
       />
@@ -44,7 +44,7 @@ function PaperBackgroundImpl() {
             style={{
               left: `${pct}%`,
               width: "1px",
-              background: "hsl(var(--border))",
+              background: "oklch(var(--border))",
               opacity: 0.18,
             }}
           />
@@ -60,7 +60,7 @@ function PaperBackgroundImpl() {
         style={{
           fontSize: "13px",
           lineHeight: 1,
-          color: "hsl(var(--muted-foreground))",
+          color: "oklch(var(--muted-foreground))",
           opacity: 0.55,
           letterSpacing: "0.01em",
         }}

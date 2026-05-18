@@ -25,7 +25,7 @@ export function ScrollProgress() {
       style={{
         scaleX,
         background:
-          "linear-gradient(90deg, hsl(var(--primary)), hsl(var(--brand-violet)), hsl(var(--secondary)))",
+          "linear-gradient(90deg, oklch(var(--primary)), hsl(var(--brand-violet)), oklch(var(--secondary)))",
       }}
     />
   );

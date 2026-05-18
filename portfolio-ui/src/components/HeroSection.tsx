@@ -40,7 +40,7 @@ function ShippedMeter({ reduced }: { reduced: boolean }) {
     <div
       aria-label={`shipped: ${SHIPPED_TOTAL} commits`}
       className="pointer-events-none absolute top-6 right-6 z-20 hidden font-mono text-[11px] tracking-tight sm:block"
-      style={{ color: "hsl(var(--secondary))", opacity: 0.85 }}
+      style={{ color: "oklch(var(--secondary))", opacity: 0.85 }}
     >
       <span className="opacity-60">shipped:</span>{" "}
       <span tabIndex={-1}>{n}</span>
@@ -107,8 +107,8 @@ export function HeroSection() {
               transition={{ delay: 0.15, ...springTransition }}
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-7"
               style={{
-                background: "hsl(var(--secondary) / 0.08)",
-                border: "1px solid hsl(var(--secondary) / 0.25)",
+                background: "oklch(var(--secondary) / 0.08)",
+                border: "1px solid oklch(var(--secondary) / 0.25)",
               }}
             >
               <span className="relative flex h-2 w-2 flex-shrink-0">
@@ -187,23 +187,23 @@ export function HeroSection() {
                   aria-label={label}
                   className="p-3 rounded-xl transition-all focus-visible:ring-2 focus-visible:ring-primary/30"
                   style={{
-                    background: "hsl(var(--muted))",
-                    border: "1px solid hsl(var(--border))",
+                    background: "oklch(var(--muted))",
+                    border: "1px solid oklch(var(--border))",
                     transition: "all 250ms cubic-bezier(0.16, 1, 0.3, 1)",
                   }}
                   onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.background = "hsl(var(--primary))";
-                    (e.currentTarget as HTMLElement).style.color = "hsl(var(--primary-foreground))";
+                    (e.currentTarget as HTMLElement).style.background = "oklch(var(--primary))";
+                    (e.currentTarget as HTMLElement).style.color = "oklch(var(--primary-foreground))";
                     (e.currentTarget as HTMLElement).style.transform = "translateY(-3px) scale(1.08)";
                     (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-glow)";
                     (e.currentTarget as HTMLElement).style.borderColor = "transparent";
                   }}
                   onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.background = "hsl(var(--muted))";
+                    (e.currentTarget as HTMLElement).style.background = "oklch(var(--muted))";
                     (e.currentTarget as HTMLElement).style.color = "";
                     (e.currentTarget as HTMLElement).style.transform = "";
                     (e.currentTarget as HTMLElement).style.boxShadow = "";
-                    (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--border))";
+                    (e.currentTarget as HTMLElement).style.borderColor = "oklch(var(--border))";
                   }}
                 >
                   <Icon className="w-5 h-5" />

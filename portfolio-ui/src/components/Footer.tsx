@@ -21,12 +21,12 @@ export function Footer() {
   return (
     <footer
       className="relative"
-      style={{ background: "hsl(var(--card) / 0.5)" }}
+      style={{ background: "oklch(var(--card) / 0.5)" }}
     >
       {/* Top gradient divider */}
       <div
         className="absolute inset-x-0 top-0 h-px"
-        style={{ background: "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.3), hsl(var(--secondary) / 0.3), transparent)" }}
+        style={{ background: "linear-gradient(90deg, transparent, oklch(var(--primary) / 0.3), oklch(var(--secondary) / 0.3), transparent)" }}
       />
 
       <div className="section-container !py-14">
@@ -80,7 +80,7 @@ export function Footer() {
         {/* Copyright */}
         <div
           className="pt-8 text-center"
-          style={{ borderTop: "1px solid hsl(var(--border) / 0.5)" }}
+          style={{ borderTop: "1px solid oklch(var(--border) / 0.5)" }}
         >
           <p className="text-xs text-muted-foreground">
             © {currentYear}{" "}

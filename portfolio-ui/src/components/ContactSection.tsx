@@ -131,7 +131,7 @@ export function ContactSection() {
               <div className="flex items-center gap-4">
                 <div
                   className="w-12 h-12 rounded-xl flex items-center justify-center transition-all"
-                  style={{ background: "hsl(var(--primary) / 0.08)", border: "1px solid hsl(var(--primary) / 0.15)" }}
+                  style={{ background: "oklch(var(--primary) / 0.08)", border: "1px solid oklch(var(--primary) / 0.15)" }}
                 >
                   <Mail className="w-5 h-5 text-primary" />
                 </div>
@@ -150,7 +150,7 @@ export function ContactSection() {
               <div className="flex items-center gap-4">
                 <div
                   className="w-12 h-12 rounded-xl flex items-center justify-center transition-all"
-                  style={{ background: "hsl(var(--secondary) / 0.08)", border: "1px solid hsl(var(--secondary) / 0.15)" }}
+                  style={{ background: "oklch(var(--secondary) / 0.08)", border: "1px solid oklch(var(--secondary) / 0.15)" }}
                 >
                   <MapPin className="w-5 h-5 text-secondary" />
                 </div>
@@ -192,18 +192,18 @@ export function ContactSection() {
                   style={{
                     background: "var(--gradient-card)",
                     boxShadow: "var(--shadow-sm)",
-                    borderColor: "hsl(var(--border))",
+                    borderColor: "oklch(var(--border))",
                     transition: "all 300ms cubic-bezier(0.16, 1, 0.3, 1)",
                   }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)";
                     (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-lg), var(--shadow-glow)";
-                    (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--primary) / 0.3)";
+                    (e.currentTarget as HTMLElement).style.borderColor = "oklch(var(--primary) / 0.3)";
                   }}
                   onMouseLeave={(e) => {
                     (e.currentTarget as HTMLElement).style.transform = "";
                     (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-sm)";
-                    (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--border))";
+                    (e.currentTarget as HTMLElement).style.borderColor = "oklch(var(--border))";
                   }}
                 >
                   <Download className="w-5 h-5 text-primary" />
@@ -221,18 +221,18 @@ export function ContactSection() {
                   style={{
                     background: "var(--gradient-card)",
                     boxShadow: "var(--shadow-sm)",
-                    borderColor: "hsl(var(--border))",
+                    borderColor: "oklch(var(--border))",
                     transition: "all 300ms cubic-bezier(0.16, 1, 0.3, 1)",
                   }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)";
                     (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-lg), var(--shadow-glow)";
-                    (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--primary) / 0.3)";
+                    (e.currentTarget as HTMLElement).style.borderColor = "oklch(var(--primary) / 0.3)";
                   }}
                   onMouseLeave={(e) => {
                     (e.currentTarget as HTMLElement).style.transform = "";
                     (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-sm)";
-                    (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--border))";
+                    (e.currentTarget as HTMLElement).style.borderColor = "oklch(var(--border))";
                   }}
                 >
                   <Calendar className="w-5 h-5 text-secondary" />
@@ -264,7 +264,7 @@ export function ContactSection() {
                 >
                   <div
                     className="w-16 h-16 rounded-full flex items-center justify-center mb-4"
-                    style={{ background: "hsl(var(--secondary) / 0.08)", border: "1px solid hsl(var(--secondary) / 0.2)" }}
+                    style={{ background: "oklch(var(--secondary) / 0.08)", border: "1px solid oklch(var(--secondary) / 0.2)" }}
                   >
                     <CheckCircle className="w-8 h-8 text-secondary" />
                   </div>

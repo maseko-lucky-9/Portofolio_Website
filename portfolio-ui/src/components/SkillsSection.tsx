@@ -39,7 +39,7 @@ const categoryShadows: Record<SkillCategory, string> = {
 
 const categoryGradients: Record<SkillCategory, string> = {
   frontend: "linear-gradient(90deg, hsl(var(--skill-frontend)), hsl(var(--brand-violet)))",
-  backend: "linear-gradient(90deg, hsl(var(--skill-backend)), hsl(var(--secondary)))",
+  backend: "linear-gradient(90deg, hsl(var(--skill-backend)), oklch(var(--secondary)))",
   devops: "linear-gradient(90deg, hsl(var(--skill-devops)), hsl(var(--brand-violet)))",
 };
 
@@ -62,12 +62,12 @@ export function SkillsSection() {
       id="skills"
       aria-labelledby="skills-heading"
       className="py-20 md:py-28 relative overflow-hidden"
-      style={{ background: "hsl(var(--muted) / var(--opacity-soft))" }}
+      style={{ background: "oklch(var(--muted) / var(--opacity-soft))" }}
     >
       {/* Subtle top gradient fade */}
       <div
         className="absolute inset-x-0 top-0 h-px"
-        style={{ background: "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.25), transparent)" }}
+        style={{ background: "linear-gradient(90deg, transparent, oklch(var(--primary) / 0.25), transparent)" }}
       />
 
       <div className="section-container !py-0 py-20 md:py-28">
@@ -106,9 +106,9 @@ export function SkillsSection() {
                 onClick={() => setActiveCategory(category)}
                 className="flex items-center gap-2 px-6 py-3 rounded-full font-medium text-sm transition-all"
                 style={{
-                  background: isActive ? categoryGradients[category] : "hsl(var(--card))",
-                  color: isActive ? "#fff" : "hsl(var(--foreground))",
-                  border: isActive ? "1px solid transparent" : "1px solid hsl(var(--border))",
+                  background: isActive ? categoryGradients[category] : "oklch(var(--card))",
+                  color: isActive ? "#fff" : "oklch(var(--foreground))",
+                  border: isActive ? "1px solid transparent" : "1px solid oklch(var(--border))",
                   boxShadow: isActive
                     ? `0 4px 20px ${categoryShadows[category]}`
                     : "var(--shadow-sm)",
@@ -142,15 +142,15 @@ export function SkillsSection() {
             <div className="h-64 sm:h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart data={currentRadarData}>
-                  <PolarGrid stroke="hsl(var(--border))" />
+                  <PolarGrid stroke="oklch(var(--border))" />
                   <PolarAngleAxis
                     dataKey="skill"
-                    tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+                    tick={{ fill: "oklch(var(--muted-foreground))", fontSize: 11 }}
                   />
                   <PolarRadiusAxis
                     angle={30}
                     domain={[0, 100]}
-                    tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 9 }}
+                    tick={{ fill: "oklch(var(--muted-foreground))", fontSize: 9 }}
                   />
                   <Radar
                     name="Proficiency"
@@ -162,13 +162,13 @@ export function SkillsSection() {
                   />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "hsl(var(--card))",
-                      border: "1px solid hsl(var(--border))",
+                      backgroundColor: "oklch(var(--card))",
+                      border: "1px solid oklch(var(--border))",
                       borderRadius: "0.75rem",
                       boxShadow: "var(--shadow-lg)",
                       fontSize: "0.8rem",
                     }}
-                    labelStyle={{ color: "hsl(var(--foreground))", fontWeight: 600 }}
+                    labelStyle={{ color: "oklch(var(--foreground))", fontWeight: 600 }}
                   />
                 </RadarChart>
               </ResponsiveContainer>
@@ -210,8 +210,8 @@ export function SkillsSection() {
                         <span className="text-sm font-semibold text-foreground">{skill.name}</span>
                         <span className="text-[10px] px-2 py-0.5 rounded-full font-medium capitalize"
                           style={{
-                            background: "hsl(var(--accent))",
-                            color: "hsl(var(--accent-foreground))",
+                            background: "oklch(var(--accent))",
+                            color: "oklch(var(--accent-foreground))",
                           }}
                         >
                           {skill.type}
@@ -221,7 +221,7 @@ export function SkillsSection() {
                         {getProficiencyLabel(skill.proficiency)}
                       </span>
                     </div>
-                    <div className="h-1.5 rounded-full overflow-hidden relative" style={{ background: "hsl(var(--muted))" }}>
+                    <div className="h-1.5 rounded-full overflow-hidden relative" style={{ background: "oklch(var(--muted))" }}>
                       <motion.div
                         initial={{ scaleX: 0 }}
                         animate={{ scaleX: 1 }}
@@ -261,7 +261,7 @@ export function SkillsSection() {
       {/* Subtle bottom border */}
       <div
         className="absolute inset-x-0 bottom-0 h-px"
-        style={{ background: "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.15), transparent)" }}
+        style={{ background: "linear-gradient(90deg, transparent, oklch(var(--primary) / 0.15), transparent)" }}
       />
     </section>
   );

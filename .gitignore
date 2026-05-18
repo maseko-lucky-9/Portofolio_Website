@@ -70,3 +70,10 @@ test-results/
 # TypeScript build info
 *.tsbuildinfo
 **/*.tsbuildinfo
+
+# Local artifacts — screenshots, RuVector graph caches, Playwright MCP page snapshots
+.playwright-mcp/
+hero-*.png
+*-final-*.png
+ruvector.db
+**/ruvector.db

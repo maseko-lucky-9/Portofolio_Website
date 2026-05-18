@@ -90,7 +90,7 @@ function ExperienceRow({
             <li key={i} className="flex items-start gap-2.5 text-sm">
               <span
                 className="mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0"
-                style={{ background: "hsl(var(--primary))" }}
+                style={{ background: "oklch(var(--primary))" }}
               />
               <span className="text-foreground/85">{achievement}</span>
             </li>
@@ -145,10 +145,10 @@ function ExperienceRow({
           onBlur={onScheduleClose}
           onClick={onToggle}
           onKeyDown={handleKeyDown}
-          className="relative rounded-xl border border-border bg-card p-6 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--primary))] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          className="relative rounded-xl border border-border bg-card p-6 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[oklch(var(--primary))] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           style={{
             boxShadow: isOpen
-              ? "var(--shadow-xl), 0 0 0 1px hsl(var(--primary) / 0.18)"
+              ? "var(--shadow-xl), 0 0 0 1px oklch(var(--primary) / 0.18)"
               : "var(--shadow-md)",
             transition:
               "box-shadow 0.3s ease, border-color 0.3s ease, transform 0.3s ease",
@@ -157,7 +157,7 @@ function ExperienceRow({
           <span className="experience-card-bar" aria-hidden="true" />
 
           {/* Step number */}
-          <div className="font-mono text-[13px] tracking-wider text-[hsl(var(--primary)/0.8)] mb-3">
+          <div className="font-mono text-[13px] tracking-wider text-[oklch(var(--primary)/0.8)] mb-3">
             {stepNumber}
           </div>
 
@@ -168,7 +168,7 @@ function ExperienceRow({
                 src={exp.logoUrl}
                 alt={exp.company}
                 className="w-7 h-7 rounded-md object-cover border flex-shrink-0 mt-0.5"
-                style={{ borderColor: "hsl(var(--border))" }}
+                style={{ borderColor: "oklch(var(--border))" }}
               />
             )}
             <div className="min-w-0">
@@ -227,9 +227,9 @@ function ExperienceRow({
             <div
               className="inline-flex items-center mt-4 px-3 py-1 rounded-full font-mono uppercase tracking-[0.15em] text-[10px]"
               style={{
-                background: "hsl(var(--primary) / 0.08)",
-                color: "hsl(var(--primary))",
-                border: "1px solid hsl(var(--primary) / 0.2)",
+                background: "oklch(var(--primary) / 0.08)",
+                color: "oklch(var(--primary))",
+                border: "1px solid oklch(var(--primary) / 0.2)",
               }}
             >
               {pillText}
@@ -290,7 +290,7 @@ export function ExperienceSection() {
           transition={springTransition}
           className="text-center mb-16"
         >
-          <span className="inline-block text-xs font-mono uppercase tracking-[0.2em] text-[hsl(var(--primary)/0.8)] mb-3">
+          <span className="inline-block text-xs font-mono uppercase tracking-[0.2em] text-[oklch(var(--primary)/0.8)] mb-3">
             Career
           </span>
           <h2 id="experience-heading" className="section-title">

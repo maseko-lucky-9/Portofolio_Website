@@ -83,14 +83,14 @@ export function ServicesSection() {
       id="services"
       aria-labelledby="services-heading"
       className="py-20 md:py-28 relative overflow-hidden"
-      style={{ background: "hsl(var(--muted) / 0.3)" }}
+      style={{ background: "oklch(var(--muted) / 0.3)" }}
     >
       {/* Top divider */}
       <div
         className="absolute inset-x-0 top-0 h-px"
         style={{
           background:
-            "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.2), transparent)",
+            "linear-gradient(90deg, transparent, oklch(var(--primary) / 0.2), transparent)",
         }}
       />
 
@@ -130,7 +130,7 @@ export function ServicesSection() {
                 className={`relative rounded-2xl border bg-card p-8 flex flex-col gap-6 transition-all duration-300 ${service.accent}`}
                 style={{
                   boxShadow: "var(--shadow-md)",
-                  borderColor: "hsl(var(--border))",
+                  borderColor: "oklch(var(--border))",
                 }}
                 aria-labelledby={`service-${service.id}-heading`}
               >
@@ -214,7 +214,7 @@ export function ServicesSection() {
         className="absolute inset-x-0 bottom-0 h-px"
         style={{
           background:
-            "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.15), transparent)",
+            "linear-gradient(90deg, transparent, oklch(var(--primary) / 0.15), transparent)",
         }}
       />
     </section>

@@ -63,8 +63,8 @@ export function Navbar() {
             transition={{ duration: 0.2 }}
             className="absolute inset-0"
             style={{
-              background: "hsl(var(--background))",
-              borderBottom: "1px solid hsl(var(--border))",
+              background: "oklch(var(--background))",
+              borderBottom: "1px solid oklch(var(--border))",
             }}
           />
         )}
@@ -163,8 +163,8 @@ export function Navbar() {
               style={{
                 backdropFilter: "blur(20px)",
                 WebkitBackdropFilter: "blur(20px)",
-                background: "hsl(var(--card) / 0.9)",
-                border: "1px solid hsl(var(--border) / 0.7)",
+                background: "oklch(var(--card) / 0.9)",
+                border: "1px solid oklch(var(--border) / 0.7)",
                 boxShadow: "var(--shadow-xl)",
               }}
             >

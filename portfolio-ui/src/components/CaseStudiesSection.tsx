@@ -105,7 +105,7 @@ export function CaseStudiesSection() {
                 className="rounded-2xl border bg-card overflow-hidden"
                 style={{
                   boxShadow: "var(--shadow-md)",
-                  borderColor: "hsl(var(--border))",
+                  borderColor: "oklch(var(--border))",
                 }}
               >
                 <div className="p-8">
