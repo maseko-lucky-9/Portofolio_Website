@@ -187,8 +187,8 @@ export function BlogSection() {
 
                     {/* Read time badge */}
                     <div
-                      className="absolute top-4 right-4 flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium backdrop-blur-md"
-                      style={{ background: "hsl(var(--background) / 0.85)", border: "1px solid hsl(var(--border) / 0.5)" }}
+                      className="absolute top-4 right-4 flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium"
+                      style={{ background: "hsl(var(--background))", border: "1px solid hsl(var(--border))" }}
                     >
                       <Clock className="w-3 h-3" />
                       {post.readTime}

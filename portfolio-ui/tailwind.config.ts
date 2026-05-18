@@ -14,8 +14,28 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Inter Variable', 'Inter', 'system-ui', 'sans-serif'],
-        mono: ['JetBrains Mono', 'monospace'],
+        // Body: Public Sans Variable (civic / operational). Reads as
+        // infrastructure, not brand. Used for nav, buttons, body copy.
+        sans: [
+          'Public Sans Variable',
+          'Public Sans',
+          'system-ui',
+          'sans-serif',
+        ],
+        // Display: Source Serif 4 Variable (wedge transitional serif,
+        // optical sizes axis). Reserved for headings, the masthead rule,
+        // and the folio mark — anywhere "publication" register is wanted.
+        // Apply via the `font-display` Tailwind utility (not the default).
+        display: [
+          'Source Serif 4 Variable',
+          'Source Serif 4',
+          'ui-serif',
+          'Georgia',
+          'serif',
+        ],
+        // Mono: JetBrains Mono — narrow technical use only (tables,
+        // code blocks, tabular numerics). NOT a default body face.
+        mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
       },
       colors: {
         border: "hsl(var(--border))",

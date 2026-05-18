@@ -145,7 +145,7 @@ function ExperienceRow({
           onBlur={onScheduleClose}
           onClick={onToggle}
           onKeyDown={handleKeyDown}
-          className="relative rounded-xl border border-border bg-card/80 backdrop-blur-sm p-6 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--primary))] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          className="relative rounded-xl border border-border bg-card p-6 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--primary))] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           style={{
             boxShadow: isOpen
               ? "var(--shadow-xl), 0 0 0 1px hsl(var(--primary) / 0.18)"

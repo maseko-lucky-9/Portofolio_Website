@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, useInView, useReducedMotion } from "framer-motion";
 import { ArrowDown, Github, Linkedin, Twitter } from "lucide-react";
 import { personalData } from "@/data/personal";
-import { AuroraBackground } from "@/components/AuroraBackground";
+import { PaperBackground } from "@/components/PaperBackground";
 import { useMagnetic } from "@/lib/motion";
 
 const springTransition = { type: "spring", stiffness: 260, damping: 24 };
@@ -81,30 +81,15 @@ export function HeroSection() {
       ref={heroRef}
       id="about"
       aria-labelledby="hero-heading"
-      className={`relative min-h-screen flex items-center justify-center overflow-hidden${
+      className={`relative min-h-screen flex items-center justify-center overflow-hidden bg-background${
         heroInView ? "" : " hero-paused"
       }`}
-      style={{ background: "var(--gradient-hero)" }}
     >
-      {/* Aurora WebGL background */}
-      <AuroraBackground />
+      {/* Paper-tinted editorial backdrop — replaces aurora */}
+      <PaperBackground />
 
       {/* Quiet operator signal — real shipping cadence */}
       <ShippedMeter reduced={!!prefersReducedMotion} />
-
-      {/* Ambient glow blobs — light mode */}
-      {!prefersReducedMotion && (
-        <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden>
-          <div
-            className="absolute top-1/4 -left-1/4 w-[600px] h-[600px] rounded-full bg-primary blur-[120px] animate-blob"
-            style={{ opacity: "var(--opacity-subtle)" }}
-          />
-          <div
-            className="absolute bottom-1/4 -right-1/4 w-[500px] h-[500px] rounded-full bg-secondary blur-[100px] animate-blob-delay"
-            style={{ opacity: "var(--opacity-subtle)" }}
-          />
-        </div>
-      )}
 
       <div className="section-container relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">

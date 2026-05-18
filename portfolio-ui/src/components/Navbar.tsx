@@ -52,22 +52,19 @@ export function Navbar() {
         paddingBottom: isScrolled ? "10px" : "18px",
       }}
     >
-      {/* Scrolled glass background */}
+      {/* Scrolled paper background — flat, hairline-ruled. No backdrop-filter. */}
       <AnimatePresence>
         {isScrolled && (
           <motion.div
-            key="glass-bg"
+            key="paper-bg"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             className="absolute inset-0"
             style={{
-              backdropFilter: "blur(20px) saturate(180%)",
-              WebkitBackdropFilter: "blur(20px) saturate(180%)",
-              background: "hsl(var(--background) / 0.75)",
-              borderBottom: "1px solid hsl(var(--border) / 0.6)",
-              boxShadow: "0 4px 24px hsl(0 0% 0% / 0.06)",
+              background: "hsl(var(--background))",
+              borderBottom: "1px solid hsl(var(--border))",
             }}
           />
         )}

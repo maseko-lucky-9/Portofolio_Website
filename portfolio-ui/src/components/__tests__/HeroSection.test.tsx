@@ -3,9 +3,10 @@ import { render, screen } from "@testing-library/react";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { personalData } from "@/data/personal";
 
-// Mock AuroraBackground — uses WebGL which jsdom cannot handle
-vi.mock("@/components/AuroraBackground", () => ({
-  AuroraBackground: () => <div data-testid="aurora-background" />,
+// PaperBackground is pure DOM (no WebGL) — but mock to keep test surface
+// stable and isolate HeroSection assertions from background rendering.
+vi.mock("@/components/PaperBackground", () => ({
+  PaperBackground: () => <div data-testid="paper-background" />,
 }));
 
 // Mock framer-motion to pass through children without animation

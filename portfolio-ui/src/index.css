@@ -1,7 +1,15 @@
-/* Self-hosted fonts — eliminates Google Fonts CDN round-trip (improves SI/CLS).
-   @fontsource-variable/inter  uses the variable-weight font (wght axis).
-   @fontsource/jetbrains-mono  uses static weights (monospace, code blocks). */
-@import "@fontsource-variable/inter";
+/* Self-hosted fonts — eliminates Google Fonts CDN round-trip.
+   Type pair (selected 2026-05-18 via the impeccable font-selection
+   procedure — rejected all reflex picks):
+     Display: Source Serif 4 Variable — wedge transitional serif, optical
+              sizes axis. Register of a serious technology publication.
+              Used on headings, the masthead rule, and the folio mark.
+     Body:    Public Sans Variable — USWDS civic typeface, humanist-but-
+              utilitarian. Used for all running text, UI controls, nav.
+     Mono:    JetBrains Mono — narrow technical use only (tables, code
+              blocks, tabular numerics). NOT a default body face. */
+@import "@fontsource-variable/source-serif-4";
+@import "@fontsource-variable/public-sans";
 @import "@fontsource/jetbrains-mono/400.css";
 @import "@fontsource/jetbrains-mono/500.css";
 @import "@fontsource/jetbrains-mono/600.css";
@@ -198,12 +206,29 @@
 
   body {
     @apply bg-background text-foreground font-sans;
-    font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    font-family: 'Public Sans Variable', 'Public Sans', system-ui, sans-serif;
+    /* ss01 = single-storey 'a', tnum = tabular numerals.
+       Public Sans ships these as opt-in stylistic sets — both improve
+       readability at small UI sizes and align metric-card numerics. */
+    font-feature-settings: "ss01", "tnum";
   }
 
+  /* Display register: Source Serif 4 Variable on h1–h3 + .font-display.
+     Optical-size axis (`opsz`) is driven implicitly by font-size in
+     supporting browsers; we set wght via Tailwind weight utilities.
+     Tight tracking, balanced wrap on supporting browsers. */
+  h1, h2, h3, .font-display {
+    font-family: 'Source Serif 4 Variable', 'Source Serif 4', ui-serif, Georgia, serif;
+    font-feature-settings: "ss01", "onum";
+    letter-spacing: -0.012em;
+    text-wrap: balance;
+  }
+
+  /* h4–h6 stay in body sans — paragraph-level headings should not
+     compete with the display register reserved for section titles. */
+
   code, pre {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
     font-feature-settings: "liga" 1, "calt" 1;
   }
 
@@ -526,37 +551,48 @@
     66% { transform: translate(-15px, 12px) scale(0.95); }
   }
 
-  /* ── Glassmorphism ── */
+  /* ── Paper surfaces (retired glassmorphism) ──
+     Class names kept (.glass, .glass-card) so existing call sites — Navbar,
+     HeroSection metric cards, ContactSection form panel, BlogSection chips —
+     pick up the new visual language without diff churn. No backdrop-filter,
+     no inset highlight, no glow on hover. Flat paper, hairline border,
+     measured shadow. */
   .glass {
-    @apply backdrop-blur-xl border;
-    background: hsl(var(--background) / 0.72);
-    border-color: hsl(var(--border) / 0.7);
-    box-shadow: 0 4px 24px hsl(0 0% 0% / 0.08), inset 0 1px 0 hsl(255 255% 255% / 0.12);
+    @apply border;
+    background: hsl(var(--background));
+    border-color: hsl(var(--border));
+    box-shadow: var(--shadow-xs);
   }
 
   .dark .glass {
-    background: hsl(var(--background) / 0.65);
-    border-color: hsl(var(--border) / 0.8);
-    box-shadow: 0 4px 32px hsl(0 0% 0% / 0.35), inset 0 1px 0 hsl(255 255% 255% / 0.05);
+    background: hsl(var(--background));
+    border-color: hsl(var(--border));
+    box-shadow: none;
   }
 
   .glass-card {
-    @apply backdrop-blur-lg border rounded-2xl;
-    background: hsl(var(--card) / 0.80);
-    border-color: hsl(var(--border) / 0.6);
-    box-shadow: var(--shadow-md), inset 0 1px 0 hsl(255 255% 255% / 0.10);
-    transition: all 0.3s var(--ease-spring);
+    @apply border rounded-2xl;
+    background: hsl(var(--card));
+    border-color: hsl(var(--border));
+    box-shadow: var(--shadow-xs);
+    transition: border-color var(--duration-base) var(--ease-spring),
+                box-shadow var(--duration-base) var(--ease-spring);
   }
 
   .glass-card:hover {
-    box-shadow: var(--shadow-lg), var(--shadow-glow), inset 0 1px 0 hsl(255 255% 255% / 0.12);
-    border-color: hsl(var(--primary) / 0.25);
+    border-color: hsl(var(--foreground) / 0.22);
+    box-shadow: var(--shadow-sm);
   }
 
   .dark .glass-card {
-    background: hsl(var(--card) / 0.55);
-    border-color: hsl(255 255% 255% / 0.06);
-    box-shadow: var(--shadow-md), inset 0 1px 0 hsl(255 255% 255% / 0.04);
+    background: hsl(var(--card));
+    border-color: hsl(var(--border));
+    box-shadow: none;
+  }
+
+  .dark .glass-card:hover {
+    border-color: hsl(var(--foreground) / 0.28);
+    box-shadow: none;
   }
 
   /* ── Gradient border utility ── */
