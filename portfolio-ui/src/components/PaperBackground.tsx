@@ -23,7 +23,9 @@ function PaperBackgroundImpl() {
       aria-hidden
       className="pointer-events-none absolute inset-0 overflow-hidden select-none"
     >
-      {/* Masthead rule — sits about 96px from top of section */}
+      {/* Masthead rule — sits about 96px from top of section. Opacity
+          driven by --masthead-opacity (0.65 light / 0.55 dark, defined
+          in index.css :root + .dark blocks). */}
       <div
         className="absolute left-0 right-0"
         style={{
@@ -31,7 +33,7 @@ function PaperBackgroundImpl() {
           height: "1px",
           background:
             "linear-gradient(to right, transparent 0%, oklch(var(--border)) 12%, oklch(var(--border)) 88%, transparent 100%)",
-          opacity: 0.55,
+          opacity: "var(--masthead-opacity, 0.65)",
         }}
       />
 
@@ -51,18 +53,25 @@ function PaperBackgroundImpl() {
         ))}
       </div>
 
-      {/* Folio mark — bottom-LEFT corner (right is reserved for the
-          ShippedMeter widget; functional widgets win — see
-          .impeccable.md). Display serif italic at small size reads as
-          a publication colophon, not as developer-IDE chrome. */}
+      {/* Folio mark — top-right of the section, vertically centered on
+          the masthead rule. Reads as the rule's right-side terminus, the
+          way a publication colophon sits at the masthead anchor.
+          ShippedMeter at top-6 right-6 sits ABOVE this anchor — no
+          collision. Display serif italic at small size for register. */}
       <div
-        className="absolute bottom-6 left-8 font-display italic"
+        className="absolute font-display italic"
         style={{
+          top: "96px",
+          right: "32px",
+          transform: "translateY(-50%)",
           fontSize: "13px",
           lineHeight: 1,
           color: "oklch(var(--muted-foreground))",
           opacity: 0.55,
           letterSpacing: "0.01em",
+          paddingLeft: "12px",
+          paddingRight: "0",
+          background: "oklch(var(--background))",
         }}
       >
         <span>N&deg;&nbsp;01</span>

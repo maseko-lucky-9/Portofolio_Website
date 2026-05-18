@@ -44,6 +44,9 @@
     --opacity-soft: 0.30;
     --opacity-overlay: 0.80;
 
+    /* Masthead rule opacity — light mode is paler, needs more weight. */
+    --masthead-opacity: 0.65;
+
     /* Light mode neutrals — bone paper, warm-tinted. */
     --background: 0.97 0.008 70;
     --foreground: 0.18 0.012 50;
@@ -119,6 +122,9 @@
     --opacity-subtle: 0.06;
     --opacity-soft: 0.30;
     --opacity-overlay: 0.80;
+
+    /* Dark mode masthead rule — paper-on-dark wants less weight. */
+    --masthead-opacity: 0.55;
 
     --muted: 0.26 0.012 50;
     --muted-foreground: 0.70 0.010 60;
