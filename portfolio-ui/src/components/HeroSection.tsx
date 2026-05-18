@@ -39,7 +39,7 @@ function ShippedMeter({ reduced }: { reduced: boolean }) {
   return (
     <div
       aria-label={`shipped: ${SHIPPED_TOTAL} commits`}
-      className="pointer-events-none absolute top-6 right-6 z-20 hidden font-mono text-[11px] tracking-tight sm:block"
+      className="pointer-events-none absolute top-6 right-6 z-20 hidden font-sans text-[11px] uppercase tracking-[0.18em] font-semibold sm:block"
       style={{ color: "oklch(var(--secondary))", opacity: 0.85 }}
     >
       <span className="opacity-60">shipped:</span>{" "}
@@ -127,8 +127,25 @@ export function HeroSection() {
               className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-bold mb-4"
               style={{ letterSpacing: "-0.03em", lineHeight: "1.05" }}
             >
-              Hi, I'm{" "}
-              <span className="text-gradient-primary">{personalData.name}</span>
+              {(() => {
+                const [first, ...rest] = personalData.name.split(" ");
+                const surname = rest.join(" ");
+                return (
+                  <>
+                    <span className="font-normal text-foreground">Hi, I'm</span>{" "}
+                    <span className="text-foreground">{first}</span>{" "}
+                    <span
+                      className="text-foreground [text-underline-offset:0.14em] [text-decoration-thickness:2px]"
+                      style={{
+                        textDecoration: "underline",
+                        textDecorationColor: "oklch(var(--primary))",
+                      }}
+                    >
+                      {surname}
+                    </span>
+                  </>
+                );
+              })()}
             </motion.h1>
 
             {/* Title */}
@@ -195,7 +212,7 @@ export function HeroSection() {
                     (e.currentTarget as HTMLElement).style.background = "oklch(var(--primary))";
                     (e.currentTarget as HTMLElement).style.color = "oklch(var(--primary-foreground))";
                     (e.currentTarget as HTMLElement).style.transform = "translateY(-3px) scale(1.08)";
-                    (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-glow)";
+                    (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-sm)";
                     (e.currentTarget as HTMLElement).style.borderColor = "transparent";
                   }}
                   onMouseLeave={(e) => {
@@ -219,26 +236,17 @@ export function HeroSection() {
             transition={{ duration: 0.7, delay: 0.2, ...springTransition }}
             className="relative flex flex-col items-center"
           >
-            {/* Profile image with premium gradient ring */}
+            {/* Profile image — single hairline ring + quiet halo. No gradient. */}
             <motion.div
               initial={{ scale: 0.85, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.4, duration: 0.6, ...springTransition }}
-              className="relative mx-auto w-56 h-56 sm:w-72 sm:h-72 lg:w-80 lg:h-80 mb-9"
+              className="relative mx-auto w-56 h-56 sm:w-72 sm:h-72 lg:w-80 lg:h-80 mb-9 rounded-full"
+              style={{
+                border: "1px solid oklch(var(--primary))",
+                boxShadow: "0 0 0 16px oklch(var(--primary) / 0.10)",
+              }}
             >
-              {/* Outer glow ring */}
-              <div
-                className="absolute inset-0 rounded-full animate-pulse-glow"
-                style={{ background: "var(--gradient-primary)", padding: "3px" }}
-              >
-                <div className="w-full h-full rounded-full bg-background" />
-              </div>
-              {/* Inner gradient ring */}
-              <div
-                className="absolute inset-[3px] rounded-full"
-                style={{ background: "var(--gradient-primary)" }}
-              />
-              {/* Photo */}
               <picture>
                 <source
                   type="image/avif"
@@ -260,17 +268,17 @@ export function HeroSection() {
                   loading="eager"
                   width={320}
                   height={320}
-                  className="absolute inset-[5px] z-10 w-[calc(100%-10px)] h-[calc(100%-10px)] rounded-full object-cover"
+                  className="absolute inset-0 z-10 w-full h-full rounded-full object-cover"
                 />
               </picture>
-              {/* Floating badge — only animates while hero is in view. */}
+              {/* "Open to work" pill — solid coral, no gradient, no glow. */}
               <motion.div
                 animate={heroInView && !prefersReducedMotion ? { y: [0, -6, 0] } : { y: 0 }}
                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                 className="absolute -bottom-3 -right-3 z-20 px-3 py-1.5 rounded-xl text-xs font-semibold text-primary-foreground"
                 style={{
-                  background: "var(--gradient-primary)",
-                  boxShadow: "var(--shadow-glow)",
+                  background: "oklch(var(--primary))",
+                  boxShadow: "var(--shadow-sm)",
                   willChange: heroInView ? "transform" : "auto",
                 }}
               >
@@ -278,27 +286,28 @@ export function HeroSection() {
               </motion.div>
             </motion.div>
 
-            {/* Metrics grid */}
-            <div className="grid grid-cols-3 gap-4 w-full max-w-sm">
-              {[
-                { label: "Projects", value: personalData.metrics.projects },
-                { label: "Years Exp.", value: personalData.metrics.experience },
-                { label: "Clients", value: personalData.metrics.clients },
-              ].map((metric, index) => (
-                <motion.div
-                  key={metric.label}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.7 + index * 0.1, ...springTransition }}
-                  className="text-center p-4 rounded-2xl glass-card"
-                >
-                  <div className="text-2xl lg:text-3xl font-bold text-gradient-primary mb-0.5">
-                    {metric.value}
-                  </div>
-                  <div className="text-xs text-muted-foreground font-medium">{metric.label}</div>
-                </motion.div>
-              ))}
-            </div>
+            {/* Metrics — inline sentence, not a card grid. Serif numerals
+                inherit weight; coral surface area capped to underline only. */}
+            <motion.p
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7, ...springTransition }}
+              className="font-sans text-sm md:text-base text-muted-foreground max-w-sm text-center leading-relaxed"
+            >
+              Shipped{" "}
+              <span className="font-display font-bold text-foreground">
+                {personalData.metrics.projects}
+              </span>{" "}
+              projects with{" "}
+              <span className="font-display font-bold text-foreground">
+                {personalData.metrics.clients}
+              </span>{" "}
+              clients over{" "}
+              <span className="font-display font-bold text-foreground">
+                {personalData.metrics.experience}
+              </span>
+              .
+            </motion.p>
           </motion.div>
         </div>
       </div>

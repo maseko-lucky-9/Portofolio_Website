@@ -27,7 +27,7 @@ export const personalData = {
   // EDIT: Key metrics to display
   metrics: {
     projects: "20+",
-    experience: "8+ Years",
+    experience: "8+ years",
     clients: "10+",
   },
 
