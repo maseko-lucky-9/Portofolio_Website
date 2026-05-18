@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { motion, useInView, useReducedMotion } from "framer-motion";
 import { ArrowDown, Github, Linkedin, Twitter } from "lucide-react";
 import { personalData } from "@/data/personal";
 import { AuroraBackground } from "@/components/AuroraBackground";
@@ -50,6 +50,11 @@ function ShippedMeter({ reduced }: { reduced: boolean }) {
 
 export function HeroSection() {
   const prefersReducedMotion = useReducedMotion();
+  const heroRef = useRef<HTMLElement>(null);
+  // `initial: true` so animations start immediately on mount — the IO callback
+  // is async and would otherwise leave looping animations un-started for 1+ frame.
+  const heroInView = useInView(heroRef, { initial: true });
+  const [pastFold, setPastFold] = useState(false);
   // Subtle magnetic-cursor effect on the two primary CTAs (Plan 3).
   // 5 px is the senior-eng-taste sweet spot — felt, not seen.
   const primaryCtaRef = useMagnetic<HTMLButtonElement>(5);
@@ -62,11 +67,23 @@ export function HeroSection() {
     document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" });
   };
 
+  // Hide the scroll indicator once the user has scrolled past ~200 px.
+  // Passive listener; cleaned up on unmount. Single read per scroll event.
+  useEffect(() => {
+    const onScroll = () => setPastFold(window.scrollY > 200);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
     <section
+      ref={heroRef}
       id="about"
       aria-labelledby="hero-heading"
-      className="relative min-h-screen flex items-center justify-center overflow-hidden"
+      className={`relative min-h-screen flex items-center justify-center overflow-hidden${
+        heroInView ? "" : " hero-paused"
+      }`}
       style={{ background: "var(--gradient-hero)" }}
     >
       {/* Aurora WebGL background */}
@@ -254,19 +271,22 @@ export function HeroSection() {
                   sizes="(min-width: 1024px) 320px, 240px"
                   alt={`${personalData.name} profile photo`}
                   fetchPriority="high"
+                  decoding="async"
+                  loading="eager"
                   width={320}
                   height={320}
                   className="absolute inset-[5px] z-10 w-[calc(100%-10px)] h-[calc(100%-10px)] rounded-full object-cover"
                 />
               </picture>
-              {/* Floating badge */}
+              {/* Floating badge — only animates while hero is in view. */}
               <motion.div
-                animate={{ y: [0, -6, 0] }}
+                animate={heroInView && !prefersReducedMotion ? { y: [0, -6, 0] } : { y: 0 }}
                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                 className="absolute -bottom-3 -right-3 z-20 px-3 py-1.5 rounded-xl text-xs font-semibold text-primary-foreground"
                 style={{
                   background: "var(--gradient-primary)",
                   boxShadow: "var(--shadow-glow)",
+                  willChange: heroInView ? "transform" : "auto",
                 }}
               >
                 Open to work
@@ -298,26 +318,33 @@ export function HeroSection() {
         </div>
       </div>
 
-      {/* Scroll indicator */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.4 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2"
-      >
-        <motion.button
-          onClick={scrollToProjects}
-          animate={{ y: [0, 8, 0], opacity: [0.4, 0.9, 0.4] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          className="flex flex-col items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-          aria-label="Scroll to projects"
+      {/* Scroll indicator — unmounts after the user scrolls past the fold,
+          and pauses its bounce when the hero is no longer visible. */}
+      {!pastFold && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: heroInView ? 1 : 0 }}
+          transition={{ delay: 1.4 }}
+          className="absolute bottom-8 left-1/2 -translate-x-1/2"
         >
-          <span className="text-[10px] uppercase tracking-[0.2em] font-medium">Scroll</span>
-          <div className="w-5 h-8 rounded-full border border-current flex items-start justify-center pt-1.5">
-            <div className="w-1 h-2 rounded-full bg-current" />
-          </div>
-        </motion.button>
-      </motion.div>
+          <motion.button
+            onClick={scrollToProjects}
+            animate={
+              heroInView && !prefersReducedMotion
+                ? { y: [0, 8, 0], opacity: [0.4, 0.9, 0.4] }
+                : { y: 0, opacity: 0.6 }
+            }
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            className="flex flex-col items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+            aria-label="Scroll to projects"
+          >
+            <span className="text-[10px] uppercase tracking-[0.2em] font-medium">Scroll</span>
+            <div className="w-5 h-8 rounded-full border border-current flex items-start justify-center pt-1.5">
+              <div className="w-1 h-2 rounded-full bg-current" />
+            </div>
+          </motion.button>
+        </motion.div>
+      )}
     </section>
   );
 }

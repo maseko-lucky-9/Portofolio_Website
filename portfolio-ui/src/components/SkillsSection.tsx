@@ -221,29 +221,34 @@ export function SkillsSection() {
                         {getProficiencyLabel(skill.proficiency)}
                       </span>
                     </div>
-                    <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "hsl(var(--muted))" }}>
+                    <div className="h-1.5 rounded-full overflow-hidden relative" style={{ background: "hsl(var(--muted))" }}>
                       <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${skill.proficiency}%` }}
+                        initial={{ scaleX: 0 }}
+                        animate={{ scaleX: 1 }}
                         transition={{
                           duration: prefersReducedMotion ? 0 : 0.7,
                           delay: index * 0.04,
                           ease: [0.16, 1, 0.3, 1],
                         }}
-                        className="h-full rounded-full relative overflow-hidden"
-                        style={{ background: categoryGradients[activeCategory] }}
-                      >
-                        {/* Shimmer highlight */}
-                        {!prefersReducedMotion && (
-                          <div
-                            className="absolute inset-0 animate-shimmer"
-                            style={{
-                              background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.35) 50%, transparent 100%)",
-                              backgroundSize: "200% 100%",
-                            }}
-                          />
-                        )}
-                      </motion.div>
+                        className="h-full rounded-full"
+                        style={{
+                          width: `${skill.proficiency}%`,
+                          transformOrigin: "left center",
+                          background: categoryGradients[activeCategory],
+                          willChange: "transform",
+                        }}
+                      />
+                      {!prefersReducedMotion && (
+                        <div
+                          className="absolute inset-y-0 left-0 pointer-events-none animate-shimmer-once"
+                          style={{
+                            width: `${skill.proficiency}%`,
+                            background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.35) 50%, transparent 100%)",
+                            backgroundSize: "200% 100%",
+                            animationDelay: `${index * 0.04 + 0.2}s`,
+                          }}
+                        />
+                      )}
                     </div>
                   </motion.div>
                 ))}

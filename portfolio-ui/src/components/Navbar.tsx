@@ -154,11 +154,12 @@ export function Navbar() {
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.nav
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            className="md:hidden overflow-hidden"
+            initial={{ opacity: 0, scaleY: 0.85 }}
+            animate={{ opacity: 1, scaleY: 1 }}
+            exit={{ opacity: 0, scaleY: 0.85 }}
+            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            style={{ transformOrigin: "top center", maxHeight: "90vh", overflowY: "auto" }}
+            className="md:hidden"
           >
             <div
               className="mx-4 mt-2 rounded-2xl overflow-hidden"

@@ -2,8 +2,6 @@ import { lazy, Suspense } from "react";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { Navbar } from "@/components/Navbar";
 import { HeroSection } from "@/components/HeroSection";
-import { SkillsSection } from "@/components/SkillsSection";
-import { ProjectsSection } from "@/components/ProjectsSection";
 import { Footer } from "@/components/Footer";
 import { ScrollProgress } from "@/components/ScrollProgress";
 import { SmoothScroll } from "@/components/SmoothScroll";
@@ -12,8 +10,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { LazySection } from "@/components/LazySection";
 
 // Lazy-load below-fold sections.
-// CodeDemoSection includes heavy Monaco Editor (~900 KB CDN JS) — wrapped in
-// LazySection so Monaco never loads until the user scrolls to that section.
+// SkillsSection imports recharts (~100 KB gzipped) — keep it out of the
+// main bundle and let LazySection trigger the chunk when the user scrolls
+// within 300 px of the section.
+// CodeDemoSection includes heavy Monaco Editor (~900 KB CDN JS).
+const SkillsSection = lazy(() => import("@/components/SkillsSection").then(m => ({ default: m.SkillsSection })));
+const ProjectsSection = lazy(() => import("@/components/ProjectsSection").then(m => ({ default: m.ProjectsSection })));
 const CodeDemoSection = lazy(() => import("@/components/CodeDemoSection").then(m => ({ default: m.CodeDemoSection })));
 const ExperienceSection = lazy(() => import("@/components/ExperienceSection").then(m => ({ default: m.ExperienceSection })));
 const ServicesSection = lazy(() => import("@/components/ServicesSection").then(m => ({ default: m.ServicesSection })));
@@ -55,11 +57,19 @@ const Index = () => {
         <Navbar />
         <main>
           <HeroSection />
-          <SkillsSection />
-          <ProjectsSection />
           {/* LazySection defers the Suspense boundary until the section
-              approaches the viewport — prevents Monaco / ContactSection / etc.
+              approaches the viewport — prevents Monaco / recharts / etc.
               from loading their chunks during the initial page load. */}
+          <LazySection minHeight="800px">
+            <Suspense fallback={<SectionFallback />}>
+              <SkillsSection />
+            </Suspense>
+          </LazySection>
+          <LazySection minHeight="800px">
+            <Suspense fallback={<SectionFallback />}>
+              <ProjectsSection />
+            </Suspense>
+          </LazySection>
           <LazySection minHeight="700px">
             <Suspense fallback={<SectionFallback />}>
               <CodeDemoSection />
