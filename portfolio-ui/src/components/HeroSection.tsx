@@ -101,22 +101,28 @@ export function HeroSection() {
             transition={{ duration: 0.7, ...springTransition }}
             className="text-center lg:text-left"
           >
-            {/* Availability badge */}
+            {/* Availability badge — monochrome treatment for full WCAG AA
+                contrast. The single coral dot carries the "available"
+                signal; the text itself stays on the foreground token. */}
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.15, ...springTransition }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-7"
-              style={{
-                background: "oklch(var(--secondary) / 0.08)",
-                border: "1px solid oklch(var(--secondary) / 0.25)",
-              }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-7 bg-muted border border-border"
             >
               <span className="relative flex h-2 w-2 flex-shrink-0">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-70" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-secondary" />
+                <span
+                  className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-70"
+                  style={{ background: "oklch(var(--primary))" }}
+                />
+                <span
+                  className="relative inline-flex rounded-full h-2 w-2"
+                  style={{ background: "oklch(var(--primary))" }}
+                />
               </span>
-              <span className="text-sm font-medium text-secondary">{personalData.availability}</span>
+              <span className="text-sm font-medium text-foreground">
+                {personalData.availability}
+              </span>
             </motion.div>
 
             {/* Name */}
