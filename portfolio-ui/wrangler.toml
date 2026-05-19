@@ -17,6 +17,20 @@ name = "thulani-portfolio"
 compatibility_date = "2025-04-26"
 workers_dev = true
 
+# Custom-domain routes (uncomment AFTER the zone is Active in
+# Cloudflare — see docs/seo/custom-domain-setup.md). `custom_domain = true`
+# makes Cloudflare auto-provision DNS records + TLS cert.
+#
+# [[routes]]
+# pattern = "thulanimaseko.com/*"
+# zone_name = "thulanimaseko.com"
+# custom_domain = true
+#
+# [[routes]]
+# pattern = "www.thulanimaseko.com/*"
+# zone_name = "thulanimaseko.com"
+# custom_domain = true
+
 # Worker entry-point: wraps the ASSETS binding to inject security and
 # AI-opt-out response headers (see src/worker.ts). Disable by clearing
 # `main` to fall back to pure-static behavior.

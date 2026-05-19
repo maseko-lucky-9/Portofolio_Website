@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && node scripts/build-sitemap.mjs",
-    "build:dev": "vite build --mode development && node scripts/build-sitemap.mjs",
+    "build": "vite build && node scripts/build-sitemap.mjs && node scripts/inject-verification.mjs",
+    "build:dev": "vite build --mode development && node scripts/build-sitemap.mjs && node scripts/inject-verification.mjs",
     "seo:sitemap": "node scripts/build-sitemap.mjs",
+    "seo:verify": "node scripts/inject-verification.mjs",
     "seo:indexnow": "node scripts/indexnow-submit.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
