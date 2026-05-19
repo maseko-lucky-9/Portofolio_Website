@@ -275,7 +275,7 @@ export function ContactSection() {
                   </p>
                 </motion.div>
               ) : (
-                <form onSubmit={handleSubmit} className="space-y-5">
+                <form onSubmit={handleSubmit} className="space-y-5" noValidate>
                   <div className="grid sm:grid-cols-2 gap-5">
                     <div className="space-y-2">
                       <Label htmlFor="name">Name</Label>
@@ -286,9 +286,17 @@ export function ContactSection() {
                         onChange={handleChange}
                         placeholder="John Doe"
                         className={errors.name ? "border-destructive" : ""}
+                        aria-invalid={!!errors.name}
+                        aria-describedby={errors.name ? "name-error" : undefined}
                       />
                       {errors.name && (
-                        <p className="text-xs text-destructive">{errors.name}</p>
+                        <p
+                          id="name-error"
+                          role="alert"
+                          className="text-xs text-destructive"
+                        >
+                          {errors.name}
+                        </p>
                       )}
                     </div>
 
@@ -302,9 +310,17 @@ export function ContactSection() {
                         onChange={handleChange}
                         placeholder="john@example.com"
                         className={errors.email ? "border-destructive" : ""}
+                        aria-invalid={!!errors.email}
+                        aria-describedby={errors.email ? "email-error" : undefined}
                       />
                       {errors.email && (
-                        <p className="text-xs text-destructive">{errors.email}</p>
+                        <p
+                          id="email-error"
+                          role="alert"
+                          className="text-xs text-destructive"
+                        >
+                          {errors.email}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -318,9 +334,17 @@ export function ContactSection() {
                       onChange={handleChange}
                       placeholder="Project Inquiry"
                       className={errors.subject ? "border-destructive" : ""}
+                      aria-invalid={!!errors.subject}
+                      aria-describedby={errors.subject ? "subject-error" : undefined}
                     />
                     {errors.subject && (
-                      <p className="text-xs text-destructive">{errors.subject}</p>
+                      <p
+                        id="subject-error"
+                        role="alert"
+                        className="text-xs text-destructive"
+                      >
+                        {errors.subject}
+                      </p>
                     )}
                   </div>
 
@@ -334,9 +358,17 @@ export function ContactSection() {
                       placeholder="Tell me about your project..."
                       rows={5}
                       className={errors.message ? "border-destructive" : ""}
+                      aria-invalid={!!errors.message}
+                      aria-describedby={errors.message ? "message-error" : undefined}
                     />
                     {errors.message && (
-                      <p className="text-xs text-destructive">{errors.message}</p>
+                      <p
+                        id="message-error"
+                        role="alert"
+                        className="text-xs text-destructive"
+                      >
+                        {errors.message}
+                      </p>
                     )}
                   </div>
 
