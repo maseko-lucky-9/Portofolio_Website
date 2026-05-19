@@ -6,6 +6,7 @@ import { Footer } from "@/components/Footer";
 import { ScrollProgress } from "@/components/ScrollProgress";
 import { SmoothScroll } from "@/components/SmoothScroll";
 import { CustomCursor } from "@/components/CustomCursor";
+import { SectionBridge } from "@/components/SectionBridge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LazySection } from "@/components/LazySection";
 
@@ -65,16 +66,22 @@ const Index = () => {
               <SkillsSection />
             </Suspense>
           </LazySection>
+          {/* SectionBridge instances render eagerly (outside LazySection)
+              so their scroll observers register on first paint. The
+              animation scrubs forward / backward with scroll position. */}
+          <SectionBridge id="skills-projects" caption="Skills · Projects" />
           <LazySection minHeight="800px">
             <Suspense fallback={<SectionFallback />}>
               <ProjectsSection />
             </Suspense>
           </LazySection>
+          <SectionBridge id="projects-codedemo" caption="Projects · Code" />
           <LazySection minHeight="700px">
             <Suspense fallback={<SectionFallback />}>
               <CodeDemoSection />
             </Suspense>
           </LazySection>
+          <SectionBridge id="codedemo-experience" caption="Code · Experience" />
           <LazySection minHeight="600px">
             <Suspense fallback={<SectionFallback />}>
               <ExperienceSection />
