@@ -5,8 +5,8 @@
  */
 
 import { httpClient } from '@/lib/http-client';
+import { EventType } from '@/types/api'; // enum — used as value at runtime
 import type {
-  EventType,
   AnalyticsQueryParams,
   AnalyticsSummary,
   ApiResponse,

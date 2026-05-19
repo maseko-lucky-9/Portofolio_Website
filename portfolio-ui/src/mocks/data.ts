@@ -5,6 +5,7 @@
  */
 
 import type { Project, Article, Tag, User } from '@/types/api';
+import { Role, ProjectStatus, ArticleStatus } from '@/types/api'; // enums — used as values
 
 export const mockUser: User = {
   id: '1',
@@ -71,7 +72,7 @@ export const mockProjects: Project[] = [
     sortOrder: 1,
     views: 1234,
     likes: 56,
-    status: 'PUBLISHED',
+    status: ProjectStatus.PUBLISHED,
     publishedAt: new Date().toISOString(),
     archivedAt: null,
     metaTitle: 'Portfolio Website - John Doe',

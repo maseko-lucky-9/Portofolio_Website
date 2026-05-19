@@ -117,7 +117,7 @@ export const handlers = [
       success: true,
       data: {
         id: '1',
-        ...body,
+        ...(body as Record<string, unknown>),
         status: 'NEW',
         createdAt: new Date().toISOString(),
       },
@@ -134,7 +134,7 @@ export const handlers = [
       success: true,
       data: {
         id: '1',
-        ...body,
+        ...(body as Record<string, unknown>),
         isConfirmed: false,
         isActive: true,
         createdAt: new Date().toISOString(),
