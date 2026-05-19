@@ -1,5 +1,10 @@
 import { useRef } from "react";
-import { Server, Cloud, Code2, CheckCircle2, ArrowRight } from "lucide-react";
+import { CheckCircle2, ArrowRight } from "lucide-react";
+import {
+  AnimatedBrackets,
+  BranchGraph,
+  CubeMorph,
+} from "@/components/icons/animated";
 
 import { revealOnScroll, useAnime } from "@/lib/use-anime";
 
@@ -20,7 +25,7 @@ interface Service {
 const services: Service[] = [
   {
     id: "k8s-ops",
-    icon: Server,
+    icon: CubeMorph,
     label: "DevOps",
     title: "Kubernetes Operations",
     description:
@@ -39,7 +44,7 @@ const services: Service[] = [
   },
   {
     id: "iac",
-    icon: Cloud,
+    icon: BranchGraph,
     label: "Infrastructure",
     title: "Terraform / IaC",
     description:
@@ -58,7 +63,7 @@ const services: Service[] = [
   },
   {
     id: "backend",
-    icon: Code2,
+    icon: AnimatedBrackets,
     label: "Backend",
     title: "Backend Engineering",
     description:
