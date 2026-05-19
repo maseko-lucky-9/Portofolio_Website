@@ -80,7 +80,7 @@ export function SkillsSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.1, ...springTransition }}
-          className="flex justify-center gap-3 mb-14 flex-wrap"
+          className="@container flex justify-center gap-3 mb-14 flex-wrap"
         >
           {(["frontend", "backend", "devops"] as SkillCategory[]).map((category) => {
             const Icon = categoryIcons[category];
@@ -90,7 +90,7 @@ export function SkillsSection() {
                 key={category}
                 onClick={() => setActiveCategory(category)}
                 data-active={isActive ? "true" : "false"}
-                className="flex items-center gap-2 px-6 py-3 rounded-full font-medium text-sm transition-all
+                className="flex items-center gap-2 px-4 @[480px]:px-6 py-2.5 @[480px]:py-3 rounded-full font-medium text-xs @[480px]:text-sm transition-all
                            bg-card text-foreground border border-border
                            data-[active=true]:bg-primary
                            data-[active=true]:text-primary-foreground
@@ -108,7 +108,10 @@ export function SkillsSection() {
           })}
         </motion.div>
 
-        <div className="grid lg:grid-cols-2 gap-10 lg:gap-14 items-start">
+        {/* Container-query wrapper — radar vs. skills list reflow based on
+            available parent width, not viewport. Lets the section adapt
+            cleanly if ever placed in a sidebar or narrow column. */}
+        <div className="@container grid grid-cols-1 @[640px]:grid-cols-2 gap-10 @[640px]:gap-14 items-start">
           {/* Radar chart */}
           <motion.div
             initial={{ opacity: 0, x: -24 }}

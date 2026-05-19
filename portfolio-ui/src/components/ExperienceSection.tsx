@@ -145,7 +145,7 @@ function ExperienceRow({
           onBlur={onScheduleClose}
           onClick={onToggle}
           onKeyDown={handleKeyDown}
-          className="relative rounded-xl border border-border bg-card p-6 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[oklch(var(--primary))] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          className="@container relative rounded-xl border border-border bg-card p-4 @[400px]:p-6 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[oklch(var(--primary))] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           style={{
             boxShadow: isOpen
               ? "var(--shadow-xl), 0 0 0 1px oklch(var(--primary) / 0.18)"
@@ -182,13 +182,14 @@ function ExperienceRow({
             </div>
           </div>
 
-          {/* Meta row */}
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground mb-3">
+          {/* Meta row — stacks vertically when card container is narrow,
+              inline at @sm and above. Container query, not viewport. */}
+          <div className="flex flex-col @[400px]:flex-row @[400px]:flex-wrap @[400px]:items-center gap-x-3 gap-y-1 text-xs text-muted-foreground mb-3">
             <span className="inline-flex items-center gap-1.5">
               <Calendar className="w-3 h-3" />
               {exp.startDate} – {exp.endDate}
             </span>
-            <span className="opacity-50">·</span>
+            <span className="hidden @[400px]:inline opacity-50">·</span>
             <span className="inline-flex items-center gap-1.5">
               <MapPin className="w-3 h-3" />
               {exp.location}
