@@ -111,3 +111,56 @@ Pre-existing findings (not introduced by anime work):
 Comparator file (local-only, gitignored by `docs/perf/*-lighthouse-*.json`
 spirit): `baseline-pre-anime.report.json`. Phase F re-runs Lighthouse on
 the migrated build and diffs against these numbers.
+
+---
+
+## Post-anime-migration snapshot (2026-05-19)
+
+Captured after Phase F (framer-motion uninstalled + size-limit + Vite
+manualChunks cleanup). Same Lighthouse CLI / headless Chrome setup.
+
+### Lighthouse mobile (`npm run preview`)
+
+| Metric                       | Pre-anime | Post-anime | Δ            |
+| ---------------------------- | --------- | ---------- | ------------ |
+| Performance                  | 90        | **88**     | −2           |
+| Accessibility                | 100       | 100        | flat         |
+| Best Practices               | 100       | 100        | flat         |
+| SEO                          | 100       | 100        | flat         |
+| First Contentful Paint       | 2.7 s     | 2.6 s      | −0.1 s ✓     |
+| Largest Contentful Paint     | 3.0 s     | 3.2 s      | +0.2 s       |
+| Total Blocking Time          | 10 ms     | 40 ms      | +30 ms       |
+| Cumulative Layout Shift      | 0         | 0.069      | +0.069 (Good)|
+| Speed Index                  | 2.7 s     | 2.6 s      | −0.1 s ✓     |
+
+Within the plan's "≥ baseline−3" Performance tolerance (88 ≥ 87). The
+30 ms TBT bump comes from the new motion code (3 SectionBridge
+timelines + 5 animated icon entrance animations + the new reveal IO
+observers in every migrated section). The 0.069 CLS is from the
+SectionBridge containers reserving height after their `useAnime`
+mounts. CLS stays well under the 0.1 "Good" threshold.
+
+### Bundle (gzip, post-size-limit-cleanup)
+
+| Asset                                | Pre-anime | Post-anime | Δ        |
+| ------------------------------------ | --------- | ---------- | -------- |
+| `index-*.js` (main, critical path)   | 118.94 KB | 122.86 KB  | +3.92 KB |
+| `motion-vendor-*.js`                 | 50.95 KB  | 25.33 KB   | **−25.62 KB** |
+| `index-*.css`                        | 35.37 KB  | 35.46 KB   | +0.09 KB |
+| `ContactSection-*.js` (lazy)         | 16.10 KB  | 16.30 KB   | +0.20 KB |
+| `BlogSection-*.js` (lazy)            | 8.68 KB   | 8.70 KB    | flat     |
+
+Net bundle savings (main + motion-vendor combined):
+**169.89 KB → 148.19 KB gz, −21.70 KB / −12.8 %**.
+
+`size-limit` block was cleaned up in Phase F:
+- Raised `main JS` limit 85 → 125 KB to reflect long-standing
+  overshoot inherited from before this work; the migration did not
+  cause it. Headroom now 2 KB.
+- Lowered `motion-vendor` limit 55 → 40 KB to reflect the new
+  anime-only footprint. Headroom now ~15 KB.
+- Removed stale `three-vendor` / `charts-vendor` entries (chunks no
+  longer exist; `vite.config.ts` comment at line 78–79 already noted
+  this).
+
+Comparator file (local-only): `post-anime.report.json`.

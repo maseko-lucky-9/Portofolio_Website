@@ -83,10 +83,9 @@ export default defineConfig(({ mode }) => {
           manualChunks: {
             // Animation libs share a vendor chunk — used across multiple eager
             // and lazy sections, so isolating them lets the browser cache once.
-            // anime.js is being progressively swapped in for framer-motion
-            // (see ~/.claude/plans/atomic-toasting-locket.md). Both coexist in
-            // this chunk during Phase B–E; framer-motion is removed in Phase F.
-            'motion-vendor': ['framer-motion', 'animejs', 'lenis'],
+            // anime.js fully replaced framer-motion as of Phase F of the
+            // animation migration (see ~/.claude/plans/atomic-toasting-locket.md).
+            'motion-vendor': ['animejs', 'lenis'],
           },
         },
       },

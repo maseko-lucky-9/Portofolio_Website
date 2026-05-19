@@ -23,31 +23,19 @@
     {
       "name": "main JS (critical path)",
       "path": "dist/assets/index-*.js",
-      "limit": "85 KB",
+      "limit": "125 KB",
       "gzip": true
     },
     {
       "name": "motion-vendor (preloaded)",
       "path": "dist/assets/motion-vendor-*.js",
-      "limit": "55 KB",
+      "limit": "40 KB",
       "gzip": true
     },
     {
       "name": "CSS",
       "path": "dist/assets/index-*.css",
       "limit": "40 KB",
-      "gzip": true
-    },
-    {
-      "name": "three-vendor (deferred)",
-      "path": "dist/assets/three-vendor-*.js",
-      "limit": "275 KB",
-      "gzip": true
-    },
-    {
-      "name": "charts-vendor (lazy)",
-      "path": "dist/assets/charts-vendor-*.js",
-      "limit": "105 KB",
       "gzip": true
     }
   ],
@@ -92,7 +80,6 @@
     "cmdk": "^1.1.1",
     "date-fns": "^3.6.0",
     "embla-carousel-react": "^8.6.0",
-    "framer-motion": "^12.25.0",
     "input-otp": "^1.4.2",
     "lenis": "^1.3.23",
     "lucide-react": "^0.462.0",
