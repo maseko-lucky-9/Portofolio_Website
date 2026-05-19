@@ -75,23 +75,15 @@ export default defineConfig(({ mode }) => {
       __SHIPPED_COUNT__: JSON.stringify(getCommitCount()),
     },
     build: {
-      // Exclude charts-vendor from automatic <link rel="modulepreload">
-      // injection — only loaded by SkillsSection (lazy + IO-gated).
-      // (three-vendor chunk removed in phase-7 audit remediation.)
-      modulePreload: {
-        polyfill: true,
-        resolveDependencies: (_filename, deps) =>
-          deps.filter((dep) => !dep.includes("charts-vendor")),
-      },
+      // (three-vendor + charts-vendor chunks both removed; recharts replaced
+      // with hand-rolled SkillsRadar SVG in phase-12.)
+      modulePreload: { polyfill: true },
       rollupOptions: {
         output: {
           manualChunks: {
             // Animation libs share a vendor chunk — used across multiple eager
             // and lazy sections, so isolating them lets the browser cache once.
             'motion-vendor': ['framer-motion', 'lenis'],
-            // Recharts (+ d3-scale/shape/interpolate) only used in SkillsSection
-            // (lazy) — co-locating it here ensures the main chunk stays lean.
-            'charts-vendor': ['recharts'],
           },
         },
       },

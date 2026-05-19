@@ -1,16 +1,8 @@
 import { useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import {
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-  Radar,
-  ResponsiveContainer,
-  Tooltip,
-} from "recharts";
 import { Code2, Server, Cloud } from "lucide-react";
 import { skills, radarSkills, SkillCategory } from "@/data/skills";
+import { SkillsRadar } from "@/components/SkillsRadar";
 
 import { SPRING_SKILLS as springTransition } from "@/lib/motion";
 // (re-exported as `springTransition` to minimize diff)
@@ -127,39 +119,8 @@ export function SkillsSection() {
               />
               <h3 className="text-base font-semibold capitalize">{activeCategory} Radar</h3>
             </div>
-            <div className="h-64 sm:h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <RadarChart data={currentRadarData}>
-                  <PolarGrid stroke="oklch(var(--border))" />
-                  <PolarAngleAxis
-                    dataKey="skill"
-                    tick={{ fill: "oklch(var(--muted-foreground))", fontSize: 11 }}
-                  />
-                  <PolarRadiusAxis
-                    angle={30}
-                    domain={[0, 100]}
-                    tick={{ fill: "oklch(var(--muted-foreground))", fontSize: 9 }}
-                  />
-                  <Radar
-                    name="Proficiency"
-                    dataKey="value"
-                    stroke={ACCENT_COLOR}
-                    fill={ACCENT_COLOR}
-                    fillOpacity={0.25}
-                    strokeWidth={2}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "oklch(var(--card))",
-                      border: "1px solid oklch(var(--border))",
-                      borderRadius: "0.75rem",
-                      boxShadow: "var(--shadow-lg)",
-                      fontSize: "0.8rem",
-                    }}
-                    labelStyle={{ color: "oklch(var(--foreground))", fontWeight: 600 }}
-                  />
-                </RadarChart>
-              </ResponsiveContainer>
+            <div className="h-64 sm:h-80 flex items-center justify-center">
+              <SkillsRadar data={currentRadarData} color={ACCENT_COLOR} />
             </div>
           </motion.div>
 
