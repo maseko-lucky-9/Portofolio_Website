@@ -24,8 +24,7 @@ export function ScrollProgress() {
       className="fixed top-0 left-0 right-0 z-[60] h-[2px] origin-left pointer-events-none"
       style={{
         scaleX,
-        background:
-          "linear-gradient(90deg, hsl(var(--primary)), hsl(var(--brand-violet)), hsl(var(--secondary)))",
+        background: "oklch(var(--primary))",
       }}
     />
   );

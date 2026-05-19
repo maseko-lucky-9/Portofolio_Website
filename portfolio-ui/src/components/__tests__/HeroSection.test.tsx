@@ -3,9 +3,10 @@ import { render, screen } from "@testing-library/react";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { personalData } from "@/data/personal";
 
-// Mock AuroraBackground — uses WebGL which jsdom cannot handle
-vi.mock("@/components/AuroraBackground", () => ({
-  AuroraBackground: () => <div data-testid="aurora-background" />,
+// PaperBackground is pure DOM (no WebGL) — but mock to keep test surface
+// stable and isolate HeroSection assertions from background rendering.
+vi.mock("@/components/PaperBackground", () => ({
+  PaperBackground: () => <div data-testid="paper-background" />,
 }));
 
 // Mock framer-motion to pass through children without animation
@@ -30,7 +31,15 @@ function renderHeroSection() {
 describe("HeroSection", () => {
   it("renders the user's name", () => {
     renderHeroSection();
-    expect(screen.getByText(personalData.name)).toBeInTheDocument();
+    // Name is split into multiple spans (first name + underlined surname) so
+    // getByText (single text node) no longer matches. Use accessible name
+    // composition via heading role.
+    expect(
+      screen.getByRole("heading", {
+        level: 1,
+        name: new RegExp(personalData.name),
+      }),
+    ).toBeInTheDocument();
   });
 
   it("renders the title", () => {
@@ -72,12 +81,14 @@ describe("HeroSection", () => {
     expect(screen.getByText(personalData.metrics.clients)).toBeInTheDocument();
   });
 
-  it("renders metric labels", () => {
+  it("renders metric prose in the inline sentence", () => {
     renderHeroSection();
-    expect(screen.getByText("Projects")).toBeInTheDocument();
-    // UI now uses abbreviated label "Years Exp." instead of "Experience"
-    expect(screen.getByText(/Years Exp\.?/i)).toBeInTheDocument();
-    expect(screen.getByText("Clients")).toBeInTheDocument();
+    // Metrics are no longer label/value cards — they're an inline sentence:
+    // "Shipped 20+ projects with 10+ clients over 8+ years."
+    // The whole sentence is a single accessible <p>; assert the substrings
+    // by matching against its text content rather than by individual spans.
+    const sentence = screen.getByText(/Shipped[\s\S]+projects[\s\S]+clients[\s\S]+/i);
+    expect(sentence).toBeInTheDocument();
   });
 
   it("renders profile image with correct alt text", () => {

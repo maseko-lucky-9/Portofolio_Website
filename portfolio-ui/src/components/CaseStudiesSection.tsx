@@ -8,7 +8,8 @@ import {
   Construction,
 } from "lucide-react";
 
-const springTransition = { type: "spring", stiffness: 260, damping: 26 };
+import { SPRING_DEFAULT as springTransition } from "@/lib/motion";
+// (re-exported as `springTransition` to minimize diff)
 
 type CaseStudyStatus = "live" | "in-progress" | "planned";
 
@@ -105,7 +106,7 @@ export function CaseStudiesSection() {
                 className="rounded-2xl border bg-card overflow-hidden"
                 style={{
                   boxShadow: "var(--shadow-md)",
-                  borderColor: "hsl(var(--border))",
+                  borderColor: "oklch(var(--border))",
                 }}
               >
                 <div className="p-8">

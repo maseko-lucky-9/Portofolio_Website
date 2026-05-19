@@ -9,7 +9,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ArticleStatus } from "@/types/api";
 import type { Article } from "@/types/api";
 
-const springTransition = { type: "spring", stiffness: 260, damping: 26 };
+import { SPRING_DEFAULT as springTransition } from "@/lib/motion";
+// (re-exported as `springTransition` to minimize diff)
 
 // Map API Article to the shape the blog template expects
 interface DisplayBlogPost {
@@ -85,7 +86,7 @@ export function BlogSection() {
       id="blog"
       aria-labelledby="blog-heading"
       className="py-20 section-mesh"
-      style={{ background: "hsl(var(--muted) / var(--opacity-soft))" }}
+      style={{ background: "oklch(var(--muted) / var(--opacity-soft))" }}
     >
       <div className="section-container">
         {/* Section Header */}
@@ -151,20 +152,20 @@ export function BlogSection() {
                   rel="noopener noreferrer"
                   className="block rounded-2xl border overflow-hidden transition-all"
                   style={{
-                    background: "var(--gradient-card)",
+                    background: "oklch(var(--card))",
                     boxShadow: "var(--shadow-md)",
-                    borderColor: "hsl(var(--border))",
+                    borderColor: "oklch(var(--border))",
                     transition: "all 300ms cubic-bezier(0.16, 1, 0.3, 1)",
                   }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLElement).style.transform = "translateY(-4px)";
-                    (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-xl), var(--shadow-glow)";
-                    (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--primary) / 0.35)";
+                    (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-sm)";
+                    (e.currentTarget as HTMLElement).style.borderColor = "oklch(var(--primary) / 0.35)";
                   }}
                   onMouseLeave={(e) => {
                     (e.currentTarget as HTMLElement).style.transform = "";
                     (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-md)";
-                    (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--border))";
+                    (e.currentTarget as HTMLElement).style.borderColor = "oklch(var(--border))";
                   }}
                 >
                   {/* Image */}
@@ -181,14 +182,14 @@ export function BlogSection() {
                       className="absolute inset-0"
                       style={{
                         background:
-                          "linear-gradient(to top, hsl(var(--background) / var(--opacity-overlay)), transparent)",
+                          "linear-gradient(to top, oklch(var(--background) / var(--opacity-overlay)), transparent)",
                       }}
                     />
 
                     {/* Read time badge */}
                     <div
-                      className="absolute top-4 right-4 flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium backdrop-blur-md"
-                      style={{ background: "hsl(var(--background) / 0.85)", border: "1px solid hsl(var(--border) / 0.5)" }}
+                      className="absolute top-4 right-4 flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium"
+                      style={{ background: "oklch(var(--background))", border: "1px solid oklch(var(--border))" }}
                     >
                       <Clock className="w-3 h-3" />
                       {post.readTime}
@@ -244,7 +245,7 @@ export function BlogSection() {
           >
             <div
               className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
-              style={{ background: "hsl(var(--primary) / 0.1)" }}
+              style={{ background: "oklch(var(--primary) / 0.1)" }}
             >
               <FileText className="w-8 h-8 text-primary/60" />
             </div>

@@ -2,19 +2,11 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-// Mock recharts — it doesn't render in jsdom
-vi.mock("recharts", () => ({
-  ResponsiveContainer: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="responsive-container">{children}</div>
-  ),
-  RadarChart: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="radar-chart">{children}</div>
-  ),
-  PolarGrid: () => <div data-testid="polar-grid" />,
-  PolarAngleAxis: () => <div data-testid="polar-angle-axis" />,
-  PolarRadiusAxis: () => <div data-testid="polar-radius-axis" />,
-  Radar: () => <div data-testid="radar" />,
-  Tooltip: () => <div data-testid="tooltip" />,
+// Mock SkillsRadar — pure SVG renders fine in jsdom but the test only
+// asserts container content, not chart geometry; keep the mock to
+// isolate SkillsSection logic.
+vi.mock("@/components/SkillsRadar", () => ({
+  SkillsRadar: () => <div data-testid="skills-radar" />,
 }));
 
 // Mock framer-motion to preserve children rendering
@@ -65,6 +57,6 @@ describe("SkillsSection", () => {
 
   it("renders the radar chart container", () => {
     render(<SkillsSection />);
-    expect(screen.getByTestId("responsive-container")).toBeInTheDocument();
+    expect(screen.getByTestId("skills-radar")).toBeInTheDocument();
   });
 });

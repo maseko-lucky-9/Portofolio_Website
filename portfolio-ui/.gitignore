@@ -29,3 +29,6 @@ docs/perf/*.html
 docs/perf/*-trace.json
 docs/perf/*-lighthouse-*.json
 
+
+# Audit remediation baseline screenshots (local-only)
+.audit-baselines/

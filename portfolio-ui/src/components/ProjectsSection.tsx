@@ -70,7 +70,8 @@ function ProjectCardSkeleton() {
   );
 }
 
-const springTransition = { type: "spring", stiffness: 260, damping: 26 };
+import { SPRING_DEFAULT as springTransition } from "@/lib/motion";
+// (re-exported as `springTransition` to minimize diff)
 
 export function ProjectsSection() {
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
@@ -206,7 +207,7 @@ export function ProjectsSection() {
                       className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                       style={{
                         background:
-                          "linear-gradient(to top, hsl(var(--background) / var(--opacity-overlay)), transparent)",
+                          "linear-gradient(to top, oklch(var(--background) / var(--opacity-overlay)), transparent)",
                       }}
                     />
 
@@ -249,7 +250,7 @@ export function ProjectsSection() {
                     </div>
 
                     {project.tagline && (
-                      <p className="text-sm font-medium text-gradient-primary mb-3">
+                      <p className="text-sm font-medium text-foreground mb-3">
                         {project.tagline}
                       </p>
                     )}
@@ -319,7 +320,7 @@ export function ProjectsSection() {
             className="flex flex-col items-center justify-center py-16 text-center"
           >
             <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
-              style={{ background: "hsl(var(--primary) / 0.08)", border: "1px solid hsl(var(--primary) / 0.15)" }}>
+              style={{ background: "oklch(var(--primary) / 0.08)", border: "1px solid oklch(var(--primary) / 0.15)" }}>
               <FolderOpen className="w-8 h-8 text-primary" />
             </div>
             <p className="text-lg font-medium text-muted-foreground mb-2">

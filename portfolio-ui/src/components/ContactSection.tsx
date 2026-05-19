@@ -20,7 +20,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 
-const springTransition = { type: "spring", stiffness: 260, damping: 26 };
+import { SPRING_DEFAULT as springTransition } from "@/lib/motion";
+// (re-exported as `springTransition` to minimize diff)
 
 // Form validation schema
 const contactSchema = z.object({
@@ -131,7 +132,7 @@ export function ContactSection() {
               <div className="flex items-center gap-4">
                 <div
                   className="w-12 h-12 rounded-xl flex items-center justify-center transition-all"
-                  style={{ background: "hsl(var(--primary) / 0.08)", border: "1px solid hsl(var(--primary) / 0.15)" }}
+                  style={{ background: "oklch(var(--primary) / 0.08)", border: "1px solid oklch(var(--primary) / 0.15)" }}
                 >
                   <Mail className="w-5 h-5 text-primary" />
                 </div>
@@ -150,7 +151,7 @@ export function ContactSection() {
               <div className="flex items-center gap-4">
                 <div
                   className="w-12 h-12 rounded-xl flex items-center justify-center transition-all"
-                  style={{ background: "hsl(var(--secondary) / 0.08)", border: "1px solid hsl(var(--secondary) / 0.15)" }}
+                  style={{ background: "oklch(var(--secondary) / 0.08)", border: "1px solid oklch(var(--secondary) / 0.15)" }}
                 >
                   <MapPin className="w-5 h-5 text-secondary" />
                 </div>
@@ -190,20 +191,20 @@ export function ContactSection() {
                   download
                   className="flex items-center gap-3 w-full p-4 rounded-xl border transition-all"
                   style={{
-                    background: "var(--gradient-card)",
+                    background: "oklch(var(--card))",
                     boxShadow: "var(--shadow-sm)",
-                    borderColor: "hsl(var(--border))",
+                    borderColor: "oklch(var(--border))",
                     transition: "all 300ms cubic-bezier(0.16, 1, 0.3, 1)",
                   }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)";
-                    (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-lg), var(--shadow-glow)";
-                    (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--primary) / 0.3)";
+                    (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-sm)";
+                    (e.currentTarget as HTMLElement).style.borderColor = "oklch(var(--primary) / 0.3)";
                   }}
                   onMouseLeave={(e) => {
                     (e.currentTarget as HTMLElement).style.transform = "";
                     (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-sm)";
-                    (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--border))";
+                    (e.currentTarget as HTMLElement).style.borderColor = "oklch(var(--border))";
                   }}
                 >
                   <Download className="w-5 h-5 text-primary" />
@@ -219,20 +220,20 @@ export function ContactSection() {
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 w-full p-4 rounded-xl border transition-all"
                   style={{
-                    background: "var(--gradient-card)",
+                    background: "oklch(var(--card))",
                     boxShadow: "var(--shadow-sm)",
-                    borderColor: "hsl(var(--border))",
+                    borderColor: "oklch(var(--border))",
                     transition: "all 300ms cubic-bezier(0.16, 1, 0.3, 1)",
                   }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)";
-                    (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-lg), var(--shadow-glow)";
-                    (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--primary) / 0.3)";
+                    (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-sm)";
+                    (e.currentTarget as HTMLElement).style.borderColor = "oklch(var(--primary) / 0.3)";
                   }}
                   onMouseLeave={(e) => {
                     (e.currentTarget as HTMLElement).style.transform = "";
                     (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-sm)";
-                    (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--border))";
+                    (e.currentTarget as HTMLElement).style.borderColor = "oklch(var(--border))";
                   }}
                 >
                   <Calendar className="w-5 h-5 text-secondary" />
@@ -264,7 +265,7 @@ export function ContactSection() {
                 >
                   <div
                     className="w-16 h-16 rounded-full flex items-center justify-center mb-4"
-                    style={{ background: "hsl(var(--secondary) / 0.08)", border: "1px solid hsl(var(--secondary) / 0.2)" }}
+                    style={{ background: "oklch(var(--secondary) / 0.08)", border: "1px solid oklch(var(--secondary) / 0.2)" }}
                   >
                     <CheckCircle className="w-8 h-8 text-secondary" />
                   </div>
@@ -274,7 +275,7 @@ export function ContactSection() {
                   </p>
                 </motion.div>
               ) : (
-                <form onSubmit={handleSubmit} className="space-y-5">
+                <form onSubmit={handleSubmit} className="space-y-5" noValidate>
                   <div className="grid sm:grid-cols-2 gap-5">
                     <div className="space-y-2">
                       <Label htmlFor="name">Name</Label>
@@ -285,9 +286,17 @@ export function ContactSection() {
                         onChange={handleChange}
                         placeholder="John Doe"
                         className={errors.name ? "border-destructive" : ""}
+                        aria-invalid={!!errors.name}
+                        aria-describedby={errors.name ? "name-error" : undefined}
                       />
                       {errors.name && (
-                        <p className="text-xs text-destructive">{errors.name}</p>
+                        <p
+                          id="name-error"
+                          role="alert"
+                          className="text-xs text-destructive"
+                        >
+                          {errors.name}
+                        </p>
                       )}
                     </div>
 
@@ -301,9 +310,17 @@ export function ContactSection() {
                         onChange={handleChange}
                         placeholder="john@example.com"
                         className={errors.email ? "border-destructive" : ""}
+                        aria-invalid={!!errors.email}
+                        aria-describedby={errors.email ? "email-error" : undefined}
                       />
                       {errors.email && (
-                        <p className="text-xs text-destructive">{errors.email}</p>
+                        <p
+                          id="email-error"
+                          role="alert"
+                          className="text-xs text-destructive"
+                        >
+                          {errors.email}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -317,9 +334,17 @@ export function ContactSection() {
                       onChange={handleChange}
                       placeholder="Project Inquiry"
                       className={errors.subject ? "border-destructive" : ""}
+                      aria-invalid={!!errors.subject}
+                      aria-describedby={errors.subject ? "subject-error" : undefined}
                     />
                     {errors.subject && (
-                      <p className="text-xs text-destructive">{errors.subject}</p>
+                      <p
+                        id="subject-error"
+                        role="alert"
+                        className="text-xs text-destructive"
+                      >
+                        {errors.subject}
+                      </p>
                     )}
                   </div>
 
@@ -333,9 +358,17 @@ export function ContactSection() {
                       placeholder="Tell me about your project..."
                       rows={5}
                       className={errors.message ? "border-destructive" : ""}
+                      aria-invalid={!!errors.message}
+                      aria-describedby={errors.message ? "message-error" : undefined}
                     />
                     {errors.message && (
-                      <p className="text-xs text-destructive">{errors.message}</p>
+                      <p
+                        id="message-error"
+                        role="alert"
+                        className="text-xs text-destructive"
+                      >
+                        {errors.message}
+                      </p>
                     )}
                   </div>
 

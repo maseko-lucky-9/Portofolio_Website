@@ -131,8 +131,8 @@ export function CustomCursor() {
           width: hover ? "44px" : "28px",
           height: hover ? "44px" : "28px",
           borderColor: hover
-            ? "hsl(var(--primary) / 0.7)"
-            : "hsl(var(--foreground) / 0.35)",
+            ? "oklch(var(--primary) / 0.7)"
+            : "oklch(var(--foreground) / 0.35)",
           opacity: active ? 1 : 0,
           mixBlendMode: "difference",
           willChange: "transform",
@@ -146,7 +146,7 @@ export function CustomCursor() {
         style={{
           width: "4px",
           height: "4px",
-          background: "hsl(var(--primary))",
+          background: "oklch(var(--primary))",
           opacity: active && !hover ? 1 : 0,
           transition: "opacity 200ms ease-out",
           willChange: "transform",

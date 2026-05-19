@@ -5,7 +5,8 @@ import { Play, Copy, Check, Terminal } from "lucide-react";
 import { codeExamples } from "@/data/codeExamples";
 import { useTheme } from "@/contexts/ThemeContext";
 
-const springTransition = { type: "spring", stiffness: 260, damping: 26 };
+import { SPRING_DEFAULT as springTransition } from "@/lib/motion";
+// (re-exported as `springTransition` to minimize diff)
 
 export function CodeDemoSection() {
   const [activeExample, setActiveExample] = useState(codeExamples[0]);
@@ -35,7 +36,7 @@ export function CodeDemoSection() {
     <section
       id="code-demo"
       className="py-20 section-mesh"
-      style={{ background: "hsl(var(--muted) / var(--opacity-soft))" }}
+      style={{ background: "oklch(var(--muted) / var(--opacity-soft))" }}
     >
       <div className="section-container">
         {/* Section Header */}
@@ -78,8 +79,8 @@ export function CodeDemoSection() {
               }`}
               style={{
                 ...(activeExample.id === example.id
-                  ? { background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }
-                  : { background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }),
+                  ? { background: "oklch(var(--primary))", boxShadow: "var(--shadow-sm)" }
+                  : { background: "oklch(var(--card))", borderColor: "oklch(var(--border))" }),
                 transition: "all 200ms cubic-bezier(0.16, 1, 0.3, 1)",
               }}
             >
@@ -100,7 +101,7 @@ export function CodeDemoSection() {
             {/* Editor Header */}
             <div
               className="flex items-center justify-between px-4 py-3 border-b"
-              style={{ background: "hsl(var(--muted) / 0.5)" }}
+              style={{ background: "oklch(var(--muted) / 0.5)" }}
             >
               <div className="flex items-center gap-3">
                 <div className="flex gap-1.5">
@@ -131,8 +132,8 @@ export function CodeDemoSection() {
                   disabled={isRunning}
                   className="flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-medium text-secondary-foreground hover:opacity-90 disabled:opacity-50 transition-all"
                   style={{
-                    background: "var(--gradient-secondary)",
-                    boxShadow: "var(--shadow-glow-secondary)",
+                    background: "oklch(var(--foreground))",
+                    boxShadow: "var(--shadow-sm)",
                   }}
                 >
                   <Play className="w-4 h-4" />
@@ -162,10 +163,10 @@ export function CodeDemoSection() {
             </div>
 
             {/* Output */}
-            <div className="border-t" style={{ background: "hsl(var(--muted) / 0.3)" }}>
+            <div className="border-t" style={{ background: "oklch(var(--muted) / 0.3)" }}>
               <div
                 className="flex items-center gap-2 px-4 py-2 border-b"
-                style={{ background: "hsl(var(--muted) / 0.5)" }}
+                style={{ background: "oklch(var(--muted) / 0.5)" }}
               >
                 <Terminal className="w-4 h-4 text-muted-foreground" />
                 <span className="text-sm font-medium">Output</span>

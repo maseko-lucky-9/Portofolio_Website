@@ -1,18 +1,11 @@
 import { useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import {
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-  Radar,
-  ResponsiveContainer,
-  Tooltip,
-} from "recharts";
 import { Code2, Server, Cloud } from "lucide-react";
 import { skills, radarSkills, SkillCategory } from "@/data/skills";
+import { SkillsRadar } from "@/components/SkillsRadar";
 
-const springTransition = { type: "spring", stiffness: 280, damping: 26 };
+import { SPRING_SKILLS as springTransition } from "@/lib/motion";
+// (re-exported as `springTransition` to minimize diff)
 
 const categoryIcons = {
   frontend: Code2,
@@ -20,28 +13,12 @@ const categoryIcons = {
   devops: Cloud,
 };
 
-// Category colours read from CSS tokens (--skill-frontend|backend|devops)
-// so dark/light mode and future palette shifts cascade automatically.
-const categoryColors: Record<SkillCategory, string> = {
-  frontend: "hsl(var(--skill-frontend))",
-  backend: "hsl(var(--skill-backend))",
-  devops: "hsl(var(--skill-devops))",
-};
-
-// Companion "tinted shadow" colours (~33% alpha on the category hue) for
-// elevation glows. Kept as a separate map because Tailwind's `/alpha`
-// syntax can't be composed with bare `hsl(var(--x))` strings inline.
-const categoryShadows: Record<SkillCategory, string> = {
-  frontend: "hsl(var(--skill-frontend) / 0.33)",
-  backend: "hsl(var(--skill-backend) / 0.33)",
-  devops: "hsl(var(--skill-devops) / 0.33)",
-};
-
-const categoryGradients: Record<SkillCategory, string> = {
-  frontend: "linear-gradient(90deg, hsl(var(--skill-frontend)), hsl(var(--brand-violet)))",
-  backend: "linear-gradient(90deg, hsl(var(--skill-backend)), hsl(var(--secondary)))",
-  devops: "linear-gradient(90deg, hsl(var(--skill-devops)), hsl(var(--brand-violet)))",
-};
+// Single-accent design: category grouping preserved (frontend / backend
+// / devops sections still drive grouping and toggle state), but visual
+// treatment is monochromatic. The brand accent (coral) is reserved for
+// the active category indicator and skill-bar fill — the single
+// intentional accent moment in this section.
+const ACCENT_COLOR = "oklch(var(--primary))";
 
 export function SkillsSection() {
   const [activeCategory, setActiveCategory] = useState<SkillCategory>("frontend");
@@ -62,12 +39,12 @@ export function SkillsSection() {
       id="skills"
       aria-labelledby="skills-heading"
       className="py-20 md:py-28 relative overflow-hidden"
-      style={{ background: "hsl(var(--muted) / var(--opacity-soft))" }}
+      style={{ background: "oklch(var(--muted) / var(--opacity-soft))" }}
     >
       {/* Subtle top gradient fade */}
       <div
         className="absolute inset-x-0 top-0 h-px"
-        style={{ background: "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.25), transparent)" }}
+        style={{ background: "linear-gradient(90deg, transparent, oklch(var(--primary) / 0.25), transparent)" }}
       />
 
       <div className="section-container !py-0 py-20 md:py-28">
@@ -104,15 +81,15 @@ export function SkillsSection() {
               <button
                 key={category}
                 onClick={() => setActiveCategory(category)}
-                className="flex items-center gap-2 px-6 py-3 rounded-full font-medium text-sm transition-all"
+                data-active={isActive ? "true" : "false"}
+                className="flex items-center gap-2 px-6 py-3 rounded-full font-medium text-sm transition-all
+                           bg-card text-foreground border border-border
+                           data-[active=true]:bg-primary
+                           data-[active=true]:text-primary-foreground
+                           data-[active=true]:border-primary
+                           hover:border-foreground/30"
                 style={{
-                  background: isActive ? categoryGradients[category] : "hsl(var(--card))",
-                  color: isActive ? "#fff" : "hsl(var(--foreground))",
-                  border: isActive ? "1px solid transparent" : "1px solid hsl(var(--border))",
-                  boxShadow: isActive
-                    ? `0 4px 20px ${categoryShadows[category]}`
-                    : "var(--shadow-sm)",
-                  transform: isActive ? "scale(1.04)" : "scale(1)",
+                  boxShadow: "var(--shadow-sm)",
                   transition: "all 300ms cubic-bezier(0.16, 1, 0.3, 1)",
                 }}
               >
@@ -135,43 +112,12 @@ export function SkillsSection() {
             <div className="flex items-center gap-2 mb-6">
               <div
                 className="w-2 h-6 rounded-full"
-                style={{ background: categoryGradients[activeCategory] }}
+                style={{ background: ACCENT_COLOR }}
               />
               <h3 className="text-base font-semibold capitalize">{activeCategory} Radar</h3>
             </div>
-            <div className="h-64 sm:h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <RadarChart data={currentRadarData}>
-                  <PolarGrid stroke="hsl(var(--border))" />
-                  <PolarAngleAxis
-                    dataKey="skill"
-                    tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
-                  />
-                  <PolarRadiusAxis
-                    angle={30}
-                    domain={[0, 100]}
-                    tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 9 }}
-                  />
-                  <Radar
-                    name="Proficiency"
-                    dataKey="value"
-                    stroke={categoryColors[activeCategory]}
-                    fill={categoryColors[activeCategory]}
-                    fillOpacity={0.25}
-                    strokeWidth={2}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "hsl(var(--card))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: "0.75rem",
-                      boxShadow: "var(--shadow-lg)",
-                      fontSize: "0.8rem",
-                    }}
-                    labelStyle={{ color: "hsl(var(--foreground))", fontWeight: 600 }}
-                  />
-                </RadarChart>
-              </ResponsiveContainer>
+            <div className="h-64 sm:h-80 flex items-center justify-center">
+              <SkillsRadar data={currentRadarData} color={ACCENT_COLOR} />
             </div>
           </motion.div>
 
@@ -185,7 +131,7 @@ export function SkillsSection() {
             <div className="flex items-center gap-2 mb-6">
               <div
                 className="w-2 h-6 rounded-full"
-                style={{ background: categoryGradients[activeCategory] }}
+                style={{ background: ACCENT_COLOR }}
               />
               <h3 className="text-base font-semibold">Technologies &amp; Tools</h3>
             </div>
@@ -210,8 +156,8 @@ export function SkillsSection() {
                         <span className="text-sm font-semibold text-foreground">{skill.name}</span>
                         <span className="text-[10px] px-2 py-0.5 rounded-full font-medium capitalize"
                           style={{
-                            background: "hsl(var(--accent))",
-                            color: "hsl(var(--accent-foreground))",
+                            background: "oklch(var(--accent))",
+                            color: "oklch(var(--accent-foreground))",
                           }}
                         >
                           {skill.type}
@@ -221,7 +167,7 @@ export function SkillsSection() {
                         {getProficiencyLabel(skill.proficiency)}
                       </span>
                     </div>
-                    <div className="h-1.5 rounded-full overflow-hidden relative" style={{ background: "hsl(var(--muted))" }}>
+                    <div className="h-1.5 rounded-full overflow-hidden relative" style={{ background: "oklch(var(--muted))" }}>
                       <motion.div
                         initial={{ scaleX: 0 }}
                         animate={{ scaleX: 1 }}
@@ -234,7 +180,7 @@ export function SkillsSection() {
                         style={{
                           width: `${skill.proficiency}%`,
                           transformOrigin: "left center",
-                          background: categoryGradients[activeCategory],
+                          background: ACCENT_COLOR,
                           willChange: "transform",
                         }}
                       />
@@ -261,7 +207,7 @@ export function SkillsSection() {
       {/* Subtle bottom border */}
       <div
         className="absolute inset-x-0 bottom-0 h-px"
-        style={{ background: "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.15), transparent)" }}
+        style={{ background: "linear-gradient(90deg, transparent, oklch(var(--primary) / 0.15), transparent)" }}
       />
     </section>
   );

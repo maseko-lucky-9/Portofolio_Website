@@ -90,7 +90,7 @@ function ExperienceRow({
             <li key={i} className="flex items-start gap-2.5 text-sm">
               <span
                 className="mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0"
-                style={{ background: "hsl(var(--primary))" }}
+                style={{ background: "oklch(var(--primary))" }}
               />
               <span className="text-foreground/85">{achievement}</span>
             </li>
@@ -145,10 +145,10 @@ function ExperienceRow({
           onBlur={onScheduleClose}
           onClick={onToggle}
           onKeyDown={handleKeyDown}
-          className="relative rounded-xl border border-border bg-card/80 backdrop-blur-sm p-6 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--primary))] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          className="@container relative rounded-xl border border-border bg-card p-4 @[400px]:p-6 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[oklch(var(--primary))] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           style={{
             boxShadow: isOpen
-              ? "var(--shadow-xl), 0 0 0 1px hsl(var(--primary) / 0.18)"
+              ? "var(--shadow-xl), 0 0 0 1px oklch(var(--primary) / 0.18)"
               : "var(--shadow-md)",
             transition:
               "box-shadow 0.3s ease, border-color 0.3s ease, transform 0.3s ease",
@@ -157,7 +157,7 @@ function ExperienceRow({
           <span className="experience-card-bar" aria-hidden="true" />
 
           {/* Step number */}
-          <div className="font-mono text-[13px] tracking-wider text-[hsl(var(--primary)/0.8)] mb-3">
+          <div className="font-sans uppercase text-[10px] tracking-[0.18em] font-semibold text-[oklch(var(--primary)/0.8)] mb-3">
             {stepNumber}
           </div>
 
@@ -168,7 +168,7 @@ function ExperienceRow({
                 src={exp.logoUrl}
                 alt={exp.company}
                 className="w-7 h-7 rounded-md object-cover border flex-shrink-0 mt-0.5"
-                style={{ borderColor: "hsl(var(--border))" }}
+                style={{ borderColor: "oklch(var(--border))" }}
               />
             )}
             <div className="min-w-0">
@@ -182,13 +182,14 @@ function ExperienceRow({
             </div>
           </div>
 
-          {/* Meta row */}
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground mb-3">
+          {/* Meta row — stacks vertically when card container is narrow,
+              inline at @sm and above. Container query, not viewport. */}
+          <div className="flex flex-col @[400px]:flex-row @[400px]:flex-wrap @[400px]:items-center gap-x-3 gap-y-1 text-xs text-muted-foreground mb-3">
             <span className="inline-flex items-center gap-1.5">
               <Calendar className="w-3 h-3" />
               {exp.startDate} – {exp.endDate}
             </span>
-            <span className="opacity-50">·</span>
+            <span className="hidden @[400px]:inline opacity-50">·</span>
             <span className="inline-flex items-center gap-1.5">
               <MapPin className="w-3 h-3" />
               {exp.location}
@@ -202,34 +203,40 @@ function ExperienceRow({
             </p>
           )}
 
-          {/* Expanded details */}
-          {reduceMotion ? (
-            <div hidden={!isOpen}>{expandedPanel}</div>
-          ) : (
-            <AnimatePresence initial={false}>
-              {isOpen && (
-                <motion.div
-                  key="details"
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={springTransition}
-                  style={{ willChange: "height", overflow: "hidden" }}
-                >
-                  {expandedPanel}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          )}
+          {/* Expanded details — grid-template-rows transition replaces
+              motion height:"auto" to avoid animating layout properties.
+              motion-reduce:transition-none honors prefers-reduced-motion
+              (snap, no animation). */}
+          <div
+            className="grid transition-[grid-template-rows] motion-reduce:transition-none"
+            style={{
+              gridTemplateRows: isOpen ? "1fr" : "0fr",
+              transitionDuration: "var(--duration-base)",
+              transitionTimingFunction: "var(--ease-spring)",
+            }}
+            aria-hidden={!isOpen}
+          >
+            <div
+              className="overflow-hidden"
+              style={{
+                opacity: isOpen ? 1 : 0,
+                transition: reduceMotion
+                  ? "none"
+                  : "opacity var(--duration-base) var(--ease-spring)",
+              }}
+            >
+              {expandedPanel}
+            </div>
+          </div>
 
           {/* Pill */}
           {pillText && (
             <div
-              className="inline-flex items-center mt-4 px-3 py-1 rounded-full font-mono uppercase tracking-[0.15em] text-[10px]"
+              className="inline-flex items-center mt-4 px-3 py-1 rounded-full font-sans uppercase tracking-[0.18em] font-semibold text-[10px]"
               style={{
-                background: "hsl(var(--primary) / 0.08)",
-                color: "hsl(var(--primary))",
-                border: "1px solid hsl(var(--primary) / 0.2)",
+                background: "oklch(var(--primary) / 0.08)",
+                color: "oklch(var(--primary))",
+                border: "1px solid oklch(var(--primary) / 0.2)",
               }}
             >
               {pillText}
@@ -290,7 +297,7 @@ export function ExperienceSection() {
           transition={springTransition}
           className="text-center mb-16"
         >
-          <span className="inline-block text-xs font-mono uppercase tracking-[0.2em] text-[hsl(var(--primary)/0.8)] mb-3">
+          <span className="inline-block text-[10px] font-sans uppercase tracking-[0.18em] font-semibold text-[oklch(var(--primary)/0.8)] mb-3">
             Career
           </span>
           <h2 id="experience-heading" className="section-title">

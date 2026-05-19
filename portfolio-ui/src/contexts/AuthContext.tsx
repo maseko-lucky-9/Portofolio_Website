@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { authApi, type User, type LoginCredentials } from '../services/auth.service';
+import { authService as authApi } from '../services/auth.service';
+import type { User, LoginData as LoginCredentials } from '../types/api';
 
 interface AuthContextType {
   user: User | null;
@@ -22,8 +23,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const loadUser = async () => {
       try {
-        const userData = await authApi.getCurrentUser();
-        setUser(userData);
+        const response = await authApi.getCurrentUser();
+        // Service wraps in ApiResponse<User>; unwrap at boundary.
+        setUser((response as unknown as { data?: User }).data ?? null);
       } catch (error) {
         console.error('Failed to load user:', error);
         setUser(null);
@@ -59,8 +61,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = useCallback(async (credentials: LoginCredentials) => {
     setIsLoading(true);
     try {
-      const userData = await authApi.login(credentials);
-      setUser(userData);
+      const response = await authApi.login(credentials);
+      // Service returns AuthResponse { user, tokens }; unwrap user at boundary.
+      setUser((response as unknown as { user?: User }).user ?? null);
     } finally {
       setIsLoading(false);
     }
@@ -87,8 +90,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const updateProfile = useCallback(async (data: Partial<User>) => {
-    const updatedUser = await authApi.updateProfile(data);
-    setUser(updatedUser);
+    const response = await authApi.updateProfile(data);
+    // Service wraps in ApiResponse<User>; unwrap at boundary.
+    setUser((response as unknown as { data?: User }).data ?? null);
   }, []);
 
   const value: AuthContextType = {

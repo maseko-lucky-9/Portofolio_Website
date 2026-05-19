@@ -13,6 +13,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { AlertCircle, Eye, Heart, ExternalLink, Github } from 'lucide-react';
+import { ProjectStatus } from '@/types/api'; // enum — used at runtime
 
 export function ProjectsList() {
   const [page, setPage] = useState(1);

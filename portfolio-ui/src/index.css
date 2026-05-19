@@ -1,7 +1,15 @@
-/* Self-hosted fonts — eliminates Google Fonts CDN round-trip (improves SI/CLS).
-   @fontsource-variable/inter  uses the variable-weight font (wght axis).
-   @fontsource/jetbrains-mono  uses static weights (monospace, code blocks). */
-@import "@fontsource-variable/inter";
+/* Self-hosted fonts — eliminates Google Fonts CDN round-trip.
+   Type pair (selected 2026-05-18 via the impeccable font-selection
+   procedure — rejected all reflex picks):
+     Display: Source Serif 4 Variable — wedge transitional serif, optical
+              sizes axis. Register of a serious technology publication.
+              Used on headings, the masthead rule, and the folio mark.
+     Body:    Public Sans Variable — USWDS civic typeface, humanist-but-
+              utilitarian. Used for all running text, UI controls, nav.
+     Mono:    JetBrains Mono — narrow technical use only (tables, code
+              blocks, tabular numerics). NOT a default body face. */
+@import "@fontsource-variable/source-serif-4";
+@import "@fontsource-variable/public-sans";
 @import "@fontsource/jetbrains-mono/400.css";
 @import "@fontsource/jetbrains-mono/500.css";
 @import "@fontsource/jetbrains-mono/600.css";
@@ -12,60 +20,55 @@
 
 /*
   =============================================
-  DESIGN SYSTEM — Developer Portfolio (Premium)
+  DESIGN SYSTEM — Developer Portfolio
   =============================================
-  All colors in HSL. Tokens drive all components.
-  Spring easing: cubic-bezier(0.16, 1, 0.3, 1)
+  All tokens in OKLCH bare-component form. Consumers wrap with
+  oklch(var(--token)) or oklch(var(--token) / a). Single coral accent.
+  Phase 9 token sweep 2026-05-18: design-vocabulary orphans removed
+  (--gradient-*, --shadow-glow*, --brand-violet, --skill-*, --primary-glow,
+  .text-gradient-*, .gradient-border).
 */
 
 @layer base {
   :root {
-    /* Brand — Quiet Operator: deepened coral primary, electric mint, violet signal */
-    --primary: 10 100% 62%;
-    --primary-foreground: 0 0% 100%;
-    --primary-glow: 10 100% 70%;
+    /* Brand — coral retuned in OKLCH. */
+    --primary: 0.66 0.18 35;
+    --primary-foreground: 0.99 0.005 70;
 
-    --secondary: 168 82% 54%;
-    --secondary-foreground: 222 30% 10%;
+    /* Secondary semantic role (shadcn-required). */
+    --secondary: 0.93 0.012 75;
+    --secondary-foreground: 0.18 0.012 50;
 
-    /* Brand signal — violet, used for emphasis/CTA in additive contexts.
-       Independent of --accent so shadcn ghost/hover primitives stay subtle. */
-    --brand-violet: 262 78% 60%;
-    --brand-violet-foreground: 0 0% 100%;
-
-    /* Skills category tokens — replaces hardcoded HSL in SkillsSection.tsx */
-    --skill-frontend: 232 85% 55%;
-    --skill-backend: 158 80% 38%;
-    --skill-devops: 280 72% 55%;
-
-    /* Opacity scale — unitless numbers consumed via Tailwind arbitrary-value
-       classes (bg-muted/[var(--opacity-soft)]) or inline style alpha. */
+    /* Opacity scale. */
     --opacity-subtle: 0.06;
     --opacity-soft: 0.30;
     --opacity-overlay: 0.80;
 
-    /* Light mode — bone, warm not white */
-    --background: 40 30% 96%;
-    --foreground: 222 30% 10%;
+    /* Masthead rule opacity — light mode is paler, needs more weight. */
+    --masthead-opacity: 0.65;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222 30% 10%;
+    /* Light mode neutrals — bone paper, warm-tinted. */
+    --background: 0.97 0.008 70;
+    --foreground: 0.18 0.012 50;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 30% 10%;
+    --card: 0.99 0.005 70;
+    --card-foreground: 0.18 0.012 50;
 
-    --muted: 40 15% 92%;
-    --muted-foreground: 222 15% 40%;
+    --popover: 0.99 0.005 70;
+    --popover-foreground: 0.18 0.012 50;
 
-    --accent: 170 76% 92%;
-    --accent-foreground: 170 80% 22%;
+    --muted: 0.93 0.012 75;
+    --muted-foreground: 0.45 0.015 60;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
+    --accent: 0.93 0.012 75;
+    --accent-foreground: 0.18 0.012 50;
 
-    --border: 40 15% 86%;
-    --input: 40 15% 86%;
-    --ring: 10 100% 62%;
+    --destructive: 0.58 0.22 27;
+    --destructive-foreground: 0.99 0.005 70;
+
+    --border: 0.86 0.015 70;
+    --input: 0.86 0.015 70;
+    --ring: 0.66 0.18 35;
 
     --radius: 0.875rem;
 
@@ -81,82 +84,60 @@
     --ease-decelerate: cubic-bezier(0, 0, 0.2, 1);
     --ease-accelerate: cubic-bezier(0.4, 0, 1, 1);
 
-    /* Gradient tokens — coral → mint → bone (refreshed to use new primary/secondary) */
-    --gradient-primary: linear-gradient(135deg, hsl(10, 100%, 62%), hsl(20, 95%, 58%));
-    --gradient-secondary: linear-gradient(135deg, hsl(168, 82%, 54%), hsl(180, 75%, 48%));
-    --gradient-hero: linear-gradient(160deg, hsl(40, 30%, 96%) 0%, hsl(20, 50%, 95%) 50%, hsl(170, 40%, 95%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(0, 0%, 100%) 0%, hsl(40, 25%, 98%) 100%);
-    --gradient-mesh: radial-gradient(ellipse 80% 60% at 50% -10%, hsl(10, 100%, 85% / 0.55) 0%, transparent 70%);
-
-    /* Shadow scale (structural, theme-neutral) */
+    /* Shadow scale (structural, theme-neutral). */
     --shadow-xs: 0 1px 2px hsl(220 13% 10% / 0.04);
     --shadow-sm: 0 1px 3px hsl(220 13% 10% / 0.06), 0 1px 2px hsl(220 13% 10% / 0.04);
     --shadow-md: 0 4px 8px -2px hsl(220 13% 10% / 0.08), 0 2px 4px -2px hsl(220 13% 10% / 0.06);
     --shadow-lg: 0 12px 24px -4px hsl(220 13% 10% / 0.10), 0 4px 8px -4px hsl(220 13% 10% / 0.06);
     --shadow-xl: 0 24px 48px -8px hsl(220 13% 10% / 0.14), 0 8px 16px -8px hsl(220 13% 10% / 0.08);
-    --shadow-glow: 0 0 0 1px hsl(10 100% 62% / 0.14), 0 4px 16px hsl(10 100% 62% / 0.22);
-    --shadow-glow-secondary: 0 0 0 1px hsl(168 82% 54% / 0.14), 0 4px 16px hsl(168 82% 54% / 0.22);
-    --shadow-glow-violet: 0 0 0 1px hsl(262 78% 60% / 0.16), 0 4px 16px hsl(262 78% 60% / 0.24);
 
-    /* Sidebar tokens */
-    --sidebar-background: 40 25% 98%;
-    --sidebar-foreground: 222 15% 30%;
-    --sidebar-primary: 10 100% 62%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 170 76% 92%;
-    --sidebar-accent-foreground: 170 80% 22%;
-    --sidebar-border: 40 15% 86%;
-    --sidebar-ring: 10 100% 62%;
+    /* Sidebar tokens — OKLCH. */
+    --sidebar-background: 0.98 0.006 70;
+    --sidebar-foreground: 0.35 0.012 50;
+    --sidebar-primary: 0.66 0.18 35;
+    --sidebar-primary-foreground: 0.99 0.005 70;
+    --sidebar-accent: 0.93 0.012 75;
+    --sidebar-accent-foreground: 0.18 0.012 50;
+    --sidebar-border: 0.86 0.015 70;
+    --sidebar-ring: 0.66 0.18 35;
   }
 
   .dark {
-    /* Deep ink — quiet, warm dark */
-    --background: 222 30% 6%;
-    --foreground: 40 30% 95%;
+    /* Warm-coal dark — engineering field-manual register. */
+    --background: 0.18 0.012 50;
+    --foreground: 0.93 0.012 75;
 
-    --card: 222 25% 9%;
-    --card-foreground: 40 30% 95%;
+    --card: 0.22 0.014 50;
+    --card-foreground: 0.93 0.012 75;
 
-    --popover: 222 25% 9%;
-    --popover-foreground: 40 30% 95%;
+    --popover: 0.22 0.014 50;
+    --popover-foreground: 0.93 0.012 75;
 
-    --primary: 10 100% 66%;
-    --primary-foreground: 0 0% 100%;
-    --primary-glow: 10 100% 72%;
+    --primary: 0.66 0.18 35;
+    --primary-foreground: 0.18 0.012 50;
 
-    --secondary: 168 82% 58%;
-    --secondary-foreground: 222 30% 10%;
-
-    --brand-violet: 262 82% 68%;
-    --brand-violet-foreground: 0 0% 100%;
-
-    --skill-frontend: 232 90% 70%;
-    --skill-backend: 158 75% 52%;
-    --skill-devops: 280 80% 68%;
+    --secondary: 0.26 0.012 50;
+    --secondary-foreground: 0.93 0.012 75;
 
     --opacity-subtle: 0.06;
     --opacity-soft: 0.30;
     --opacity-overlay: 0.80;
 
-    --muted: 222 20% 14%;
-    --muted-foreground: 40 15% 65%;
+    /* Dark mode masthead rule — paper-on-dark wants less weight. */
+    --masthead-opacity: 0.55;
 
-    --accent: 170 50% 16%;
-    --accent-foreground: 170 76% 70%;
+    --muted: 0.26 0.012 50;
+    --muted-foreground: 0.70 0.010 60;
 
-    --destructive: 0 70% 55%;
-    --destructive-foreground: 40 30% 95%;
+    --accent: 0.26 0.012 50;
+    --accent-foreground: 0.93 0.012 75;
 
-    --border: 222 20% 16%;
-    --input: 222 20% 16%;
-    --ring: 10 100% 66%;
+    --destructive: 0.58 0.22 27;
+    --destructive-foreground: 0.99 0.005 70;
 
-    /* Dark gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(10, 100%, 66%), hsl(20, 95%, 58%));
-    --gradient-secondary: linear-gradient(135deg, hsl(168, 82%, 58%), hsl(180, 75%, 52%));
-    --gradient-hero: linear-gradient(160deg, hsl(222, 30%, 6%) 0%, hsl(220, 28%, 7%) 50%, hsl(218, 25%, 8%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(222, 25%, 9%) 0%, hsl(222, 28%, 7%) 100%);
-    --gradient-mesh: radial-gradient(ellipse 80% 60% at 50% -10%, hsl(10, 100%, 66% / 0.12) 0%, transparent 70%);
+    --border: 0.32 0.014 50;
+    --input: 0.32 0.014 50;
+    --ring: 0.66 0.18 35;
 
     /* Dark shadows */
     --shadow-xs: 0 1px 2px hsl(0 0% 0% / 0.20);
@@ -164,19 +145,16 @@
     --shadow-md: 0 4px 8px -2px hsl(0 0% 0% / 0.40), 0 2px 4px -2px hsl(0 0% 0% / 0.30);
     --shadow-lg: 0 12px 24px -4px hsl(0 0% 0% / 0.50), 0 4px 8px -4px hsl(0 0% 0% / 0.35);
     --shadow-xl: 0 24px 48px -8px hsl(0 0% 0% / 0.60), 0 8px 16px -8px hsl(0 0% 0% / 0.40);
-    --shadow-glow: 0 0 0 1px hsl(10 100% 66% / 0.22), 0 4px 20px hsl(10 100% 66% / 0.30);
-    --shadow-glow-secondary: 0 0 0 1px hsl(168 82% 58% / 0.20), 0 4px 20px hsl(168 82% 58% / 0.28);
-    --shadow-glow-violet: 0 0 0 1px hsl(262 82% 68% / 0.22), 0 4px 20px hsl(262 82% 68% / 0.30);
 
-    /* Dark sidebar */
-    --sidebar-background: 222 30% 7%;
-    --sidebar-foreground: 40 25% 88%;
-    --sidebar-primary: 10 100% 66%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 170 50% 16%;
-    --sidebar-accent-foreground: 170 76% 70%;
-    --sidebar-border: 222 20% 16%;
-    --sidebar-ring: 10 100% 66%;
+    /* Dark sidebar — OKLCH. */
+    --sidebar-background: 0.20 0.012 50;
+    --sidebar-foreground: 0.85 0.010 60;
+    --sidebar-primary: 0.66 0.18 35;
+    --sidebar-primary-foreground: 0.18 0.012 50;
+    --sidebar-accent: 0.26 0.012 50;
+    --sidebar-accent-foreground: 0.93 0.012 75;
+    --sidebar-border: 0.32 0.014 50;
+    --sidebar-ring: 0.66 0.18 35;
   }
 }
 
@@ -198,12 +176,29 @@
 
   body {
     @apply bg-background text-foreground font-sans;
-    font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    font-family: 'Public Sans Variable', 'Public Sans', system-ui, sans-serif;
+    /* ss01 = single-storey 'a', tnum = tabular numerals.
+       Public Sans ships these as opt-in stylistic sets — both improve
+       readability at small UI sizes and align metric-card numerics. */
+    font-feature-settings: "ss01", "tnum";
   }
 
+  /* Display register: Source Serif 4 Variable on h1–h3 + .font-display.
+     Optical-size axis (`opsz`) is driven implicitly by font-size in
+     supporting browsers; we set wght via Tailwind weight utilities.
+     Tight tracking, balanced wrap on supporting browsers. */
+  h1, h2, h3, .font-display {
+    font-family: 'Source Serif 4 Variable', 'Source Serif 4', ui-serif, Georgia, serif;
+    font-feature-settings: "ss01", "onum";
+    letter-spacing: -0.012em;
+    text-wrap: balance;
+  }
+
+  /* h4–h6 stay in body sans — paragraph-level headings should not
+     compete with the display register reserved for section titles. */
+
   code, pre {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
     font-feature-settings: "liga" 1, "calt" 1;
   }
 
@@ -217,8 +212,8 @@
   /* ── Hero CTA buttons ── */
   .btn-hero-primary {
     @apply inline-flex items-center justify-center gap-2 rounded-xl px-7 py-3.5 font-semibold text-sm text-primary-foreground transition-all;
-    background: var(--gradient-primary);
-    box-shadow: var(--shadow-md), var(--shadow-glow);
+    background: oklch(var(--primary));
+    box-shadow: var(--shadow-md), var(--shadow-sm);
     transition-duration: var(--duration-base);
     transition-timing-function: var(--ease-spring);
     /* Magnetic offset (set by useMagnetic; 0 when not magnetised). */
@@ -227,7 +222,7 @@
 
   .btn-hero-primary:hover {
     transform: translate(var(--magnetic-x, 0), calc(var(--magnetic-y, 0) - 2px)) scale(1.02);
-    box-shadow: var(--shadow-xl), 0 0 32px hsl(var(--primary) / 0.45);
+    box-shadow: var(--shadow-xl), 0 0 32px oklch(var(--primary) / 0.45);
   }
 
   .btn-hero-primary:active {
@@ -236,18 +231,18 @@
 
   .btn-hero-secondary {
     @apply inline-flex items-center justify-center gap-2 rounded-xl px-7 py-3.5 font-semibold text-sm text-primary transition-all;
-    border: 1.5px solid hsl(var(--primary) / 0.4);
-    background: hsl(var(--primary) / 0.05);
+    border: 1.5px solid oklch(var(--primary) / 0.4);
+    background: oklch(var(--primary) / 0.05);
     transition-duration: var(--duration-base);
     transition-timing-function: var(--ease-spring);
     transform: translate(var(--magnetic-x, 0), var(--magnetic-y, 0));
   }
 
   .btn-hero-secondary:hover {
-    background: hsl(var(--primary) / 0.10);
-    border-color: hsl(var(--primary) / 0.7);
+    background: oklch(var(--primary) / 0.10);
+    border-color: oklch(var(--primary) / 0.7);
     transform: translate(var(--magnetic-x, 0), calc(var(--magnetic-y, 0) - 2px)) scale(1.02);
-    box-shadow: var(--shadow-glow);
+    box-shadow: var(--shadow-sm);
   }
 
   .btn-hero-secondary:active {
@@ -257,56 +252,56 @@
   /* ── Project cards ── */
   .card-project {
     @apply rounded-2xl border bg-card overflow-hidden transition-all;
-    background: var(--gradient-card);
+    background: oklch(var(--card));
     box-shadow: var(--shadow-md);
-    border-color: hsl(var(--border));
+    border-color: oklch(var(--border));
     transition-duration: 300ms;
     transition-timing-function: var(--ease-spring);
   }
 
   .card-project:hover {
     transform: translateY(-4px);
-    box-shadow: var(--shadow-xl), var(--shadow-glow);
-    border-color: hsl(var(--primary) / 0.35);
+    box-shadow: var(--shadow-xl), var(--shadow-sm);
+    border-color: oklch(var(--primary) / 0.35);
   }
 
   /* ── Tech badges ── */
   .tech-badge {
     @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-medium transition-all;
-    background: hsl(var(--accent));
-    color: hsl(var(--accent-foreground));
-    border: 1px solid hsl(var(--primary) / 0.12);
+    background: oklch(var(--accent));
+    color: oklch(var(--accent-foreground));
+    border: 1px solid oklch(var(--primary) / 0.12);
     transition-duration: 200ms;
     transition-timing-function: var(--ease-spring);
   }
 
   .tech-badge:hover {
-    background: hsl(var(--primary));
-    color: hsl(var(--primary-foreground));
+    background: oklch(var(--primary));
+    color: oklch(var(--primary-foreground));
     transform: scale(1.06);
-    box-shadow: var(--shadow-glow);
+    box-shadow: var(--shadow-sm);
   }
 
   /* ── Social link (token-driven; replaces inline onMouseEnter/Leave) ── */
   .social-link {
     @apply inline-flex items-center justify-center rounded-xl transition-all;
-    background: hsl(var(--muted));
-    color: hsl(var(--foreground));
-    border: 1px solid hsl(var(--border));
+    background: oklch(var(--muted));
+    color: oklch(var(--foreground));
+    border: 1px solid oklch(var(--border));
     transition-duration: 200ms;
     transition-timing-function: var(--ease-spring);
   }
 
   .social-link:hover {
-    background: hsl(var(--primary));
-    color: hsl(var(--primary-foreground));
+    background: oklch(var(--primary));
+    color: oklch(var(--primary-foreground));
     border-color: transparent;
     transform: translateY(-2px);
-    box-shadow: var(--shadow-glow);
+    box-shadow: var(--shadow-sm);
   }
 
   .social-link:focus-visible {
-    outline: 2px solid hsl(var(--primary) / 0.45);
+    outline: 2px solid oklch(var(--primary) / 0.45);
     outline-offset: 2px;
   }
 
@@ -324,27 +319,16 @@
     @apply text-base md:text-lg text-muted-foreground mb-12 max-w-2xl leading-relaxed;
   }
 
-  /* ── Gradient text ── */
-  .text-gradient-primary {
-    @apply bg-clip-text text-transparent;
-    background-image: var(--gradient-primary);
-  }
-
-  .text-gradient-secondary {
-    @apply bg-clip-text text-transparent;
-    background-image: var(--gradient-secondary);
-  }
-
   /* ── Timeline ── */
   .timeline-dot {
     @apply w-3.5 h-3.5 rounded-full;
-    background: var(--gradient-primary);
-    box-shadow: 0 0 0 3px hsl(var(--background)), 0 0 0 5px hsl(var(--primary) / 0.3), var(--shadow-glow);
+    background: oklch(var(--primary));
+    box-shadow: 0 0 0 3px oklch(var(--background)), 0 0 0 5px oklch(var(--primary) / 0.3), var(--shadow-sm);
   }
 
   .timeline-line {
     @apply absolute left-[6px] top-5 bottom-0 w-px;
-    background: linear-gradient(to bottom, hsl(var(--primary) / 0.4), hsl(var(--border)));
+    background: linear-gradient(to bottom, oklch(var(--primary) / 0.4), oklch(var(--border)));
   }
 
   /* ── Zigzag timeline (Chase-style) ── */
@@ -352,31 +336,31 @@
     @apply absolute top-0 bottom-0 w-[2px] z-0 pointer-events-none;
     background: linear-gradient(
       to bottom,
-      hsl(var(--primary) / 0.5),
-      hsl(var(--primary) / 0.2),
+      oklch(var(--primary) / 0.5),
+      oklch(var(--primary) / 0.2),
       transparent
     );
   }
 
   .timeline-node {
     @apply absolute w-[18px] h-[18px] rounded-full z-10;
-    border: 2px solid hsl(var(--primary));
-    background: hsl(var(--background));
+    border: 2px solid oklch(var(--primary));
+    background: oklch(var(--background));
     box-shadow:
-      0 0 0 4px hsl(var(--background)),
-      var(--shadow-glow);
+      0 0 0 4px oklch(var(--background)),
+      var(--shadow-sm);
   }
 
   .timeline-node::after {
     content: "";
     @apply absolute rounded-full;
     inset: 4px;
-    background: hsl(var(--primary));
+    background: oklch(var(--primary));
   }
 
   .timeline-grid-bg {
     @apply absolute inset-0 -z-10 pointer-events-none;
-    color: hsl(var(--border));
+    color: oklch(var(--border));
     opacity: 0.06;
   }
 
@@ -384,8 +368,8 @@
     @apply absolute top-0 left-0 right-0 h-[2px] rounded-t-xl pointer-events-none;
     background: linear-gradient(
       to right,
-      hsl(var(--primary)),
-      hsl(var(--primary) / 0.5) 40%,
+      oklch(var(--primary)),
+      oklch(var(--primary) / 0.5) 40%,
       transparent
     );
   }
@@ -399,7 +383,7 @@
   /* ── Skill radar ── */
   .skill-radar-container {
     @apply relative rounded-2xl border bg-card p-6;
-    background: var(--gradient-card);
+    background: oklch(var(--card));
     box-shadow: var(--shadow-md);
   }
 
@@ -412,7 +396,7 @@
   .nav-link::after {
     content: '';
     @apply absolute -bottom-0.5 left-0 w-0 h-px transition-all;
-    background: var(--gradient-primary);
+    background: oklch(var(--primary));
     transition-duration: 250ms;
     transition-timing-function: var(--ease-spring);
   }
@@ -442,7 +426,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: var(--gradient-mesh);
+    background: transparent;
     pointer-events: none;
     z-index: 0;
   }
@@ -501,8 +485,8 @@
   }
 
   @keyframes pulseGlow {
-    0%, 100% { box-shadow: var(--shadow-glow); }
-    50% { box-shadow: 0 0 0 1px hsl(var(--primary) / 0.3), 0 8px 32px hsl(var(--primary) / 0.50); }
+    0%, 100% { box-shadow: var(--shadow-sm); }
+    50% { box-shadow: 0 0 0 1px oklch(var(--primary) / 0.3), 0 8px 32px oklch(var(--primary) / 0.50); }
   }
 
   @keyframes slideUp {
@@ -526,68 +510,60 @@
     66% { transform: translate(-15px, 12px) scale(0.95); }
   }
 
-  /* ── Glassmorphism ── */
+  /* ── Paper surfaces (retired glassmorphism) ──
+     Class names kept (.glass, .glass-card) so existing call sites — Navbar,
+     HeroSection metric cards, ContactSection form panel, BlogSection chips —
+     pick up the new visual language without diff churn. No backdrop-filter,
+     no inset highlight, no glow on hover. Flat paper, hairline border,
+     measured shadow. */
   .glass {
-    @apply backdrop-blur-xl border;
-    background: hsl(var(--background) / 0.72);
-    border-color: hsl(var(--border) / 0.7);
-    box-shadow: 0 4px 24px hsl(0 0% 0% / 0.08), inset 0 1px 0 hsl(255 255% 255% / 0.12);
+    @apply border;
+    background: oklch(var(--background));
+    border-color: oklch(var(--border));
+    box-shadow: var(--shadow-xs);
   }
 
   .dark .glass {
-    background: hsl(var(--background) / 0.65);
-    border-color: hsl(var(--border) / 0.8);
-    box-shadow: 0 4px 32px hsl(0 0% 0% / 0.35), inset 0 1px 0 hsl(255 255% 255% / 0.05);
+    background: oklch(var(--background));
+    border-color: oklch(var(--border));
+    box-shadow: none;
   }
 
   .glass-card {
-    @apply backdrop-blur-lg border rounded-2xl;
-    background: hsl(var(--card) / 0.80);
-    border-color: hsl(var(--border) / 0.6);
-    box-shadow: var(--shadow-md), inset 0 1px 0 hsl(255 255% 255% / 0.10);
-    transition: all 0.3s var(--ease-spring);
+    @apply border rounded-2xl;
+    background: oklch(var(--card));
+    border-color: oklch(var(--border));
+    box-shadow: var(--shadow-xs);
+    transition: border-color var(--duration-base) var(--ease-spring),
+                box-shadow var(--duration-base) var(--ease-spring);
   }
 
   .glass-card:hover {
-    box-shadow: var(--shadow-lg), var(--shadow-glow), inset 0 1px 0 hsl(255 255% 255% / 0.12);
-    border-color: hsl(var(--primary) / 0.25);
+    border-color: oklch(var(--foreground) / 0.22);
+    box-shadow: var(--shadow-sm);
   }
 
   .dark .glass-card {
-    background: hsl(var(--card) / 0.55);
-    border-color: hsl(255 255% 255% / 0.06);
-    box-shadow: var(--shadow-md), inset 0 1px 0 hsl(255 255% 255% / 0.04);
+    background: oklch(var(--card));
+    border-color: oklch(var(--border));
+    box-shadow: none;
   }
 
-  /* ── Gradient border utility ── */
-  .gradient-border {
-    position: relative;
-    border-radius: inherit;
+  .dark .glass-card:hover {
+    border-color: oklch(var(--foreground) / 0.28);
+    box-shadow: none;
   }
 
-  .gradient-border::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 1px;
-    background: var(--gradient-primary);
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
-  }
 
   /* ── Scrollbar ── */
   .custom-scrollbar::-webkit-scrollbar { width: 5px; }
   .custom-scrollbar::-webkit-scrollbar-track { @apply bg-transparent; }
   .custom-scrollbar::-webkit-scrollbar-thumb {
     @apply rounded-full;
-    background: hsl(var(--muted-foreground) / 0.25);
+    background: oklch(var(--muted-foreground) / 0.25);
   }
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--muted-foreground) / 0.45);
+    background: oklch(var(--muted-foreground) / 0.45);
   }
 
   /* ── Reduced motion ── */

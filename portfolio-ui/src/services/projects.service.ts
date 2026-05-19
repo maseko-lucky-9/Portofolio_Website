@@ -65,16 +65,20 @@ class ProjectsService extends BaseService<Project> {
 
   /**
    * Create project (admin)
+   *
+   * `tags` is a branded string template type at the API contract layer.
+   * Service boundary accepts raw `string[]` from forms; runtime
+   * validation belongs to the API contract, not the service.
    */
   async createProject(data: CreateProjectData): Promise<ApiResponse<Project>> {
-    return this.create(data);
+    return this.create(data as unknown as Partial<Project>);
   }
 
   /**
    * Update project (admin)
    */
   async updateProject(data: UpdateProjectData): Promise<ApiResponse<Project>> {
-    return this.update(data.id, data);
+    return this.update(data.id, data as unknown as Partial<Project>);
   }
 
   /**

@@ -24,6 +24,27 @@ export const DURATION = {
   slow: 0.48,
 } as const;
 
+// ─── Spring transitions (typed) ─────────────────────────────────────
+// Centralized to satisfy framer-motion's Transition<any> type — inline
+// object literals with `type: "spring"` infer as `string` not the
+// literal, which trips TS2322. Three tuples in actual use across the
+// codebase (enumerated 2026-05-18 via the audit-remediation pass).
+export const SPRING_DEFAULT: Transition = {
+  type: "spring",
+  stiffness: 260,
+  damping: 26,
+};
+export const SPRING_HERO: Transition = {
+  type: "spring",
+  stiffness: 260,
+  damping: 24,
+};
+export const SPRING_SKILLS: Transition = {
+  type: "spring",
+  stiffness: 280,
+  damping: 26,
+};
+
 // ─── Easing curves ──────────────────────────────────────────────────
 // Reference: Linear / Stripe / Material 3 style.
 export const EASE = {
@@ -91,11 +112,10 @@ export function useMotionProps<T extends Record<string, unknown>>(
   return prefersReducedMotion ? {} : animated;
 }
 
-// ─── R3F feature-flag layer (Plan 4) ────────────────────────────────
-// Composes every condition under which a WebGL/Three.js scene should be
-// skipped in favour of a static or CSS fallback. Single source of truth
-// so every R3F entry point (AuroraBackground today; future scenes
-// tomorrow) reaches the same decision identically.
+// ─── Motion feature-flag layer ──────────────────────────────────────
+// Composes the conditions under which motion-heavy features (smooth
+// scroll, custom cursor) should be replaced by their static defaults.
+// Single source of truth — every consumer reaches the same decision.
 
 /** Returns true if `?lite=1` is present in the URL. SSR-safe. */
 function hasLiteParam(): boolean {
@@ -139,34 +159,9 @@ function subscribeToFlagSources(callback: () => void): () => void {
 }
 
 /**
- * Returns true when the runtime should render WebGL scenes. Returns
- * false when ANY of the following holds:
- *   • `import.meta.env.VITE_DISABLE_WEBGL === "true"` (Playwright builds)
- *   • prefers-reduced-motion at the OS / browser level
- *   • `?lite=1` URL query param (manual feature-flag kill switch;
- *     toggled by the user, sometimes by recruiters on slow corp wifi)
- *   • `navigator.connection.saveData === true`
- *   • `navigator.connection.effectiveType` is `slow-2g | 2g | 3g`
- *
- * SSR-safe: returns false until the client hydrates (we never paint
- * WebGL before the first client render anyway).
- */
-export function useShouldRenderWebGL(): boolean {
-  const prefersReducedMotion = useReducedMotion();
-  const flagsAllow = useSyncExternalStore(
-    subscribeToFlagSources,
-    () => !hasLiteParam() && !hasSlowConnection(),
-    () => false, // SSR snapshot: assume false; client effect upgrades.
-  );
-  if (import.meta.env.VITE_DISABLE_WEBGL === "true") return false;
-  if (prefersReducedMotion) return false;
-  return flagsAllow;
-}
-
-/**
  * Returns true when smooth-scroll (Lenis) should hijack native scroll.
- * Stricter than useShouldRenderWebGL — Lenis affects every scroll
- * interaction on the page, so any hint of degradation kills it.
+ * Lenis affects every scroll interaction on the page, so any hint of
+ * degradation kills it.
  *
  * Skips on:
  *   • prefers-reduced-motion (OS preference)
