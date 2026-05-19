@@ -15,7 +15,7 @@ const categoryIcons = {
 
 // Single-accent design: category grouping preserved (frontend / backend
 // / devops sections still drive grouping and toggle state), but visual
-// treatment is monochromatic. The brand accent (coral) is reserved for
+// treatment is monochromatic. The brand accent (mint) is reserved for
 // the active category indicator and skill-bar fill — the single
 // intentional accent moment in this section.
 const ACCENT_COLOR = "oklch(var(--primary))";

@@ -215,7 +215,7 @@ export function HeroSection() {
           {/* Left — Text content */}
           <div data-anime-hero="left" className="text-center lg:text-left">
             {/* Availability badge — monochrome treatment for full WCAG AA
-                contrast. The single coral dot carries the "available"
+                contrast. The single mint dot carries the "available"
                 signal; the text itself stays on the foreground token. */}
             <div
               data-anime-hero="badge"

@@ -23,7 +23,14 @@
   DESIGN SYSTEM — Developer Portfolio
   =============================================
   All tokens in OKLCH bare-component form. Consumers wrap with
-  oklch(var(--token)) or oklch(var(--token) / a). Single coral accent.
+  oklch(var(--token)) or oklch(var(--token) / a). Single mint accent
+  (electric mint, oklch(0.82 0.17 145)) — terminal-green vibe to match
+  the software-dev theme. Replaced the prior coral accent on 2026-05-19
+  as part of the anime.js + palette revitalization (revision 5). The
+  chroma ceiling in .impeccable.md is preserved for every neutral token;
+  the `--primary` / `--ring` / `--sidebar-primary` mint tokens have an
+  explicit, documented exception.
+
   Phase 9 token sweep 2026-05-18: design-vocabulary orphans removed
   (--gradient-*, --shadow-glow*, --brand-violet, --skill-*, --primary-glow,
   .text-gradient-*, .gradient-border).
@@ -31,8 +38,13 @@
 
 @layer base {
   :root {
-    /* Brand — coral retuned in OKLCH. */
-    --primary: 0.66 0.18 35;
+    /* Brand — deep mint for light mode. Hue 145° is the same as dark
+       mode, but lightness drops to 0.45 so `text-primary` clears AA
+       Normal (~6.2:1 on cream BG). White button labels read AAA on
+       this fill (~6.6:1). Dark mode bumps the lightness to 0.82 for
+       vibrancy against Deep ink. See .impeccable.md for the chroma
+       exception rationale. */
+    --primary: 0.45 0.17 145;
     --primary-foreground: 0.99 0.005 70;
 
     /* Secondary semantic role (shadcn-required). */
@@ -68,7 +80,7 @@
 
     --border: 0.86 0.015 70;
     --input: 0.86 0.015 70;
-    --ring: 0.66 0.18 35;
+    --ring: 0.45 0.17 145;
 
     --radius: 0.875rem;
 
@@ -94,30 +106,34 @@
     /* Sidebar tokens — OKLCH. */
     --sidebar-background: 0.98 0.006 70;
     --sidebar-foreground: 0.35 0.012 50;
-    --sidebar-primary: 0.66 0.18 35;
+    --sidebar-primary: 0.45 0.17 145;
     --sidebar-primary-foreground: 0.99 0.005 70;
     --sidebar-accent: 0.93 0.012 75;
     --sidebar-accent-foreground: 0.18 0.012 50;
     --sidebar-border: 0.86 0.015 70;
-    --sidebar-ring: 0.66 0.18 35;
+    --sidebar-ring: 0.45 0.17 145;
   }
 
   .dark {
-    /* Deep ink dark — near-OLED, faint cool tint (hue 250) to frame coral accent. */
-    --background: 0.13 0.008 250;
-    --foreground: 0.96 0.005 250;
+    /* Deep ink dark — near-OLED, faint cool tint (hue 248). Slight
+       lightness + chroma bump on neutrals vs the prior revision so the
+       surfaces read less flat without crossing the 0.015 chroma ceiling
+       documented in .impeccable.md. Mint accent at hue 145° sits 103°
+       away from the bg hue 248° — maximum tonal separation. */
+    --background: 0.14 0.012 248;
+    --foreground: 0.96 0.005 248;
 
-    --card: 0.17 0.010 250;
-    --card-foreground: 0.96 0.005 250;
+    --card: 0.18 0.020 248;
+    --card-foreground: 0.96 0.005 248;
 
-    --popover: 0.17 0.010 250;
-    --popover-foreground: 0.96 0.005 250;
+    --popover: 0.18 0.020 248;
+    --popover-foreground: 0.96 0.005 248;
 
-    --primary: 0.66 0.18 35;
-    --primary-foreground: 0.13 0.008 250;
+    --primary: 0.82 0.17 145;
+    --primary-foreground: 0.14 0.012 248;
 
-    --secondary: 0.22 0.012 250;
-    --secondary-foreground: 0.96 0.005 250;
+    --secondary: 0.22 0.015 248;
+    --secondary-foreground: 0.96 0.005 248;
 
     --opacity-subtle: 0.06;
     --opacity-soft: 0.30;
@@ -126,18 +142,18 @@
     /* Dark mode masthead rule — paper-on-dark wants less weight. */
     --masthead-opacity: 0.55;
 
-    --muted: 0.22 0.012 250;
-    --muted-foreground: 0.72 0.008 250;
+    --muted: 0.22 0.015 248;
+    --muted-foreground: 0.72 0.012 248;
 
-    --accent: 0.22 0.012 250;
-    --accent-foreground: 0.96 0.005 250;
+    --accent: 0.22 0.015 248;
+    --accent-foreground: 0.96 0.005 248;
 
     --destructive: 0.58 0.22 27;
-    --destructive-foreground: 0.99 0.003 250;
+    --destructive-foreground: 0.99 0.003 248;
 
-    --border: 0.30 0.012 250;
-    --input: 0.30 0.012 250;
-    --ring: 0.66 0.18 35;
+    --border: 0.30 0.020 248;
+    --input: 0.30 0.020 248;
+    --ring: 0.82 0.17 145;
 
     /* Dark shadows */
     --shadow-xs: 0 1px 2px hsl(0 0% 0% / 0.20);
@@ -146,15 +162,15 @@
     --shadow-lg: 0 12px 24px -4px hsl(0 0% 0% / 0.50), 0 4px 8px -4px hsl(0 0% 0% / 0.35);
     --shadow-xl: 0 24px 48px -8px hsl(0 0% 0% / 0.60), 0 8px 16px -8px hsl(0 0% 0% / 0.40);
 
-    /* Dark sidebar — Deep ink (hue 250). */
-    --sidebar-background: 0.15 0.010 250;
-    --sidebar-foreground: 0.88 0.008 250;
-    --sidebar-primary: 0.66 0.18 35;
-    --sidebar-primary-foreground: 0.13 0.008 250;
-    --sidebar-accent: 0.22 0.012 250;
-    --sidebar-accent-foreground: 0.96 0.005 250;
-    --sidebar-border: 0.30 0.012 250;
-    --sidebar-ring: 0.66 0.18 35;
+    /* Dark sidebar — Deep ink (hue 248). */
+    --sidebar-background: 0.16 0.014 248;
+    --sidebar-foreground: 0.88 0.010 248;
+    --sidebar-primary: 0.82 0.17 145;
+    --sidebar-primary-foreground: 0.14 0.012 248;
+    --sidebar-accent: 0.22 0.015 248;
+    --sidebar-accent-foreground: 0.96 0.005 248;
+    --sidebar-border: 0.30 0.020 248;
+    --sidebar-ring: 0.82 0.17 145;
   }
 }
 
