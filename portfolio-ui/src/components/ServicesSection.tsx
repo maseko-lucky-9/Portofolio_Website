@@ -1,8 +1,9 @@
-import { motion } from "framer-motion";
+import { useRef } from "react";
+import { animate, onScroll, stagger } from "animejs";
 import { Server, Cloud, Code2, CheckCircle2, ArrowRight } from "lucide-react";
 
-import { SPRING_DEFAULT as springTransition } from "@/lib/motion";
-// (re-exported as `springTransition` to minimize diff)
+import { fadeUpAnim } from "@/lib/motion";
+import { useAnime } from "@/lib/use-anime";
 
 interface Service {
   id: string;
@@ -79,8 +80,32 @@ const services: Service[] = [
 ];
 
 export function ServicesSection() {
+  const rootRef = useRef<HTMLElement>(null);
+
+  useAnime(
+    rootRef,
+    (scope) => {
+      const root = rootRef.current;
+      if (!root) return;
+      if (scope.matches.reducedMotion) return;
+
+      const targets = root.querySelectorAll<HTMLElement>("[data-anime]");
+      animate(targets, {
+        ...fadeUpAnim(),
+        delay: stagger(90),
+        autoplay: onScroll({
+          target: root,
+          enter: "top bottom-=50",
+          sync: "play pause",
+        }),
+      });
+    },
+    [],
+  );
+
   return (
     <section
+      ref={rootRef}
       id="services"
       aria-labelledby="services-heading"
       className="py-20 md:py-28 relative overflow-hidden"
@@ -97,13 +122,7 @@ export function ServicesSection() {
 
       <div className="section-container !py-0 py-20 md:py-28">
         {/* Section header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={springTransition}
-          className="text-center mb-16"
-        >
+        <div data-anime className="text-center mb-16">
           <span className="inline-block text-xs font-semibold uppercase tracking-[0.18em] text-primary mb-3">
             What I Offer
           </span>
@@ -114,21 +133,17 @@ export function ServicesSection() {
             Focused freelance engagements across three disciplines — shipped to production,
             not just delivered as a handover document.
           </p>
-        </motion.div>
+        </div>
 
         {/* Service cards grid */}
         <div className="grid md:grid-cols-3 gap-8">
-          {services.map((service, index) => {
+          {services.map((service) => {
             const Icon = service.icon;
             return (
-              <motion.article
+              <article
                 key={service.id}
-                initial={{ opacity: 0, y: 28 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ delay: index * 0.1, ...springTransition }}
-                whileHover={{ y: -6 }}
-                className={`relative rounded-2xl border bg-card p-8 flex flex-col gap-6 transition-all duration-300 ${service.accent}`}
+                data-anime
+                className={`relative rounded-2xl border bg-card p-8 flex flex-col gap-6 transition-all duration-300 hover:-translate-y-1.5 ${service.accent}`}
                 style={{
                   boxShadow: "var(--shadow-md)",
                   borderColor: "oklch(var(--border))",
@@ -179,22 +194,16 @@ export function ServicesSection() {
                     </span>
                   ))}
                 </div>
-              </motion.article>
+              </article>
             );
           })}
         </div>
 
         {/* CTA strip */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.35, ...springTransition }}
-          className="mt-14 text-center"
-        >
+        <div data-anime className="mt-14 text-center">
           <p className="text-muted-foreground mb-6 text-sm">
             Need something that spans two or all three disciplines?{" "}
-            <span className="text-foreground font-medium">Let's scope it together.</span>
+            <span className="text-foreground font-medium">Let&apos;s scope it together.</span>
           </p>
           <a
             href="#contact"
@@ -207,7 +216,7 @@ export function ServicesSection() {
             Get in touch
             <ArrowRight className="w-4 h-4" aria-hidden="true" />
           </a>
-        </motion.div>
+        </div>
       </div>
 
       {/* Bottom divider */}

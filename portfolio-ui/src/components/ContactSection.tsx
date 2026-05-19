@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { motion } from "framer-motion";
+import { useRef, useState } from "react";
+import { animate, onScroll } from "animejs";
 import { z } from "zod";
 import {
   Mail,
@@ -20,8 +20,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 
-import { SPRING_DEFAULT as springTransition } from "@/lib/motion";
-// (re-exported as `springTransition` to minimize diff)
+import { DURATION, EASE_FN, fadeUpAnim } from "@/lib/motion";
+import { useAnime } from "@/lib/use-anime";
 
 // Form validation schema
 const contactSchema = z.object({
@@ -34,6 +34,8 @@ const contactSchema = z.object({
 type ContactFormData = z.infer<typeof contactSchema>;
 
 export function ContactSection() {
+  const rootRef = useRef<HTMLElement>(null);
+  const successRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState<ContactFormData>({
     name: "",
     email: "",
@@ -44,6 +46,78 @@ export function ContactSection() {
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const { mutate: submitContact, isPending } = useContactForm();
+
+  // Header + columns: scroll-triggered fade-up. Columns slide in from
+  // their respective sides (left for info, right for form) — matches the
+  // previous framer x:-20 / x:20 entry.
+  useAnime(
+    rootRef,
+    (scope) => {
+      const root = rootRef.current;
+      if (!root) return;
+      if (scope.matches.reducedMotion) return;
+
+      const header = root.querySelector<HTMLElement>("[data-anime='header']");
+      const infoCol = root.querySelector<HTMLElement>("[data-anime='info']");
+      const formCol = root.querySelector<HTMLElement>("[data-anime='form']");
+
+      if (header) {
+        animate(header, {
+          ...fadeUpAnim(),
+          autoplay: onScroll({
+            target: root,
+            enter: "top bottom-=50",
+            sync: "play pause",
+          }),
+        });
+      }
+      if (infoCol) {
+        animate(infoCol, {
+          opacity: [0, 1],
+          translateX: [-20, 0],
+          duration: DURATION.base * 1000,
+          ease: EASE_FN.emphasized,
+          autoplay: onScroll({
+            target: root,
+            enter: "top bottom-=50",
+            sync: "play pause",
+          }),
+        });
+      }
+      if (formCol) {
+        animate(formCol, {
+          opacity: [0, 1],
+          translateX: [20, 0],
+          duration: DURATION.base * 1000,
+          ease: EASE_FN.emphasized,
+          autoplay: onScroll({
+            target: root,
+            enter: "top bottom-=50",
+            sync: "play pause",
+          }),
+        });
+      }
+    },
+    [],
+  );
+
+  // Success-state scale-in (mount-only, not scroll-triggered).
+  // Fires whenever isSubmitted flips true.
+  useAnime(
+    successRef,
+    (scope) => {
+      const el = successRef.current;
+      if (!el) return;
+      if (scope.matches.reducedMotion) return;
+      animate(el, {
+        opacity: [0, 1],
+        scale: [0.9, 1],
+        duration: DURATION.base * 1000,
+        ease: EASE_FN.emphasized,
+      });
+    },
+    [isSubmitted],
+  );
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -97,35 +171,29 @@ export function ContactSection() {
   };
 
   return (
-    <section id="contact" aria-labelledby="contact-heading" className="py-20 section-mesh">
+    <section
+      ref={rootRef}
+      id="contact"
+      aria-labelledby="contact-heading"
+      className="py-20 section-mesh"
+    >
       <div className="section-container">
         {/* Section Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={springTransition}
-          className="text-center mb-12"
-        >
+        <div data-anime="header" className="text-center mb-12">
           <span className="inline-block text-xs font-semibold uppercase tracking-[0.18em] text-primary mb-3">
             Contact
           </span>
           <h2 id="contact-heading" className="section-title">Say hi</h2>
           <p className="section-subtitle mx-auto">
-            Have a project in mind or want to discuss opportunities? I'd love to hear from
-            you.
+            Have a project in mind or want to discuss opportunities? I would love to hear
+            from you.
           </p>
-        </motion.div>
+        </div>
 
         <div className="grid lg:grid-cols-2 gap-12 max-w-5xl mx-auto">
           {/* Contact Info */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={springTransition}
-          >
-            <h3 className="text-xl font-bold mb-6">Let's Connect</h3>
+          <div data-anime="info">
+            <h3 className="text-xl font-bold mb-6">Let us connect</h3>
 
             <div className="space-y-6">
               {/* Email */}
@@ -244,23 +312,16 @@ export function ContactSection() {
                 </a>
               </div>
             </div>
-          </motion.div>
+          </div>
 
           {/* Contact Form */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={springTransition}
-          >
+          <div data-anime="form">
             <div className="glass-card p-6 md:p-8">
               <h3 className="text-xl font-bold mb-6">Send a Message</h3>
 
               {isSubmitted ? (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={springTransition}
+                <div
+                  ref={successRef}
                   className="flex flex-col items-center justify-center py-12 text-center"
                 >
                   <div
@@ -271,9 +332,9 @@ export function ContactSection() {
                   </div>
                   <h4 className="text-lg font-bold mb-2">Message Sent!</h4>
                   <p className="text-muted-foreground">
-                    Thanks for reaching out. I'll get back to you soon.
+                    Thanks for reaching out. I will get back to you soon.
                   </p>
-                </motion.div>
+                </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-5" noValidate>
                   <div className="grid sm:grid-cols-2 gap-5">
@@ -392,7 +453,7 @@ export function ContactSection() {
                 </form>
               )}
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>
