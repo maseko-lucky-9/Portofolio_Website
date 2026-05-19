@@ -90,27 +90,13 @@ export const springAnimeDefault = spring(SPRING_PARAMS.default);
 export const springAnimeHero = spring(SPRING_PARAMS.hero);
 export const springAnimeSkills = spring(SPRING_PARAMS.skills);
 
-// Legacy aliases kept until Phase B sweeps each consumer.
+// Legacy framer-format helpers — removed in Phase F once SPRING_*
+// consumers (currently un-migrated parts of Navbar/CodeDemo/etc.) are
+// all on the anime side.
 export const springTransition = SPRING_DEFAULT;
 export const snappyTransition = {
   duration: DURATION.fast,
   ease: EASE.emphasized,
-} as const;
-
-// ─── Framer-Variants stubs (DEPRECATED, removed in Phase F) ─────────
-// Re-introduced so the build stays green while the anime.js migration
-// proceeds component-by-component. ExperienceSection still consumes
-// `fadeUp` as a framer Variants prop (`variants={fadeUp}`); when that
-// component is migrated in Phase C4, delete the stub. Other Variants
-// (`fadeIn`, `scaleIn`, `staggerContainer`) had zero consumers so they
-// are not re-stubbed — see git history for the original definitions.
-export const fadeUp = {
-  hidden: { opacity: 0, y: 16 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: DURATION.base, ease: EASE.emphasized },
-  },
 } as const;
 
 // ─── Animation factories (anime.js configs) ──────────────────────────

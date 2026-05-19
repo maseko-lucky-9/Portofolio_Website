@@ -5,10 +5,10 @@ import {
   useState,
   type KeyboardEvent,
 } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Building2, Calendar, MapPin } from "lucide-react";
 import { experiences, type Experience } from "@/data/experience";
-import { fadeUp, springTransition } from "@/lib/motion";
+import { useReducedMotion } from "@/lib/motion";
+import { revealOnScroll, useAnime } from "@/lib/use-anime";
 
 const HOVER_CLOSE_MS = 120;
 
@@ -111,15 +111,15 @@ function ExperienceRow({
   );
 
   return (
-    <motion.div
-      variants={fadeUp}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, margin: "-80px" }}
-      transition={{ delay: index * 0.08 }}
+    <div
+      data-anime-row
       className={`relative flex md:items-start ${
         isLeft ? "md:flex-row" : "md:flex-row-reverse"
       } mb-12 last:mb-0`}
+      // Initial state (opacity 0, translateY 16) is applied by the reveal
+      // animation when motion is allowed; reduced-motion users see the
+      // row at its natural position.
+      style={{ opacity: reduceMotion ? 1 : 0 }}
     >
       {/* Node — desktop centered, mobile left */}
       <div
@@ -244,7 +244,7 @@ function ExperienceRow({
           )}
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -252,6 +252,26 @@ export function ExperienceSection() {
   const [openId, setOpenId] = useState<string | null>(null);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prefersReducedMotion = useReducedMotion();
+
+  const rootRef = useRef<HTMLElement>(null);
+
+  // Section reveal: header fade-up + zigzag rows fan-in with stagger.
+  useAnime(
+    rootRef,
+    (scope) => {
+      const root = rootRef.current;
+      if (!root) return;
+      if (scope.matches.reducedMotion) return;
+      const cleanups = [
+        revealOnScroll(root, "[data-anime-header]"),
+        // Stagger 80 ms per row matches the previous framer
+        // transition={{ delay: index * 0.08 }} cadence.
+        revealOnScroll(root, "[data-anime-row]", { staggerMs: 80 }),
+      ];
+      return () => cleanups.forEach((fn) => fn());
+    },
+    [],
+  );
 
   const cancelClose = useCallback(() => {
     if (closeTimerRef.current) {
@@ -282,6 +302,7 @@ export function ExperienceSection() {
 
   return (
     <section
+      ref={rootRef}
       id="experience"
       aria-labelledby="experience-heading"
       className="relative py-20 md:py-28 overflow-hidden"
@@ -290,13 +311,7 @@ export function ExperienceSection() {
 
       <div className="section-container !py-0 relative">
         {/* Section header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={springTransition}
-          className="text-center mb-16"
-        >
+        <div data-anime-header className="text-center mb-16">
           <span className="inline-block text-[10px] font-sans uppercase tracking-[0.18em] font-semibold text-[oklch(var(--primary)/0.8)] mb-3">
             Career
           </span>
@@ -306,7 +321,7 @@ export function ExperienceSection() {
           <p className="section-subtitle mx-auto">
             My professional journey building products and leading teams.
           </p>
-        </motion.div>
+        </div>
 
         {/* Zigzag timeline */}
         <div className="relative max-w-6xl mx-auto">
