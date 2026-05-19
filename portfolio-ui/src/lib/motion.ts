@@ -1,22 +1,41 @@
 /**
- * Motion grammar — central source of truth for durations, easings, and
- * reusable Framer Motion variants. Pairs with the CSS motion tokens in
- * src/index.css so the same easing curves apply to plain CSS transitions
- * and to Framer-Motion-controlled elements.
+ * Motion grammar — central source of truth for durations, easings, springs,
+ * and reusable animation factories. Pairs with the CSS motion tokens in
+ * `src/index.css` so the same easing curves apply to plain CSS transitions
+ * and to JS-controlled animations.
  *
- * Plan 3 of the v2 ladder: micro-interactions only. No scroll-jacking,
- * no R3F, no custom cursor (Plans 4–5).
+ * History:
+ *   - Plan 3 of the v2 ladder: micro-interactions only (framer-motion era).
+ *   - 2026-05-19: dropped framer-motion dependency in favour of anime.js v4.
+ *     `useReducedMotion` now comes from `./use-reduced-motion` (matchMedia
+ *     hook, no library binding). `SPRING_*` objects retained in
+ *     framer-compatible shape until Phase F of the anime.js migration
+ *     removes their last consumers — see
+ *     `~/.claude/plans/atomic-toasting-locket.md`. New `*Anim()` factories
+ *     replace the `Variants` exports for migrated components.
+ *
+ * Conventions for new code:
+ *   - Animations live inside a `useAnime(ref, factory, deps)` hook from
+ *     `./use-anime`. The factory reads `scope.matches.reducedMotion` and
+ *     skips animations under that condition.
+ *   - Tag animatable descendants with `data-anime="<role>"` so factory
+ *     selectors stay decoupled from styling classes.
+ *   - Durations in this file are seconds (CSS-friendly). anime.js consumers
+ *     multiply by 1000 at the call site, or use the `*Anim()` factories
+ *     which already convert.
  */
-import { useEffect, useRef, useSyncExternalStore, type RefObject } from "react";
 import {
-  useReducedMotion,
-  type Transition,
-  type Variants,
-} from "framer-motion";
+  useEffect,
+  useRef,
+  useSyncExternalStore,
+  type RefObject,
+} from "react";
+import { cubicBezier, spring } from "animejs";
+import { useReducedMotion } from "./use-reduced-motion";
 
-// ─── Duration scale (ms) ─────────────────────────────────────────────
-// Mirrors the --duration-* CSS vars. Kept as numbers here because
-// Framer Motion's `duration:` field expects seconds, not the CSS string.
+// ─── Duration scale (seconds) ────────────────────────────────────────
+// Mirrors the --duration-* CSS vars. Numbers (not strings) so consumers
+// can do arithmetic — anime.js needs ms (multiply by 1000), CSS needs s.
 export const DURATION = {
   instant: 0.10,
   fast: 0.18,
@@ -24,28 +43,10 @@ export const DURATION = {
   slow: 0.48,
 } as const;
 
-// ─── Spring transitions (typed) ─────────────────────────────────────
-// Centralized to satisfy framer-motion's Transition<any> type — inline
-// object literals with `type: "spring"` infer as `string` not the
-// literal, which trips TS2322. Three tuples in actual use across the
-// codebase (enumerated 2026-05-18 via the audit-remediation pass).
-export const SPRING_DEFAULT: Transition = {
-  type: "spring",
-  stiffness: 260,
-  damping: 26,
-};
-export const SPRING_HERO: Transition = {
-  type: "spring",
-  stiffness: 260,
-  damping: 24,
-};
-export const SPRING_SKILLS: Transition = {
-  type: "spring",
-  stiffness: 280,
-  damping: 26,
-};
-
 // ─── Easing curves ──────────────────────────────────────────────────
+// Raw 4-tuple cubic-bezier coefficients. Use `EASE_FN.*` for anime.js
+// `ease:` fields (pre-wrapped with cubicBezier). Use `EASE.*` for any
+// downstream that wants raw tuples (CSS or framer-motion holdovers).
 // Reference: Linear / Stripe / Material 3 style.
 export const EASE = {
   spring: [0.16, 1, 0.3, 1],
@@ -55,67 +56,103 @@ export const EASE = {
   accelerate: [0.4, 0, 1, 1],
 } as const;
 
-// ─── Reusable transitions ───────────────────────────────────────────
-export const springTransition: Transition = {
-  type: "spring",
-  stiffness: 280,
-  damping: 26,
-};
+export const EASE_FN = {
+  spring: cubicBezier(...EASE.spring),
+  out: cubicBezier(...EASE.out),
+  emphasized: cubicBezier(...EASE.emphasized),
+  decelerate: cubicBezier(...EASE.decelerate),
+  accelerate: cubicBezier(...EASE.accelerate),
+} as const;
 
-export const snappyTransition: Transition = {
+// ─── Spring presets ─────────────────────────────────────────────────
+// Two parallel exports during the framer→anime migration:
+//   - `SPRING_*` (uppercase) — framer-compatible object literals; still
+//     consumed by un-migrated components in B–E. Removed in Phase F.
+//   - `springAnime*` (camelCase) — anime.js spring instances built via
+//     `spring({ stiffness, damping })`. Used by migrated components.
+//
+// Stiffness/damping values are the audit-remediation pass's tuned defaults
+// (see git history 2026-05-18 audit-remediation merge).
+const SPRING_PARAMS = {
+  default: { stiffness: 260, damping: 26 },
+  hero: { stiffness: 260, damping: 24 },
+  skills: { stiffness: 280, damping: 26 },
+} as const;
+
+// Framer-compatible (no `as Transition` annotation; framer-motion accepts
+// the structural shape and we no longer import its types).
+export const SPRING_DEFAULT = { type: "spring", ...SPRING_PARAMS.default } as const;
+export const SPRING_HERO = { type: "spring", ...SPRING_PARAMS.hero } as const;
+export const SPRING_SKILLS = { type: "spring", ...SPRING_PARAMS.skills } as const;
+
+// Anime-compatible spring instances. Pass into anime config as `ease:`.
+export const springAnimeDefault = spring(SPRING_PARAMS.default);
+export const springAnimeHero = spring(SPRING_PARAMS.hero);
+export const springAnimeSkills = spring(SPRING_PARAMS.skills);
+
+// Legacy aliases kept until Phase B sweeps each consumer.
+export const springTransition = SPRING_DEFAULT;
+export const snappyTransition = {
   duration: DURATION.fast,
   ease: EASE.emphasized,
-};
+} as const;
 
-// ─── Reusable variants ──────────────────────────────────────────────
-export const fadeUp: Variants = {
+// ─── Framer-Variants stubs (DEPRECATED, removed in Phase F) ─────────
+// Re-introduced so the build stays green while the anime.js migration
+// proceeds component-by-component. ExperienceSection still consumes
+// `fadeUp` as a framer Variants prop (`variants={fadeUp}`); when that
+// component is migrated in Phase C4, delete the stub. Other Variants
+// (`fadeIn`, `scaleIn`, `staggerContainer`) had zero consumers so they
+// are not re-stubbed — see git history for the original definitions.
+export const fadeUp = {
   hidden: { opacity: 0, y: 16 },
   visible: {
     opacity: 1,
     y: 0,
     transition: { duration: DURATION.base, ease: EASE.emphasized },
   },
-};
+} as const;
 
-export const fadeIn: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { duration: DURATION.base, ease: EASE.out },
-  },
-};
+// ─── Animation factories (anime.js configs) ──────────────────────────
+// Replace the previous framer `Variants` exports. Each factory returns a
+// plain object suitable for `animate(targets, factory())` or for inlining
+// into a `createTimeline().add(targets, factory())`. Durations are ms.
 
-export const scaleIn: Variants = {
-  hidden: { opacity: 0, scale: 0.94 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: springTransition,
-  },
-};
-
-export const staggerContainer = (delay = 0, stagger = 0.06): Variants => ({
-  hidden: {},
-  visible: {
-    transition: { delayChildren: delay, staggerChildren: stagger },
-  },
-});
-
-/**
- * Returns animation props only if the user hasn't enabled reduced motion.
- * Usage: <motion.div {...useMotionProps({ initial, animate })} />
- */
-export function useMotionProps<T extends Record<string, unknown>>(
-  animated: T,
-): T | Record<string, never> {
-  const prefersReducedMotion = useReducedMotion();
-  return prefersReducedMotion ? {} : animated;
+export function fadeUpAnim() {
+  return {
+    opacity: [0, 1],
+    translateY: [16, 0],
+    duration: DURATION.base * 1000,
+    ease: EASE_FN.emphasized,
+  };
 }
 
-// ─── Motion feature-flag layer ──────────────────────────────────────
+export function fadeInAnim() {
+  return {
+    opacity: [0, 1],
+    duration: DURATION.base * 1000,
+    ease: EASE_FN.out,
+  };
+}
+
+export function scaleInAnim() {
+  return {
+    opacity: [0, 1],
+    scale: [0.94, 1],
+    ease: springAnimeDefault,
+  };
+}
+
+// Helper for staggered children. anime.js's stagger() builds delay
+// functions; this wraps the common case. Consumers compose:
+//   animate(items, { ...fadeUpAnim(), delay: staggerChildren(60) })
+export function staggerChildren(stepMs: number = 60, baseDelayMs: number = 0) {
+  return (_: unknown, i: number) => baseDelayMs + i * stepMs;
+}
+
+// ─── Smooth-scroll feature flag ─────────────────────────────────────
 // Composes the conditions under which motion-heavy features (smooth
 // scroll, custom cursor) should be replaced by their static defaults.
-// Single source of truth — every consumer reaches the same decision.
 
 /** Returns true if `?lite=1` is present in the URL. SSR-safe. */
 function hasLiteParam(): boolean {
@@ -130,7 +167,6 @@ function hasLiteParam(): boolean {
  */
 function hasSlowConnection(): boolean {
   if (typeof navigator === "undefined") return false;
-  // The Network Information API is non-standard; type it locally.
   type NetInfo = {
     saveData?: boolean;
     effectiveType?: "slow-2g" | "2g" | "3g" | "4g";
@@ -142,11 +178,6 @@ function hasSlowConnection(): boolean {
   return conn.effectiveType ? slow.includes(conn.effectiveType) : false;
 }
 
-/**
- * Subscribes to URL changes (popstate) and connection-info changes so the
- * hook re-evaluates when the user toggles `?lite=1` or the connection
- * shifts. `useSyncExternalStore` keeps SSR safe and dedupes notifications.
- */
 function subscribeToFlagSources(callback: () => void): () => void {
   if (typeof window === "undefined") return () => {};
   window.addEventListener("popstate", callback);
@@ -158,22 +189,25 @@ function subscribeToFlagSources(callback: () => void): () => void {
   };
 }
 
+/** Returns true if `?nomo=1` is present in the URL. SSR-safe. */
+function hasNoMotionParam(): boolean {
+  if (typeof window === "undefined") return false;
+  return new URLSearchParams(window.location.search).get("nomo") === "1";
+}
+
+/** Returns true on coarse-pointer (touch) devices. SSR-safe. */
+function hasCoarsePointer(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia?.("(pointer: coarse)").matches ?? false;
+}
+
 /**
  * Returns true when smooth-scroll (Lenis) should hijack native scroll.
  * Lenis affects every scroll interaction on the page, so any hint of
  * degradation kills it.
  *
- * Skips on:
- *   • prefers-reduced-motion (OS preference)
- *   • `?lite=1` (the same kill switch that disables WebGL)
- *   • `?nomo=1` (motion-specific kill switch — disables smooth scroll
- *     and custom cursor without touching WebGL)
- *   • slow connections / Data Saver (smooth-scroll's JS cost isn't
- *     justified when bandwidth is precious)
- *   • coarse-pointer devices (touch — smooth scroll competes with
- *     native momentum scroll on mobile, always worse)
- *
- * SSR-safe: server snapshot is always false; the client effect upgrades.
+ * Skips on prefers-reduced-motion, `?lite=1`, `?nomo=1`, slow connections,
+ * or coarse-pointer devices. SSR-safe: server snapshot is always false.
  */
 export function useShouldRenderSmoothScroll(): boolean {
   const prefersReducedMotion = useReducedMotion();
@@ -190,32 +224,20 @@ export function useShouldRenderSmoothScroll(): boolean {
   return flagsAllow;
 }
 
-/** Returns true if `?nomo=1` is present in the URL. SSR-safe. */
-function hasNoMotionParam(): boolean {
-  if (typeof window === "undefined") return false;
-  return new URLSearchParams(window.location.search).get("nomo") === "1";
-}
-
-/** Returns true on coarse-pointer (touch) devices. SSR-safe. */
-function hasCoarsePointer(): boolean {
-  if (typeof window === "undefined") return false;
-  return window.matchMedia?.("(pointer: coarse)").matches ?? false;
-}
-
-// ─── Input-modality tracker (Plan 5) ────────────────────────────────
+// ─── Input-modality tracker ─────────────────────────────────────────
 // Module-level state shared across all useInputModality consumers so
 // they reach the same conclusion identically.
 let lastKeyboardAt = -Infinity;
 let lastPointerKind: "mouse" | "pen" | "touch" = "mouse";
 const modalityListeners = new Set<() => void>();
+let modalityCleanup: (() => void) | null = null;
 
 function subscribeToModality(callback: () => void): () => void {
   if (typeof window === "undefined") return () => {};
   modalityListeners.add(callback);
-  // Bind the global window listeners once on first subscriber.
   if (modalityListeners.size === 1) {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Tab") return; // Only Tab signals keyboard nav.
+      if (e.key !== "Tab") return;
       lastKeyboardAt = performance.now();
       modalityListeners.forEach((fn) => fn());
     };
@@ -238,17 +260,11 @@ function subscribeToModality(callback: () => void): () => void {
     }
   };
 }
-let modalityCleanup: (() => void) | null = null;
 
 /**
  * Tracks the user's current primary input modality so motion features
  * (custom cursor, magnetic effects) can suppress themselves when the
  * user switches to keyboard / screen-reader navigation.
- *
- * Returns one of:
- *   • "pointer" — last interaction was mouse / pen / trackpad
- *   • "keyboard" — Tab pressed within the last `keyboardWindowMs`
- *   • "touch" — pointerdown with pointerType === "touch"
  */
 export function useInputModality(
   keyboardWindowMs: number = 5000,
@@ -261,23 +277,19 @@ export function useInputModality(
       if (since < keyboardWindowMs) return "keyboard" as const;
       return "pointer" as const;
     },
-    () => "pointer" as const, // SSR default
+    () => "pointer" as const,
   );
 }
 
 /**
- * Subtle magnetic-cursor effect for buttons / nav links.
- *
- * Tracks pointer position relative to the element's centre and writes
- * the offset to `--magnetic-x` / `--magnetic-y` custom properties on the
+ * Subtle magnetic-cursor effect for buttons / nav links. Writes pointer
+ * offset to `--magnetic-x` / `--magnetic-y` custom properties on the
  * element. Consumers compose these into their `transform` so the effect
- * stacks with existing hover lifts (e.g. `.btn-hero-primary:hover`).
+ * stacks with existing hover lifts.
  *
- * Returns the ref to attach. Automatically no-ops under
- * prefers-reduced-motion (custom properties stay at their initial 0px).
+ * No-ops under prefers-reduced-motion (custom properties stay at 0px).
  *
- * Keep `strength` small (4–8 px). Above 8 px the effect reads as gimmicky
- * rather than crafted — senior-eng audience tunes out fast.
+ * Keep `strength` small (4–8 px). Above 8 px the effect reads gimmicky.
  */
 export function useMagnetic<T extends HTMLElement = HTMLElement>(
   strength: number = 6,
@@ -313,7 +325,6 @@ export function useMagnetic<T extends HTMLElement = HTMLElement>(
 
     el.addEventListener("pointermove", onMove);
     el.addEventListener("pointerleave", onLeave);
-    // Initialise custom props so first paint has stable values.
     el.style.setProperty("--magnetic-x", "0px");
     el.style.setProperty("--magnetic-y", "0px");
 
@@ -328,3 +339,8 @@ export function useMagnetic<T extends HTMLElement = HTMLElement>(
 
   return ref;
 }
+
+// Re-export the reduced-motion hook so existing consumers can continue
+// to import it from `@/lib/motion` if they want to (avoids touching
+// every file in B–E just to change an import path).
+export { useReducedMotion } from "./use-reduced-motion";
