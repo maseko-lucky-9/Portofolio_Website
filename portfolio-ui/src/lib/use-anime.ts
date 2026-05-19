@@ -31,9 +31,79 @@
  *   }, []);
  */
 import { useEffect, type RefObject } from "react";
+import { animate, stagger, type AnimationParams } from "animejs";
 import { createMotionScope, type MotionScope } from "./anime-scope";
+import { fadeUpAnim } from "./motion";
 
 export type AnimeFactory = (scope: MotionScope) => void | (() => void);
+
+/**
+ * Section reveal helper — the canonical "fade-up on scroll" pattern used
+ * across every migrated section.
+ *
+ * Behaviour matches framer-motion's `whileInView` viewport={{ once: true }}:
+ * elements start hidden, animate once when the section enters the viewport,
+ * then stay at end-state. Uses a plain IntersectionObserver instead of
+ * anime.js `onScroll` because the latter does not reliably re-fire enter
+ * for targets already in view at observer-register time (which is the
+ * common case here — LazySection mounts the component when the section
+ * is already near the viewport).
+ *
+ * Pass either explicit DOM targets or a selector resolved within `root`.
+ * Returns a cleanup function so useAnime can disconnect the observer
+ * when the scope reverts.
+ */
+export function revealOnScroll(
+  root: HTMLElement,
+  targets: NodeListOf<Element> | Element[] | string,
+  options: { staggerMs?: number; anim?: AnimationParams; rootMargin?: string } = {},
+): () => void {
+  const els =
+    typeof targets === "string"
+      ? Array.from(root.querySelectorAll<HTMLElement>(targets))
+      : Array.from(targets as ArrayLike<Element>);
+  if (els.length === 0) return () => {};
+
+  const anim = animate(els, {
+    ...(options.anim ?? fadeUpAnim()),
+    delay:
+      options.staggerMs !== undefined ? stagger(options.staggerMs) : undefined,
+    autoplay: false,
+  });
+
+  // IntersectionObserver fires on initial observe with current state, so
+  // if the section is already partially in view at mount, the animation
+  // plays immediately. Disconnect after the first intersection so we
+  // never re-trigger on subsequent scroll.
+  if (typeof IntersectionObserver === "undefined") {
+    anim.play();
+    return () => anim.cancel();
+  }
+
+  const io = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          anim.play();
+          io.disconnect();
+          break;
+        }
+      }
+    },
+    {
+      // Trigger when section is 50 px from entering viewport bottom —
+      // matches the original framer `viewport={{ margin: "-50px" }}`.
+      rootMargin: options.rootMargin ?? "0px 0px -50px 0px",
+      threshold: 0,
+    },
+  );
+  io.observe(root);
+
+  return () => {
+    io.disconnect();
+    anim.cancel();
+  };
+}
 
 /**
  * Run an animation factory inside a scope keyed to `rootRef.current`.

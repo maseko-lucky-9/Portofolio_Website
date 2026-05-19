@@ -1,12 +1,10 @@
 import { useCallback, useRef, useState } from "react";
-import { animate, onScroll, stagger } from "animejs";
 import Editor from "@monaco-editor/react";
 import { Play, Copy, Check, Terminal } from "lucide-react";
 import { codeExamples } from "@/data/codeExamples";
 import { useTheme } from "@/contexts/ThemeContext";
 
-import { fadeUpAnim } from "@/lib/motion";
-import { useAnime } from "@/lib/use-anime";
+import { revealOnScroll, useAnime } from "@/lib/use-anime";
 
 export function CodeDemoSection() {
   const rootRef = useRef<HTMLElement>(null);
@@ -22,17 +20,7 @@ export function CodeDemoSection() {
       const root = rootRef.current;
       if (!root) return;
       if (scope.matches.reducedMotion) return;
-
-      const targets = root.querySelectorAll<HTMLElement>("[data-anime]");
-      animate(targets, {
-        ...fadeUpAnim(),
-        delay: stagger(100),
-        autoplay: onScroll({
-          target: root,
-          enter: "top bottom-=50",
-          sync: "play pause",
-        }),
-      });
+      return revealOnScroll(root, "[data-anime]", { staggerMs: 100 });
     },
     [],
   );

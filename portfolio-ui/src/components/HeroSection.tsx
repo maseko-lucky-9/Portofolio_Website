@@ -248,7 +248,7 @@ export function HeroSection() {
                 const surname = rest.join(" ");
                 return (
                   <>
-                    <span className="font-normal text-foreground">Hi, I am</span>{" "}
+                    <span className="font-normal text-foreground">Hi, I&apos;m</span>{" "}
                     <span className="text-foreground">{first}</span>{" "}
                     <span
                       className="text-foreground [text-underline-offset:0.14em] [text-decoration-thickness:2px]"
@@ -286,7 +286,7 @@ export function HeroSection() {
               className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start mb-9"
             >
               <button ref={primaryCtaRef} onClick={scrollToProjects} className="btn-hero-primary">
-                See what I have built
+                See what I&apos;ve built
                 <ArrowDown className="w-4 h-4" />
               </button>
               <button ref={secondaryCtaRef} onClick={scrollToContact} className="btn-hero-secondary">

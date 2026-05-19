@@ -1,5 +1,4 @@
 import { useMemo, useRef } from "react";
-import { animate, onScroll, stagger } from "animejs";
 import { Clock, ArrowRight, Tag, AlertCircle, FileText } from "lucide-react";
 import { format } from "date-fns";
 import { useArticles } from "@/hooks/use-articles";
@@ -9,8 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ArticleStatus } from "@/types/api";
 import type { Article } from "@/types/api";
 
-import { fadeUpAnim } from "@/lib/motion";
-import { useAnime } from "@/lib/use-anime";
+import { revealOnScroll, useAnime } from "@/lib/use-anime";
 
 // Map API Article to the shape the blog template expects
 interface DisplayBlogPost {
@@ -89,17 +87,7 @@ export function BlogSection() {
       const root = rootRef.current;
       if (!root) return;
       if (scope.matches.reducedMotion) return;
-
-      const targets = root.querySelectorAll<HTMLElement>("[data-anime]");
-      animate(targets, {
-        ...fadeUpAnim(),
-        delay: stagger(90),
-        autoplay: onScroll({
-          target: root,
-          enter: "top bottom-=50",
-          sync: "play pause",
-        }),
-      });
+      return revealOnScroll(root, "[data-anime]", { staggerMs: 90 });
     },
     // Re-run after blogPosts changes from skeleton → real list so the
     // newly-mounted card refs are picked up by querySelectorAll.
@@ -122,7 +110,7 @@ export function BlogSection() {
           </span>
           <h2 id="blog-heading" className="section-title">Notes</h2>
           <p className="section-subtitle mx-auto">
-            Working notes on software I have shipped.
+            Working notes on software I&apos;ve shipped.
           </p>
         </div>
 

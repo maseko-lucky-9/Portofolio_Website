@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { animate, onScroll } from "animejs";
+import { animate } from "animejs";
 import { z } from "zod";
 import {
   Mail,
@@ -20,8 +20,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 
-import { DURATION, EASE_FN, fadeUpAnim } from "@/lib/motion";
-import { useAnime } from "@/lib/use-anime";
+import { DURATION, EASE_FN } from "@/lib/motion";
+import { revealOnScroll, useAnime } from "@/lib/use-anime";
 
 // Form validation schema
 const contactSchema = z.object({
@@ -47,9 +47,12 @@ export function ContactSection() {
 
   const { mutate: submitContact, isPending } = useContactForm();
 
-  // Header + columns: scroll-triggered fade-up. Columns slide in from
+  // Header + columns: scroll-triggered fade. Columns slide in from
   // their respective sides (left for info, right for form) — matches the
-  // previous framer x:-20 / x:20 entry.
+  // previous framer x:-20 / x:20 entry. Each item runs its own animate()
+  // because the per-item parameters differ; revealOnScroll handles the
+  // single-anim case but for distinct per-target configs we drop to
+  // animate() + the same onEnter pattern in-place.
   useAnime(
     rootRef,
     (scope) => {
@@ -57,46 +60,42 @@ export function ContactSection() {
       if (!root) return;
       if (scope.matches.reducedMotion) return;
 
-      const header = root.querySelector<HTMLElement>("[data-anime='header']");
-      const infoCol = root.querySelector<HTMLElement>("[data-anime='info']");
-      const formCol = root.querySelector<HTMLElement>("[data-anime='form']");
+      const cleanups: Array<() => void> = [];
 
-      if (header) {
-        animate(header, {
-          ...fadeUpAnim(),
-          autoplay: onScroll({
-            target: root,
-            enter: "top bottom-=50",
-            sync: "play pause",
-          }),
-        });
-      }
+      // Header uses the canonical fade-up reveal.
+      cleanups.push(revealOnScroll(root, "[data-anime='header']"));
+
+      // Info column slides in from the left.
+      const infoCol = root.querySelector<HTMLElement>("[data-anime='info']");
       if (infoCol) {
-        animate(infoCol, {
-          opacity: [0, 1],
-          translateX: [-20, 0],
-          duration: DURATION.base * 1000,
-          ease: EASE_FN.emphasized,
-          autoplay: onScroll({
-            target: root,
-            enter: "top bottom-=50",
-            sync: "play pause",
+        cleanups.push(
+          revealOnScroll(root, [infoCol], {
+            anim: {
+              opacity: [0, 1],
+              translateX: [-20, 0],
+              duration: DURATION.base * 1000,
+              ease: EASE_FN.emphasized,
+            },
           }),
-        });
+        );
       }
+
+      // Form column slides in from the right.
+      const formCol = root.querySelector<HTMLElement>("[data-anime='form']");
       if (formCol) {
-        animate(formCol, {
-          opacity: [0, 1],
-          translateX: [20, 0],
-          duration: DURATION.base * 1000,
-          ease: EASE_FN.emphasized,
-          autoplay: onScroll({
-            target: root,
-            enter: "top bottom-=50",
-            sync: "play pause",
+        cleanups.push(
+          revealOnScroll(root, [formCol], {
+            anim: {
+              opacity: [0, 1],
+              translateX: [20, 0],
+              duration: DURATION.base * 1000,
+              ease: EASE_FN.emphasized,
+            },
           }),
-        });
+        );
       }
+
+      return () => cleanups.forEach((fn) => fn());
     },
     [],
   );
@@ -185,7 +184,7 @@ export function ContactSection() {
           </span>
           <h2 id="contact-heading" className="section-title">Say hi</h2>
           <p className="section-subtitle mx-auto">
-            Have a project in mind or want to discuss opportunities? I would love to hear
+            Have a project in mind or want to discuss opportunities? I&apos;d love to hear
             from you.
           </p>
         </div>
@@ -193,7 +192,7 @@ export function ContactSection() {
         <div className="grid lg:grid-cols-2 gap-12 max-w-5xl mx-auto">
           {/* Contact Info */}
           <div data-anime="info">
-            <h3 className="text-xl font-bold mb-6">Let us connect</h3>
+            <h3 className="text-xl font-bold mb-6">Let&apos;s Connect</h3>
 
             <div className="space-y-6">
               {/* Email */}
@@ -332,7 +331,7 @@ export function ContactSection() {
                   </div>
                   <h4 className="text-lg font-bold mb-2">Message Sent!</h4>
                   <p className="text-muted-foreground">
-                    Thanks for reaching out. I will get back to you soon.
+                    Thanks for reaching out. I&apos;ll get back to you soon.
                   </p>
                 </div>
               ) : (

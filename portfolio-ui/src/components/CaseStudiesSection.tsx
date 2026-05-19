@@ -1,5 +1,4 @@
 import { useRef } from "react";
-import { animate, onScroll, stagger } from "animejs";
 import {
   Server,
   GitBranch,
@@ -9,8 +8,7 @@ import {
   Construction,
 } from "lucide-react";
 
-import { fadeUpAnim } from "@/lib/motion";
-import { useAnime } from "@/lib/use-anime";
+import { revealOnScroll, useAnime } from "@/lib/use-anime";
 
 type CaseStudyStatus = "live" | "in-progress" | "planned";
 
@@ -71,17 +69,7 @@ export function CaseStudiesSection() {
       const root = rootRef.current;
       if (!root) return;
       if (scope.matches.reducedMotion) return;
-
-      const targets = root.querySelectorAll<HTMLElement>("[data-anime]");
-      animate(targets, {
-        ...fadeUpAnim(),
-        delay: stagger(100),
-        autoplay: onScroll({
-          target: root,
-          enter: "top bottom-=50",
-          sync: "play pause",
-        }),
-      });
+      return revealOnScroll(root, "[data-anime]", { staggerMs: 100 });
     },
     [],
   );
