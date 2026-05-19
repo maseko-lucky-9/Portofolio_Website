@@ -13,8 +13,7 @@
  *   • Hardware-accelerated via translate3d + will-change: transform.
  */
 import { useEffect, useRef, useState } from "react";
-import { useReducedMotion } from "framer-motion";
-import { useInputModality } from "@/lib/motion";
+import { useInputModality, useReducedMotion } from "@/lib/motion";
 
 const HOVER_SELECTOR = '[data-cursor="hover"], a, button';
 
