@@ -103,21 +103,21 @@
   }
 
   .dark {
-    /* Warm-coal dark — engineering field-manual register. */
-    --background: 0.18 0.012 50;
-    --foreground: 0.93 0.012 75;
+    /* Deep ink dark — near-OLED, faint cool tint (hue 250) to frame coral accent. */
+    --background: 0.13 0.008 250;
+    --foreground: 0.96 0.005 250;
 
-    --card: 0.22 0.014 50;
-    --card-foreground: 0.93 0.012 75;
+    --card: 0.17 0.010 250;
+    --card-foreground: 0.96 0.005 250;
 
-    --popover: 0.22 0.014 50;
-    --popover-foreground: 0.93 0.012 75;
+    --popover: 0.17 0.010 250;
+    --popover-foreground: 0.96 0.005 250;
 
     --primary: 0.66 0.18 35;
-    --primary-foreground: 0.18 0.012 50;
+    --primary-foreground: 0.13 0.008 250;
 
-    --secondary: 0.26 0.012 50;
-    --secondary-foreground: 0.93 0.012 75;
+    --secondary: 0.22 0.012 250;
+    --secondary-foreground: 0.96 0.005 250;
 
     --opacity-subtle: 0.06;
     --opacity-soft: 0.30;
@@ -126,17 +126,17 @@
     /* Dark mode masthead rule — paper-on-dark wants less weight. */
     --masthead-opacity: 0.55;
 
-    --muted: 0.26 0.012 50;
-    --muted-foreground: 0.70 0.010 60;
+    --muted: 0.22 0.012 250;
+    --muted-foreground: 0.72 0.008 250;
 
-    --accent: 0.26 0.012 50;
-    --accent-foreground: 0.93 0.012 75;
+    --accent: 0.22 0.012 250;
+    --accent-foreground: 0.96 0.005 250;
 
     --destructive: 0.58 0.22 27;
-    --destructive-foreground: 0.99 0.005 70;
+    --destructive-foreground: 0.99 0.003 250;
 
-    --border: 0.32 0.014 50;
-    --input: 0.32 0.014 50;
+    --border: 0.30 0.012 250;
+    --input: 0.30 0.012 250;
     --ring: 0.66 0.18 35;
 
     /* Dark shadows */
@@ -146,14 +146,14 @@
     --shadow-lg: 0 12px 24px -4px hsl(0 0% 0% / 0.50), 0 4px 8px -4px hsl(0 0% 0% / 0.35);
     --shadow-xl: 0 24px 48px -8px hsl(0 0% 0% / 0.60), 0 8px 16px -8px hsl(0 0% 0% / 0.40);
 
-    /* Dark sidebar — OKLCH. */
-    --sidebar-background: 0.20 0.012 50;
-    --sidebar-foreground: 0.85 0.010 60;
+    /* Dark sidebar — Deep ink (hue 250). */
+    --sidebar-background: 0.15 0.010 250;
+    --sidebar-foreground: 0.88 0.008 250;
     --sidebar-primary: 0.66 0.18 35;
-    --sidebar-primary-foreground: 0.18 0.012 50;
-    --sidebar-accent: 0.26 0.012 50;
-    --sidebar-accent-foreground: 0.93 0.012 75;
-    --sidebar-border: 0.32 0.014 50;
+    --sidebar-primary-foreground: 0.13 0.008 250;
+    --sidebar-accent: 0.22 0.012 250;
+    --sidebar-accent-foreground: 0.96 0.005 250;
+    --sidebar-border: 0.30 0.012 250;
     --sidebar-ring: 0.66 0.18 35;
   }
 }
