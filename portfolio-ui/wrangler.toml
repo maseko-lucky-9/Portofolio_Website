@@ -49,6 +49,11 @@ directory = "./dist"
 binding = "ASSETS"
 # Vite SPA needs all unmatched routes to fall through to index.html
 not_found_handling = "single-page-application"
+# Force worker (src/worker.ts) to run on every request — including asset
+# paths — so it can inject security + AI-opt-out response headers.
+# Without this, asset requests bypass the worker entirely and headers
+# never reach the response.
+run_worker_first = true
 
 # Observability is on by default in 2025+ wrangler.
 [observability]
