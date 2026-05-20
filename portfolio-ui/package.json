@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && node scripts/build-static-pages.mjs && node scripts/build-sitemap.mjs && node scripts/build-rss.mjs && node scripts/inject-verification.mjs && node scripts/inject-fingerprint.mjs",
-    "build:dev": "vite build --mode development && node scripts/build-static-pages.mjs && node scripts/build-sitemap.mjs && node scripts/build-rss.mjs && node scripts/inject-verification.mjs && node scripts/inject-fingerprint.mjs",
+    "build": "vite build && node scripts/build-static-pages.mjs && node scripts/build-og-images.mjs && node scripts/build-sitemap.mjs && node scripts/build-rss.mjs && node scripts/inject-verification.mjs && node scripts/inject-fingerprint.mjs",
+    "build:dev": "vite build --mode development && node scripts/build-static-pages.mjs && node scripts/build-og-images.mjs && node scripts/build-sitemap.mjs && node scripts/build-rss.mjs && node scripts/inject-verification.mjs && node scripts/inject-fingerprint.mjs",
     "seo:static-pages": "node scripts/build-static-pages.mjs",
+    "seo:og": "node scripts/build-og-images.mjs",
     "seo:rss": "node scripts/build-rss.mjs",
     "seo:sitemap": "node scripts/build-sitemap.mjs",
     "seo:verify": "node scripts/inject-verification.mjs",
@@ -127,7 +128,9 @@
   "devDependencies": {
     "@axe-core/playwright": "^4.11.3",
     "@eslint/js": "^9.32.0",
+    "@fontsource/inter": "^5.2.8",
     "@playwright/test": "^1.59.1",
+    "@resvg/resvg-js": "^2.6.2",
     "@size-limit/preset-app": "^12.1.0",
     "@tailwindcss/typography": "^0.5.16",
     "@tanstack/react-query-devtools": "^5.91.2",
@@ -157,13 +160,15 @@
     "remark-parse": "^11.0.0",
     "remark-rehype": "^11.1.2",
     "rollup-plugin-visualizer": "^7.0.1",
+    "satori": "^0.26.0",
     "size-limit": "^12.1.0",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.38.0",
     "unified": "^11.0.5",
     "vite": "^7.3.1",
-    "vitest": "^4.1.0"
+    "vitest": "^4.1.0",
+    "wawoff2": "^2.0.1"
   },
   "optionalDependencies": {
     "@swc/core-darwin-arm64": "^1.15.32",

@@ -178,7 +178,10 @@ export function renderPage(args) {
   const { kind, slug, title, description, datePublished, dateModified, keywords, wordCount, htmlBody,
     programmingLanguages, codeRepository, runtimePlatform } = args;
   const url = `${SITE_ORIGIN}/${kind}/${slug}`;
-  const ogImage = `${SITE_ORIGIN}/og/home.png?v=2`;
+  // Per-post OG card generated at build time by build-og-images.mjs.
+  // Falls back to home.png if the script hasn't been run (or for kinds
+  // without a generated card).
+  const ogImage = `${SITE_ORIGIN}/og/${kind}-${slug}.png`;
   const kindLabel = KIND_LABEL[kind] ?? kind;
 
   let primarySchema;
@@ -291,6 +294,8 @@ export function renderIndex(kind, posts) {
   const url = `${SITE_ORIGIN}/${kind}`;
   const description = KIND_INDEX_DESCRIPTION[kind] ?? 'Index';
 
+  const indexOgImage = `${SITE_ORIGIN}/og/${kind}-index.png`;
+
   const items = posts
     .map(
       (p) => `<li>
@@ -320,7 +325,11 @@ export function renderIndex(kind, posts) {
     <meta property="og:description" content="${escape(description)}" />
     <meta property="og:url" content="${url}" />
     <meta property="og:type" content="website" />
+    <meta property="og:image" content="${indexOgImage}" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="${indexOgImage}" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="alternate" type="application/rss+xml" title="Thulani Maseko - Blog &amp; Answers" href="${SITE_ORIGIN}/rss.xml" />
     ${jsonLd(schema)}
