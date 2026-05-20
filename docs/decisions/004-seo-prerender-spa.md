@@ -1,7 +1,8 @@
 # ADR 004 — Prerender the SPA at build time for SEO + AEO
 
-- Status: Accepted
+- Status: **Superseded in scope** by 2026-05-20 addendum (see bottom)
 - Date: 2026-05-19
+- Addendum: 2026-05-20
 - Plan: `~/.claude/plans/now-create-a-seo-nifty-finch.md`
 
 ## Context
@@ -66,3 +67,60 @@ The prerender plugin fires `app-rendered` via `document.dispatchEvent` once all 
 - `@prerenderer/rollup-plugin`: <https://github.com/prerenderer/prerenderer>
 - Google two-pass indexing: <https://developers.google.com/search/docs/crawling-indexing/javascript/javascript-seo-basics>
 - AI engine crawler behavior matrix: `docs/seo/bot-policy.md`
+
+---
+
+## Addendum — 2026-05-20: Scope reduction
+
+When implementation started, a hard architectural collision surfaced: the home page now eagerly mounts a 3D scene built on `@react-three/fiber` (`src/components/canvas/Scene.tsx`). Build-time prerendering via Puppeteer would:
+
+1. Render the page in headless Chromium where WebGL is software-rendered through SwiftShader — slow, brittle, and the captured snapshot is whatever frame the scene happens to be at when the `app-rendered` event fires (usually frame 0: a black canvas).
+2. Embed thousands of lines of post-hydration DOM that mismatch what R3F generates on the client, triggering React hydration warnings and potentially aborting hydration entirely.
+3. Add Puppeteer (~250 MB) to the dev dependency tree purely to capture a snapshot that crawlers don't actually need on the home page — the existing static `<title>`, `<meta>`, and JSON-LD blocks in `index.html` already give crawlers and AI engines enough to index the home as a Person/ProfessionalService entity.
+
+### Revised approach (implemented in commit `<TBD>`)
+
+Static generation is now scoped to **content pages only**, where AEO benefit is highest and the 3D experience does not exist:
+
+| Route | Strategy | Reason |
+|---|---|---|
+| `/` | Stays SPA + 3D (CSR) | R3F runtime-dependent; static meta already strong |
+| `/about`, `/projects`, `/services`, `/contact` | Stays SPA, accessible via hash anchors on `/` | Low individual SEO value; site is small enough that on-page content covers it |
+| `/blog`, `/blog/<slug>` | **Statically generated** from `content/blog/*.md` via `scripts/build-static-pages.mjs` | High AEO value; crawlers + AI engines see real content |
+| `/answers`, `/answers/<slug>` | **Statically generated** from `content/answers/*.md` | Highest AEO value (long-form Q&A is the citation target) |
+
+### Pipeline
+
+```
+vite build
+  -> dist/index.html (SPA shell)
+node scripts/build-static-pages.mjs
+  -> dist/blog/<slug>/index.html (one per markdown post)
+  -> dist/blog/index.html (post index)
+  -> dist/answers/<slug>/index.html
+  -> dist/answers/index.html
+  -> dist/content-manifest.json
+node scripts/build-sitemap.mjs
+  -> dist/sitemap.xml (reads STATIC_ROUTES + content-manifest.json)
+node scripts/inject-verification.mjs
+node scripts/inject-fingerprint.mjs
+```
+
+Each generated content page:
+
+- Is fully self-contained: no React, no JS dependency, no Vite asset hash to maintain.
+- Ships its own `<title>`, `<meta name="description">`, canonical link, hreflang cluster (en-ZA / en / x-default), geo meta, OG card, Twitter card, robots `noai` meta.
+- Embeds `BlogPosting` (or `SpeakableArticle` for `/answers`) + `BreadcrumbList` JSON-LD via the same schema builders used by the SPA.
+- Includes a minimal CSS (~3 KB) so it reads cleanly without the app bundle.
+- Loads Plausible analytics (same `data-domain`) so traffic counts.
+- Links back to the SPA (`/`, `/blog`, `/answers`) so humans can dive into the full experience.
+
+### Deferred work
+
+- Full Vite + Puppeteer prerender of `/`, `/about`, etc. — only worth doing if the 3D scene is later refactored to render a non-interactive fallback during prerender (e.g., a hero image snapshot). Reopen as ADR 005 if pursued.
+- `react-helmet-async` integration — not needed under this scope; static meta in `index.html` covers the SPA routes and the generator handles per-content-page meta.
+- Per-route OG image generation via `satori` — content pages currently use the home OG image; revisit if individual post OGs become valuable for social syndication.
+
+### Reversal cost
+
+Lower than the original plan. To reverse: delete `scripts/build-static-pages.mjs`, `scripts/seo/page-template.mjs`, and `content/` directory. The SPA continues to work unchanged.

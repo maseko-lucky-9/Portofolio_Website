@@ -6,7 +6,7 @@
 // catches accidental route deletions before they reach production.
 
 import { execFileSync } from 'node:child_process';
-import { writeFileSync, existsSync, mkdirSync } from 'node:fs';
+import { writeFileSync, readFileSync, existsSync, mkdirSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -16,6 +16,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, '..');
 const DIST_DIR = resolve(REPO_ROOT, 'dist');
 const OUTPUT = resolve(DIST_DIR, 'sitemap.xml');
+const MANIFEST = resolve(DIST_DIR, 'content-manifest.json');
 
 // execFileSync uses argv array (no shell) — even a hostile pathSpec
 // cannot inject command tokens. Hardcoded `.` here; the param is kept
@@ -35,11 +36,37 @@ function gitLastMod(pathSpec) {
 
 const repoLastMod = gitLastMod('.');
 
-const urls = STATIC_ROUTES.map((route) => {
+// Pull dynamically-generated content routes from the manifest written by
+// build-static-pages.mjs (must run before this script — see package.json).
+let contentRoutes = [];
+if (existsSync(MANIFEST)) {
+  try {
+    const m = JSON.parse(readFileSync(MANIFEST, 'utf8'));
+    for (const [kind, posts] of Object.entries(m)) {
+      for (const post of posts) {
+        contentRoutes.push({
+          path: `/${kind}/${post.slug}`,
+          priority: kind === 'answers' ? 0.7 : 0.6,
+          changefreq: 'monthly',
+          lastmod: (post.dateModified ?? post.datePublished).slice(0, 10),
+        });
+      }
+    }
+  } catch (err) {
+    console.warn(`[build-sitemap] manifest unreadable, skipping content routes: ${err.message}`);
+  }
+}
+
+const allRoutes = [
+  ...STATIC_ROUTES.map((r) => ({ ...r, lastmod: repoLastMod.slice(0, 10) })),
+  ...contentRoutes,
+];
+
+const urls = allRoutes.map((route) => {
   const loc = `${SITE_ORIGIN}${route.path}`;
   return `  <url>
     <loc>${loc}</loc>
-    <lastmod>${repoLastMod.slice(0, 10)}</lastmod>
+    <lastmod>${route.lastmod}</lastmod>
     <changefreq>${route.changefreq}</changefreq>
     <priority>${route.priority.toFixed(1)}</priority>
   </url>`;
@@ -54,10 +81,10 @@ ${urls}
 </urlset>
 `;
 
-if (STATIC_ROUTES.length < MIN_SITEMAP_URLS) {
+if (allRoutes.length < MIN_SITEMAP_URLS) {
   console.error(
-    `[build-sitemap] FAIL — only ${STATIC_ROUTES.length} routes; ` +
-      `MIN_SITEMAP_URLS=${MIN_SITEMAP_URLS}. Check scripts/seo/routes.mjs.`
+    `[build-sitemap] FAIL — only ${allRoutes.length} routes (static=${STATIC_ROUTES.length}, ` +
+      `content=${contentRoutes.length}); MIN_SITEMAP_URLS=${MIN_SITEMAP_URLS}.`
   );
   process.exit(1);
 }
@@ -67,5 +94,5 @@ if (!existsSync(DIST_DIR)) {
 }
 writeFileSync(OUTPUT, xml, 'utf8');
 console.log(
-  `[build-sitemap] wrote ${STATIC_ROUTES.length} URL(s) → ${OUTPUT}`
+  `[build-sitemap] wrote ${allRoutes.length} URL(s) (${STATIC_ROUTES.length} static + ${contentRoutes.length} content) → ${OUTPUT}`
 );
