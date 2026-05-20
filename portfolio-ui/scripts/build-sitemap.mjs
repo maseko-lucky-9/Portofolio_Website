@@ -46,8 +46,8 @@ if (existsSync(MANIFEST)) {
       for (const post of posts) {
         contentRoutes.push({
           path: `/${kind}/${post.slug}`,
-          priority: kind === 'answers' ? 0.7 : 0.6,
-          changefreq: 'monthly',
+          priority: kind === 'projects' ? 0.8 : kind === 'answers' ? 0.7 : 0.6,
+          changefreq: kind === 'projects' ? 'monthly' : 'monthly',
           lastmod: (post.dateModified ?? post.datePublished).slice(0, 10),
         });
       }

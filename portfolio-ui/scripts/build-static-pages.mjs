@@ -23,7 +23,7 @@ const REPO_ROOT = resolve(__dirname, '..');
 const CONTENT_ROOT = resolve(REPO_ROOT, 'content');
 const DIST = resolve(REPO_ROOT, 'dist');
 
-const KINDS = ['blog', 'answers'];
+const KINDS = ['blog', 'answers', 'projects'];
 const BT = String.fromCharCode(96); // backtick literal kept out of source
 const CODE_FENCE_RE = new RegExp(BT + BT + BT + '[\\s\\S]*?' + BT + BT + BT, 'g');
 const PUNCT_RE = new RegExp('[#>*_\\-' + BT + ']', 'g');
@@ -82,6 +82,10 @@ async function buildPost(kind, filePath) {
     keywords: data.keywords ?? data.tags ?? [],
     wordCount: wc,
     htmlBody,
+    // project-specific (ignored for blog/answers)
+    programmingLanguages: data.programmingLanguages ?? data.languages ?? [],
+    codeRepository: data.codeRepository ?? data.repo,
+    runtimePlatform: data.runtimePlatform ?? data.platform,
   });
 
   const outDir = join(DIST, kind, slug);

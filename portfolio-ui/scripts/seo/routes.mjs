@@ -17,10 +17,11 @@ export const STATIC_ROUTES = [
   // build-sitemap.mjs at run time (not hardcoded here).
   { path: '/blog', priority: 0.7, changefreq: 'weekly' },
   { path: '/answers', priority: 0.8, changefreq: 'weekly' },
+  { path: '/projects', priority: 0.9, changefreq: 'weekly' },
 ];
 
 // Minimum URL count enforced by build-sitemap.mjs. Bump as routes grow.
-export const MIN_SITEMAP_URLS = 3;
+export const MIN_SITEMAP_URLS = 4;
 
 // IndexNow key — value matches the public/<key>.txt filename. Rotating
 // requires renaming the .txt file AND updating this constant in the

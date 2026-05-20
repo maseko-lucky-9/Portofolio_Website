@@ -64,6 +64,32 @@ function buildBreadcrumbList(crumbs) {
   };
 }
 
+function buildCreativeWork(project) {
+  const url = `${SITE_ORIGIN}/projects/${project.slug}`;
+  return {
+    '@context': 'https://schema.org',
+    '@type': ['CreativeWork', 'SoftwareSourceCode'],
+    '@id': `${url}#project`,
+    name: project.name,
+    description: project.description,
+    url,
+    author: { '@id': PERSON_ID },
+    ...(project.programmingLanguages && project.programmingLanguages.length && {
+      programmingLanguage: project.programmingLanguages,
+    }),
+    ...(project.codeRepository && { codeRepository: project.codeRepository }),
+    ...(project.runtimePlatform && { runtimePlatform: project.runtimePlatform }),
+    ...(project.dateCreated && { dateCreated: project.dateCreated }),
+  };
+}
+
+const KIND_LABEL = { blog: 'Blog', answers: 'Answers', projects: 'Projects' };
+const KIND_INDEX_DESCRIPTION = {
+  blog: 'Notes on building software platforms, Kubernetes operations, and trading systems.',
+  answers: 'Long-form answers to engineering questions worth bookmarking.',
+  projects: 'Case studies from shipped projects — what was built, how, and what it taught me.',
+};
+
 // Inline CSS — small, self-contained, readable. Doesn't depend on the
 // Vite-hashed app stylesheet. ~3 KB raw; far cheaper than loading the
 // 35 KB app CSS just to render text.
@@ -149,15 +175,26 @@ function jsonLd(obj) {
  * @param {string} args.htmlBody    Rendered HTML from markdown
  */
 export function renderPage(args) {
-  const { kind, slug, title, description, datePublished, dateModified, keywords, wordCount, htmlBody } = args;
+  const { kind, slug, title, description, datePublished, dateModified, keywords, wordCount, htmlBody,
+    programmingLanguages, codeRepository, runtimePlatform } = args;
   const url = `${SITE_ORIGIN}/${kind}/${slug}`;
   const ogImage = `${SITE_ORIGIN}/og/home.png?v=2`;
-  const kindLabel = kind === 'blog' ? 'Blog' : 'Answers';
+  const kindLabel = KIND_LABEL[kind] ?? kind;
+
+  let primarySchema;
+  if (kind === 'blog') {
+    primarySchema = buildBlogPosting({ slug, headline: title, description, datePublished, dateModified, image: ogImage, wordCount, keywords });
+  } else if (kind === 'projects') {
+    primarySchema = buildCreativeWork({
+      slug, name: title, description, programmingLanguages, codeRepository, runtimePlatform,
+      dateCreated: datePublished,
+    });
+  } else {
+    primarySchema = buildSpeakableArticle({ slug: `${kind}/${slug}`, headline: title, description, speakableSelectors: ['h1', '.lead', '.speakable'] });
+  }
 
   const schemas = [
-    kind === 'blog'
-      ? buildBlogPosting({ slug, headline: title, description, datePublished, dateModified, image: ogImage, wordCount, keywords })
-      : buildSpeakableArticle({ slug: `${kind}/${slug}`, headline: title, description, speakableSelectors: ['h1', '.lead', '.speakable'] }),
+    primarySchema,
     buildBreadcrumbList([
       { name: 'Home', url: `${SITE_ORIGIN}/` },
       { name: kindLabel, url: `${SITE_ORIGIN}/${kind}` },
@@ -203,6 +240,7 @@ export function renderPage(args) {
     <link rel="alternate icon" href="/favicon.ico" />
     <meta name="theme-color" content="#0B0D14" media="(prefers-color-scheme: dark)" />
     <meta name="theme-color" content="#F5F2EE" media="(prefers-color-scheme: light)" />
+    <link rel="alternate" type="application/rss+xml" title="Thulani Maseko - Blog &amp; Answers" href="${SITE_ORIGIN}/rss.xml" />
 
     ${schemas.map(jsonLd).join('\n    ')}
 
@@ -249,12 +287,9 @@ export function renderPage(args) {
  * Render an index page listing all posts of a given kind.
  */
 export function renderIndex(kind, posts) {
-  const kindLabel = kind === 'blog' ? 'Blog' : 'Answers';
+  const kindLabel = KIND_LABEL[kind] ?? kind;
   const url = `${SITE_ORIGIN}/${kind}`;
-  const description =
-    kind === 'blog'
-      ? 'Notes on building software platforms, Kubernetes operations, and trading systems.'
-      : 'Long-form answers to engineering questions worth bookmarking.';
+  const description = KIND_INDEX_DESCRIPTION[kind] ?? 'Index';
 
   const items = posts
     .map(
@@ -287,6 +322,7 @@ export function renderIndex(kind, posts) {
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate" type="application/rss+xml" title="Thulani Maseko - Blog &amp; Answers" href="${SITE_ORIGIN}/rss.xml" />
     ${jsonLd(schema)}
     <style>${INLINE_CSS}
       main.article ul { list-style: none; padding: 0; }

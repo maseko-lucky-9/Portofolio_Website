@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && node scripts/build-static-pages.mjs && node scripts/build-sitemap.mjs && node scripts/inject-verification.mjs && node scripts/inject-fingerprint.mjs",
-    "build:dev": "vite build --mode development && node scripts/build-static-pages.mjs && node scripts/build-sitemap.mjs && node scripts/inject-verification.mjs && node scripts/inject-fingerprint.mjs",
+    "build": "vite build && node scripts/build-static-pages.mjs && node scripts/build-sitemap.mjs && node scripts/build-rss.mjs && node scripts/inject-verification.mjs && node scripts/inject-fingerprint.mjs",
+    "build:dev": "vite build --mode development && node scripts/build-static-pages.mjs && node scripts/build-sitemap.mjs && node scripts/build-rss.mjs && node scripts/inject-verification.mjs && node scripts/inject-fingerprint.mjs",
     "seo:static-pages": "node scripts/build-static-pages.mjs",
+    "seo:rss": "node scripts/build-rss.mjs",
     "seo:sitemap": "node scripts/build-sitemap.mjs",
     "seo:verify": "node scripts/inject-verification.mjs",
     "seo:fingerprint": "node scripts/inject-fingerprint.mjs",
