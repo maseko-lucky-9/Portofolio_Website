@@ -1,0 +1,52 @@
+name: Bundle size
+
+on:
+  pull_request:
+    paths:
+      - 'portfolio-ui/src/**'
+      - 'portfolio-ui/package.json'
+      - 'portfolio-ui/package-lock.json'
+      - 'portfolio-ui/vite.config.ts'
+      - '.github/workflows/bundle-size.yml'
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: bundle-size-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  size:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --include=optional --no-audit --no-fund
+
+      - name: Build UI
+        run: npm run build --workspace=portfolio-ui
+
+      - name: Check bundle budgets
+        run: npm run size --workspace=portfolio-ui
+
+      - name: Upload bundle stats
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundle-stats
+          path: portfolio-ui/dist/assets/
+          retention-days: 7
