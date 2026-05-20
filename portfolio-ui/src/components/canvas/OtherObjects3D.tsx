@@ -21,7 +21,7 @@ export function Projects3D() {
 
   return (
     <Box ref={meshRef} args={[2, 1.5, 0.1]} position={[-2, -10, -2]}>
-      <meshStandardMaterial color="#8b5cf6" metalness={0.8} roughness={0.2} />
+      <meshStandardMaterial color="#eb5f3d" metalness={0.8} roughness={0.2} />
     </Box>
   );
 }
@@ -43,7 +43,7 @@ export function CodeDemo3D() {
 
   return (
     <Cylinder ref={meshRef} args={[1, 1, 2, 32]} position={[2, -10, -2]}>
-      <meshStandardMaterial color="#10b981" wireframe />
+      <meshStandardMaterial color="#a1a5a9" wireframe />
     </Cylinder>
   );
 }
@@ -64,7 +64,7 @@ export function Experience3D() {
 
   return (
     <Box ref={meshRef} args={[0.5, 3, 0.5]} position={[-2, -10, -3]}>
-      <meshStandardMaterial color="#f59e0b" wireframe />
+      <meshStandardMaterial color="#eff2f5" wireframe />
     </Box>
   );
 }
@@ -85,7 +85,7 @@ export function Contact3D() {
 
   return (
     <Cylinder ref={meshRef} args={[0, 1, 1.5, 4]} position={[0, -10, -2]} rotation={[Math.PI / 2, 0, 0]}>
-      <meshStandardMaterial color="#ef4444" roughness={0.1} metalness={0.8} />
+      <meshStandardMaterial color="#df2225" roughness={0.1} metalness={0.8} />
     </Cylinder>
   );
 }

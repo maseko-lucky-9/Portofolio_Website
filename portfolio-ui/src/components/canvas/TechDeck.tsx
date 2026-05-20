@@ -44,7 +44,7 @@ export function TechDeck() {
         return (
           <group key={tech.name} position={[xPos, 0, zPos]} rotation={[0, rotY, 0]}>
             <RoundedBox args={[1.2, 1.8, 0.05]} radius={0.05} smoothness={4}>
-              <meshStandardMaterial color="#1f2937" metalness={0.5} roughness={0.2} />
+              <meshStandardMaterial color="#0c1014" metalness={0.5} roughness={0.2} />
             </RoundedBox>
             <Text
               position={[0, 0, 0.03]}

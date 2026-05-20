@@ -29,7 +29,7 @@ export function Hero3D() {
   return (
     <Sphere ref={meshRef} args={[1.5, 64, 64]} position={[0, 0, 0]}>
       <MeshDistortMaterial
-        color="#3b82f6"
+        color="#eb5f3d"
         envMapIntensity={0.4}
         clearcoat={0.8}
         clearcoatRoughness={0}
