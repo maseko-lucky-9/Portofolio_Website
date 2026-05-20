@@ -2,8 +2,17 @@
   "ci": {
     "collect": {
       "staticDistDir": "./portfolio-ui/dist",
-      "url": ["http://localhost/index.html"],
-      "numberOfRuns": 3,
+      "url": [
+        "http://localhost/index.html",
+        "http://localhost/blog/index.html",
+        "http://localhost/answers/index.html",
+        "http://localhost/projects/index.html",
+        "http://localhost/blog/welcome-to-the-blog/index.html",
+        "http://localhost/answers/argocd-vs-flux-2026/index.html",
+        "http://localhost/projects/homelab-kubernetes/index.html",
+        "http://localhost/projects/portfolio-website/index.html"
+      ],
+      "numberOfRuns": 2,
       "settings": {
         "preset": "desktop",
         "throttlingMethod": "simulate",
@@ -30,7 +39,16 @@
         "uses-rel-preconnect": "off",
         "uses-http2": "off",
         "csp-xss": "warn",
-        "valid-source-maps": "off"
+        "valid-source-maps": "off",
+        "is-crawlable": "error",
+        "robots-txt": "error",
+        "canonical": "error",
+        "structured-data": "off",
+        "hreflang": "error",
+        "meta-description": "error",
+        "document-title": "error",
+        "html-has-lang": "error",
+        "html-lang-valid": "error"
       }
     },
     "upload": {

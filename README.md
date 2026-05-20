@@ -581,3 +581,91 @@ openssl rand -hex 32
 - **ESM vs CJS:** `module: "NodeNext"` outputs CJS — do not use `import.meta.url` or `fileURLToPath` in backend source files
 - **R3F version pinning:** React Three Fiber is pinned to `^8.17.0` (not v9) because R3F v9 requires React >=19; this project uses React 18.3.x
 - **Profile photo:** Must be placed at `portfolio-ui/public/images/profile.jpg` — the directory exists but the file is not committed
+
+---
+
+## Search / SEO / AEO
+
+The site is engineered for discoverability by both search engines (Google, Bing) and AI engines (ChatGPT, Claude, Perplexity, Gemini) while denying unauthorized scrapers. See [`docs/seo/`](docs/seo/) for the runbooks and [`docs/decisions/004-seo-prerender-spa.md`](docs/decisions/004-seo-prerender-spa.md) for the architecture decision.
+
+### Content pipeline
+
+Markdown files in `portfolio-ui/content/` are statically rendered to HTML at build time. Three kinds:
+
+| Source | Output | JSON-LD type |
+|---|---|---|
+| `content/blog/<slug>.md` | `/blog/<slug>` | `BlogPosting` |
+| `content/answers/<slug>.md` | `/answers/<slug>` | `Article` with `SpeakableSpecification` |
+| `content/projects/<slug>.md` | `/projects/<slug>` | `CreativeWork` + `SoftwareSourceCode` |
+
+Each post needs frontmatter:
+
+```yaml
+---
+title: "Post title"
+description: "One-paragraph summary, used in <meta description> + OG cards."
+datePublished: "2026-05-20T08:00:00+02:00"
+keywords: [foo, bar]                          # optional
+# Project-only:
+programmingLanguages: [TypeScript, Go]        # optional
+codeRepository: "https://github.com/..."      # optional
+runtimePlatform: "Kubernetes"                 # optional
+---
+```
+
+Run `npm run build` (or just `npm run seo:static-pages`) to regenerate. Sitemap + RSS update automatically from the resulting `content-manifest.json`.
+
+### Build pipeline (order matters)
+
+```
+vite build
+  → dist/index.html (SPA shell)
+node scripts/build-static-pages.mjs
+  → dist/<kind>/<slug>/index.html + dist/<kind>/index.html
+  → dist/content-manifest.json
+node scripts/build-sitemap.mjs
+  → dist/sitemap.xml  (reads STATIC_ROUTES + content-manifest.json)
+node scripts/build-rss.mjs
+  → dist/rss.xml
+node scripts/inject-verification.mjs
+  → injects GSC + Bing verification meta tags from env vars
+node scripts/inject-fingerprint.mjs
+  → embeds per-build identifier + appends ~/.config/portfolio/fingerprints.log
+```
+
+### Bot policy
+
+| Layer | Mechanism | Source |
+|---|---|---|
+| L1 | `robots.txt` allow + deny | `portfolio-ui/public/robots.txt` |
+| L2 | `<meta name="robots" content="noai, noimageai">` | `portfolio-ui/index.html` + per-page template |
+| L3 | `X-Robots-Tag: noai, noimageai` HTTP header | `portfolio-ui/src/worker.ts` |
+| L4 | TDM Reservation Protocol | `portfolio-ui/public/.well-known/tdmrep.json` |
+| L5–L7 | Cloudflare WAF (Bot Fight Mode + custom rules) | `infra/cloudflare/waf.tf` |
+| L8 | Fastify rate-limit on `/api/*` | `portfolio-api/index.ts` |
+| L9 | Build fingerprint for post-hoc theft detection | `portfolio-ui/scripts/inject-fingerprint.mjs` |
+
+Apply WAF rules: `cd infra/cloudflare && terraform apply -var cf_api_token=…`. See `docs/seo/bot-policy.md` for the per-category rationale.
+
+### Build-time env vars (Workers dashboard)
+
+| Variable | Purpose | Required |
+|---|---|---|
+| `GSC_VERIFICATION` | Google Search Console site-verification token | No (no-op if absent) |
+| `BING_VERIFICATION` | Bing Webmaster verification token | No |
+| `YANDEX_VERIFICATION` | Yandex Webmaster verification token | No |
+
+See [`docs/seo/search-console-setup.md`](docs/seo/search-console-setup.md) for the registration walkthrough.
+
+### Quality gates
+
+- **Lighthouse CI** (`.github/workflows/lighthouse-ci.yml`): runs against `/`, all three indexes, and one sample of each content kind on every PR. Fails if SEO < 95, A11y < 95, perf < 90, LCP > 2s, or CLS > 0.05.
+- **Bundle size CI** (`.github/workflows/bundle-size.yml`): enforces 6 chunk budgets via `size-limit`.
+- **Static page generator tests** (`portfolio-ui/src/seo/pageTemplate.test.ts`): 11 vitest assertions on rendered HTML — canonical, hreflang, JSON-LD per kind, breadcrumb monotonicity, entity escaping.
+
+### Adding a new content post
+
+1. Create `portfolio-ui/content/<kind>/<slug>.md` with the frontmatter above.
+2. Write the body in Markdown (GFM, including code fences).
+3. `npm run build` (or push and let CI build).
+4. The post appears at `/<kind>/<slug>`, in the kind's index, in `sitemap.xml`, and in `rss.xml` — automatically.
