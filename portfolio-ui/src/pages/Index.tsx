@@ -42,10 +42,13 @@ function SectionFallback() {
   );
 }
 
+import { Scene } from "@/components/canvas/Scene";
+import { ScrollSync } from "@/components/canvas/ScrollSync";
+
 const Index = () => {
   return (
     <ThemeProvider>
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background relative">
         <a
           href="#about"
           className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[60] focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-lg focus:outline-none"
@@ -55,58 +58,76 @@ const Index = () => {
         <SmoothScroll />
         <CustomCursor />
         <ScrollProgress />
+        <ScrollSync />
+        <Scene />
         <Navbar />
-        <main>
+        <main id="hero">
           <HeroSection />
           {/* LazySection defers the Suspense boundary until the section
               approaches the viewport — prevents Monaco / recharts / etc.
               from loading their chunks during the initial page load. */}
-          <LazySection minHeight="800px">
-            <Suspense fallback={<SectionFallback />}>
-              <SkillsSection />
-            </Suspense>
-          </LazySection>
+          <div id="skills">
+            <LazySection minHeight="800px">
+              <Suspense fallback={<SectionFallback />}>
+                <SkillsSection />
+              </Suspense>
+            </LazySection>
+          </div>
           {/* SectionBridge instances render eagerly (outside LazySection)
               so their scroll observers register on first paint. The
               animation scrubs forward / backward with scroll position. */}
           <SectionBridge id="skills-projects" caption="Skills · Projects" />
-          <LazySection minHeight="800px">
-            <Suspense fallback={<SectionFallback />}>
-              <ProjectsSection />
-            </Suspense>
-          </LazySection>
+          <div id="projects">
+            <LazySection minHeight="800px">
+              <Suspense fallback={<SectionFallback />}>
+                <ProjectsSection />
+              </Suspense>
+            </LazySection>
+          </div>
           <SectionBridge id="projects-codedemo" caption="Projects · Code" />
-          <LazySection minHeight="700px">
-            <Suspense fallback={<SectionFallback />}>
-              <CodeDemoSection />
-            </Suspense>
-          </LazySection>
+          <div id="codedemo">
+            <LazySection minHeight="700px">
+              <Suspense fallback={<SectionFallback />}>
+                <CodeDemoSection />
+              </Suspense>
+            </LazySection>
+          </div>
           <SectionBridge id="codedemo-experience" caption="Code · Experience" />
-          <LazySection minHeight="600px">
-            <Suspense fallback={<SectionFallback />}>
-              <ExperienceSection />
-            </Suspense>
-          </LazySection>
-          <LazySection minHeight="700px">
-            <Suspense fallback={<SectionFallback />}>
-              <ServicesSection />
-            </Suspense>
-          </LazySection>
-          <LazySection minHeight="600px">
-            <Suspense fallback={<SectionFallback />}>
-              <CaseStudiesSection />
-            </Suspense>
-          </LazySection>
-          <LazySection minHeight="600px">
-            <Suspense fallback={<SectionFallback />}>
-              <BlogSection />
-            </Suspense>
-          </LazySection>
-          <LazySection minHeight="700px">
-            <Suspense fallback={<SectionFallback />}>
-              <ContactSection />
-            </Suspense>
-          </LazySection>
+          <div id="experience">
+            <LazySection minHeight="600px">
+              <Suspense fallback={<SectionFallback />}>
+                <ExperienceSection />
+              </Suspense>
+            </LazySection>
+          </div>
+          <div id="services">
+            <LazySection minHeight="700px">
+              <Suspense fallback={<SectionFallback />}>
+                <ServicesSection />
+              </Suspense>
+            </LazySection>
+          </div>
+          <div id="casestudies">
+            <LazySection minHeight="600px">
+              <Suspense fallback={<SectionFallback />}>
+                <CaseStudiesSection />
+              </Suspense>
+            </LazySection>
+          </div>
+          <div id="blog">
+            <LazySection minHeight="600px">
+              <Suspense fallback={<SectionFallback />}>
+                <BlogSection />
+              </Suspense>
+            </LazySection>
+          </div>
+          <div id="contact">
+            <LazySection minHeight="700px">
+              <Suspense fallback={<SectionFallback />}>
+                <ContactSection />
+              </Suspense>
+            </LazySection>
+          </div>
         </main>
         <Footer />
       </div>
