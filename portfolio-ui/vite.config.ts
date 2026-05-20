@@ -30,7 +30,8 @@ export default defineConfig(({ mode }) => {
   return {
     server: {
       host: "::",
-      port: 8080,
+      port: 5173,
+      strictPort: true,
       // Note: HMR causes full-page reload in headless Playwright — use `npm run preview` for e2e tests.
       // Proxy API requests to the backend during development
       proxy: {
@@ -51,7 +52,8 @@ export default defineConfig(({ mode }) => {
     // preview server: same port so Playwright config needs no change between dev and preview mode.
     preview: {
       host: "::",
-      port: 8080,
+      port: 5173,
+      strictPort: true,
     },
     plugins: [
       react(),
