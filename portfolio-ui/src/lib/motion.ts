@@ -129,6 +129,27 @@ export function scaleInAnim() {
   };
 }
 
+// Horizontal shake for invalid form fields. Short, decisive, ease-out so
+// the final settle is quiet. Amplitude tuned to read as feedback without
+// crossing into "broken / vibrating" territory.
+export function shakeFieldAnim() {
+  return {
+    translateX: [0, -6, 6, -4, 4, -2, 0],
+    duration: 360,
+    ease: EASE_FN.out,
+  };
+}
+
+// SVG stroke draw-in. Consumer must set stroke-dasharray to the path length
+// before animating (or use a generous fallback like 200 for lucide icons).
+export function strokeDrawAnim() {
+  return {
+    strokeDashoffset: [200, 0],
+    duration: 600,
+    ease: EASE_FN.emphasized,
+  };
+}
+
 // Helper for staggered children. anime.js's stagger() builds delay
 // functions; this wraps the common case. Consumers compose:
 //   animate(items, { ...fadeUpAnim(), delay: staggerChildren(60) })

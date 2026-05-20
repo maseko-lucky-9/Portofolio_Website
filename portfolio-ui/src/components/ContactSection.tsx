@@ -20,7 +20,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 
-import { DURATION, EASE_FN } from "@/lib/motion";
+import { DURATION, EASE_FN, shakeFieldAnim, strokeDrawAnim } from "@/lib/motion";
 import { revealOnScroll, useAnime } from "@/lib/use-anime";
 
 // Form validation schema
@@ -101,7 +101,11 @@ export function ContactSection() {
   );
 
   // Success-state scale-in (mount-only, not scroll-triggered).
-  // Fires whenever isSubmitted flips true.
+  // Fires whenever isSubmitted flips true. Layered animation:
+  //   1. Container scales in (existing behaviour).
+  //   2. Checkmark SVG paths draw in via stroke-dashoffset — the delight
+  //      beat. Lucide icons render as <svg><path|circle/></svg>; we target
+  //      every drawable child so both the ring and the tick animate.
   useAnime(
     successRef,
     (scope) => {
@@ -114,8 +118,54 @@ export function ContactSection() {
         duration: DURATION.base * 1000,
         ease: EASE_FN.emphasized,
       });
+      const strokes = el.querySelectorAll<SVGElement>(
+        '[data-anime="success-icon"] path, [data-anime="success-icon"] circle, [data-anime="success-icon"] polyline'
+      );
+      if (strokes.length) {
+        strokes.forEach((s) => {
+          s.style.strokeDasharray = "200";
+          s.style.strokeDashoffset = "200";
+        });
+        animate(strokes, {
+          ...strokeDrawAnim(),
+          delay: 120,
+        });
+      }
     },
     [isSubmitted],
+  );
+
+  // Validation-error feedback: shake invalid fields + fade-in error
+  // messages. Watches `errors` and fires only when it transitions from
+  // empty → populated (i.e. on submit, not on every keystroke that
+  // partially clears an error).
+  useAnime(
+    rootRef,
+    (scope) => {
+      const root = rootRef.current;
+      if (!root) return;
+      if (scope.matches.reducedMotion) return;
+      const errorKeys = Object.keys(errors).filter(
+        (k) => !!errors[k as keyof ContactFormData]
+      );
+      if (errorKeys.length === 0) return;
+      const invalidFields = root.querySelectorAll<HTMLElement>(
+        '[aria-invalid="true"]'
+      );
+      if (invalidFields.length) {
+        animate(invalidFields, shakeFieldAnim());
+      }
+      const errorMsgs = root.querySelectorAll<HTMLElement>('[role="alert"]');
+      if (errorMsgs.length) {
+        animate(errorMsgs, {
+          opacity: [0, 1],
+          translateY: [-4, 0],
+          duration: 180,
+          ease: EASE_FN.out,
+        });
+      }
+    },
+    [errors],
   );
 
   const handleChange = (
@@ -327,7 +377,10 @@ export function ContactSection() {
                     className="w-16 h-16 rounded-full flex items-center justify-center mb-4"
                     style={{ background: "oklch(var(--secondary) / 0.08)", border: "1px solid oklch(var(--secondary) / 0.2)" }}
                   >
-                    <CheckCircle className="w-8 h-8 text-secondary" />
+                    <CheckCircle
+                      data-anime="success-icon"
+                      className="w-8 h-8 text-secondary"
+                    />
                   </div>
                   <h4 className="text-lg font-bold mb-2">Message Sent!</h4>
                   <p className="text-muted-foreground">

@@ -32,5 +32,8 @@
     "full-stack"
   ],
   "author": "Portfolio",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@tailwindcss/container-queries": "^0.1.1"
+  }
 }
