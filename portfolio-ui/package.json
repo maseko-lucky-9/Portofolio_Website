@@ -22,15 +22,33 @@
   },
   "size-limit": [
     {
-      "name": "main JS (critical path)",
+      "name": "main JS (app code)",
       "path": "dist/assets/index-*.js",
-      "limit": "125 KB",
+      "limit": "90 KB",
       "gzip": true
     },
     {
-      "name": "motion-vendor (preloaded)",
+      "name": "react-vendor (eager)",
+      "path": "dist/assets/react-vendor-*.js",
+      "limit": "60 KB",
+      "gzip": true
+    },
+    {
+      "name": "three-vendor (eager)",
+      "path": "dist/assets/three-vendor-*.js",
+      "limit": "300 KB",
+      "gzip": true
+    },
+    {
+      "name": "radix-vendor (eager)",
+      "path": "dist/assets/radix-vendor-*.js",
+      "limit": "35 KB",
+      "gzip": true
+    },
+    {
+      "name": "motion-vendor (eager)",
       "path": "dist/assets/motion-vendor-*.js",
-      "limit": "40 KB",
+      "limit": "30 KB",
       "gzip": true
     },
     {
