@@ -229,6 +229,10 @@ export function renderPage(args) {
     <meta property="og:url" content="${url}" />
     <meta property="og:locale" content="en_ZA" />
     <meta property="og:image" content="${ogImage}" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:alt" content="OpenGraph card: ${escape(title)} — ${kindLabel} by Thulani Maseko" />
     <meta property="article:published_time" content="${datePublished}" />
     ${dateModified ? `<meta property="article:modified_time" content="${dateModified}" />` : ''}
     <meta property="article:author" content="Thulani Maseko" />
@@ -238,6 +242,7 @@ export function renderPage(args) {
     <meta name="twitter:title" content="${escape(title)}" />
     <meta name="twitter:description" content="${escape(description)}" />
     <meta name="twitter:image" content="${ogImage}" />
+    <meta name="twitter:image:alt" content="OpenGraph card: ${escape(title)} — ${kindLabel} by Thulani Maseko" />
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="alternate icon" href="/favicon.ico" />
