@@ -14,6 +14,16 @@ export function Footer() {
     { href: "#contact", label: "Contact" },
   ];
 
+  // Cross-route links to statically-generated content surfaces. These are
+  // separate prerendered pages (not in-page anchors) so they need real
+  // <a href> elements with full reloads.
+  const contentLinks = [
+    { href: "/blog", label: "Writing" },
+    { href: "/answers", label: "Answers" },
+    { href: "/projects", label: "Case studies" },
+    { href: "/rss.xml", label: "RSS", external: true },
+  ];
+
   const scrollToSection = (href: string) => {
     document.querySelector(href)?.scrollIntoView({ behavior: "smooth" });
   };
@@ -76,6 +86,23 @@ export function Footer() {
             ))}
           </div>
         </div>
+
+        {/* Cross-route content links — separately prerendered pages. */}
+        <nav
+          className="flex flex-wrap justify-center gap-x-5 gap-y-2 mb-6"
+          aria-label="Content navigation"
+        >
+          {contentLinks.map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              {...(link.external ? { rel: "alternate" } : {})}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
+            >
+              {link.label}
+            </a>
+          ))}
+        </nav>
 
         {/* Copyright */}
         <div

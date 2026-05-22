@@ -1,0 +1,43 @@
+{
+  "@context": "https://www.w3.org/ns/odrl.jsonld",
+  "@type": "Policy",
+  "uid": "https://thulanimaseko.com/.well-known/tdm-policy.json",
+  "profile": "https://www.w3.org/community/tdmrep/",
+  "permission": [
+    {
+      "target": "https://thulanimaseko.com/",
+      "action": "tdm-mine",
+      "constraint": [
+        {
+          "leftOperand": "purpose",
+          "operator": "eq",
+          "rightOperand": "research"
+        }
+      ]
+    }
+  ],
+  "prohibition": [
+    {
+      "target": "https://thulanimaseko.com/",
+      "action": "tdm-mine",
+      "constraint": [
+        {
+          "leftOperand": "purpose",
+          "operator": "eq",
+          "rightOperand": "commercial-ai-training"
+        }
+      ]
+    },
+    {
+      "target": "https://thulanimaseko.com/",
+      "action": "reproduce",
+      "constraint": [
+        {
+          "leftOperand": "purpose",
+          "operator": "eq",
+          "rightOperand": "model-training"
+        }
+      ]
+    }
+  ]
+}

@@ -1,11 +1,11 @@
-import { useState } from "react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { animate, stagger } from "animejs";
 import { Code2, Server, Cloud } from "lucide-react";
 import { skills, radarSkills, SkillCategory } from "@/data/skills";
 import { SkillsRadar } from "@/components/SkillsRadar";
 
-import { SPRING_SKILLS as springTransition } from "@/lib/motion";
-// (re-exported as `springTransition` to minimize diff)
+import { DURATION, EASE_FN, springAnimeSkills, useReducedMotion } from "@/lib/motion";
+import { revealOnScroll, useAnime } from "@/lib/use-anime";
 
 const categoryIcons = {
   frontend: Code2,
@@ -15,17 +15,25 @@ const categoryIcons = {
 
 // Single-accent design: category grouping preserved (frontend / backend
 // / devops sections still drive grouping and toggle state), but visual
-// treatment is monochromatic. The brand accent (coral) is reserved for
+// treatment is monochromatic. The brand accent (mint) is reserved for
 // the active category indicator and skill-bar fill — the single
 // intentional accent moment in this section.
 const ACCENT_COLOR = "oklch(var(--primary))";
 
 export function SkillsSection() {
   const [activeCategory, setActiveCategory] = useState<SkillCategory>("frontend");
+  // `displayed` lags `activeCategory` while the exit animation plays. The
+  // list renders against `displayed` so the swap completes cleanly: exit
+  // current → setDisplayed → enter new (handled by useAnime keyed on
+  // displayed). Matches the previous AnimatePresence mode="wait" semantics.
+  const [displayed, setDisplayed] = useState<SkillCategory>(activeCategory);
   const prefersReducedMotion = useReducedMotion();
 
-  const currentRadarData = radarSkills[activeCategory];
-  const filteredSkills = skills.filter((skill) => skill.category === activeCategory);
+  const rootRef = useRef<HTMLElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+
+  const currentRadarData = radarSkills[displayed];
+  const filteredSkills = skills.filter((skill) => skill.category === displayed);
 
   const getProficiencyLabel = (value: number) => {
     if (value >= 90) return "Expert";
@@ -34,8 +42,95 @@ export function SkillsSection() {
     return "Beginner";
   };
 
+  // Section-level reveals: header, toggle, radar column, skills-list
+  // column. Standard scroll-triggered fade-up via revealOnScroll. Runs
+  // once per mount.
+  useAnime(
+    rootRef,
+    (scope) => {
+      const root = rootRef.current;
+      if (!root) return;
+      if (scope.matches.reducedMotion) return;
+      return revealOnScroll(root, "[data-anime-section]", { staggerMs: 80 });
+    },
+    [],
+  );
+
+  // Category-swap orchestration. When `activeCategory` differs from
+  // `displayed`, animate the list out, swap displayed, and let the
+  // category-keyed useAnime below play the entrance for the new items.
+  useEffect(() => {
+    if (activeCategory === displayed) return;
+    const el = listRef.current;
+    if (!el) {
+      setDisplayed(activeCategory);
+      return;
+    }
+    if (prefersReducedMotion) {
+      setDisplayed(activeCategory);
+      return;
+    }
+    const exit = animate(el, {
+      opacity: [1, 0],
+      translateY: [0, -8],
+      duration: 180,
+      ease: EASE_FN.out,
+    });
+    let cancelled = false;
+    exit.then(() => {
+      if (!cancelled) setDisplayed(activeCategory);
+    });
+    return () => {
+      cancelled = true;
+      exit.cancel();
+    };
+  }, [activeCategory, displayed, prefersReducedMotion]);
+
+  // Entrance for the displayed-category skills. Re-runs every time
+  // `displayed` changes (after the exit animation completes). Animates
+  // each skill row + its progress bar with a small stagger.
+  useAnime(
+    listRef,
+    (scope) => {
+      const el = listRef.current;
+      if (!el) return;
+      if (scope.matches.reducedMotion) {
+        el.style.opacity = "1";
+        el.style.transform = "none";
+        return;
+      }
+      // Bring the wrapper back to full opacity (in case we just exited).
+      const wrapper = animate(el, {
+        opacity: [el.style.opacity || "0", 1],
+        translateY: [el.style.transform ? -8 : 0, 0],
+        duration: 220,
+        ease: EASE_FN.emphasized,
+      });
+      const rows = animate(el.querySelectorAll<HTMLElement>("[data-anime-skill]"), {
+        opacity: [0, 1],
+        translateX: [16, 0],
+        delay: stagger(45),
+        duration: 700,
+        ease: springAnimeSkills,
+      });
+      const bars = animate(el.querySelectorAll<HTMLElement>("[data-anime-bar]"), {
+        scaleX: [0, 1],
+        delay: stagger(40, { start: 200 }),
+        duration: DURATION.slow * 1000,
+        ease: EASE_FN.spring,
+      });
+      return () => {
+        wrapper.cancel();
+        rows.cancel();
+        bars.cancel();
+      };
+    },
+    [displayed],
+  );
+
   return (
     <section
+      ref={rootRef}
       id="skills"
       aria-labelledby="skills-heading"
       className="py-20 md:py-28 relative overflow-hidden"
@@ -49,13 +144,7 @@ export function SkillsSection() {
 
       <div className="section-container !py-0 py-20 md:py-28">
         {/* Section header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={springTransition}
-          className="text-center mb-14"
-        >
+        <div data-anime-section className="text-center mb-14">
           <span className="inline-block text-xs font-semibold uppercase tracking-[0.18em] text-primary mb-3">
             Expertise
           </span>
@@ -64,16 +153,10 @@ export function SkillsSection() {
             A T-shaped developer with deep expertise in specific areas and broad knowledge
             across the stack.
           </p>
-        </motion.div>
+        </div>
 
         {/* Category toggle */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.1, ...springTransition }}
-          className="flex justify-center gap-3 mb-14 flex-wrap"
-        >
+        <div data-anime-section className="flex justify-center gap-3 mb-14 flex-wrap">
           {(["frontend", "backend", "devops"] as SkillCategory[]).map((category) => {
             const Icon = categoryIcons[category];
             const isActive = activeCategory === category;
@@ -98,36 +181,25 @@ export function SkillsSection() {
               </button>
             );
           })}
-        </motion.div>
+        </div>
 
         <div className="grid lg:grid-cols-2 gap-10 lg:gap-14 items-start">
-          {/* Radar chart */}
-          <motion.div
-            initial={{ opacity: 0, x: -24 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={springTransition}
-            className="skill-radar-container"
-          >
+          {/* Radar chart column */}
+          <div data-anime-section className="skill-radar-container">
             <div className="flex items-center gap-2 mb-6">
               <div
                 className="w-2 h-6 rounded-full"
                 style={{ background: ACCENT_COLOR }}
               />
-              <h3 className="text-base font-semibold capitalize">{activeCategory} Radar</h3>
+              <h3 className="text-base font-semibold capitalize">{displayed} Radar</h3>
             </div>
             <div className="h-64 sm:h-80 flex items-center justify-center">
               <SkillsRadar data={currentRadarData} color={ACCENT_COLOR} />
             </div>
-          </motion.div>
+          </div>
 
-          {/* Skills list */}
-          <motion.div
-            initial={{ opacity: 0, x: 24 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={springTransition}
-          >
+          {/* Skills list column */}
+          <div data-anime-section>
             <div className="flex items-center gap-2 mb-6">
               <div
                 className="w-2 h-6 rounded-full"
@@ -135,72 +207,55 @@ export function SkillsSection() {
               />
               <h3 className="text-base font-semibold">Technologies &amp; Tools</h3>
             </div>
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeCategory}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.25 }}
-                className="space-y-5"
-              >
-                {filteredSkills.map((skill, index) => (
-                  <motion.div
-                    key={skill.name}
-                    initial={{ opacity: 0, x: 16 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.045, ...springTransition }}
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2.5">
-                        <span className="text-sm font-semibold text-foreground">{skill.name}</span>
-                        <span className="text-[10px] px-2 py-0.5 rounded-full font-medium capitalize"
-                          style={{
-                            background: "oklch(var(--accent))",
-                            color: "oklch(var(--accent-foreground))",
-                          }}
-                        >
-                          {skill.type}
-                        </span>
-                      </div>
-                      <span className="text-xs font-medium text-muted-foreground">
-                        {getProficiencyLabel(skill.proficiency)}
+            {/* Category-swap container. The skill rows + bars are keyed off
+                `displayed`, which lags `activeCategory` while the exit
+                animation plays — see the useEffect above. */}
+            <div ref={listRef} className="space-y-5" style={{ opacity: 0 }}>
+              {filteredSkills.map((skill) => (
+                <div key={skill.name} data-anime-skill>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-sm font-semibold text-foreground">{skill.name}</span>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full font-medium capitalize"
+                        style={{
+                          background: "oklch(var(--accent))",
+                          color: "oklch(var(--accent-foreground))",
+                        }}
+                      >
+                        {skill.type}
                       </span>
                     </div>
-                    <div className="h-1.5 rounded-full overflow-hidden relative" style={{ background: "oklch(var(--muted))" }}>
-                      <motion.div
-                        initial={{ scaleX: 0 }}
-                        animate={{ scaleX: 1 }}
-                        transition={{
-                          duration: prefersReducedMotion ? 0 : 0.7,
-                          delay: index * 0.04,
-                          ease: [0.16, 1, 0.3, 1],
-                        }}
-                        className="h-full rounded-full"
+                    <span className="text-xs font-medium text-muted-foreground">
+                      {getProficiencyLabel(skill.proficiency)}
+                    </span>
+                  </div>
+                  <div className="h-1.5 rounded-full overflow-hidden relative" style={{ background: "oklch(var(--muted))" }}>
+                    <div
+                      data-anime-bar
+                      className="h-full rounded-full"
+                      style={{
+                        width: `${skill.proficiency}%`,
+                        transform: prefersReducedMotion ? "scaleX(1)" : "scaleX(0)",
+                        transformOrigin: "left center",
+                        background: ACCENT_COLOR,
+                        willChange: "transform",
+                      }}
+                    />
+                    {!prefersReducedMotion && (
+                      <div
+                        className="absolute inset-y-0 left-0 pointer-events-none animate-shimmer-once"
                         style={{
                           width: `${skill.proficiency}%`,
-                          transformOrigin: "left center",
-                          background: ACCENT_COLOR,
-                          willChange: "transform",
+                          background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.35) 50%, transparent 100%)",
+                          backgroundSize: "200% 100%",
                         }}
                       />
-                      {!prefersReducedMotion && (
-                        <div
-                          className="absolute inset-y-0 left-0 pointer-events-none animate-shimmer-once"
-                          style={{
-                            width: `${skill.proficiency}%`,
-                            background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.35) 50%, transparent 100%)",
-                            backgroundSize: "200% 100%",
-                            animationDelay: `${index * 0.04 + 0.2}s`,
-                          }}
-                        />
-                      )}
-                    </div>
-                  </motion.div>
-                ))}
-              </motion.div>
-            </AnimatePresence>
-          </motion.div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 

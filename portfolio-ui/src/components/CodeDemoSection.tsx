@@ -1,19 +1,29 @@
-import { useState, useCallback } from "react";
-import { motion } from "framer-motion";
+import { useCallback, useRef, useState } from "react";
 import Editor from "@monaco-editor/react";
 import { Play, Copy, Check, Terminal } from "lucide-react";
 import { codeExamples } from "@/data/codeExamples";
 import { useTheme } from "@/contexts/ThemeContext";
 
-import { SPRING_DEFAULT as springTransition } from "@/lib/motion";
-// (re-exported as `springTransition` to minimize diff)
+import { revealOnScroll, useAnime } from "@/lib/use-anime";
 
 export function CodeDemoSection() {
+  const rootRef = useRef<HTMLElement>(null);
   const [activeExample, setActiveExample] = useState(codeExamples[0]);
   const [output, setOutput] = useState<string>(activeExample.output || "");
   const [isRunning, setIsRunning] = useState(false);
   const [copied, setCopied] = useState(false);
   const { resolvedTheme } = useTheme();
+
+  useAnime(
+    rootRef,
+    (scope) => {
+      const root = rootRef.current;
+      if (!root) return;
+      if (scope.matches.reducedMotion) return;
+      return revealOnScroll(root, "[data-anime]", { staggerMs: 100 });
+    },
+    [],
+  );
 
   const handleRunCode = useCallback(() => {
     setIsRunning(true);
@@ -34,19 +44,14 @@ export function CodeDemoSection() {
 
   return (
     <section
+      ref={rootRef}
       id="code-demo"
       className="py-20 section-mesh"
       style={{ background: "oklch(var(--muted) / var(--opacity-soft))" }}
     >
       <div className="section-container">
         {/* Section Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={springTransition}
-          className="text-center mb-12"
-        >
+        <div data-anime className="text-center mb-12">
           <span className="inline-block text-xs font-semibold uppercase tracking-[0.18em] text-primary mb-3">
             Live Code
           </span>
@@ -55,16 +60,10 @@ export function CodeDemoSection() {
             Explore my coding style with live examples. Try running the code to see it in
             action.
           </p>
-        </motion.div>
+        </div>
 
         {/* Example Selector */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ ...springTransition, delay: 0.1 }}
-          className="flex flex-wrap justify-center gap-2 mb-8"
-        >
+        <div data-anime className="flex flex-wrap justify-center gap-2 mb-8">
           {codeExamples.map((example) => (
             <button
               key={example.id}
@@ -87,16 +86,10 @@ export function CodeDemoSection() {
               {example.title}
             </button>
           ))}
-        </motion.div>
+        </div>
 
         {/* Code Editor */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ ...springTransition, delay: 0.2 }}
-          className="max-w-4xl mx-auto"
-        >
+        <div data-anime className="max-w-4xl mx-auto">
           <div className="code-editor-wrapper">
             {/* Editor Header */}
             <div
@@ -183,7 +176,7 @@ export function CodeDemoSection() {
           <p className="mt-4 text-center text-sm text-muted-foreground">
             {activeExample.description}
           </p>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

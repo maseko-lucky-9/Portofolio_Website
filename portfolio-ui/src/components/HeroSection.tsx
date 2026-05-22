@@ -1,12 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { motion, useInView, useReducedMotion } from "framer-motion";
+import { animate, createTimeline } from "animejs";
 import { ArrowDown, Github, Linkedin, Twitter } from "lucide-react";
 import { personalData } from "@/data/personal";
 import { PaperBackground } from "@/components/PaperBackground";
-import { useMagnetic } from "@/lib/motion";
-
-import { SPRING_HERO as springTransition } from "@/lib/motion";
-// (re-exported as `springTransition` to minimize diff)
+import { DURATION, EASE_FN, useMagnetic, useReducedMotion } from "@/lib/motion";
+import { useAnime } from "@/lib/use-anime";
 
 // Build-time commit count — reflects real shipping cadence, no runtime cost.
 const SHIPPED_TOTAL = Number.parseInt(__SHIPPED_COUNT__, 10) || 0;
@@ -52,14 +50,17 @@ function ShippedMeter({ reduced }: { reduced: boolean }) {
 export function HeroSection() {
   const prefersReducedMotion = useReducedMotion();
   const heroRef = useRef<HTMLElement>(null);
-  // `initial: true` so animations start immediately on mount — the IO callback
-  // is async and would otherwise leave looping animations un-started for 1+ frame.
-  const heroInView = useInView(heroRef, { initial: true });
+  const pillRef = useRef<HTMLDivElement>(null);
+  const scrollIndicatorRef = useRef<HTMLButtonElement>(null);
+  // Initial: true so the timeline starts immediately on mount (matches the
+  // previous framer-motion `useInView({ initial: true })`).
+  const [heroInView, setHeroInView] = useState(true);
   const [pastFold, setPastFold] = useState(false);
   // Subtle magnetic-cursor effect on the two primary CTAs (Plan 3).
   // 5 px is the senior-eng-taste sweet spot — felt, not seen.
   const primaryCtaRef = useMagnetic<HTMLButtonElement>(5);
   const secondaryCtaRef = useMagnetic<HTMLButtonElement>(5);
+
   const scrollToProjects = () => {
     document.querySelector("#projects")?.scrollIntoView({ behavior: "smooth" });
   };
@@ -76,6 +77,123 @@ export function HeroSection() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  // IntersectionObserver to drive heroInView (replaces framer-motion's
+  // useInView). Triggers hero-paused className + ShippedMeter behaviour.
+  useEffect(() => {
+    const el = heroRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(
+      ([entry]) => setHeroInView(entry.isIntersecting),
+      { rootMargin: "0px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  // Entrance choreography — single timeline with offsets matching the
+  // previous framer staggered `delay:` values. The timeline starts on
+  // mount; under reduced-motion the factory bails out and CSS shows the
+  // static end-state.
+  useAnime(
+    heroRef,
+    (scope) => {
+      if (scope.matches.reducedMotion) return;
+      const root = heroRef.current;
+      if (!root) return;
+
+      const q = (sel: string) => root.querySelector<HTMLElement>(sel);
+
+      const tl = createTimeline({
+        defaults: { ease: EASE_FN.emphasized, duration: 700 },
+      });
+
+      // Left column lead-in (whole column slides from -40 → 0).
+      const left = q('[data-anime-hero="left"]');
+      if (left) {
+        tl.add(left, { opacity: [0, 1], translateX: [-40, 0] }, 0);
+      }
+
+      // Per-element fade-up cascade. Offsets in ms mirror the previous
+      // framer delays (0.15, 0.25, 0.35, 0.45, 0.55, 0.65 s).
+      const cascade: Array<[string, number]> = [
+        ['[data-anime-hero="badge"]', 150],
+        ['[data-anime-hero="name"]', 250],
+        ['[data-anime-hero="title"]', 350],
+        ['[data-anime-hero="tagline"]', 450],
+        ['[data-anime-hero="ctas"]', 550],
+        ['[data-anime-hero="social"]', 650],
+      ];
+      for (const [selector, atMs] of cascade) {
+        const el = q(selector);
+        if (!el) continue;
+        tl.add(
+          el,
+          { opacity: [0, 1], translateY: [16, 0], duration: DURATION.base * 1000 },
+          atMs,
+        );
+      }
+
+      // Right column: column slide + profile scale + metrics fade.
+      const right = q('[data-anime-hero="right"]');
+      if (right) {
+        tl.add(right, { opacity: [0, 1], translateX: [40, 0] }, 200);
+      }
+      const profile = q('[data-anime-hero="profile"]');
+      if (profile) {
+        tl.add(
+          profile,
+          { opacity: [0, 1], scale: [0.85, 1], duration: 600 },
+          400,
+        );
+      }
+      const metrics = q('[data-anime-hero="metrics"]');
+      if (metrics) {
+        tl.add(
+          metrics,
+          { opacity: [0, 1], translateY: [16, 0], duration: DURATION.base * 1000 },
+          700,
+        );
+      }
+    },
+    [],
+  );
+
+  // "Open to work" pill — y-bobble loop. Auto-pauses when section
+  // leaves viewport via the [data-anime-loop] toggle in useEffect below.
+  useAnime(
+    pillRef,
+    (scope) => {
+      if (scope.matches.reducedMotion) return;
+      const el = pillRef.current;
+      if (!el) return;
+      animate(el, {
+        translateY: [0, -6, 0],
+        duration: 4000,
+        loop: true,
+        ease: "inOutSine",
+      });
+    },
+    [],
+  );
+
+  // Scroll indicator — y-bobble + opacity pulse loop.
+  useAnime(
+    scrollIndicatorRef,
+    (scope) => {
+      if (scope.matches.reducedMotion) return;
+      const el = scrollIndicatorRef.current;
+      if (!el) return;
+      animate(el, {
+        translateY: [0, 8, 0],
+        opacity: [0.4, 0.9, 0.4],
+        duration: 2000,
+        loop: true,
+        ease: "inOutSine",
+      });
+    },
+    [pastFold],
+  );
 
   return (
     <section
@@ -95,19 +213,12 @@ export function HeroSection() {
       <div className="section-container relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Left — Text content */}
-          <motion.div
-            initial={{ opacity: 0, x: -40 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.7, ...springTransition }}
-            className="text-center lg:text-left"
-          >
+          <div data-anime-hero="left" className="text-center lg:text-left">
             {/* Availability badge — monochrome treatment for full WCAG AA
-                contrast. The single coral dot carries the "available"
+                contrast. The single mint dot carries the "available"
                 signal; the text itself stays on the foreground token. */}
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15, ...springTransition }}
+            <div
+              data-anime-hero="badge"
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-7 bg-muted border border-border"
             >
               <span className="relative flex h-2 w-2 flex-shrink-0">
@@ -123,14 +234,12 @@ export function HeroSection() {
               <span className="text-sm font-medium text-foreground">
                 {personalData.availability}
               </span>
-            </motion.div>
+            </div>
 
             {/* Name */}
-            <motion.h1
+            <h1
               id="hero-heading"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.25, ...springTransition }}
+              data-anime-hero="name"
               className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-bold mb-4"
               style={{ letterSpacing: "-0.03em", lineHeight: "1.05" }}
             >
@@ -139,7 +248,7 @@ export function HeroSection() {
                 const surname = rest.join(" ");
                 return (
                   <>
-                    <span className="font-normal text-foreground">Hi, I'm</span>{" "}
+                    <span className="font-normal text-foreground">Hi, I&apos;m</span>{" "}
                     <span className="text-foreground">{first}</span>{" "}
                     <span
                       className="text-foreground [text-underline-offset:0.14em] [text-decoration-thickness:2px]"
@@ -153,49 +262,41 @@ export function HeroSection() {
                   </>
                 );
               })()}
-            </motion.h1>
+            </h1>
 
             {/* Title */}
-            <motion.h2
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.35, ...springTransition }}
+            <h2
+              data-anime-hero="title"
               className="text-xl sm:text-2xl lg:text-3xl font-semibold text-muted-foreground mb-6"
             >
               {personalData.title}
-            </motion.h2>
+            </h2>
 
             {/* Tagline */}
-            <motion.p
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.45, ...springTransition }}
+            <p
+              data-anime-hero="tagline"
               className="text-base md:text-lg text-muted-foreground max-w-xl mb-9 mx-auto lg:mx-0 leading-relaxed"
             >
               {personalData.tagline}
-            </motion.p>
+            </p>
 
             {/* CTAs */}
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.55, ...springTransition }}
+            <div
+              data-anime-hero="ctas"
               className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start mb-9"
             >
               <button ref={primaryCtaRef} onClick={scrollToProjects} className="btn-hero-primary">
-                See what I've built
+                See what I&apos;ve built
                 <ArrowDown className="w-4 h-4" />
               </button>
               <button ref={secondaryCtaRef} onClick={scrollToContact} className="btn-hero-secondary">
                 Contact Me
               </button>
-            </motion.div>
+            </div>
 
             {/* Social links */}
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.65, ...springTransition }}
+            <div
+              data-anime-hero="social"
               className="flex gap-3 justify-center lg:justify-start"
             >
               {[
@@ -233,21 +334,14 @@ export function HeroSection() {
                   <Icon className="w-5 h-5" />
                 </a>
               ))}
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
 
           {/* Right — Profile + metrics */}
-          <motion.div
-            initial={{ opacity: 0, x: 40 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.7, delay: 0.2, ...springTransition }}
-            className="relative flex flex-col items-center"
-          >
+          <div data-anime-hero="right" className="relative flex flex-col items-center">
             {/* Profile image — single hairline ring + quiet halo. No gradient. */}
-            <motion.div
-              initial={{ scale: 0.85, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.4, duration: 0.6, ...springTransition }}
+            <div
+              data-anime-hero="profile"
               className="relative mx-auto w-56 h-56 sm:w-72 sm:h-72 lg:w-80 lg:h-80 mb-9 rounded-full"
               style={{
                 border: "1px solid oklch(var(--primary))",
@@ -278,10 +372,9 @@ export function HeroSection() {
                   className="absolute inset-0 z-10 w-full h-full rounded-full object-cover"
                 />
               </picture>
-              {/* "Open to work" pill — solid coral, no gradient, no glow. */}
-              <motion.div
-                animate={heroInView && !prefersReducedMotion ? { y: [0, -6, 0] } : { y: 0 }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              {/* "Open to work" pill — solid accent, y-bobble loop. */}
+              <div
+                ref={pillRef}
                 className="absolute -bottom-3 -right-3 z-20 px-3 py-1.5 rounded-xl text-xs font-semibold text-primary-foreground"
                 style={{
                   background: "oklch(var(--primary))",
@@ -290,15 +383,12 @@ export function HeroSection() {
                 }}
               >
                 Open to work
-              </motion.div>
-            </motion.div>
+              </div>
+            </div>
 
-            {/* Metrics — inline sentence, not a card grid. Serif numerals
-                inherit weight; coral surface area capped to underline only. */}
-            <motion.p
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.7, ...springTransition }}
+            {/* Metrics — inline sentence, not a card grid. */}
+            <p
+              data-anime-hero="metrics"
               className="font-sans text-sm md:text-base text-muted-foreground max-w-sm text-center leading-relaxed"
             >
               Shipped{" "}
@@ -314,28 +404,20 @@ export function HeroSection() {
                 {personalData.metrics.experience}
               </span>
               .
-            </motion.p>
-          </motion.div>
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* Scroll indicator — unmounts after the user scrolls past the fold,
-          and pauses its bounce when the hero is no longer visible. */}
+      {/* Scroll indicator — unmounts after the user scrolls past the fold. */}
       {!pastFold && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: heroInView ? 1 : 0 }}
-          transition={{ delay: 1.4 }}
+        <div
           className="absolute bottom-8 left-1/2 -translate-x-1/2"
+          style={{ opacity: heroInView ? 1 : 0, transition: "opacity 400ms ease-out" }}
         >
-          <motion.button
+          <button
+            ref={scrollIndicatorRef}
             onClick={scrollToProjects}
-            animate={
-              heroInView && !prefersReducedMotion
-                ? { y: [0, 8, 0], opacity: [0.4, 0.9, 0.4] }
-                : { y: 0, opacity: 0.6 }
-            }
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
             className="flex flex-col items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
             aria-label="Scroll to projects"
           >
@@ -343,8 +425,8 @@ export function HeroSection() {
             <div className="w-5 h-8 rounded-full border border-current flex items-start justify-center pt-1.5">
               <div className="w-1 h-2 rounded-full bg-current" />
             </div>
-          </motion.button>
-        </motion.div>
+          </button>
+        </div>
       )}
     </section>
   );

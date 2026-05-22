@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { motion } from "framer-motion";
+import { useRef, useState } from "react";
+import { animate } from "animejs";
 import { z } from "zod";
 import {
   Mail,
@@ -20,8 +20,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 
-import { SPRING_DEFAULT as springTransition } from "@/lib/motion";
-// (re-exported as `springTransition` to minimize diff)
+import { DURATION, EASE_FN, shakeFieldAnim, strokeDrawAnim } from "@/lib/motion";
+import { revealOnScroll, useAnime } from "@/lib/use-anime";
 
 // Form validation schema
 const contactSchema = z.object({
@@ -34,6 +34,8 @@ const contactSchema = z.object({
 type ContactFormData = z.infer<typeof contactSchema>;
 
 export function ContactSection() {
+  const rootRef = useRef<HTMLElement>(null);
+  const successRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState<ContactFormData>({
     name: "",
     email: "",
@@ -44,6 +46,127 @@ export function ContactSection() {
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const { mutate: submitContact, isPending } = useContactForm();
+
+  // Header + columns: scroll-triggered fade. Columns slide in from
+  // their respective sides (left for info, right for form) — matches the
+  // previous framer x:-20 / x:20 entry. Each item runs its own animate()
+  // because the per-item parameters differ; revealOnScroll handles the
+  // single-anim case but for distinct per-target configs we drop to
+  // animate() + the same onEnter pattern in-place.
+  useAnime(
+    rootRef,
+    (scope) => {
+      const root = rootRef.current;
+      if (!root) return;
+      if (scope.matches.reducedMotion) return;
+
+      const cleanups: Array<() => void> = [];
+
+      // Header uses the canonical fade-up reveal.
+      cleanups.push(revealOnScroll(root, "[data-anime='header']"));
+
+      // Info column slides in from the left.
+      const infoCol = root.querySelector<HTMLElement>("[data-anime='info']");
+      if (infoCol) {
+        cleanups.push(
+          revealOnScroll(root, [infoCol], {
+            anim: {
+              opacity: [0, 1],
+              translateX: [-20, 0],
+              duration: DURATION.base * 1000,
+              ease: EASE_FN.emphasized,
+            },
+          }),
+        );
+      }
+
+      // Form column slides in from the right.
+      const formCol = root.querySelector<HTMLElement>("[data-anime='form']");
+      if (formCol) {
+        cleanups.push(
+          revealOnScroll(root, [formCol], {
+            anim: {
+              opacity: [0, 1],
+              translateX: [20, 0],
+              duration: DURATION.base * 1000,
+              ease: EASE_FN.emphasized,
+            },
+          }),
+        );
+      }
+
+      return () => cleanups.forEach((fn) => fn());
+    },
+    [],
+  );
+
+  // Success-state scale-in (mount-only, not scroll-triggered).
+  // Fires whenever isSubmitted flips true. Layered animation:
+  //   1. Container scales in (existing behaviour).
+  //   2. Checkmark SVG paths draw in via stroke-dashoffset — the delight
+  //      beat. Lucide icons render as <svg><path|circle/></svg>; we target
+  //      every drawable child so both the ring and the tick animate.
+  useAnime(
+    successRef,
+    (scope) => {
+      const el = successRef.current;
+      if (!el) return;
+      if (scope.matches.reducedMotion) return;
+      animate(el, {
+        opacity: [0, 1],
+        scale: [0.9, 1],
+        duration: DURATION.base * 1000,
+        ease: EASE_FN.emphasized,
+      });
+      const strokes = el.querySelectorAll<SVGElement>(
+        '[data-anime="success-icon"] path, [data-anime="success-icon"] circle, [data-anime="success-icon"] polyline'
+      );
+      if (strokes.length) {
+        strokes.forEach((s) => {
+          s.style.strokeDasharray = "200";
+          s.style.strokeDashoffset = "200";
+        });
+        animate(strokes, {
+          ...strokeDrawAnim(),
+          delay: 120,
+        });
+      }
+    },
+    [isSubmitted],
+  );
+
+  // Validation-error feedback: shake invalid fields + fade-in error
+  // messages. Watches `errors` and fires only when it transitions from
+  // empty → populated (i.e. on submit, not on every keystroke that
+  // partially clears an error).
+  useAnime(
+    rootRef,
+    (scope) => {
+      const root = rootRef.current;
+      if (!root) return;
+      if (scope.matches.reducedMotion) return;
+      const errorKeys = Object.keys(errors).filter(
+        (k) => !!errors[k as keyof ContactFormData]
+      );
+      if (errorKeys.length === 0) return;
+      const invalidFields = root.querySelectorAll<HTMLElement>(
+        '[aria-invalid="true"]'
+      );
+      if (invalidFields.length) {
+        animate(invalidFields, shakeFieldAnim());
+      }
+      const errorMsgs = root.querySelectorAll<HTMLElement>('[role="alert"]');
+      if (errorMsgs.length) {
+        animate(errorMsgs, {
+          opacity: [0, 1],
+          translateY: [-4, 0],
+          duration: 180,
+          ease: EASE_FN.out,
+        });
+      }
+    },
+    [errors],
+  );
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -97,35 +220,29 @@ export function ContactSection() {
   };
 
   return (
-    <section id="contact" aria-labelledby="contact-heading" className="py-20 section-mesh">
+    <section
+      ref={rootRef}
+      id="contact"
+      aria-labelledby="contact-heading"
+      className="py-20 section-mesh"
+    >
       <div className="section-container">
         {/* Section Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={springTransition}
-          className="text-center mb-12"
-        >
+        <div data-anime="header" className="text-center mb-12">
           <span className="inline-block text-xs font-semibold uppercase tracking-[0.18em] text-primary mb-3">
             Contact
           </span>
           <h2 id="contact-heading" className="section-title">Say hi</h2>
           <p className="section-subtitle mx-auto">
-            Have a project in mind or want to discuss opportunities? I'd love to hear from
-            you.
+            Have a project in mind or want to discuss opportunities? I&apos;d love to hear
+            from you.
           </p>
-        </motion.div>
+        </div>
 
         <div className="grid lg:grid-cols-2 gap-12 max-w-5xl mx-auto">
           {/* Contact Info */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={springTransition}
-          >
-            <h3 className="text-xl font-bold mb-6">Let's Connect</h3>
+          <div data-anime="info">
+            <h3 className="text-xl font-bold mb-6">Let&apos;s Connect</h3>
 
             <div className="space-y-6">
               {/* Email */}
@@ -244,36 +361,32 @@ export function ContactSection() {
                 </a>
               </div>
             </div>
-          </motion.div>
+          </div>
 
           {/* Contact Form */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={springTransition}
-          >
+          <div data-anime="form">
             <div className="glass-card p-6 md:p-8">
               <h3 className="text-xl font-bold mb-6">Send a Message</h3>
 
               {isSubmitted ? (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={springTransition}
+                <div
+                  ref={successRef}
                   className="flex flex-col items-center justify-center py-12 text-center"
                 >
                   <div
                     className="w-16 h-16 rounded-full flex items-center justify-center mb-4"
                     style={{ background: "oklch(var(--secondary) / 0.08)", border: "1px solid oklch(var(--secondary) / 0.2)" }}
                   >
-                    <CheckCircle className="w-8 h-8 text-secondary" />
+                    <CheckCircle
+                      data-anime="success-icon"
+                      className="w-8 h-8 text-secondary"
+                    />
                   </div>
                   <h4 className="text-lg font-bold mb-2">Message Sent!</h4>
                   <p className="text-muted-foreground">
-                    Thanks for reaching out. I'll get back to you soon.
+                    Thanks for reaching out. I&apos;ll get back to you soon.
                   </p>
-                </motion.div>
+                </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-5" noValidate>
                   <div className="grid sm:grid-cols-2 gap-5">
@@ -392,7 +505,7 @@ export function ContactSection() {
                 </form>
               )}
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>

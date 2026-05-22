@@ -11,9 +11,15 @@
  * a filled polygon, vertex dots with native tooltips, and axis labels.
  *
  * Colors come from `oklch(var(--…))` tokens — theme-aware.
+ *
+ * Migrated from framer-motion to anime.js v4 on 2026-05-19. The data
+ * polygon animates in on mount (opacity + scale), reverted on unmount
+ * by the scope.
  */
-import { motion } from "framer-motion";
-import { useReducedMotion } from "framer-motion";
+import { useRef } from "react";
+import { animate } from "animejs";
+import { EASE_FN } from "@/lib/motion";
+import { useAnime } from "@/lib/use-anime";
 
 export interface RadarDatum {
   skill: string;
@@ -44,29 +50,56 @@ export function SkillsRadar({
   data,
   color = "oklch(var(--primary))",
 }: SkillsRadarProps) {
-  const prefersReducedMotion = useReducedMotion();
+  const svgRef = useRef<SVGSVGElement>(null);
+  const polygonRef = useRef<SVGPolygonElement>(null);
+
   const n = data.length;
-  if (n < 3) return null;
 
-  // Pre-compute axis angles + endpoint coordinates per vertex.
-  const axes = data.map((d, i) => {
-    const angle = (i / n) * Math.PI * 2;
-    const outer = polarToXY(angle, RADIUS);
-    const point = polarToXY(angle, RADIUS * (d.value / 100));
-    const label = polarToXY(angle, RADIUS + LABEL_OFFSET);
-    return { ...d, angle, outer, point, label };
-  });
+  // Pre-compute axis angles + endpoint coordinates per vertex. (Guarded
+  // by n>=3 at render time; the hooks below still run unconditionally so
+  // React rules-of-hooks stay clean if data shape changes.)
+  const axes =
+    n >= 3
+      ? data.map((d, i) => {
+          const angle = (i / n) * Math.PI * 2;
+          const outer = polarToXY(angle, RADIUS);
+          const point = polarToXY(angle, RADIUS * (d.value / 100));
+          const label = polarToXY(angle, RADIUS + LABEL_OFFSET);
+          return { ...d, angle, outer, point, label };
+        })
+      : [];
 
-  // Concentric gridline ring positions (as fraction of full radius).
-  const rings = [0.33, 0.66, 1];
-
-  // Polygon points string for the filled data shape.
+  // Mount-only entrance for the data polygon. Re-fires when the polygon
+  // points change (e.g. category swap in SkillsSection) because the
+  // dependency below tracks the points string.
   const polygonPoints = axes
     .map(({ point }) => `${point.x},${point.y}`)
     .join(" ");
 
+  useAnime(
+    svgRef,
+    (scope) => {
+      if (scope.matches.reducedMotion) return;
+      const el = polygonRef.current;
+      if (!el) return;
+      animate(el, {
+        opacity: [0, 1],
+        scale: [0.85, 1],
+        duration: 700,
+        ease: EASE_FN.spring,
+      });
+    },
+    [polygonPoints],
+  );
+
+  if (n < 3) return null;
+
+  // Concentric gridline ring positions (as fraction of full radius).
+  const rings = [0.33, 0.66, 1];
+
   return (
     <svg
+      ref={svgRef}
       viewBox={`0 0 ${SIZE} ${SIZE}`}
       width="100%"
       height="100%"
@@ -107,20 +140,15 @@ export function SkillsRadar({
         />
       ))}
 
-      {/* Data polygon — animated fill-in on mount */}
-      <motion.polygon
+      {/* Data polygon — animated fill-in on mount (anime.js scope-managed) */}
+      <polygon
+        ref={polygonRef}
         points={polygonPoints}
         fill={color}
         fillOpacity={0.22}
         stroke={color}
         strokeWidth={2}
         strokeLinejoin="round"
-        initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.85 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{
-          duration: 0.7,
-          ease: [0.16, 1, 0.3, 1],
-        }}
         style={{ transformOrigin: `${CENTER}px ${CENTER}px` }}
       />
 

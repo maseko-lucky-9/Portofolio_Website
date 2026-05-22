@@ -13,7 +13,7 @@ export default defineConfig({
   // 60s per-test timeout covers lazy-loaded Suspense sections + scroll + assertions.
   timeout: 60000,
   use: {
-    baseURL: "http://localhost:8080",
+    baseURL: "http://localhost:5173",
     trace: "on-first-retry",
     navigationTimeout: 45000,
     actionTimeout: 15000,
@@ -52,7 +52,7 @@ export default defineConfig({
     //   r3f throws → React unmounts the entire tree including the Navbar).
     // Also avoids HMR (dev server) which triggers full page reloads in headless mode.
     command: "VITE_USE_API=false VITE_DISABLE_WEBGL=true npm run build && npm run preview",
-    url: "http://localhost:8080",
+    url: "http://localhost:5173",
     reuseExistingServer: !process.env.CI,
     timeout: 120000,
   },

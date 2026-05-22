@@ -1,16 +1,176 @@
+# robots.txt for thulanimaseko.com
+# Policy: allow major search engines + named AI engines (with throttle),
+# deny SEO data-aggregation crawlers, defer enforcement to Cloudflare WAF.
+# See ~/.claude/plans/now-create-a-seo-nifty-finch.md track A5.
+
+# ── Major search engines ─────────────────────────────────────────────────
 User-agent: Googlebot
+Allow: /
+
+User-agent: Googlebot-Image
 Allow: /
 
 User-agent: Bingbot
 Allow: /
 
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+User-agent: Baiduspider
+Allow: /
+
+User-agent: YandexBot
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+# ── Social / messenger preview fetchers ─────────────────────────────────
 User-agent: Twitterbot
 Allow: /
 
 User-agent: facebookexternalhit
 Allow: /
 
-User-agent: *
+User-agent: LinkedInBot
 Allow: /
 
-Sitemap: https://prudentiadigital.co.za/sitemap.xml
+User-agent: Telegrambot
+Allow: /
+
+User-agent: Discordbot
+Allow: /
+
+User-agent: WhatsApp
+Allow: /
+
+# ── AI engines: allow indexing + answer-engine retrieval, with throttle ──
+# These are CITATION engines. Allowing them is the AEO/GEO play.
+# Crawl-delay is advisory; the WAF rate-limits the rest.
+User-agent: GPTBot
+Allow: /
+Crawl-delay: 10
+
+User-agent: OAI-SearchBot
+Allow: /
+Crawl-delay: 10
+
+User-agent: ChatGPT-User
+Allow: /
+Crawl-delay: 10
+
+User-agent: ClaudeBot
+Allow: /
+Crawl-delay: 10
+
+User-agent: Claude-Web
+Allow: /
+Crawl-delay: 10
+
+User-agent: anthropic-ai
+Allow: /
+Crawl-delay: 10
+
+User-agent: PerplexityBot
+Allow: /
+Crawl-delay: 10
+
+User-agent: Perplexity-User
+Allow: /
+Crawl-delay: 10
+
+User-agent: Google-Extended
+Allow: /
+Crawl-delay: 10
+
+User-agent: Applebot-Extended
+Allow: /
+Crawl-delay: 10
+
+User-agent: Amazonbot
+Allow: /
+Crawl-delay: 10
+
+User-agent: Bytespider
+Allow: /
+Crawl-delay: 20
+
+User-agent: cohere-ai
+Allow: /
+Crawl-delay: 10
+
+User-agent: Diffbot
+Allow: /
+Crawl-delay: 20
+
+User-agent: FacebookBot
+Allow: /
+Crawl-delay: 10
+
+# ── Common Crawl: allow (it is a legitimate research corpus; the
+#    tdmrep.json reserves training use separately). Flip to Disallow if
+#    training-data leakage becomes a concern.
+User-agent: CCBot
+Allow: /
+Crawl-delay: 30
+
+# ── SEO data-aggregation crawlers: deny ──────────────────────────────────
+# These resell crawl data to competitors and produce no value to the site.
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: SemrushBot-SA
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+User-agent: BLEXBot
+Disallow: /
+
+User-agent: DataForSeoBot
+Disallow: /
+
+User-agent: PetalBot
+Disallow: /
+
+User-agent: SeznamBot
+Disallow: /
+
+User-agent: serpstatbot
+Disallow: /
+
+User-agent: ZoominfoBot
+Disallow: /
+
+User-agent: Sogou
+Disallow: /
+
+User-agent: SiteAuditBot
+Disallow: /
+
+User-agent: BacklinksExtendedBot
+Disallow: /
+
+User-agent: Barkrowler
+Disallow: /
+
+# ── Default policy ───────────────────────────────────────────────────────
+# Unknown but well-behaved bots can crawl public surface. Anything that
+# misbehaves is caught by Cloudflare Bot Fight Mode + WAF rules.
+User-agent: *
+Disallow: /api/
+Disallow: /private/
+Disallow: /_well-known/internal/
+
+Sitemap: https://thulanimaseko.com/sitemap.xml
+Host: https://thulanimaseko.com

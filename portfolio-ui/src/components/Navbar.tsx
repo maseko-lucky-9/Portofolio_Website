@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { animate, stagger } from "animejs";
 import { Menu, X, Sun, Moon, Monitor } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { EASE_FN, useReducedMotion } from "@/lib/motion";
+import { useAnime } from "@/lib/use-anime";
 
 const navLinks = [
   { href: "#about", label: "About" },
@@ -24,11 +26,12 @@ const navLinks = [
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { theme, setTheme } = useTheme();
-  // When prefers-reduced-motion:reduce (e.g. in Playwright e2e runs), skip the
-  // slide-in animation so the header is immediately at its final position and
-  // stable for Playwright's actionability checks.
+  const { setTheme } = useTheme();
   const prefersReducedMotion = useReducedMotion();
+
+  const headerRef = useRef<HTMLElement>(null);
+  const paperBgRef = useRef<HTMLDivElement>(null);
+  const drawerRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 40);
@@ -41,49 +44,119 @@ export function Navbar() {
     setIsMobileMenuOpen(false);
   };
 
+  // Header entrance — slide down + fade on mount. Skips entirely under
+  // prefers-reduced-motion (the header is immediately at its final
+  // position; matches the previous framer initial={false} short-circuit).
+  useAnime(
+    headerRef,
+    (scope) => {
+      if (scope.matches.reducedMotion) return;
+      const el = headerRef.current;
+      if (!el) return;
+      animate(el, {
+        translateY: [-80, 0],
+        opacity: [0, 1],
+        duration: 500,
+        ease: EASE_FN.spring,
+      });
+    },
+    [],
+  );
+
+  // Paper-background fade on scroll boundary. The div is rendered
+  // unconditionally with opacity 0 and toggled via animate() so we get
+  // proper exit transitions without AnimatePresence.
+  useEffect(() => {
+    const el = paperBgRef.current;
+    if (!el) return;
+    if (prefersReducedMotion) {
+      el.style.opacity = isScrolled ? "1" : "0";
+      return;
+    }
+    const anim = animate(el, {
+      opacity: isScrolled ? [el.style.opacity || "0", 1] : [el.style.opacity || "1", 0],
+      duration: 200,
+      ease: EASE_FN.out,
+    });
+    return () => anim.cancel();
+  }, [isScrolled, prefersReducedMotion]);
+
+  // Mobile drawer enter/exit. Rendered unconditionally; pointer-events
+  // and aria-hidden gated by isMobileMenuOpen for accessibility.
+  // Children fan-in with a small stagger on enter only.
+  useEffect(() => {
+    const drawer = drawerRef.current;
+    if (!drawer) return;
+    if (prefersReducedMotion) {
+      drawer.style.opacity = isMobileMenuOpen ? "1" : "0";
+      drawer.style.transform = "none";
+      return;
+    }
+    const items = drawer.querySelectorAll<HTMLElement>("[data-anime-link]");
+    if (isMobileMenuOpen) {
+      const open = animate(drawer, {
+        opacity: [0, 1],
+        scaleY: [0.85, 1],
+        duration: 200,
+        ease: EASE_FN.spring,
+      });
+      const links = animate(items, {
+        opacity: [0, 1],
+        translateX: [-12, 0],
+        duration: 200,
+        delay: stagger(40),
+        ease: EASE_FN.spring,
+      });
+      return () => {
+        open.cancel();
+        links.cancel();
+      };
+    } else {
+      const close = animate(drawer, {
+        opacity: [drawer.style.opacity || "1", 0],
+        scaleY: [1, 0.85],
+        duration: 200,
+        ease: EASE_FN.out,
+      });
+      return () => close.cancel();
+    }
+  }, [isMobileMenuOpen, prefersReducedMotion]);
+
   return (
-    <motion.header
-      initial={prefersReducedMotion ? false : { y: -80, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+    <header
+      ref={headerRef}
       className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
       style={{
         paddingTop: isScrolled ? "10px" : "18px",
         paddingBottom: isScrolled ? "10px" : "18px",
       }}
     >
-      {/* Scrolled paper background — flat, hairline-ruled. No backdrop-filter. */}
-      <AnimatePresence>
-        {isScrolled && (
-          <motion.div
-            key="paper-bg"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="absolute inset-0"
-            style={{
-              background: "oklch(var(--background))",
-              borderBottom: "1px solid oklch(var(--border))",
-            }}
-          />
-        )}
-      </AnimatePresence>
+      {/* Scrolled paper background — flat, hairline-ruled. No backdrop-filter.
+          Rendered unconditionally; opacity animated via useEffect above. */}
+      <div
+        ref={paperBgRef}
+        aria-hidden="true"
+        className="absolute inset-0"
+        style={{
+          opacity: 0,
+          background: "oklch(var(--background))",
+          borderBottom: "1px solid oklch(var(--border))",
+        }}
+      />
 
       <div className="section-container !py-0 relative flex items-center justify-between">
-        {/* Brand */}
-        <motion.a
+        {/* Brand — Tailwind hover handles the magnetic scale; no JS hover handler. */}
+        <a
           href="#"
-          className="z-10"
-          whileHover={{ scale: 1.04 }}
-          transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          className="z-10 inline-block transition-transform duration-200 ease-out hover:scale-[1.04]"
+          style={{ transformOrigin: "center", transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)" }}
           onClick={(e) => {
             e.preventDefault();
             window.scrollTo({ top: 0, behavior: "smooth" });
           }}
         >
           <Logo size="md" />
-        </motion.a>
+        </a>
 
         {/* Desktop navigation */}
         <nav className="hidden md:flex items-center gap-7" role="navigation">
@@ -128,62 +201,72 @@ export function Navbar() {
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden rounded-xl w-9 h-9"
+            className="md:hidden rounded-xl w-9 h-9 relative"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={isMobileMenuOpen}
           >
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={isMobileMenuOpen ? "close" : "open"}
-                initial={{ rotate: -90, opacity: 0 }}
-                animate={{ rotate: 0, opacity: 1 }}
-                exit={{ rotate: 90, opacity: 0 }}
-                transition={{ duration: 0.15 }}
-              >
-                {isMobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-              </motion.div>
-            </AnimatePresence>
+            {/* Cross-fade between Menu and X icons via stacked layout and
+                CSS transitions — keeps both elements mounted so a11y
+                tree stays stable. */}
+            <Menu
+              className="absolute h-4 w-4 transition-all duration-150"
+              style={{
+                opacity: isMobileMenuOpen ? 0 : 1,
+                transform: `rotate(${isMobileMenuOpen ? "90deg" : "0deg"})`,
+              }}
+              aria-hidden="true"
+            />
+            <X
+              className="absolute h-4 w-4 transition-all duration-150"
+              style={{
+                opacity: isMobileMenuOpen ? 1 : 0,
+                transform: `rotate(${isMobileMenuOpen ? "0deg" : "-90deg"})`,
+              }}
+              aria-hidden="true"
+            />
           </Button>
         </div>
       </div>
 
-      {/* Mobile navigation drawer */}
-      <AnimatePresence>
-        {isMobileMenuOpen && (
-          <motion.nav
-            initial={{ opacity: 0, scaleY: 0.85 }}
-            animate={{ opacity: 1, scaleY: 1 }}
-            exit={{ opacity: 0, scaleY: 0.85 }}
-            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            style={{ transformOrigin: "top center", maxHeight: "90vh", overflowY: "auto" }}
-            className="md:hidden"
-          >
-            <div
-              className="mx-4 mt-2 rounded-2xl overflow-hidden"
-              style={{
-                background: "oklch(var(--card))",
-                border: "1px solid oklch(var(--border))",
-                boxShadow: "var(--shadow-lg)",
-              }}
-            >
-              <div className="flex flex-col p-3 gap-1">
-                {navLinks.map((link, index) => (
-                  <motion.button
-                    key={link.href}
-                    initial={{ opacity: 0, x: -12 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.04, ease: [0.16, 1, 0.3, 1] }}
-                    onClick={() => scrollToSection(link.href)}
-                    className="text-left py-3 px-4 rounded-xl hover:bg-accent hover:text-accent-foreground transition-colors text-sm font-medium text-foreground"
-                  >
-                    {link.label}
-                  </motion.button>
-                ))}
-              </div>
-            </div>
-          </motion.nav>
-        )}
-      </AnimatePresence>
-    </motion.header>
+      {/* Mobile navigation drawer — always rendered; opacity + pointer-events
+          gated by isMobileMenuOpen so screen-readers and tab-focus skip it
+          when closed. */}
+      <nav
+        ref={drawerRef}
+        aria-hidden={!isMobileMenuOpen}
+        className="md:hidden"
+        style={{
+          transformOrigin: "top center",
+          maxHeight: "90vh",
+          overflowY: "auto",
+          opacity: 0,
+          pointerEvents: isMobileMenuOpen ? "auto" : "none",
+        }}
+      >
+        <div
+          className="mx-4 mt-2 rounded-2xl overflow-hidden"
+          style={{
+            background: "oklch(var(--card))",
+            border: "1px solid oklch(var(--border))",
+            boxShadow: "var(--shadow-lg)",
+          }}
+        >
+          <div className="flex flex-col p-3 gap-1">
+            {navLinks.map((link) => (
+              <button
+                key={link.href}
+                data-anime-link
+                onClick={() => scrollToSection(link.href)}
+                tabIndex={isMobileMenuOpen ? 0 : -1}
+                className="text-left py-3 px-4 rounded-xl hover:bg-accent hover:text-accent-foreground transition-colors text-sm font-medium text-foreground"
+              >
+                {link.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </nav>
+    </header>
   );
 }

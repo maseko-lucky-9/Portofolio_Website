@@ -23,7 +23,14 @@
   DESIGN SYSTEM — Developer Portfolio
   =============================================
   All tokens in OKLCH bare-component form. Consumers wrap with
-  oklch(var(--token)) or oklch(var(--token) / a). Single coral accent.
+  oklch(var(--token)) or oklch(var(--token) / a). Single mint accent
+  (electric mint, oklch(0.82 0.17 145)) — terminal-green vibe to match
+  the software-dev theme. Replaced the prior coral accent on 2026-05-19
+  as part of the anime.js + palette revitalization (revision 5). The
+  chroma ceiling in .impeccable.md is preserved for every neutral token;
+  the `--primary` / `--ring` / `--sidebar-primary` mint tokens have an
+  explicit, documented exception.
+
   Phase 9 token sweep 2026-05-18: design-vocabulary orphans removed
   (--gradient-*, --shadow-glow*, --brand-violet, --skill-*, --primary-glow,
   .text-gradient-*, .gradient-border).
@@ -31,8 +38,13 @@
 
 @layer base {
   :root {
-    /* Brand — coral retuned in OKLCH. */
-    --primary: 0.66 0.18 35;
+    /* Brand — deep mint for light mode. Hue 145° is the same as dark
+       mode, but lightness drops to 0.45 so `text-primary` clears AA
+       Normal (~6.2:1 on cream BG). White button labels read AAA on
+       this fill (~6.6:1). Dark mode bumps the lightness to 0.82 for
+       vibrancy against Deep ink. See .impeccable.md for the chroma
+       exception rationale. */
+    --primary: 0.45 0.17 145;
     --primary-foreground: 0.99 0.005 70;
 
     /* Secondary semantic role (shadcn-required). */
@@ -68,7 +80,7 @@
 
     --border: 0.86 0.015 70;
     --input: 0.86 0.015 70;
-    --ring: 0.66 0.18 35;
+    --ring: 0.45 0.17 145;
 
     --radius: 0.875rem;
 
@@ -94,12 +106,12 @@
     /* Sidebar tokens — OKLCH. */
     --sidebar-background: 0.98 0.006 70;
     --sidebar-foreground: 0.35 0.012 50;
-    --sidebar-primary: 0.66 0.18 35;
+    --sidebar-primary: 0.45 0.17 145;
     --sidebar-primary-foreground: 0.99 0.005 70;
     --sidebar-accent: 0.93 0.012 75;
     --sidebar-accent-foreground: 0.18 0.012 50;
     --sidebar-border: 0.86 0.015 70;
-    --sidebar-ring: 0.66 0.18 35;
+    --sidebar-ring: 0.45 0.17 145;
   }
 
   .dark {
@@ -305,9 +317,13 @@
     outline-offset: 2px;
   }
 
-  /* ── Section layout ── */
+  /* ── Section layout ──
+     max-w-7xl (1280px) covers laptops; on 2xl viewports (1536+) we widen
+     to 1600px so widescreen monitors (1920+) don't read as letterboxed.
+     Text lines stay within ergonomic length because hero/sections use
+     internal grid splits that keep individual text columns ~700px or less. */
   .section-container {
-    @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 md:py-28;
+    @apply mx-auto max-w-7xl 2xl:max-w-[1600px] px-4 sm:px-6 lg:px-8 py-20 md:py-28;
   }
 
   .section-title {

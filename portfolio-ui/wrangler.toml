@@ -17,6 +17,25 @@ name = "thulani-portfolio"
 compatibility_date = "2025-04-26"
 workers_dev = true
 
+# Custom-domain routes (uncomment AFTER the zone is Active in
+# Cloudflare — see docs/seo/custom-domain-setup.md). `custom_domain = true`
+# makes Cloudflare auto-provision DNS records + TLS cert.
+#
+# [[routes]]
+# pattern = "thulanimaseko.com/*"
+# zone_name = "thulanimaseko.com"
+# custom_domain = true
+#
+# [[routes]]
+# pattern = "www.thulanimaseko.com/*"
+# zone_name = "thulanimaseko.com"
+# custom_domain = true
+
+# Worker entry-point: wraps the ASSETS binding to inject security and
+# AI-opt-out response headers (see src/worker.ts). Disable by clearing
+# `main` to fall back to pure-static behavior.
+main = "src/worker.ts"
+
 # Personal portfolio for Thulani Maseko — deploys to
 # `thulani-portfolio.<account>.workers.dev`. No production custom domain
 # assigned yet.
@@ -41,8 +60,19 @@ command = "cd .. && npm install --include=optional --no-audit --no-fund && npm r
 
 [assets]
 directory = "./dist"
+binding = "ASSETS"
 # Vite SPA needs all unmatched routes to fall through to index.html
 not_found_handling = "single-page-application"
+# Force worker (src/worker.ts) to run on every request — including asset
+# paths — so it can inject security + AI-opt-out response headers.
+# Without this, asset requests bypass the worker entirely and headers
+# never reach the response.
+run_worker_first = true
+# Serve dist/blog/<slug>/index.html at /blog/<slug> (no redirect). Without
+# this, default is "auto-trailing-slash" which 307-redirects /blog/<slug>
+# -> /blog/<slug>/ — wasting a roundtrip on every crawler hit and
+# mismatching our sitemap + canonical URLs (which are slash-less).
+html_handling = "drop-trailing-slash"
 
 # Observability is on by default in 2025+ wrangler.
 [observability]

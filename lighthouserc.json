@@ -1,0 +1,58 @@
+{
+  "ci": {
+    "collect": {
+      "staticDistDir": "./portfolio-ui/dist",
+      "url": [
+        "http://localhost/index.html",
+        "http://localhost/blog/index.html",
+        "http://localhost/answers/index.html",
+        "http://localhost/projects/index.html",
+        "http://localhost/blog/welcome-to-the-blog/index.html",
+        "http://localhost/answers/argocd-vs-flux-2026/index.html",
+        "http://localhost/projects/homelab-kubernetes/index.html",
+        "http://localhost/projects/portfolio-website/index.html"
+      ],
+      "numberOfRuns": 2,
+      "settings": {
+        "preset": "desktop",
+        "throttlingMethod": "simulate",
+        "onlyCategories": [
+          "performance",
+          "accessibility",
+          "best-practices",
+          "seo"
+        ]
+      }
+    },
+    "assert": {
+      "preset": "lighthouse:no-pwa",
+      "assertions": {
+        "categories:performance": ["error", { "minScore": 0.90 }],
+        "categories:accessibility": ["error", { "minScore": 0.95 }],
+        "categories:best-practices": ["error", { "minScore": 0.90 }],
+        "categories:seo": ["error", { "minScore": 0.95 }],
+        "largest-contentful-paint": ["error", { "maxNumericValue": 2000 }],
+        "cumulative-layout-shift": ["error", { "maxNumericValue": 0.05 }],
+        "total-blocking-time": ["warn", { "maxNumericValue": 200 }],
+        "first-contentful-paint": ["warn", { "maxNumericValue": 1500 }],
+        "speed-index": ["warn", { "maxNumericValue": 2500 }],
+        "uses-rel-preconnect": "off",
+        "uses-http2": "off",
+        "csp-xss": "warn",
+        "valid-source-maps": "off",
+        "is-crawlable": "error",
+        "robots-txt": "error",
+        "canonical": "error",
+        "structured-data": "off",
+        "hreflang": "error",
+        "meta-description": "error",
+        "document-title": "error",
+        "html-has-lang": "error",
+        "html-lang-valid": "error"
+      }
+    },
+    "upload": {
+      "target": "temporary-public-storage"
+    }
+  }
+}

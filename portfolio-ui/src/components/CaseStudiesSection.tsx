@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { useRef } from "react";
 import {
   Server,
   GitBranch,
@@ -8,8 +8,7 @@ import {
   Construction,
 } from "lucide-react";
 
-import { SPRING_DEFAULT as springTransition } from "@/lib/motion";
-// (re-exported as `springTransition` to minimize diff)
+import { revealOnScroll, useAnime } from "@/lib/use-anime";
 
 type CaseStudyStatus = "live" | "in-progress" | "planned";
 
@@ -62,21 +61,29 @@ const statusConfig: Record<CaseStudyStatus, { label: string; colour: string }> =
 };
 
 export function CaseStudiesSection() {
+  const rootRef = useRef<HTMLElement>(null);
+
+  useAnime(
+    rootRef,
+    (scope) => {
+      const root = rootRef.current;
+      if (!root) return;
+      if (scope.matches.reducedMotion) return;
+      return revealOnScroll(root, "[data-anime]", { staggerMs: 100 });
+    },
+    [],
+  );
+
   return (
     <section
+      ref={rootRef}
       id="case-studies"
       aria-labelledby="case-studies-heading"
       className="py-20 md:py-28"
     >
       <div className="section-container !py-0 py-20 md:py-28">
         {/* Section header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={springTransition}
-          className="text-center mb-16"
-        >
+        <div data-anime className="text-center mb-16">
           <span className="inline-block text-xs font-semibold uppercase tracking-[0.18em] text-primary mb-3">
             Real Projects
           </span>
@@ -87,21 +94,18 @@ export function CaseStudiesSection() {
             Architecture decisions, trade-off analysis, and measured outcomes — not just
             a list of technologies used.
           </p>
-        </motion.div>
+        </div>
 
         {/* Cards */}
         <div className="space-y-8 max-w-4xl mx-auto">
-          {caseStudies.map((cs, index) => {
+          {caseStudies.map((cs) => {
             const Icon = cs.icon;
             const { label: statusLabel, colour: statusColour } = statusConfig[cs.status];
 
             return (
-              <motion.article
+              <article
                 key={cs.id}
-                initial={{ opacity: 0, y: 28 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ delay: index * 0.1, ...springTransition }}
+                data-anime
                 aria-labelledby={`cs-${cs.id}-heading`}
                 className="rounded-2xl border bg-card overflow-hidden"
                 style={{
@@ -211,22 +215,18 @@ export function CaseStudiesSection() {
                     ) : null}
                   </div>
                 </div>
-              </motion.article>
+              </article>
             );
           })}
         </div>
 
         {/* Empty state hint — visible when no items */}
         {caseStudies.length === 0 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-20 text-muted-foreground"
-          >
+          <div className="text-center py-20 text-muted-foreground animate-in fade-in duration-500">
             <Construction className="w-12 h-12 mx-auto mb-4 opacity-30" />
             <p className="text-lg font-medium">Case studies in progress</p>
             <p className="text-sm mt-2">Check back once the first project ships.</p>
-          </motion.div>
+          </div>
         )}
       </div>
     </section>

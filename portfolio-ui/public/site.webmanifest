@@ -1,4 +1,5 @@
 {
+  "id": "/",
   "name": "Thulani Maseko",
   "short_name": "Thulani",
   "description": "Senior software developer — Kubernetes, .NET, platform engineering.",
@@ -10,5 +11,6 @@
   "theme_color": "#0B0D14",
   "background_color": "#F5F2EE",
   "display": "standalone",
+  "scope": "/",
   "start_url": "/"
 }

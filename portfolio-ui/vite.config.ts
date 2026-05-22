@@ -30,7 +30,8 @@ export default defineConfig(({ mode }) => {
   return {
     server: {
       host: "::",
-      port: 8080,
+      port: 5173,
+      strictPort: true,
       // Note: HMR causes full-page reload in headless Playwright — use `npm run preview` for e2e tests.
       // Proxy API requests to the backend during development
       proxy: {
@@ -51,7 +52,8 @@ export default defineConfig(({ mode }) => {
     // preview server: same port so Playwright config needs no change between dev and preview mode.
     preview: {
       host: "::",
-      port: 8080,
+      port: 5173,
+      strictPort: true,
     },
     plugins: [
       react(),
@@ -75,15 +77,67 @@ export default defineConfig(({ mode }) => {
       __SHIPPED_COUNT__: JSON.stringify(getCommitCount()),
     },
     build: {
-      // (three-vendor + charts-vendor chunks both removed; recharts replaced
-      // with hand-rolled SkillsRadar SVG in phase-12.)
+      // Vendor chunks isolate heavy 3rd-party code from app code so:
+      //  (1) browser caches them across deploys when only app code changes,
+      //  (2) the parser/eval cost is parallelizable,
+      //  (3) main bundle reflects actual app size, not framework weight.
+      //
+      // Phase-12 removed three-vendor + charts-vendor (recharts -> SVG,
+      // three.js gone). Phase-13 brought 3D back via @react-three/fiber for
+      // the Scene component — Scene is eagerly imported in Index.tsx, so the
+      // three-vendor chunk is critical-path again. Keep it isolated for cache.
       modulePreload: { polyfill: true },
       rollupOptions: {
         output: {
-          manualChunks: {
-            // Animation libs share a vendor chunk — used across multiple eager
-            // and lazy sections, so isolating them lets the browser cache once.
-            'motion-vendor': ['framer-motion', 'lenis'],
+          manualChunks(id) {
+            if (!id.includes('node_modules')) return undefined;
+
+            // React core + router — small, stable, on every page.
+            if (
+              /node_modules\/(react|react-dom|scheduler|react-router|react-router-dom)\//.test(id)
+            ) {
+              return 'react-vendor';
+            }
+
+            // Three.js + R3F + drei. Eagerly imported by Scene in Index.tsx;
+            // isolating prevents it from doubling the main chunk on every code
+            // change to the app.
+            if (
+              id.includes('/three/') ||
+              id.includes('/@react-three/')
+            ) {
+              return 'three-vendor';
+            }
+
+            // Animation libs — used across eager + lazy sections.
+            if (id.includes('/animejs/') || id.includes('/lenis/')) {
+              return 'motion-vendor';
+            }
+
+            // Radix UI primitives — many small packages, share one chunk so
+            // the import graph collapses cleanly.
+            if (id.includes('/@radix-ui/')) {
+              return 'radix-vendor';
+            }
+
+            // Data layer.
+            if (id.includes('/@tanstack/react-query')) {
+              return 'query-vendor';
+            }
+
+            // Icon set is large enough to deserve its own bucket.
+            if (id.includes('/lucide-react/')) {
+              return 'icons-vendor';
+            }
+
+            // Monaco — only used by CodeDemoSection which is lazy-loaded.
+            // Forcing it into its own chunk keeps it deferred even if some
+            // future import accidentally pulls it eagerly.
+            if (id.includes('/@monaco-editor/') || id.includes('/monaco-editor/')) {
+              return 'monaco-vendor';
+            }
+
+            return undefined;
           },
         },
       },

@@ -1,5 +1,4 @@
-import { useMemo } from "react";
-import { motion } from "framer-motion";
+import { useMemo, useRef } from "react";
 import { Clock, ArrowRight, Tag, AlertCircle, FileText } from "lucide-react";
 import { format } from "date-fns";
 import { useArticles } from "@/hooks/use-articles";
@@ -9,8 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ArticleStatus } from "@/types/api";
 import type { Article } from "@/types/api";
 
-import { SPRING_DEFAULT as springTransition } from "@/lib/motion";
-// (re-exported as `springTransition` to minimize diff)
+import { revealOnScroll, useAnime } from "@/lib/use-anime";
 
 // Map API Article to the shape the blog template expects
 interface DisplayBlogPost {
@@ -62,6 +60,8 @@ function BlogCardSkeleton() {
 }
 
 export function BlogSection() {
+  const rootRef = useRef<HTMLElement>(null);
+
   // Fetch latest 3 published articles
   const { data: apiResponse, isLoading, isError, refetch } = useArticles({
     status: ArticleStatus.PUBLISHED,
@@ -81,8 +81,22 @@ export function BlogSection() {
     return staticBlogPosts;
   }, [apiResponse]);
 
+  useAnime(
+    rootRef,
+    (scope) => {
+      const root = rootRef.current;
+      if (!root) return;
+      if (scope.matches.reducedMotion) return;
+      return revealOnScroll(root, "[data-anime]", { staggerMs: 90 });
+    },
+    // Re-run after blogPosts changes from skeleton → real list so the
+    // newly-mounted card refs are picked up by querySelectorAll.
+    [blogPosts.length, isLoading],
+  );
+
   return (
     <section
+      ref={rootRef}
       id="blog"
       aria-labelledby="blog-heading"
       className="py-20 section-mesh"
@@ -90,30 +104,19 @@ export function BlogSection() {
     >
       <div className="section-container">
         {/* Section Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={springTransition}
-          className="text-center mb-12"
-        >
+        <div data-anime className="text-center mb-12">
           <span className="inline-block text-xs font-semibold uppercase tracking-[0.18em] text-primary mb-3">
             Blog
           </span>
           <h2 id="blog-heading" className="section-title">Notes</h2>
           <p className="section-subtitle mx-auto">
-            Working notes on software I've shipped.
+            Working notes on software I&apos;ve shipped.
           </p>
-        </motion.div>
+        </div>
 
         {/* Error State */}
         {isError && env.useApi && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={springTransition}
-            className="flex items-center justify-center gap-2 mb-8 p-3 rounded-lg bg-destructive/10 text-destructive text-sm"
-          >
+          <div className="flex items-center justify-center gap-2 mb-8 p-3 rounded-lg bg-destructive/10 text-destructive text-sm animate-in fade-in duration-300">
             <AlertCircle className="w-4 h-4" />
             <span>Unable to load latest articles.</span>
             <button
@@ -122,7 +125,7 @@ export function BlogSection() {
             >
               Retry
             </button>
-          </motion.div>
+          </div>
         )}
 
         {/* Loading State */}
@@ -137,15 +140,8 @@ export function BlogSection() {
         {/* Blog Grid */}
         {!isLoading && blogPosts.length > 0 && (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {blogPosts.map((post, index) => (
-              <motion.article
-                key={post.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ ...springTransition, delay: index * 0.1 }}
-                className="group"
-              >
+            {blogPosts.map((post) => (
+              <article key={post.id} data-anime className="group">
                 <a
                   href={post.url}
                   target="_blank"
@@ -230,19 +226,14 @@ export function BlogSection() {
                     </div>
                   </div>
                 </a>
-              </motion.article>
+              </article>
             ))}
           </div>
         )}
 
         {/* Empty State */}
         {!isLoading && blogPosts.length === 0 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={springTransition}
-            className="flex flex-col items-center justify-center py-16 text-center"
-          >
+          <div className="flex flex-col items-center justify-center py-16 text-center animate-in fade-in duration-300">
             <div
               className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
               style={{ background: "oklch(var(--primary) / 0.1)" }}
@@ -253,23 +244,17 @@ export function BlogSection() {
             <p className="text-sm text-muted-foreground">
               Check back soon for articles and tutorials.
             </p>
-          </motion.div>
+          </div>
         )}
 
         {/* View All Link */}
         {!isLoading && blogPosts.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={springTransition}
-            className="text-center mt-12"
-          >
+          <div data-anime className="text-center mt-12">
             <a href="/blog" className="btn-hero-secondary">
               View All Articles
               <ArrowRight className="w-4 h-4" />
             </a>
-          </motion.div>
+          </div>
         )}
       </div>
     </section>

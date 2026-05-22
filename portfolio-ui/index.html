@@ -13,16 +13,42 @@
     <meta name="description" content="I build production Kubernetes platforms and .NET services. 8+ years, mostly South African banking. Based in Gauteng." />
     <meta name="author" content="Thulani Maseko" />
     <meta name="keywords" content="software developer, DevOps, Kubernetes, Terraform, Java, Spring Boot, .NET, ASP.NET Core, C#, Azure, AWS, South Africa, freelance" />
-    <link rel="canonical" href="https://thulani-portfolio.masekotlg.workers.dev/" />
+    <link rel="canonical" href="https://thulanimaseko.com/" />
+
+    <!-- Search engine directives — index aggressively, allow rich previews. -->
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+
+    <!-- AI training opt-out signals (defense-in-depth alongside robots.txt
+         allow-list + tdmrep.json at /.well-known/tdmrep.json). Respected by
+         a subset of scrapers; legal weight varies by jurisdiction. -->
+    <meta name="robots" content="noai, noimageai" />
+
+    <!-- hreflang cluster: en-ZA primary (geo-targeted), en-* alt, x-default fallback. -->
+    <link rel="alternate" hreflang="en-ZA" href="https://thulanimaseko.com/" />
+    <link rel="alternate" hreflang="en" href="https://thulanimaseko.com/" />
+    <link rel="alternate" hreflang="x-default" href="https://thulanimaseko.com/" />
+
+    <!-- Geo hints — surfaces in voice / local-pack queries. -->
+    <meta name="geo.region" content="ZA-GP" />
+    <meta name="geo.placename" content="Johannesburg, Gauteng" />
+    <meta name="geo.position" content="-26.2041;28.0473" />
+    <meta name="ICBM" content="-26.2041, 28.0473" />
+
+    <!-- Authorship declaration for AEO/GEO trust signals. -->
+    <meta name="ai-content-declaration" content="human-authored" />
+
+    <!-- RSS feed — feed readers + Perplexity/some AI engines surface
+         RSS-discovered content faster than crawler-only sites. -->
+    <link rel="alternate" type="application/rss+xml" title="Thulani Maseko - Blog &amp; Answers" href="https://thulanimaseko.com/rss.xml" />
 
     <!-- Open Graph ─────────────────────────────────────────────────────── -->
     <meta property="og:site_name" content="Thulani Maseko" />
     <meta property="og:title" content="Thulani Maseko — senior software developer" />
     <meta property="og:description" content="I build production Kubernetes platforms and .NET services. 8+ years, mostly South African banking." />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://thulani-portfolio.masekotlg.workers.dev/" />
+    <meta property="og:url" content="https://thulanimaseko.com/" />
     <meta property="og:locale" content="en_ZA" />
-    <meta property="og:image" content="https://thulani-portfolio.masekotlg.workers.dev/og/home.png?v=2" />
+    <meta property="og:image" content="https://thulanimaseko.com/og/home.png?v=2" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:image:type" content="image/png" />
@@ -32,7 +58,7 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Thulani Maseko — senior software developer" />
     <meta name="twitter:description" content="I build production Kubernetes platforms and .NET services. 8+ years, mostly South African banking." />
-    <meta name="twitter:image" content="https://thulani-portfolio.masekotlg.workers.dev/og/home.png?v=2" />
+    <meta name="twitter:image" content="https://thulanimaseko.com/og/home.png?v=2" />
 
     <!-- schema.org structured data ─────────────────────────────────────── -->
     <script type="application/ld+json">
@@ -41,11 +67,11 @@
       "@graph": [
         {
           "@type": "Person",
-          "@id": "https://thulani-portfolio.masekotlg.workers.dev/#thulani",
+          "@id": "https://thulanimaseko.com/#thulani",
           "name": "Thulani Maseko",
           "jobTitle": "Software Developer & DevOps Engineer",
           "description": "Senior software developer and DevOps engineer based in Gauteng, South Africa, specialising in Kubernetes operations, Terraform IaC, and .NET backend engineering.",
-          "url": "https://thulani-portfolio.masekotlg.workers.dev/",
+          "url": "https://thulanimaseko.com/",
           "email": "ltmaseko7@gmail.com",
           "address": {
             "@type": "PostalAddress",
@@ -78,7 +104,7 @@
           "name": "Prudentia Digital",
           "url": "https://prudentiadigital.co.za/",
           "description": "Freelance software development and DevOps engineering services.",
-          "founder": { "@id": "https://thulani-portfolio.masekotlg.workers.dev/#thulani" },
+          "founder": { "@id": "https://thulanimaseko.com/#thulani" },
           "address": {
             "@type": "PostalAddress",
             "addressRegion": "Gauteng",
@@ -118,23 +144,25 @@
         },
         {
           "@type": "WebSite",
-          "@id": "https://thulani-portfolio.masekotlg.workers.dev/#website",
-          "url": "https://thulani-portfolio.masekotlg.workers.dev/",
+          "@id": "https://thulanimaseko.com/#website",
+          "url": "https://thulanimaseko.com/",
           "name": "Thulani Maseko | Software Developer Portfolio",
           "description": "Portfolio and professional profile of Thulani Maseko.",
-          "publisher": { "@id": "https://thulani-portfolio.masekotlg.workers.dev/#thulani" }
+          "publisher": { "@id": "https://thulanimaseko.com/#thulani" }
         }
       ]
     }
     </script>
 
     <!-- Plausible analytics — privacy-first, no cookies, GDPR compliant.
-         Register `thulani-portfolio.masekotlg.workers.dev` at
-         https://plausible.io before portfolio traffic appears in the
-         dashboard. The script is a no-op until then. (The company site at
+         Domain changed from thulani-portfolio.masekotlg.workers.dev to
+         thulanimaseko.com as part of the SEO/AEO rework (see
+         ~/.claude/plans/atomic-toasting-locket.md). Register the new
+         domain at https://plausible.io before traffic appears in the
+         dashboard; the script is a no-op until then. (The company site at
          prudentiadigital.co.za is tracked under its own Plausible entry,
          from its own repo.) -->
-    <script defer data-domain="thulani-portfolio.masekotlg.workers.dev" src="https://plausible.io/js/script.js"></script>
+    <script defer data-domain="thulanimaseko.com" src="https://plausible.io/js/script.js"></script>
 
     <!-- Fonts are self-hosted via @fontsource (see src/index.css).
          Google Fonts CDN links removed to eliminate third-party round-trip
