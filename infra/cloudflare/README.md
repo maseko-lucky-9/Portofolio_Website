@@ -10,20 +10,60 @@ environment.
 | `variables.tf` | Inputs (zone name, account ID, API token) |
 | `outputs.tf` | Rule IDs for downstream debugging |
 
-## Apply
+## Apply — fast path
+
+Once the zone is **Active** in Cloudflare (domain registered + DNS
+delegated), one command:
 
 ```bash
-cd infra/cloudflare
-terraform init
-terraform plan \
-  -var "cf_api_token=$(op read 'op://Personal/Cloudflare API Token/credential')" \
-  -var "cf_account_id=1ddc6b389e8661e7a6948805382d1ec4" \
-  -var "cf_zone_name=thulanimaseko.com"
-terraform apply
+cd infra/cloudflare && ./apply.sh
 ```
 
-API token needs **Zone:Zone WAF:Edit** and **Zone:Zone:Read** scoped to
-the `thulanimaseko.com` zone.
+The wrapper:
 
-State is local-only (`terraform.tfstate` in `.gitignore`). For team use,
+1. Verifies the zone is actually registered (Verisign WHOIS check) —
+   aborts loudly if not, so terraform doesn't fail mid-plan with a
+   misleading error.
+2. Resolves the Cloudflare API token from, in order:
+   `$TF_VAR_cf_api_token` → `$CLOUDFLARE_API_TOKEN` → 1Password
+   (`op read 'op://Personal/Cloudflare API Token/credential'`) →
+   macOS Keychain (`cloudflare-api-token`) → interactive prompt.
+3. Runs `init → validate → plan → apply`.
+
+`./apply.sh --auto-approve` for non-interactive (CI) runs.
+
+## Apply — manual path
+
+```bash
+export TF_VAR_cf_api_token=...
+terraform init
+terraform plan -var-file=terraform.tfvars
+terraform apply -var-file=terraform.tfvars
+```
+
+## API token scopes
+
+Create at <https://dash.cloudflare.com/profile/api-tokens>. Needs:
+
+- **Zone → Zone WAF → Edit**
+- **Zone → Zone → Read**
+
+Scope to **Specific zone → thulanimaseko.com** (not "All zones") to keep
+the blast radius small.
+
+## State
+
+Local-only — `terraform.tfstate` is in `.gitignore`. For team use,
 migrate to an S3/R2 backend before that becomes a problem.
+
+## Files
+
+| File | Purpose |
+|---|---|
+| `main.tf` | Provider + zone data source |
+| `variables.tf` | Input vars |
+| `waf.tf` | 5 WAF rules from `docs/seo/bot-policy.md` |
+| `outputs.tf` | Rule IDs |
+| `terraform.tfvars` | Account ID + zone name (gitignored; token NOT here) |
+| `example.tfvars` | Same as above, committed for reference |
+| `apply.sh` | Token-resolving wrapper (recommended entry point) |
