@@ -15,7 +15,8 @@ spec:
   schedule: "0 2 * * *"  # Daily at 2 AM
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 3
-  concurrencyPolicy: Forbid
+  concurrencyPolicy: Replace
+  startingDeadlineSeconds: 600
   jobTemplate:
     spec:
       template:
