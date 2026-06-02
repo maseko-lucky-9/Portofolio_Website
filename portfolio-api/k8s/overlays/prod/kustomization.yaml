@@ -20,9 +20,6 @@ labels:
 bases:
 - ../../base
 
-resources:
-- external-secret.yaml
-
 patchesStrategicMerge:
 - deployment-patch.yaml
 - configmap-patch.yaml
