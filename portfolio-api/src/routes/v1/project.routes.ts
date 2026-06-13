@@ -53,8 +53,8 @@ export async function projectRoutes(app: FastifyInstance): Promise<void> {
             : (query.featured as any) === 'false'
               ? false
               : undefined,
-        tag: query.tag as string | undefined,
-        search: query.search as string | undefined,
+        tag: query.tag,
+        search: query.search,
         sortBy: (query.sortBy as string) || 'createdAt',
         sortOrder: (query.sortOrder as 'asc' | 'desc') || 'desc',
       });
