@@ -5,7 +5,8 @@ import { personalData } from "@/data/personal";
 
 // Mock framer-motion to pass through children
 vi.mock("framer-motion", async () => {
-  const actual = await vi.importActual<typeof import("framer-motion")>("framer-motion");
+  const actual =
+    await vi.importActual<typeof import("framer-motion")>("framer-motion");
   return {
     ...actual,
   };
@@ -17,14 +18,21 @@ function renderNavbar() {
   return render(
     <ThemeProvider>
       <Navbar />
-    </ThemeProvider>
+    </ThemeProvider>,
   );
 }
 
 describe("Navbar", () => {
   it("renders all 6 navigation links", () => {
     renderNavbar();
-    const expectedLinks = ["About", "Skills", "Projects", "Experience", "Blog", "Contact"];
+    const expectedLinks = [
+      "About",
+      "Skills",
+      "Projects",
+      "Experience",
+      "Blog",
+      "Contact",
+    ];
 
     expectedLinks.forEach((linkText) => {
       const buttons = screen.getAllByText(linkText);
@@ -48,7 +56,7 @@ describe("Navbar", () => {
     renderNavbar();
     // "Toggle theme" is provided as accessible name via aria-label, not text node.
     expect(
-      screen.getByRole("button", { name: /toggle theme/i })
+      screen.getByRole("button", { name: /toggle theme/i }),
     ).toBeInTheDocument();
   });
 

@@ -57,8 +57,8 @@ export function CodeDemoSection() {
           </span>
           <h2 className="section-title">Interactive Code Demo</h2>
           <p className="section-subtitle mx-auto">
-            Explore my coding style with live examples. Try running the code to see it in
-            action.
+            Explore my coding style with live examples. Try running the code to
+            see it in action.
           </p>
         </div>
 
@@ -78,8 +78,14 @@ export function CodeDemoSection() {
               }`}
               style={{
                 ...(activeExample.id === example.id
-                  ? { background: "oklch(var(--primary))", boxShadow: "var(--shadow-sm)" }
-                  : { background: "oklch(var(--card))", borderColor: "oklch(var(--border))" }),
+                  ? {
+                      background: "oklch(var(--primary))",
+                      boxShadow: "var(--shadow-sm)",
+                    }
+                  : {
+                      background: "oklch(var(--card))",
+                      borderColor: "oklch(var(--border))",
+                    }),
                 transition: "all 200ms cubic-bezier(0.16, 1, 0.3, 1)",
               }}
             >
@@ -102,7 +108,9 @@ export function CodeDemoSection() {
                   <div className="w-3 h-3 rounded-full bg-amber-500/80" />
                   <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
                 </div>
-                <span className="text-sm font-medium">{activeExample.title}</span>
+                <span className="text-sm font-medium">
+                  {activeExample.title}
+                </span>
                 <span className="text-xs text-muted-foreground">
                   {activeExample.language}
                 </span>
@@ -111,7 +119,9 @@ export function CodeDemoSection() {
                 <button
                   onClick={handleCopy}
                   className="p-2 rounded-lg transition-all hover:bg-accent"
-                  style={{ transition: "all 200ms cubic-bezier(0.16, 1, 0.3, 1)" }}
+                  style={{
+                    transition: "all 200ms cubic-bezier(0.16, 1, 0.3, 1)",
+                  }}
                   aria-label="Copy code"
                 >
                   {copied ? (
@@ -156,7 +166,10 @@ export function CodeDemoSection() {
             </div>
 
             {/* Output */}
-            <div className="border-t" style={{ background: "oklch(var(--muted) / 0.3)" }}>
+            <div
+              className="border-t"
+              style={{ background: "oklch(var(--muted) / 0.3)" }}
+            >
               <div
                 className="flex items-center gap-2 px-4 py-2 border-b"
                 style={{ background: "oklch(var(--muted) / 0.5)" }}
@@ -165,7 +178,11 @@ export function CodeDemoSection() {
                 <span className="text-sm font-medium">Output</span>
               </div>
               <pre className="p-4 text-sm font-mono overflow-x-auto max-h-40">
-                <code className={isRunning ? "text-muted-foreground" : "text-foreground"}>
+                <code
+                  className={
+                    isRunning ? "text-muted-foreground" : "text-foreground"
+                  }
+                >
                   {output}
                 </code>
               </pre>

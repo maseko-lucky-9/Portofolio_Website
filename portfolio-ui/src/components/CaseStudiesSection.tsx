@@ -43,7 +43,16 @@ const caseStudies: CaseStudy[] = [
     description:
       "A self-hosted, single-node MicroK8s cluster that mirrors the architecture of a production platform — ArgoCD App-of-Apps GitOps, External Secrets Operator, cert-manager, Prometheus/Grafana stack, and Cloudflare Tunnel exposure. Built to demonstrate that homelab ≠ toy.",
     icon: Server,
-    stack: ["MicroK8s", "ArgoCD", "Helm", "Prometheus", "Grafana", "cert-manager", "ESO", "Cloudflare"],
+    stack: [
+      "MicroK8s",
+      "ArgoCD",
+      "Helm",
+      "Prometheus",
+      "Grafana",
+      "cert-manager",
+      "ESO",
+      "Cloudflare",
+    ],
     metrics: [
       { label: "Setup to ArgoCD sync", value: "< 2h" },
       { label: "TLS provisioned via", value: "cert-manager" },
@@ -54,11 +63,21 @@ const caseStudies: CaseStudy[] = [
   },
 ];
 
-const statusConfig: Record<CaseStudyStatus, { label: string; colour: string }> = {
-  live: { label: "Live", colour: "text-emerald-500 bg-emerald-500/10 border-emerald-500/20" },
-  "in-progress": { label: "In Progress", colour: "text-amber-500 bg-amber-500/10 border-amber-500/20" },
-  planned: { label: "Planned", colour: "text-muted-foreground bg-muted/60 border-border" },
-};
+const statusConfig: Record<CaseStudyStatus, { label: string; colour: string }> =
+  {
+    live: {
+      label: "Live",
+      colour: "text-emerald-500 bg-emerald-500/10 border-emerald-500/20",
+    },
+    "in-progress": {
+      label: "In Progress",
+      colour: "text-amber-500 bg-amber-500/10 border-amber-500/20",
+    },
+    planned: {
+      label: "Planned",
+      colour: "text-muted-foreground bg-muted/60 border-border",
+    },
+  };
 
 export function CaseStudiesSection() {
   const rootRef = useRef<HTMLElement>(null);
@@ -91,8 +110,8 @@ export function CaseStudiesSection() {
             Case Studies
           </h2>
           <p className="section-subtitle mx-auto">
-            Architecture decisions, trade-off analysis, and measured outcomes — not just
-            a list of technologies used.
+            Architecture decisions, trade-off analysis, and measured outcomes —
+            not just a list of technologies used.
           </p>
         </div>
 
@@ -100,7 +119,8 @@ export function CaseStudiesSection() {
         <div className="space-y-8 max-w-4xl mx-auto">
           {caseStudies.map((cs) => {
             const Icon = cs.icon;
-            const { label: statusLabel, colour: statusColour } = statusConfig[cs.status];
+            const { label: statusLabel, colour: statusColour } =
+              statusConfig[cs.status];
 
             return (
               <article
@@ -118,7 +138,10 @@ export function CaseStudiesSection() {
                   <div className="flex items-start justify-between gap-4 mb-6">
                     <div className="flex items-center gap-4">
                       <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500/20 to-indigo-500/20 shrink-0">
-                        <Icon className="w-6 h-6 text-foreground" aria-hidden="true" />
+                        <Icon
+                          className="w-6 h-6 text-foreground"
+                          aria-hidden="true"
+                        />
                       </div>
                       <div>
                         <span className="text-xs font-semibold uppercase tracking-[0.15em] text-primary">
@@ -130,7 +153,9 @@ export function CaseStudiesSection() {
                         >
                           {cs.title}
                         </h3>
-                        <p className="text-sm text-muted-foreground">{cs.subtitle}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {cs.subtitle}
+                        </p>
                       </div>
                     </div>
 
@@ -225,7 +250,9 @@ export function CaseStudiesSection() {
           <div className="text-center py-20 text-muted-foreground animate-in fade-in duration-500">
             <Construction className="w-12 h-12 mx-auto mb-4 opacity-30" />
             <p className="text-lg font-medium">Case studies in progress</p>
-            <p className="text-sm mt-2">Check back once the first project ships.</p>
+            <p className="text-sm mt-2">
+              Check back once the first project ships.
+            </p>
           </div>
         )}
       </div>

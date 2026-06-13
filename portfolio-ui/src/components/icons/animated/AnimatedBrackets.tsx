@@ -35,7 +35,9 @@ export function AnimatedBrackets({
       if (scope.matches.reducedMotion) return;
       const svg = svgRef.current;
       if (!svg) return;
-      const paths = svg.querySelectorAll<SVGPathElement>("[data-anime-bracket]");
+      const paths = svg.querySelectorAll<SVGPathElement>(
+        "[data-anime-bracket]",
+      );
       if (paths.length === 0) return;
 
       const drawables = Array.from(paths).map((p) => createDrawable(p));

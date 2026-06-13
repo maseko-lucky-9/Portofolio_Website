@@ -1,11 +1,11 @@
 /**
  * Projects Service
- * 
+ *
  * Handles all project-related API operations
  */
 
-import { BaseService } from './base.service';
-import { httpClient } from '@/lib/http-client';
+import { BaseService } from "./base.service";
+import { httpClient } from "@/lib/http-client";
 import type {
   Project,
   ProjectQueryParams,
@@ -13,17 +13,19 @@ import type {
   PaginatedResponse,
   CreateProjectData,
   UpdateProjectData,
-} from '@/types/api';
+} from "@/types/api";
 
 class ProjectsService extends BaseService<Project> {
   constructor() {
-    super('/projects');
+    super("/projects");
   }
 
   /**
    * Get projects with filtering and pagination
    */
-  async getProjects(params?: ProjectQueryParams): Promise<PaginatedResponse<Project>> {
+  async getProjects(
+    params?: ProjectQueryParams,
+  ): Promise<PaginatedResponse<Project>> {
     return this.getAll(params);
   }
 
@@ -31,7 +33,9 @@ class ProjectsService extends BaseService<Project> {
    * Get single project by slug
    */
   async getBySlug(slug: string): Promise<ApiResponse<Project>> {
-    return httpClient.get<ApiResponse<Project>>(`${this.basePath}/slug/${slug}`);
+    return httpClient.get<ApiResponse<Project>>(
+      `${this.basePath}/slug/${slug}`,
+    );
   }
 
   /**
@@ -39,7 +43,7 @@ class ProjectsService extends BaseService<Project> {
    */
   async getFeatured(limit: number = 6): Promise<ApiResponse<Project[]>> {
     return httpClient.get<ApiResponse<Project[]>>(
-      `${this.basePath}?featured=true&limit=${limit}`
+      `${this.basePath}?featured=true&limit=${limit}`,
     );
   }
 
@@ -50,7 +54,7 @@ class ProjectsService extends BaseService<Project> {
     return httpClient.post<ApiResponse<void>>(
       `${this.basePath}/slug/${slug}/views`,
       undefined,
-      { skipAuth: true }
+      { skipAuth: true },
     );
   }
 
@@ -59,7 +63,7 @@ class ProjectsService extends BaseService<Project> {
    */
   async toggleLike(id: string): Promise<ApiResponse<{ likes: number }>> {
     return httpClient.post<ApiResponse<{ likes: number }>>(
-      `${this.basePath}/${id}/like`
+      `${this.basePath}/${id}/like`,
     );
   }
 
@@ -91,25 +95,40 @@ class ProjectsService extends BaseService<Project> {
   /**
    * Get projects by tag
    */
-  async getByTag(tagSlug: string, params?: ProjectQueryParams): Promise<PaginatedResponse<Project>> {
+  async getByTag(
+    tagSlug: string,
+    params?: ProjectQueryParams,
+  ): Promise<PaginatedResponse<Project>> {
     const query = this.buildQueryString({ ...params, tag: tagSlug });
-    return httpClient.get<PaginatedResponse<Project>>(`${this.basePath}${query}`);
+    return httpClient.get<PaginatedResponse<Project>>(
+      `${this.basePath}${query}`,
+    );
   }
 
   /**
    * Get projects by category
    */
-  async getByCategory(category: string, params?: ProjectQueryParams): Promise<PaginatedResponse<Project>> {
+  async getByCategory(
+    category: string,
+    params?: ProjectQueryParams,
+  ): Promise<PaginatedResponse<Project>> {
     const query = this.buildQueryString({ ...params, category });
-    return httpClient.get<PaginatedResponse<Project>>(`${this.basePath}${query}`);
+    return httpClient.get<PaginatedResponse<Project>>(
+      `${this.basePath}${query}`,
+    );
   }
 
   /**
    * Search projects
    */
-  async search(searchQuery: string, params?: ProjectQueryParams): Promise<PaginatedResponse<Project>> {
+  async search(
+    searchQuery: string,
+    params?: ProjectQueryParams,
+  ): Promise<PaginatedResponse<Project>> {
     const query = this.buildQueryString({ ...params, search: searchQuery });
-    return httpClient.get<PaginatedResponse<Project>>(`${this.basePath}${query}`);
+    return httpClient.get<PaginatedResponse<Project>>(
+      `${this.basePath}${query}`,
+    );
   }
 }
 

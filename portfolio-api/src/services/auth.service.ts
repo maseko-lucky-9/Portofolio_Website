@@ -7,7 +7,11 @@ import { LoginInput, RegisterInput } from '../utils/validation.js';
 
 export class AuthService {
   // Register new user
-  async register(data: RegisterInput): Promise<{ user: { id: string; email: string; role: Role }; accessToken: string; refreshToken: string }> {
+  async register(data: RegisterInput): Promise<{
+    user: { id: string; email: string; role: Role };
+    accessToken: string;
+    refreshToken: string;
+  }> {
     // Check if user exists
     const existing = await prisma.user.findUnique({
       where: { email: data.email },
@@ -50,7 +54,17 @@ export class AuthService {
   }
 
   // Login
-  async login(data: LoginInput): Promise<{ user: { id: string; email: string; role: Role; firstName: string | null; lastName: string | null }; accessToken: string; refreshToken: string }> {
+  async login(data: LoginInput): Promise<{
+    user: {
+      id: string;
+      email: string;
+      role: Role;
+      firstName: string | null;
+      lastName: string | null;
+    };
+    accessToken: string;
+    refreshToken: string;
+  }> {
     // Find user
     const user = await prisma.user.findUnique({
       where: { email: data.email },
@@ -158,7 +172,16 @@ export class AuthService {
   }
 
   // Get user profile
-  async getProfile(userId: string): Promise<{ id: string; email: string; role: Role; firstName: string | null; lastName: string | null; avatar: string | null; bio: string | null; createdAt: Date }> {
+  async getProfile(userId: string): Promise<{
+    id: string;
+    email: string;
+    role: Role;
+    firstName: string | null;
+    lastName: string | null;
+    avatar: string | null;
+    bio: string | null;
+    createdAt: Date;
+  }> {
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: {
@@ -181,7 +204,17 @@ export class AuthService {
   }
 
   // Update profile
-  async updateProfile(userId: string, data: { firstName?: string; lastName?: string; avatar?: string; bio?: string }): Promise<{ id: string; email: string; firstName: string | null; lastName: string | null; avatar: string | null; bio: string | null }> {
+  async updateProfile(
+    userId: string,
+    data: { firstName?: string; lastName?: string; avatar?: string; bio?: string }
+  ): Promise<{
+    id: string;
+    email: string;
+    firstName: string | null;
+    lastName: string | null;
+    avatar: string | null;
+    bio: string | null;
+  }> {
     const user = await prisma.user.update({
       where: { id: userId },
       data,
@@ -199,7 +232,11 @@ export class AuthService {
   }
 
   // Change password
-  async changePassword(userId: string, currentPassword: string, newPassword: string): Promise<void> {
+  async changePassword(
+    userId: string,
+    currentPassword: string,
+    newPassword: string
+  ): Promise<void> {
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { passwordHash: true },

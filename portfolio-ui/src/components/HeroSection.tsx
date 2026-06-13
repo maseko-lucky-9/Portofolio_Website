@@ -129,7 +129,11 @@ export function HeroSection() {
         if (!el) continue;
         tl.add(
           el,
-          { opacity: [0, 1], translateY: [16, 0], duration: DURATION.base * 1000 },
+          {
+            opacity: [0, 1],
+            translateY: [16, 0],
+            duration: DURATION.base * 1000,
+          },
           atMs,
         );
       }
@@ -151,7 +155,11 @@ export function HeroSection() {
       if (metrics) {
         tl.add(
           metrics,
-          { opacity: [0, 1], translateY: [16, 0], duration: DURATION.base * 1000 },
+          {
+            opacity: [0, 1],
+            translateY: [16, 0],
+            duration: DURATION.base * 1000,
+          },
           700,
         );
       }
@@ -248,7 +256,9 @@ export function HeroSection() {
                 const surname = rest.join(" ");
                 return (
                   <>
-                    <span className="font-normal text-foreground">Hi, I&apos;m</span>{" "}
+                    <span className="font-normal text-foreground">
+                      Hi, I&apos;m
+                    </span>{" "}
                     <span className="text-foreground">{first}</span>{" "}
                     <span
                       className="text-foreground [text-underline-offset:0.14em] [text-decoration-thickness:2px]"
@@ -285,11 +295,19 @@ export function HeroSection() {
               data-anime-hero="ctas"
               className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start mb-9"
             >
-              <button ref={primaryCtaRef} onClick={scrollToProjects} className="btn-hero-primary">
+              <button
+                ref={primaryCtaRef}
+                onClick={scrollToProjects}
+                className="btn-hero-primary"
+              >
                 See what I&apos;ve built
                 <ArrowDown className="w-4 h-4" />
               </button>
-              <button ref={secondaryCtaRef} onClick={scrollToContact} className="btn-hero-secondary">
+              <button
+                ref={secondaryCtaRef}
+                onClick={scrollToContact}
+                className="btn-hero-secondary"
+              >
                 Contact Me
               </button>
             </div>
@@ -300,9 +318,21 @@ export function HeroSection() {
               className="flex gap-3 justify-center lg:justify-start"
             >
               {[
-                { href: personalData.social.github, Icon: Github, label: "GitHub" },
-                { href: personalData.social.linkedin, Icon: Linkedin, label: "LinkedIn" },
-                { href: personalData.social.twitter, Icon: Twitter, label: "Twitter" },
+                {
+                  href: personalData.social.github,
+                  Icon: Github,
+                  label: "GitHub",
+                },
+                {
+                  href: personalData.social.linkedin,
+                  Icon: Linkedin,
+                  label: "LinkedIn",
+                },
+                {
+                  href: personalData.social.twitter,
+                  Icon: Twitter,
+                  label: "Twitter",
+                },
               ].map(({ href, Icon, label }) => (
                 <a
                   key={label}
@@ -317,18 +347,25 @@ export function HeroSection() {
                     transition: "all 250ms cubic-bezier(0.16, 1, 0.3, 1)",
                   }}
                   onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.background = "oklch(var(--primary))";
-                    (e.currentTarget as HTMLElement).style.color = "oklch(var(--primary-foreground))";
-                    (e.currentTarget as HTMLElement).style.transform = "translateY(-3px) scale(1.08)";
-                    (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-sm)";
-                    (e.currentTarget as HTMLElement).style.borderColor = "transparent";
+                    (e.currentTarget as HTMLElement).style.background =
+                      "oklch(var(--primary))";
+                    (e.currentTarget as HTMLElement).style.color =
+                      "oklch(var(--primary-foreground))";
+                    (e.currentTarget as HTMLElement).style.transform =
+                      "translateY(-3px) scale(1.08)";
+                    (e.currentTarget as HTMLElement).style.boxShadow =
+                      "var(--shadow-sm)";
+                    (e.currentTarget as HTMLElement).style.borderColor =
+                      "transparent";
                   }}
                   onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.background = "oklch(var(--muted))";
+                    (e.currentTarget as HTMLElement).style.background =
+                      "oklch(var(--muted))";
                     (e.currentTarget as HTMLElement).style.color = "";
                     (e.currentTarget as HTMLElement).style.transform = "";
                     (e.currentTarget as HTMLElement).style.boxShadow = "";
-                    (e.currentTarget as HTMLElement).style.borderColor = "oklch(var(--border))";
+                    (e.currentTarget as HTMLElement).style.borderColor =
+                      "oklch(var(--border))";
                   }}
                 >
                   <Icon className="w-5 h-5" />
@@ -338,7 +375,10 @@ export function HeroSection() {
           </div>
 
           {/* Right — Profile + metrics */}
-          <div data-anime-hero="right" className="relative flex flex-col items-center">
+          <div
+            data-anime-hero="right"
+            className="relative flex flex-col items-center"
+          >
             {/* Profile image — single hairline ring + quiet halo. No gradient. */}
             <div
               data-anime-hero="profile"
@@ -413,7 +453,10 @@ export function HeroSection() {
       {!pastFold && (
         <div
           className="absolute bottom-8 left-1/2 -translate-x-1/2"
-          style={{ opacity: heroInView ? 1 : 0, transition: "opacity 400ms ease-out" }}
+          style={{
+            opacity: heroInView ? 1 : 0,
+            transition: "opacity 400ms ease-out",
+          }}
         >
           <button
             ref={scrollIndicatorRef}
@@ -421,7 +464,9 @@ export function HeroSection() {
             className="flex flex-col items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
             aria-label="Scroll to projects"
           >
-            <span className="text-[10px] uppercase tracking-[0.2em] font-medium">Scroll</span>
+            <span className="text-[10px] uppercase tracking-[0.2em] font-medium">
+              Scroll
+            </span>
             <div className="w-5 h-8 rounded-full border border-current flex items-start justify-center pt-1.5">
               <div className="w-1 h-2 rounded-full bg-current" />
             </div>

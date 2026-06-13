@@ -5,10 +5,13 @@ import { nanoid } from 'nanoid';
 const logger = createLogger('request');
 
 // Request context stored in a WeakMap to avoid modifying request object
-const requestContextMap = new WeakMap<FastifyRequest, {
-  requestId: string;
-  startTime: number;
-}>();
+const requestContextMap = new WeakMap<
+  FastifyRequest,
+  {
+    requestId: string;
+    startTime: number;
+  }
+>();
 
 // Request logging middleware
 export const requestLogger = async (
@@ -77,7 +80,7 @@ export const setCacheHeaders = (maxAge: number, isPrivate: boolean = false) => {
     const cacheControl = isPrivate
       ? `private, max-age=${maxAge}`
       : `public, max-age=${maxAge}, s-maxage=${maxAge}`;
-    
+
     reply.header('Cache-Control', cacheControl);
   };
 };

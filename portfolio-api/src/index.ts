@@ -84,7 +84,7 @@ async function registerPlugins(): Promise<void> {
     nameSpace: 'rl:',
     skipOnError: true,
     keyGenerator: (request) => {
-      return request.headers['x-forwarded-for'] as string || request.ip;
+      return (request.headers['x-forwarded-for'] as string) || request.ip;
     },
     errorResponseBuilder: () => {
       return {

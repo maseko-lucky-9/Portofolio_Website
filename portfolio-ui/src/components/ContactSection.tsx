@@ -20,7 +20,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 
-import { DURATION, EASE_FN, shakeFieldAnim, strokeDrawAnim } from "@/lib/motion";
+import {
+  DURATION,
+  EASE_FN,
+  shakeFieldAnim,
+  strokeDrawAnim,
+} from "@/lib/motion";
 import { revealOnScroll, useAnime } from "@/lib/use-anime";
 
 // Form validation schema
@@ -28,7 +33,10 @@ const contactSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(100),
   email: z.string().email("Please enter a valid email address").max(255),
   subject: z.string().min(5, "Subject must be at least 5 characters").max(200),
-  message: z.string().min(20, "Message must be at least 20 characters").max(1000),
+  message: z
+    .string()
+    .min(20, "Message must be at least 20 characters")
+    .max(1000),
 });
 
 type ContactFormData = z.infer<typeof contactSchema>;
@@ -119,7 +127,7 @@ export function ContactSection() {
         ease: EASE_FN.emphasized,
       });
       const strokes = el.querySelectorAll<SVGElement>(
-        '[data-anime="success-icon"] path, [data-anime="success-icon"] circle, [data-anime="success-icon"] polyline'
+        '[data-anime="success-icon"] path, [data-anime="success-icon"] circle, [data-anime="success-icon"] polyline',
       );
       if (strokes.length) {
         strokes.forEach((s) => {
@@ -146,11 +154,11 @@ export function ContactSection() {
       if (!root) return;
       if (scope.matches.reducedMotion) return;
       const errorKeys = Object.keys(errors).filter(
-        (k) => !!errors[k as keyof ContactFormData]
+        (k) => !!errors[k as keyof ContactFormData],
       );
       if (errorKeys.length === 0) return;
       const invalidFields = root.querySelectorAll<HTMLElement>(
-        '[aria-invalid="true"]'
+        '[aria-invalid="true"]',
       );
       if (invalidFields.length) {
         animate(invalidFields, shakeFieldAnim());
@@ -169,7 +177,7 @@ export function ContactSection() {
   );
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -215,7 +223,7 @@ export function ContactSection() {
           // Global error toast handled by QueryClient config
           // No additional handling needed here
         },
-      }
+      },
     );
   };
 
@@ -232,10 +240,12 @@ export function ContactSection() {
           <span className="inline-block text-xs font-semibold uppercase tracking-[0.18em] text-primary mb-3">
             Contact
           </span>
-          <h2 id="contact-heading" className="section-title">Say hi</h2>
+          <h2 id="contact-heading" className="section-title">
+            Say hi
+          </h2>
           <p className="section-subtitle mx-auto">
-            Have a project in mind or want to discuss opportunities? I&apos;d love to hear
-            from you.
+            Have a project in mind or want to discuss opportunities? I&apos;d
+            love to hear from you.
           </p>
         </div>
 
@@ -249,7 +259,10 @@ export function ContactSection() {
               <div className="flex items-center gap-4">
                 <div
                   className="w-12 h-12 rounded-xl flex items-center justify-center transition-all"
-                  style={{ background: "oklch(var(--primary) / 0.08)", border: "1px solid oklch(var(--primary) / 0.15)" }}
+                  style={{
+                    background: "oklch(var(--primary) / 0.08)",
+                    border: "1px solid oklch(var(--primary) / 0.15)",
+                  }}
                 >
                   <Mail className="w-5 h-5 text-primary" />
                 </div>
@@ -268,7 +281,10 @@ export function ContactSection() {
               <div className="flex items-center gap-4">
                 <div
                   className="w-12 h-12 rounded-xl flex items-center justify-center transition-all"
-                  style={{ background: "oklch(var(--secondary) / 0.08)", border: "1px solid oklch(var(--secondary) / 0.15)" }}
+                  style={{
+                    background: "oklch(var(--secondary) / 0.08)",
+                    border: "1px solid oklch(var(--secondary) / 0.15)",
+                  }}
                 >
                   <MapPin className="w-5 h-5 text-secondary" />
                 </div>
@@ -280,12 +296,26 @@ export function ContactSection() {
 
               {/* Social Links */}
               <div className="pt-4">
-                <p className="text-sm text-muted-foreground mb-4">Connect with me</p>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Connect with me
+                </p>
                 <div className="flex gap-3">
                   {[
-                    { href: personalData.social.github, Icon: Github, label: "GitHub" },
-                    { href: personalData.social.linkedin, Icon: Linkedin, label: "LinkedIn" },
-                    { href: personalData.social.twitter, Icon: Twitter, label: "Twitter" },
+                    {
+                      href: personalData.social.github,
+                      Icon: Github,
+                      label: "GitHub",
+                    },
+                    {
+                      href: personalData.social.linkedin,
+                      Icon: Linkedin,
+                      label: "LinkedIn",
+                    },
+                    {
+                      href: personalData.social.twitter,
+                      Icon: Twitter,
+                      label: "Twitter",
+                    },
                   ].map(({ href, Icon, label }) => (
                     <a
                       key={label}
@@ -314,14 +344,19 @@ export function ContactSection() {
                     transition: "all 300ms cubic-bezier(0.16, 1, 0.3, 1)",
                   }}
                   onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)";
-                    (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-sm)";
-                    (e.currentTarget as HTMLElement).style.borderColor = "oklch(var(--primary) / 0.3)";
+                    (e.currentTarget as HTMLElement).style.transform =
+                      "translateY(-2px)";
+                    (e.currentTarget as HTMLElement).style.boxShadow =
+                      "var(--shadow-sm)";
+                    (e.currentTarget as HTMLElement).style.borderColor =
+                      "oklch(var(--primary) / 0.3)";
                   }}
                   onMouseLeave={(e) => {
                     (e.currentTarget as HTMLElement).style.transform = "";
-                    (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-sm)";
-                    (e.currentTarget as HTMLElement).style.borderColor = "oklch(var(--border))";
+                    (e.currentTarget as HTMLElement).style.boxShadow =
+                      "var(--shadow-sm)";
+                    (e.currentTarget as HTMLElement).style.borderColor =
+                      "oklch(var(--border))";
                   }}
                 >
                   <Download className="w-5 h-5 text-primary" />
@@ -343,20 +378,27 @@ export function ContactSection() {
                     transition: "all 300ms cubic-bezier(0.16, 1, 0.3, 1)",
                   }}
                   onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)";
-                    (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-sm)";
-                    (e.currentTarget as HTMLElement).style.borderColor = "oklch(var(--primary) / 0.3)";
+                    (e.currentTarget as HTMLElement).style.transform =
+                      "translateY(-2px)";
+                    (e.currentTarget as HTMLElement).style.boxShadow =
+                      "var(--shadow-sm)";
+                    (e.currentTarget as HTMLElement).style.borderColor =
+                      "oklch(var(--primary) / 0.3)";
                   }}
                   onMouseLeave={(e) => {
                     (e.currentTarget as HTMLElement).style.transform = "";
-                    (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-sm)";
-                    (e.currentTarget as HTMLElement).style.borderColor = "oklch(var(--border))";
+                    (e.currentTarget as HTMLElement).style.boxShadow =
+                      "var(--shadow-sm)";
+                    (e.currentTarget as HTMLElement).style.borderColor =
+                      "oklch(var(--border))";
                   }}
                 >
                   <Calendar className="w-5 h-5 text-secondary" />
                   <div>
                     <p className="font-medium">Schedule a Call</p>
-                    <p className="text-xs text-muted-foreground">30 min meeting</p>
+                    <p className="text-xs text-muted-foreground">
+                      30 min meeting
+                    </p>
                   </div>
                 </a>
               </div>
@@ -375,7 +417,10 @@ export function ContactSection() {
                 >
                   <div
                     className="w-16 h-16 rounded-full flex items-center justify-center mb-4"
-                    style={{ background: "oklch(var(--secondary) / 0.08)", border: "1px solid oklch(var(--secondary) / 0.2)" }}
+                    style={{
+                      background: "oklch(var(--secondary) / 0.08)",
+                      border: "1px solid oklch(var(--secondary) / 0.2)",
+                    }}
                   >
                     <CheckCircle
                       data-anime="success-icon"
@@ -400,7 +445,9 @@ export function ContactSection() {
                         placeholder="John Doe"
                         className={errors.name ? "border-destructive" : ""}
                         aria-invalid={!!errors.name}
-                        aria-describedby={errors.name ? "name-error" : undefined}
+                        aria-describedby={
+                          errors.name ? "name-error" : undefined
+                        }
                       />
                       {errors.name && (
                         <p
@@ -424,7 +471,9 @@ export function ContactSection() {
                         placeholder="john@example.com"
                         className={errors.email ? "border-destructive" : ""}
                         aria-invalid={!!errors.email}
-                        aria-describedby={errors.email ? "email-error" : undefined}
+                        aria-describedby={
+                          errors.email ? "email-error" : undefined
+                        }
                       />
                       {errors.email && (
                         <p
@@ -448,7 +497,9 @@ export function ContactSection() {
                       placeholder="Project Inquiry"
                       className={errors.subject ? "border-destructive" : ""}
                       aria-invalid={!!errors.subject}
-                      aria-describedby={errors.subject ? "subject-error" : undefined}
+                      aria-describedby={
+                        errors.subject ? "subject-error" : undefined
+                      }
                     />
                     {errors.subject && (
                       <p
@@ -472,7 +523,9 @@ export function ContactSection() {
                       rows={5}
                       className={errors.message ? "border-destructive" : ""}
                       aria-invalid={!!errors.message}
-                      aria-describedby={errors.message ? "message-error" : undefined}
+                      aria-describedby={
+                        errors.message ? "message-error" : undefined
+                      }
                     />
                     {errors.message && (
                       <p

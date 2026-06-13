@@ -31,7 +31,8 @@ export function CustomCursor() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     const coarse = window.matchMedia("(pointer: coarse)").matches;
-    const nomo = new URLSearchParams(window.location.search).get("nomo") === "1";
+    const nomo =
+      new URLSearchParams(window.location.search).get("nomo") === "1";
     if (coarse || nomo) return; // Stay un-rendered for the session.
     setShouldRender(true);
   }, []);

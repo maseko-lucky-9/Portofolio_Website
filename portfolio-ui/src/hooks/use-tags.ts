@@ -1,12 +1,12 @@
 /**
  * Tags Hooks
- * 
+ *
  * React Query hooks for tag operations
  */
 
-import { useQuery } from '@tanstack/react-query';
-import { tagsService } from '@/services/tags.service';
-import { queryKeys } from '@/lib/react-query';
+import { useQuery } from "@tanstack/react-query";
+import { tagsService } from "@/services/tags.service";
+import { queryKeys } from "@/lib/react-query";
 
 /**
  * Get all tags

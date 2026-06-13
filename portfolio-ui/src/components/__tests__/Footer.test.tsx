@@ -7,7 +7,9 @@ describe("Footer", () => {
   it("renders copyright with current year", () => {
     render(<Footer />);
     const currentYear = new Date().getFullYear().toString();
-    expect(screen.getByText(new RegExp(`© ${currentYear}`))).toBeInTheDocument();
+    expect(
+      screen.getByText(new RegExp(`© ${currentYear}`)),
+    ).toBeInTheDocument();
   });
 
   it("renders brand name", () => {
@@ -19,7 +21,14 @@ describe("Footer", () => {
 
   it("renders all 6 navigation links", () => {
     render(<Footer />);
-    const expectedLinks = ["About", "Skills", "Projects", "Experience", "Blog", "Contact"];
+    const expectedLinks = [
+      "About",
+      "Skills",
+      "Projects",
+      "Experience",
+      "Blog",
+      "Contact",
+    ];
     expectedLinks.forEach((linkText) => {
       expect(screen.getByText(linkText)).toBeInTheDocument();
     });
@@ -34,8 +43,17 @@ describe("Footer", () => {
 
   it("social links have correct hrefs", () => {
     render(<Footer />);
-    expect(screen.getByLabelText("GitHub")).toHaveAttribute("href", personalData.social.github);
-    expect(screen.getByLabelText("LinkedIn")).toHaveAttribute("href", personalData.social.linkedin);
-    expect(screen.getByLabelText("Twitter")).toHaveAttribute("href", personalData.social.twitter);
+    expect(screen.getByLabelText("GitHub")).toHaveAttribute(
+      "href",
+      personalData.social.github,
+    );
+    expect(screen.getByLabelText("LinkedIn")).toHaveAttribute(
+      "href",
+      personalData.social.linkedin,
+    );
+    expect(screen.getByLabelText("Twitter")).toHaveAttribute(
+      "href",
+      personalData.social.twitter,
+    );
   });
 });

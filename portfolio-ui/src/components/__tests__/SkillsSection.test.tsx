@@ -11,7 +11,8 @@ vi.mock("@/components/SkillsRadar", () => ({
 
 // Mock framer-motion to preserve children rendering
 vi.mock("framer-motion", async () => {
-  const actual = await vi.importActual<typeof import("framer-motion")>("framer-motion");
+  const actual =
+    await vi.importActual<typeof import("framer-motion")>("framer-motion");
   return {
     ...actual,
   };
@@ -51,7 +52,9 @@ describe("SkillsSection", () => {
 
   it.skip("renders skill progress bars", () => {
     const { container } = render(<SkillsSection />);
-    const progressBars = container.querySelectorAll(".h-2.bg-muted.rounded-full");
+    const progressBars = container.querySelectorAll(
+      ".h-2.bg-muted.rounded-full",
+    );
     expect(progressBars.length).toBeGreaterThan(0);
   });
 

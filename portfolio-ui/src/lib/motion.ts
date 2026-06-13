@@ -24,12 +24,7 @@
  *     multiply by 1000 at the call site, or use the `*Anim()` factories
  *     which already convert.
  */
-import {
-  useEffect,
-  useRef,
-  useSyncExternalStore,
-  type RefObject,
-} from "react";
+import { useEffect, useRef, useSyncExternalStore, type RefObject } from "react";
 import { cubicBezier, spring } from "animejs";
 import { useReducedMotion } from "./use-reduced-motion";
 
@@ -37,7 +32,7 @@ import { useReducedMotion } from "./use-reduced-motion";
 // Mirrors the --duration-* CSS vars. Numbers (not strings) so consumers
 // can do arithmetic — anime.js needs ms (multiply by 1000), CSS needs s.
 export const DURATION = {
-  instant: 0.10,
+  instant: 0.1,
   fast: 0.18,
   base: 0.28,
   slow: 0.48,
@@ -81,9 +76,15 @@ const SPRING_PARAMS = {
 
 // Framer-compatible (no `as Transition` annotation; framer-motion accepts
 // the structural shape and we no longer import its types).
-export const SPRING_DEFAULT = { type: "spring", ...SPRING_PARAMS.default } as const;
+export const SPRING_DEFAULT = {
+  type: "spring",
+  ...SPRING_PARAMS.default,
+} as const;
 export const SPRING_HERO = { type: "spring", ...SPRING_PARAMS.hero } as const;
-export const SPRING_SKILLS = { type: "spring", ...SPRING_PARAMS.skills } as const;
+export const SPRING_SKILLS = {
+  type: "spring",
+  ...SPRING_PARAMS.skills,
+} as const;
 
 // Anime-compatible spring instances. Pass into anime config as `ease:`.
 export const springAnimeDefault = spring(SPRING_PARAMS.default);
@@ -188,7 +189,8 @@ function hasSlowConnection(): boolean {
 function subscribeToFlagSources(callback: () => void): () => void {
   if (typeof window === "undefined") return () => {};
   window.addEventListener("popstate", callback);
-  const conn = (navigator as Navigator & { connection?: EventTarget }).connection;
+  const conn = (navigator as Navigator & { connection?: EventTarget })
+    .connection;
   conn?.addEventListener?.("change", callback);
   return () => {
     window.removeEventListener("popstate", callback);

@@ -1,8 +1,8 @@
-import { useRef } from 'react';
-import { useFrame } from '@react-three/fiber';
-import { Sphere, MeshDistortMaterial } from '@react-three/drei';
-import * as THREE from 'three';
-import { useScrollStore } from '@/store/useScrollStore';
+import { useRef } from "react";
+import { useFrame } from "@react-three/fiber";
+import { Sphere, MeshDistortMaterial } from "@react-three/drei";
+import * as THREE from "three";
+import { useScrollStore } from "@/store/useScrollStore";
 
 export function Hero3D() {
   const meshRef = useRef<THREE.Mesh>(null);
@@ -11,18 +11,30 @@ export function Hero3D() {
 
   useFrame((state) => {
     if (!meshRef.current) return;
-    
+
     // Rotate slowly over time
     meshRef.current.rotation.x = state.clock.elapsedTime * 0.2;
     meshRef.current.rotation.y = state.clock.elapsedTime * 0.3;
 
     // React to scroll progress (fade/move out when not in hero)
-    if (activeSection === 'hero') {
-      meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, 0, 0.1);
-      meshRef.current.scale.setScalar(THREE.MathUtils.lerp(meshRef.current.scale.x, 1, 0.1));
+    if (activeSection === "hero") {
+      meshRef.current.position.y = THREE.MathUtils.lerp(
+        meshRef.current.position.y,
+        0,
+        0.1,
+      );
+      meshRef.current.scale.setScalar(
+        THREE.MathUtils.lerp(meshRef.current.scale.x, 1, 0.1),
+      );
     } else {
-      meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, 5, 0.1);
-      meshRef.current.scale.setScalar(THREE.MathUtils.lerp(meshRef.current.scale.x, 0.5, 0.1));
+      meshRef.current.position.y = THREE.MathUtils.lerp(
+        meshRef.current.position.y,
+        5,
+        0.1,
+      );
+      meshRef.current.scale.setScalar(
+        THREE.MathUtils.lerp(meshRef.current.scale.x, 0.5, 0.1),
+      );
     }
   });
 

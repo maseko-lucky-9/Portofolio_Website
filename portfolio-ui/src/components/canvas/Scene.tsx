@@ -1,10 +1,15 @@
-import { Canvas } from '@react-three/fiber';
-import { Suspense } from 'react';
-import { useProgress, Html } from '@react-three/drei';
+import { Canvas } from "@react-three/fiber";
+import { Suspense } from "react";
+import { useProgress, Html } from "@react-three/drei";
 
-import { Hero3D } from './Hero3D';
-import { TechDeck } from './TechDeck';
-import { Projects3D, CodeDemo3D, Experience3D, Contact3D } from './OtherObjects3D';
+import { Hero3D } from "./Hero3D";
+import { TechDeck } from "./TechDeck";
+import {
+  Projects3D,
+  CodeDemo3D,
+  Experience3D,
+  Contact3D,
+} from "./OtherObjects3D";
 
 function Loader() {
   const { progress } = useProgress();

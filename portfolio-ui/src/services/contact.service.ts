@@ -1,10 +1,10 @@
 /**
  * Contact & Newsletter Services
- * 
+ *
  * Handles contact form submissions, newsletter signups, and demo requests
  */
 
-import { httpClient } from '@/lib/http-client';
+import { httpClient } from "@/lib/http-client";
 import type {
   ContactFormData,
   NewsletterSignupData,
@@ -13,14 +13,14 @@ import type {
   ContactSubmission,
   NewsletterSubscriber,
   DemoRequest,
-} from '@/types/api';
+} from "@/types/api";
 
 // ===========================================
 // Contact Service
 // ===========================================
 
 class ContactService {
-  private readonly basePath = '/contact/submit';
+  private readonly basePath = "/contact/submit";
 
   /**
    * Submit contact form
@@ -29,7 +29,7 @@ class ContactService {
     return httpClient.post<ApiResponse<ContactSubmission>>(
       this.basePath,
       data,
-      { skipAuth: true }
+      { skipAuth: true },
     );
   }
 }
@@ -39,16 +39,18 @@ class ContactService {
 // ===========================================
 
 class NewsletterService {
-  private readonly basePath = '/newsletter';
+  private readonly basePath = "/newsletter";
 
   /**
    * Subscribe to newsletter
    */
-  async subscribe(data: NewsletterSignupData): Promise<ApiResponse<NewsletterSubscriber>> {
+  async subscribe(
+    data: NewsletterSignupData,
+  ): Promise<ApiResponse<NewsletterSubscriber>> {
     return httpClient.post<ApiResponse<NewsletterSubscriber>>(
       `${this.basePath}/subscribe`,
       data,
-      { skipAuth: true }
+      { skipAuth: true },
     );
   }
 
@@ -59,7 +61,7 @@ class NewsletterService {
     return httpClient.post<ApiResponse<void>>(
       `${this.basePath}/confirm`,
       { token },
-      { skipAuth: true }
+      { skipAuth: true },
     );
   }
 
@@ -70,7 +72,7 @@ class NewsletterService {
     return httpClient.post<ApiResponse<void>>(
       `${this.basePath}/unsubscribe`,
       { token },
-      { skipAuth: true }
+      { skipAuth: true },
     );
   }
 }
@@ -80,17 +82,15 @@ class NewsletterService {
 // ===========================================
 
 class DemoService {
-  private readonly basePath = '/demo';
+  private readonly basePath = "/demo";
 
   /**
    * Submit demo request
    */
   async requestDemo(data: DemoRequestData): Promise<ApiResponse<DemoRequest>> {
-    return httpClient.post<ApiResponse<DemoRequest>>(
-      this.basePath,
-      data,
-      { skipAuth: true }
-    );
+    return httpClient.post<ApiResponse<DemoRequest>>(this.basePath, data, {
+      skipAuth: true,
+    });
   }
 }
 

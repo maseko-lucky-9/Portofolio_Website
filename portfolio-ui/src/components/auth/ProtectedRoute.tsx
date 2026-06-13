@@ -1,14 +1,18 @@
-import React from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import React from "react";
+import { Navigate, useLocation } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: 'VIEWER' | 'EDITOR' | 'ADMIN';
+  requiredRole?: "VIEWER" | "EDITOR" | "ADMIN";
   fallback?: React.ReactNode;
 }
 
-export function ProtectedRoute({ children, requiredRole, fallback }: ProtectedRouteProps) {
+export function ProtectedRoute({
+  children,
+  requiredRole,
+  fallback,
+}: ProtectedRouteProps) {
   const { user, isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
 

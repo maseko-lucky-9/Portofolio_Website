@@ -1,6 +1,6 @@
 /**
  * Security Configuration
- * 
+ *
  * Centralized security settings for the application
  */
 
@@ -84,11 +84,7 @@ export const securityConfig = {
   csrf: {
     cookieName: 'XSRF-TOKEN',
     headerName: 'X-CSRF-Token',
-    excludePaths: [
-      '/api/v1/health',
-      '/api/v1/auth/oauth',
-      '/metrics',
-    ],
+    excludePaths: ['/api/v1/health', '/api/v1/auth/oauth', '/metrics'],
   },
 
   // Security headers (Helmet configuration)

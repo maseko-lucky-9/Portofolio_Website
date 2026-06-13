@@ -74,7 +74,9 @@ export function Navbar() {
       return;
     }
     const anim = animate(el, {
-      opacity: isScrolled ? [el.style.opacity || "0", 1] : [el.style.opacity || "1", 0],
+      opacity: isScrolled
+        ? [el.style.opacity || "0", 1]
+        : [el.style.opacity || "1", 0],
       duration: 200,
       ease: EASE_FN.out,
     });
@@ -149,7 +151,10 @@ export function Navbar() {
         <a
           href="#"
           className="z-10 inline-block transition-transform duration-200 ease-out hover:scale-[1.04]"
-          style={{ transformOrigin: "center", transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)" }}
+          style={{
+            transformOrigin: "center",
+            transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
+          }}
           onClick={(e) => {
             e.preventDefault();
             window.scrollTo({ top: 0, behavior: "smooth" });
@@ -186,13 +191,22 @@ export function Navbar() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="rounded-xl">
-              <DropdownMenuItem onClick={() => setTheme("light")} className="rounded-lg gap-2">
+              <DropdownMenuItem
+                onClick={() => setTheme("light")}
+                className="rounded-lg gap-2"
+              >
                 <Sun className="h-4 w-4" /> Light
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setTheme("dark")} className="rounded-lg gap-2">
+              <DropdownMenuItem
+                onClick={() => setTheme("dark")}
+                className="rounded-lg gap-2"
+              >
                 <Moon className="h-4 w-4" /> Dark
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setTheme("system")} className="rounded-lg gap-2">
+              <DropdownMenuItem
+                onClick={() => setTheme("system")}
+                className="rounded-lg gap-2"
+              >
                 <Monitor className="h-4 w-4" /> System
               </DropdownMenuItem>
             </DropdownMenuContent>

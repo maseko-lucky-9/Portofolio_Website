@@ -1,20 +1,20 @@
 /**
  * Articles Hooks
- * 
+ *
  * React Query hooks for article-related operations
  */
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
-import { articlesService } from '@/services/articles.service';
-import { queryKeys } from '@/lib/react-query';
-import { env } from '@/config/env';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { articlesService } from "@/services/articles.service";
+import { queryKeys } from "@/lib/react-query";
+import { env } from "@/config/env";
 import type {
   Article,
   ArticleQueryParams,
   CreateArticleData,
   UpdateArticleData,
-} from '@/types/api';
+} from "@/types/api";
 
 /**
  * Get all articles with pagination
@@ -69,7 +69,10 @@ export function useArticlesByTag(tagSlug: string, params?: ArticleQueryParams) {
 /**
  * Search articles
  */
-export function useArticleSearch(searchQuery: string, params?: ArticleQueryParams) {
+export function useArticleSearch(
+  searchQuery: string,
+  params?: ArticleQueryParams,
+) {
   return useQuery({
     queryKey: queryKeys.articles.list({ ...params, search: searchQuery }),
     queryFn: () => articlesService.search(searchQuery, params),
@@ -99,7 +102,7 @@ export function useIncrementArticleViews() {
               views: (oldData.data.views || 0) + 1,
             },
           };
-        }
+        },
       );
     },
   });
@@ -114,7 +117,7 @@ export function useToggleArticleLike() {
   return useMutation({
     mutationFn: (id: string) => articlesService.toggleLike(id),
     onSuccess: () => {
-      toast.success('Article liked!');
+      toast.success("Article liked!");
       queryClient.invalidateQueries({ queryKey: queryKeys.articles.all });
     },
   });
@@ -127,9 +130,10 @@ export function useCreateArticle() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: CreateArticleData) => articlesService.createArticle(data),
+    mutationFn: (data: CreateArticleData) =>
+      articlesService.createArticle(data),
     onSuccess: () => {
-      toast.success('Article created successfully');
+      toast.success("Article created successfully");
       queryClient.invalidateQueries({ queryKey: queryKeys.articles.lists() });
     },
   });
@@ -142,12 +146,13 @@ export function useUpdateArticle() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: UpdateArticleData) => articlesService.updateArticle(data),
+    mutationFn: (data: UpdateArticleData) =>
+      articlesService.updateArticle(data),
     onSuccess: (response) => {
-      toast.success('Article updated successfully');
+      toast.success("Article updated successfully");
       queryClient.invalidateQueries({ queryKey: queryKeys.articles.lists() });
-      queryClient.invalidateQueries({ 
-        queryKey: queryKeys.articles.detail(response.data.slug) 
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.articles.detail(response.data.slug),
       });
     },
   });
@@ -162,7 +167,7 @@ export function useDeleteArticle() {
   return useMutation({
     mutationFn: (id: string) => articlesService.deleteArticle(id),
     onSuccess: () => {
-      toast.success('Article deleted successfully');
+      toast.success("Article deleted successfully");
       queryClient.invalidateQueries({ queryKey: queryKeys.articles.lists() });
     },
   });

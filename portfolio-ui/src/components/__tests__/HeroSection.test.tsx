@@ -11,7 +11,8 @@ vi.mock("@/components/PaperBackground", () => ({
 
 // Mock framer-motion to pass through children without animation
 vi.mock("framer-motion", async () => {
-  const actual = await vi.importActual<typeof import("framer-motion")>("framer-motion");
+  const actual =
+    await vi.importActual<typeof import("framer-motion")>("framer-motion");
   return {
     ...actual,
     useReducedMotion: () => false,
@@ -24,7 +25,7 @@ function renderHeroSection() {
   return render(
     <ThemeProvider>
       <HeroSection />
-    </ThemeProvider>
+    </ThemeProvider>,
   );
 }
 
@@ -64,7 +65,7 @@ describe("HeroSection", () => {
     expect(linkedinLink).toHaveAttribute("href", personalData.social.linkedin);
   });
 
-  it('renders projects CTA button', () => {
+  it("renders projects CTA button", () => {
     renderHeroSection();
     expect(screen.getByText("See what I've built")).toBeInTheDocument();
   });
@@ -77,7 +78,9 @@ describe("HeroSection", () => {
   it("renders metric cards with correct values", () => {
     renderHeroSection();
     expect(screen.getByText(personalData.metrics.projects)).toBeInTheDocument();
-    expect(screen.getByText(personalData.metrics.experience)).toBeInTheDocument();
+    expect(
+      screen.getByText(personalData.metrics.experience),
+    ).toBeInTheDocument();
     expect(screen.getByText(personalData.metrics.clients)).toBeInTheDocument();
   });
 
@@ -87,14 +90,18 @@ describe("HeroSection", () => {
     // "Shipped 20+ projects with 10+ clients over 8+ years."
     // The whole sentence is a single accessible <p>; assert the substrings
     // by matching against its text content rather than by individual spans.
-    const sentence = screen.getByText(/Shipped[\s\S]+projects[\s\S]+clients[\s\S]+/i);
+    const sentence = screen.getByText(
+      /Shipped[\s\S]+projects[\s\S]+clients[\s\S]+/i,
+    );
     expect(sentence).toBeInTheDocument();
   });
 
   it("renders profile image with correct alt text", () => {
     renderHeroSection();
     // alt is "${name} profile photo" — assert with a partial regex match.
-    const profileImage = screen.getByAltText(new RegExp(personalData.name, "i"));
+    const profileImage = screen.getByAltText(
+      new RegExp(personalData.name, "i"),
+    );
     expect(profileImage).toBeInTheDocument();
     expect(profileImage.tagName).toBe("IMG");
   });

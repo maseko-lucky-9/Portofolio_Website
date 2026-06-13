@@ -1,8 +1,17 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { animate, stagger } from "animejs";
-import { ExternalLink, Github, ChevronRight, AlertCircle, FolderOpen } from "lucide-react";
+import {
+  ExternalLink,
+  Github,
+  ChevronRight,
+  AlertCircle,
+  FolderOpen,
+} from "lucide-react";
 import { useFeaturedProjects } from "@/hooks/use-projects";
-import { projects as staticProjects, allTechnologies as staticTechnologies } from "@/data/projects";
+import {
+  projects as staticProjects,
+  allTechnologies as staticTechnologies,
+} from "@/data/projects";
 import { env } from "@/config/env";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Project as ApiProject } from "@/types/api";
@@ -33,7 +42,9 @@ function mapApiProject(project: ApiProject): DisplayProject {
     title: project.title,
     tagline: project.subtitle || "",
     description: project.excerpt || project.description,
-    thumbnail: project.thumbnail || "https://placehold.co/600x400/1e293b/94a3b8?text=Project",
+    thumbnail:
+      project.thumbnail ||
+      "https://placehold.co/600x400/1e293b/94a3b8?text=Project",
     technologies: project.techStack,
     challenge: undefined,
     solution: undefined,
@@ -80,12 +91,19 @@ export function ProjectsSection() {
   const gridRef = useRef<HTMLDivElement>(null);
 
   // Fetch from API if enabled, otherwise use static data
-  const { data: apiResponse, isLoading, isError, refetch } = useFeaturedProjects(6);
+  const {
+    data: apiResponse,
+    isLoading,
+    isError,
+    refetch,
+  } = useFeaturedProjects(6);
 
   const projects: DisplayProject[] = useMemo(() => {
     if (!env.useApi && !apiResponse) return staticProjects;
     if (apiResponse?.data) {
-      const apiData = Array.isArray(apiResponse.data) ? apiResponse.data : [apiResponse.data];
+      const apiData = Array.isArray(apiResponse.data)
+        ? apiResponse.data
+        : [apiResponse.data];
       return apiData.map(mapApiProject);
     }
     return staticProjects;
@@ -110,7 +128,8 @@ export function ProjectsSection() {
   // animate out, list swaps, new cards animate in. Less true-FLIP than
   // the original (which inter-card translated), but visually similar
   // since the grid lattice is uniform.
-  const [displayed, setDisplayed] = useState<DisplayProject[]>(filteredProjects);
+  const [displayed, setDisplayed] =
+    useState<DisplayProject[]>(filteredProjects);
 
   // Header + filter row scroll reveal (section-level entrance).
   useAnime(
@@ -162,10 +181,12 @@ export function ProjectsSection() {
       if (!grid) return;
       if (scope.matches.reducedMotion) {
         // Reduced-motion: leave cards at full opacity / no transform.
-        grid.querySelectorAll<HTMLElement>("[data-anime-card]").forEach((el) => {
-          el.style.opacity = "1";
-          el.style.transform = "none";
-        });
+        grid
+          .querySelectorAll<HTMLElement>("[data-anime-card]")
+          .forEach((el) => {
+            el.style.opacity = "1";
+            el.style.transform = "none";
+          });
         return;
       }
       const cards = grid.querySelectorAll<HTMLElement>("[data-anime-card]");
@@ -195,19 +216,27 @@ export function ProjectsSection() {
           <span className="inline-block text-xs font-semibold uppercase tracking-[0.18em] text-primary mb-3">
             Portfolio
           </span>
-          <h2 id="projects-heading" className="section-title">Featured Projects</h2>
+          <h2 id="projects-heading" className="section-title">
+            Featured Projects
+          </h2>
           <p className="section-subtitle mx-auto">
-            Things I&apos;ve shipped to production — banking, infra, internal platforms.
+            Things I&apos;ve shipped to production — banking, infra, internal
+            platforms.
           </p>
         </div>
 
         {/* Technology Filters */}
         {!isLoading && (
-          <div data-anime-section className="flex flex-wrap justify-center gap-2 mb-12">
+          <div
+            data-anime-section
+            className="flex flex-wrap justify-center gap-2 mb-12"
+          >
             <button
               onClick={() => setActiveFilter(null)}
               className={`tech-badge ${
-                activeFilter === null ? "bg-primary text-primary-foreground" : ""
+                activeFilter === null
+                  ? "bg-primary text-primary-foreground"
+                  : ""
               }`}
             >
               All
@@ -215,9 +244,13 @@ export function ProjectsSection() {
             {allTechnologies.slice(0, 10).map((tech) => (
               <button
                 key={tech}
-                onClick={() => setActiveFilter(activeFilter === tech ? null : tech)}
+                onClick={() =>
+                  setActiveFilter(activeFilter === tech ? null : tech)
+                }
                 className={`tech-badge ${
-                  activeFilter === tech ? "bg-primary text-primary-foreground" : ""
+                  activeFilter === tech
+                    ? "bg-primary text-primary-foreground"
+                    : ""
                 }`}
               >
                 {tech}
@@ -251,7 +284,10 @@ export function ProjectsSection() {
 
         {/* Projects Grid */}
         {!isLoading && displayed.length > 0 && (
-          <div ref={gridRef} className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+          <div
+            ref={gridRef}
+            className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8"
+          >
             {displayed.map((project) => (
               <article
                 key={project.id}
@@ -344,7 +380,9 @@ export function ProjectsSection() {
                     <div className="space-y-2 text-sm">
                       {project.challenge && (
                         <div>
-                          <span className="font-medium text-primary">Challenge: </span>
+                          <span className="font-medium text-primary">
+                            Challenge:{" "}
+                          </span>
                           <span className="text-muted-foreground line-clamp-1">
                             {project.challenge}
                           </span>
@@ -352,7 +390,9 @@ export function ProjectsSection() {
                       )}
                       {project.impact && (
                         <div>
-                          <span className="font-medium text-secondary">Impact: </span>
+                          <span className="font-medium text-secondary">
+                            Impact:{" "}
+                          </span>
                           <span className="text-muted-foreground line-clamp-1">
                             {project.impact}
                           </span>
@@ -380,8 +420,13 @@ export function ProjectsSection() {
         {/* Empty State */}
         {!isLoading && displayed.length === 0 && (
           <div className="flex flex-col items-center justify-center py-16 text-center animate-in fade-in duration-300">
-            <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
-              style={{ background: "oklch(var(--primary) / 0.08)", border: "1px solid oklch(var(--primary) / 0.15)" }}>
+            <div
+              className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
+              style={{
+                background: "oklch(var(--primary) / 0.08)",
+                border: "1px solid oklch(var(--primary) / 0.15)",
+              }}
+            >
               <FolderOpen className="w-8 h-8 text-primary" />
             </div>
             <p className="text-lg font-medium text-muted-foreground mb-2">

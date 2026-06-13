@@ -46,12 +46,22 @@ export function SectionBridge({ caption, id }: SectionBridgeProps) {
       const root = rootRef.current;
       if (!root) return;
 
-      const hairlineL = root.querySelector<SVGPathElement>('[data-bridge="hairline-left"]');
-      const hairlineR = root.querySelector<SVGPathElement>('[data-bridge="hairline-right"]');
-      const bracketL = root.querySelector<SVGPathElement>('[data-bridge="bracket-left"]');
-      const bracketR = root.querySelector<SVGPathElement>('[data-bridge="bracket-right"]');
+      const hairlineL = root.querySelector<SVGPathElement>(
+        '[data-bridge="hairline-left"]',
+      );
+      const hairlineR = root.querySelector<SVGPathElement>(
+        '[data-bridge="hairline-right"]',
+      );
+      const bracketL = root.querySelector<SVGPathElement>(
+        '[data-bridge="bracket-left"]',
+      );
+      const bracketR = root.querySelector<SVGPathElement>(
+        '[data-bridge="bracket-right"]',
+      );
       const slash = root.querySelector<SVGPathElement>('[data-bridge="slash"]');
-      const captionEl = root.querySelector<HTMLElement>('[data-bridge="caption"]');
+      const captionEl = root.querySelector<HTMLElement>(
+        '[data-bridge="caption"]',
+      );
 
       if (!hairlineL || !hairlineR || !bracketL || !bracketR) return;
 
@@ -66,16 +76,8 @@ export function SectionBridge({ caption, id }: SectionBridgeProps) {
       const tl = createTimeline({ autoplay: false });
 
       // Phase 1 (0 – 400ms): hairlines grow outward from centre.
-      tl.add(
-        hairlineL,
-        { scaleX: [0, 1], duration: 400, ease: "outQuart" },
-        0,
-      );
-      tl.add(
-        hairlineR,
-        { scaleX: [0, 1], duration: 400, ease: "outQuart" },
-        0,
-      );
+      tl.add(hairlineL, { scaleX: [0, 1], duration: 400, ease: "outQuart" }, 0);
+      tl.add(hairlineR, { scaleX: [0, 1], duration: 400, ease: "outQuart" }, 0);
 
       // Phase 2 (400 – 800ms): brackets stroke-draw on.
       drawables.forEach((d, i) => {

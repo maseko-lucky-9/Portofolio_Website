@@ -32,7 +32,9 @@ function mapArticle(article: Article): DisplayBlogPost {
       : "Draft",
     readTime: `${article.readingTime} min read`,
     tags: article.tags?.map((t) => t.name) || [],
-    imageUrl: article.coverImage || "https://placehold.co/400x250/1e293b/94a3b8?text=Article",
+    imageUrl:
+      article.coverImage ||
+      "https://placehold.co/400x250/1e293b/94a3b8?text=Article",
     url: `/blog/${article.slug}`,
   };
 }
@@ -63,7 +65,12 @@ export function BlogSection() {
   const rootRef = useRef<HTMLElement>(null);
 
   // Fetch latest 3 published articles
-  const { data: apiResponse, isLoading, isError, refetch } = useArticles({
+  const {
+    data: apiResponse,
+    isLoading,
+    isError,
+    refetch,
+  } = useArticles({
     status: ArticleStatus.PUBLISHED,
     limit: 3,
     sortBy: "publishedAt",
@@ -108,7 +115,9 @@ export function BlogSection() {
           <span className="inline-block text-xs font-semibold uppercase tracking-[0.18em] text-primary mb-3">
             Blog
           </span>
-          <h2 id="blog-heading" className="section-title">Notes</h2>
+          <h2 id="blog-heading" className="section-title">
+            Notes
+          </h2>
           <p className="section-subtitle mx-auto">
             Working notes on software I&apos;ve shipped.
           </p>
@@ -154,14 +163,19 @@ export function BlogSection() {
                     transition: "all 300ms cubic-bezier(0.16, 1, 0.3, 1)",
                   }}
                   onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.transform = "translateY(-4px)";
-                    (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-sm)";
-                    (e.currentTarget as HTMLElement).style.borderColor = "oklch(var(--primary) / 0.35)";
+                    (e.currentTarget as HTMLElement).style.transform =
+                      "translateY(-4px)";
+                    (e.currentTarget as HTMLElement).style.boxShadow =
+                      "var(--shadow-sm)";
+                    (e.currentTarget as HTMLElement).style.borderColor =
+                      "oklch(var(--primary) / 0.35)";
                   }}
                   onMouseLeave={(e) => {
                     (e.currentTarget as HTMLElement).style.transform = "";
-                    (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-md)";
-                    (e.currentTarget as HTMLElement).style.borderColor = "oklch(var(--border))";
+                    (e.currentTarget as HTMLElement).style.boxShadow =
+                      "var(--shadow-md)";
+                    (e.currentTarget as HTMLElement).style.borderColor =
+                      "oklch(var(--border))";
                   }}
                 >
                   {/* Image */}
@@ -185,7 +199,10 @@ export function BlogSection() {
                     {/* Read time badge */}
                     <div
                       className="absolute top-4 right-4 flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium"
-                      style={{ background: "oklch(var(--background))", border: "1px solid oklch(var(--border))" }}
+                      style={{
+                        background: "oklch(var(--background))",
+                        border: "1px solid oklch(var(--border))",
+                      }}
                     >
                       <Clock className="w-3 h-3" />
                       {post.readTime}
@@ -195,7 +212,9 @@ export function BlogSection() {
                   {/* Content */}
                   <div className="p-6">
                     {/* Date */}
-                    <p className="text-xs text-muted-foreground mb-2">{post.publishedAt}</p>
+                    <p className="text-xs text-muted-foreground mb-2">
+                      {post.publishedAt}
+                    </p>
 
                     {/* Title */}
                     <h3 className="text-lg font-bold mb-2 group-hover:text-primary transition-colors line-clamp-2">
@@ -240,7 +259,9 @@ export function BlogSection() {
             >
               <FileText className="w-8 h-8 text-primary/60" />
             </div>
-            <p className="text-lg font-medium text-muted-foreground mb-2">No articles yet</p>
+            <p className="text-lg font-medium text-muted-foreground mb-2">
+              No articles yet
+            </p>
             <p className="text-sm text-muted-foreground">
               Check back soon for articles and tutorials.
             </p>

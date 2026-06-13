@@ -56,7 +56,11 @@ export type AnimeFactory = (scope: MotionScope) => void | (() => void);
 export function revealOnScroll(
   root: HTMLElement,
   targets: NodeListOf<Element> | Element[] | string,
-  options: { staggerMs?: number; anim?: AnimationParams; rootMargin?: string } = {},
+  options: {
+    staggerMs?: number;
+    anim?: AnimationParams;
+    rootMargin?: string;
+  } = {},
 ): () => void {
   const els =
     typeof targets === "string"

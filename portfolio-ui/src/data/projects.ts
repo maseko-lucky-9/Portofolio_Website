@@ -75,7 +75,8 @@ export const projects: Project[] = [
       "VPC + private/public subnets (or BYO-VPC), EKS with managed node groups or Karpenter, IRSA for service accounts, OIDC provider, optional add-ons (cert-manager, ESO, ArgoCD, ALB controller). Multi-env tfvars templates plus OPA policies on critical resources.",
     impact:
       "Clients adopt the module to skip 2 weeks of bootstrapping and inherit production defaults. Public Terraform Registry visibility provides independent third-party validation.",
-    githubUrl: "https://github.com/maseko-lucky-9/terraform-aws-eks-opinionated",
+    githubUrl:
+      "https://github.com/maseko-lucky-9/terraform-aws-eks-opinionated",
     featured: true,
   },
   // Project 3: .NET microservices + Kafka (planned)
@@ -113,7 +114,15 @@ export const projects: Project[] = [
     description:
       "pgvector-backed retrieval-augmented generation pipeline served via the Model Context Protocol — designed for Claude/agent integration with measurable accuracy and latency benchmarks.",
     thumbnail: "/images/projects/rag-mcp.png",
-    technologies: ["Python", "pgvector", "PostgreSQL", "MCP", "Anthropic Claude", "FastAPI", "Docker"],
+    technologies: [
+      "Python",
+      "pgvector",
+      "PostgreSQL",
+      "MCP",
+      "Anthropic Claude",
+      "FastAPI",
+      "Docker",
+    ],
     challenge:
       "Most RAG demos ship as notebooks. Need a production-pattern reference: ingestion pipeline, embedding store, retrieval API, MCP server interface, with explicit accuracy/latency SLOs.",
     solution:
@@ -126,4 +135,6 @@ export const projects: Project[] = [
 ];
 
 // All unique technologies for filtering
-export const allTechnologies = [...new Set(projects.flatMap((p) => p.technologies))].sort();
+export const allTechnologies = [
+  ...new Set(projects.flatMap((p) => p.technologies)),
+].sort();

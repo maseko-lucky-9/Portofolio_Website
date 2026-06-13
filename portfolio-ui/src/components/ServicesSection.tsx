@@ -38,7 +38,14 @@ const services: Service[] = [
       "Cloudflare Tunnel or ingress-nginx public exposure",
       "External Secrets Operator for secret management",
     ],
-    stack: ["Kubernetes", "ArgoCD", "Helm", "Prometheus", "Grafana", "cert-manager"],
+    stack: [
+      "Kubernetes",
+      "ArgoCD",
+      "Helm",
+      "Prometheus",
+      "Grafana",
+      "cert-manager",
+    ],
     gradient: "from-blue-500/20 to-indigo-500/20",
     accent: "hover:border-blue-500/40",
   },
@@ -76,7 +83,16 @@ const services: Service[] = [
       "Entity Framework Core + JPA/Hibernate with safe migrations",
       "xUnit / JUnit test coverage + OpenTelemetry instrumentation",
     ],
-    stack: ["Java", "Spring Boot", "C#", "ASP.NET Core", "Kafka", "Azure", "EF Core", "Docker"],
+    stack: [
+      "Java",
+      "Spring Boot",
+      "C#",
+      "ASP.NET Core",
+      "Kafka",
+      "Azure",
+      "EF Core",
+      "Docker",
+    ],
     gradient: "from-violet-500/20 to-purple-500/20",
     accent: "hover:border-violet-500/40",
   },
@@ -123,8 +139,8 @@ export function ServicesSection() {
             Services
           </h2>
           <p className="section-subtitle mx-auto">
-            Focused freelance engagements across three disciplines — shipped to production,
-            not just delivered as a handover document.
+            Focused freelance engagements across three disciplines — shipped to
+            production, not just delivered as a handover document.
           </p>
         </div>
 
@@ -148,7 +164,10 @@ export function ServicesSection() {
                   <div
                     className={`inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br ${service.gradient}`}
                   >
-                    <Icon className="w-7 h-7 text-foreground" aria-hidden="true" />
+                    <Icon
+                      className="w-7 h-7 text-foreground"
+                      aria-hidden="true"
+                    />
                   </div>
                   <span className="tech-badge text-xs">{service.label}</span>
                 </div>
@@ -169,7 +188,10 @@ export function ServicesSection() {
                 {/* Capabilities list */}
                 <ul className="space-y-2 flex-1">
                   {service.capabilities.map((cap) => (
-                    <li key={cap} className="flex items-start gap-2.5 text-sm text-muted-foreground">
+                    <li
+                      key={cap}
+                      className="flex items-start gap-2.5 text-sm text-muted-foreground"
+                    >
                       <CheckCircle2
                         className="w-4 h-4 mt-0.5 shrink-0 text-primary"
                         aria-hidden="true"
@@ -196,14 +218,18 @@ export function ServicesSection() {
         <div data-anime className="mt-14 text-center">
           <p className="text-muted-foreground mb-6 text-sm">
             Need something that spans two or all three disciplines?{" "}
-            <span className="text-foreground font-medium">Let&apos;s scope it together.</span>
+            <span className="text-foreground font-medium">
+              Let&apos;s scope it together.
+            </span>
           </p>
           <a
             href="#contact"
             className="btn-hero-secondary inline-flex items-center gap-2"
             onClick={(e) => {
               e.preventDefault();
-              document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
+              document
+                .getElementById("contact")
+                ?.scrollIntoView({ behavior: "smooth" });
             }}
           >
             Get in touch

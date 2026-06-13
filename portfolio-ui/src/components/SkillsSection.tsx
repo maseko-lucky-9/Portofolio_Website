@@ -4,7 +4,12 @@ import { Code2, Server, Cloud } from "lucide-react";
 import { skills, radarSkills, SkillCategory } from "@/data/skills";
 import { SkillsRadar } from "@/components/SkillsRadar";
 
-import { DURATION, EASE_FN, springAnimeSkills, useReducedMotion } from "@/lib/motion";
+import {
+  DURATION,
+  EASE_FN,
+  springAnimeSkills,
+  useReducedMotion,
+} from "@/lib/motion";
 import { revealOnScroll, useAnime } from "@/lib/use-anime";
 
 const categoryIcons = {
@@ -21,7 +26,8 @@ const categoryIcons = {
 const ACCENT_COLOR = "oklch(var(--primary))";
 
 export function SkillsSection() {
-  const [activeCategory, setActiveCategory] = useState<SkillCategory>("frontend");
+  const [activeCategory, setActiveCategory] =
+    useState<SkillCategory>("frontend");
   // `displayed` lags `activeCategory` while the exit animation plays. The
   // list renders against `displayed` so the swap completes cleanly: exit
   // current → setDisplayed → enter new (handled by useAnime keyed on
@@ -106,19 +112,25 @@ export function SkillsSection() {
         duration: 220,
         ease: EASE_FN.emphasized,
       });
-      const rows = animate(el.querySelectorAll<HTMLElement>("[data-anime-skill]"), {
-        opacity: [0, 1],
-        translateX: [16, 0],
-        delay: stagger(45),
-        duration: 700,
-        ease: springAnimeSkills,
-      });
-      const bars = animate(el.querySelectorAll<HTMLElement>("[data-anime-bar]"), {
-        scaleX: [0, 1],
-        delay: stagger(40, { start: 200 }),
-        duration: DURATION.slow * 1000,
-        ease: EASE_FN.spring,
-      });
+      const rows = animate(
+        el.querySelectorAll<HTMLElement>("[data-anime-skill]"),
+        {
+          opacity: [0, 1],
+          translateX: [16, 0],
+          delay: stagger(45),
+          duration: 700,
+          ease: springAnimeSkills,
+        },
+      );
+      const bars = animate(
+        el.querySelectorAll<HTMLElement>("[data-anime-bar]"),
+        {
+          scaleX: [0, 1],
+          delay: stagger(40, { start: 200 }),
+          duration: DURATION.slow * 1000,
+          ease: EASE_FN.spring,
+        },
+      );
       return () => {
         wrapper.cancel();
         rows.cancel();
@@ -139,7 +151,10 @@ export function SkillsSection() {
       {/* Subtle top gradient fade */}
       <div
         className="absolute inset-x-0 top-0 h-px"
-        style={{ background: "linear-gradient(90deg, transparent, oklch(var(--primary) / 0.25), transparent)" }}
+        style={{
+          background:
+            "linear-gradient(90deg, transparent, oklch(var(--primary) / 0.25), transparent)",
+        }}
       />
 
       <div className="section-container !py-0 py-20 md:py-28">
@@ -148,39 +163,46 @@ export function SkillsSection() {
           <span className="inline-block text-xs font-semibold uppercase tracking-[0.18em] text-primary mb-3">
             Expertise
           </span>
-          <h2 id="skills-heading" className="section-title">Skills &amp; Expertise</h2>
+          <h2 id="skills-heading" className="section-title">
+            Skills &amp; Expertise
+          </h2>
           <p className="section-subtitle mx-auto">
-            A T-shaped developer with deep expertise in specific areas and broad knowledge
-            across the stack.
+            A T-shaped developer with deep expertise in specific areas and broad
+            knowledge across the stack.
           </p>
         </div>
 
         {/* Category toggle */}
-        <div data-anime-section className="flex justify-center gap-3 mb-14 flex-wrap">
-          {(["frontend", "backend", "devops"] as SkillCategory[]).map((category) => {
-            const Icon = categoryIcons[category];
-            const isActive = activeCategory === category;
-            return (
-              <button
-                key={category}
-                onClick={() => setActiveCategory(category)}
-                data-active={isActive ? "true" : "false"}
-                className="flex items-center gap-2 px-6 py-3 rounded-full font-medium text-sm transition-all
+        <div
+          data-anime-section
+          className="flex justify-center gap-3 mb-14 flex-wrap"
+        >
+          {(["frontend", "backend", "devops"] as SkillCategory[]).map(
+            (category) => {
+              const Icon = categoryIcons[category];
+              const isActive = activeCategory === category;
+              return (
+                <button
+                  key={category}
+                  onClick={() => setActiveCategory(category)}
+                  data-active={isActive ? "true" : "false"}
+                  className="flex items-center gap-2 px-6 py-3 rounded-full font-medium text-sm transition-all
                            bg-card text-foreground border border-border
                            data-[active=true]:bg-primary
                            data-[active=true]:text-primary-foreground
                            data-[active=true]:border-primary
                            hover:border-foreground/30"
-                style={{
-                  boxShadow: "var(--shadow-sm)",
-                  transition: "all 300ms cubic-bezier(0.16, 1, 0.3, 1)",
-                }}
-              >
-                <Icon className="w-4 h-4" />
-                <span className="capitalize">{category}</span>
-              </button>
-            );
-          })}
+                  style={{
+                    boxShadow: "var(--shadow-sm)",
+                    transition: "all 300ms cubic-bezier(0.16, 1, 0.3, 1)",
+                  }}
+                >
+                  <Icon className="w-4 h-4" />
+                  <span className="capitalize">{category}</span>
+                </button>
+              );
+            },
+          )}
         </div>
 
         <div className="grid lg:grid-cols-2 gap-10 lg:gap-14 items-start">
@@ -191,7 +213,9 @@ export function SkillsSection() {
                 className="w-2 h-6 rounded-full"
                 style={{ background: ACCENT_COLOR }}
               />
-              <h3 className="text-base font-semibold capitalize">{displayed} Radar</h3>
+              <h3 className="text-base font-semibold capitalize">
+                {displayed} Radar
+              </h3>
             </div>
             <div className="h-64 sm:h-80 flex items-center justify-center">
               <SkillsRadar data={currentRadarData} color={ACCENT_COLOR} />
@@ -205,7 +229,9 @@ export function SkillsSection() {
                 className="w-2 h-6 rounded-full"
                 style={{ background: ACCENT_COLOR }}
               />
-              <h3 className="text-base font-semibold">Technologies &amp; Tools</h3>
+              <h3 className="text-base font-semibold">
+                Technologies &amp; Tools
+              </h3>
             </div>
             {/* Category-swap container. The skill rows + bars are keyed off
                 `displayed`, which lags `activeCategory` while the exit
@@ -215,8 +241,11 @@ export function SkillsSection() {
                 <div key={skill.name} data-anime-skill>
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2.5">
-                      <span className="text-sm font-semibold text-foreground">{skill.name}</span>
-                      <span className="text-[10px] px-2 py-0.5 rounded-full font-medium capitalize"
+                      <span className="text-sm font-semibold text-foreground">
+                        {skill.name}
+                      </span>
+                      <span
+                        className="text-[10px] px-2 py-0.5 rounded-full font-medium capitalize"
                         style={{
                           background: "oklch(var(--accent))",
                           color: "oklch(var(--accent-foreground))",
@@ -229,13 +258,18 @@ export function SkillsSection() {
                       {getProficiencyLabel(skill.proficiency)}
                     </span>
                   </div>
-                  <div className="h-1.5 rounded-full overflow-hidden relative" style={{ background: "oklch(var(--muted))" }}>
+                  <div
+                    className="h-1.5 rounded-full overflow-hidden relative"
+                    style={{ background: "oklch(var(--muted))" }}
+                  >
                     <div
                       data-anime-bar
                       className="h-full rounded-full"
                       style={{
                         width: `${skill.proficiency}%`,
-                        transform: prefersReducedMotion ? "scaleX(1)" : "scaleX(0)",
+                        transform: prefersReducedMotion
+                          ? "scaleX(1)"
+                          : "scaleX(0)",
                         transformOrigin: "left center",
                         background: ACCENT_COLOR,
                         willChange: "transform",
@@ -246,7 +280,8 @@ export function SkillsSection() {
                         className="absolute inset-y-0 left-0 pointer-events-none animate-shimmer-once"
                         style={{
                           width: `${skill.proficiency}%`,
-                          background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.35) 50%, transparent 100%)",
+                          background:
+                            "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.35) 50%, transparent 100%)",
                           backgroundSize: "200% 100%",
                         }}
                       />
@@ -262,7 +297,10 @@ export function SkillsSection() {
       {/* Subtle bottom border */}
       <div
         className="absolute inset-x-0 bottom-0 h-px"
-        style={{ background: "linear-gradient(90deg, transparent, oklch(var(--primary) / 0.15), transparent)" }}
+        style={{
+          background:
+            "linear-gradient(90deg, transparent, oklch(var(--primary) / 0.15), transparent)",
+        }}
       />
     </section>
   );

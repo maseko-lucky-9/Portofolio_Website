@@ -20,9 +20,19 @@ export interface Skill {
 export const skills: Skill[] = [
   // DevOps / Cloud-native (headline differentiator)
   { name: "Kubernetes", proficiency: 90, category: "devops", type: "cloud" },
-  { name: "AWS (EC2, EKS)", proficiency: 88, category: "devops", type: "cloud" },
+  {
+    name: "AWS (EC2, EKS)",
+    proficiency: 88,
+    category: "devops",
+    type: "cloud",
+  },
   { name: "Terraform", proficiency: 88, category: "devops", type: "cloud" },
-  { name: "Microsoft Azure", proficiency: 80, category: "devops", type: "cloud" },
+  {
+    name: "Microsoft Azure",
+    proficiency: 80,
+    category: "devops",
+    type: "cloud",
+  },
   { name: "Helm", proficiency: 85, category: "devops", type: "tool" },
   { name: "ArgoCD", proficiency: 85, category: "devops", type: "tool" },
   { name: "Docker", proficiency: 90, category: "devops", type: "tool" },
@@ -32,10 +42,25 @@ export const skills: Skill[] = [
   { name: "Git", proficiency: 95, category: "devops", type: "tool" },
 
   // Backend (core engineering)
-  { name: ".NET Core / .NET 9", proficiency: 95, category: "backend", type: "framework" },
+  {
+    name: ".NET Core / .NET 9",
+    proficiency: 95,
+    category: "backend",
+    type: "framework",
+  },
   { name: "C#", proficiency: 95, category: "backend", type: "language" },
-  { name: "ASP.NET Core", proficiency: 92, category: "backend", type: "framework" },
-  { name: "Java / Spring Boot", proficiency: 80, category: "backend", type: "framework" },
+  {
+    name: "ASP.NET Core",
+    proficiency: 92,
+    category: "backend",
+    type: "framework",
+  },
+  {
+    name: "Java / Spring Boot",
+    proficiency: 80,
+    category: "backend",
+    type: "framework",
+  },
   { name: "Python", proficiency: 75, category: "backend", type: "language" },
   { name: "Apache Kafka", proficiency: 82, category: "backend", type: "tool" },
   { name: "REST APIs", proficiency: 95, category: "backend", type: "tool" },
@@ -44,7 +69,12 @@ export const skills: Skill[] = [
   { name: "DynamoDB", proficiency: 78, category: "backend", type: "tool" },
 
   // Frontend (supporting, per CV)
-  { name: "TypeScript", proficiency: 78, category: "frontend", type: "language" },
+  {
+    name: "TypeScript",
+    proficiency: 78,
+    category: "frontend",
+    type: "language",
+  },
   { name: "Angular", proficiency: 75, category: "frontend", type: "framework" },
   { name: "Vue.js", proficiency: 70, category: "frontend", type: "framework" },
   { name: "HTML/CSS", proficiency: 80, category: "frontend", type: "language" },

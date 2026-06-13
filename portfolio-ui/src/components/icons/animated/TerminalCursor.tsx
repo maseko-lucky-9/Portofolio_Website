@@ -33,17 +33,14 @@ export function TerminalCursor({
   const cursorRef = useRef<HTMLSpanElement>(null);
   const reduced = useReducedMotion();
   const [typedChars, setTypedChars] = useState(
-    reduced ? typeText?.length ?? 0 : 0,
+    reduced ? (typeText?.length ?? 0) : 0,
   );
 
   // Typewriter: advance one character per `60000 / cpm` ms.
   useEffect(() => {
     if (!typeText || reduced) return;
     if (typedChars >= typeText.length) return;
-    const id = setTimeout(
-      () => setTypedChars((n) => n + 1),
-      60000 / cpm,
-    );
+    const id = setTimeout(() => setTypedChars((n) => n + 1), 60000 / cpm);
     return () => clearTimeout(id);
   }, [typeText, typedChars, cpm, reduced]);
 
@@ -70,9 +67,7 @@ export function TerminalCursor({
 
   return (
     <span ref={wrapperRef} className={className} aria-hidden="true">
-      {typeText && (
-        <span>{typeText.slice(0, typedChars)}</span>
-      )}
+      {typeText && <span>{typeText.slice(0, typedChars)}</span>}
       <span
         ref={cursorRef}
         style={{

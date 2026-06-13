@@ -38,7 +38,8 @@ vi.mock("@/config/env", () => ({
 
 // Mock framer-motion to preserve children rendering
 vi.mock("framer-motion", async () => {
-  const actual = await vi.importActual<typeof import("framer-motion")>("framer-motion");
+  const actual =
+    await vi.importActual<typeof import("framer-motion")>("framer-motion");
   return {
     ...actual,
   };
