@@ -20,7 +20,7 @@ export const securityConfig = {
 
   // CORS configuration
   cors: {
-    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+    origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN : 'http://localhost:5173',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: [
@@ -68,8 +68,8 @@ export const securityConfig = {
     allowedRedirects: [
       'http://localhost:5173',
       'http://localhost:3000',
-      process.env.FRONTEND_URL || '',
-      process.env.APP_URL || '',
+      process.env.FRONTEND_URL ?? '',
+      process.env.APP_URL ?? '',
     ].filter(Boolean),
   },
 
@@ -96,7 +96,7 @@ export const securityConfig = {
         scriptSrc: ["'self'"],
         fontSrc: ["'self'", 'fonts.gstatic.com'],
         imgSrc: ["'self'", 'data:', 'https:'],
-        connectSrc: ["'self'", process.env.FRONTEND_URL || ''],
+        connectSrc: ["'self'", process.env.FRONTEND_URL ?? ''],
         frameSrc: ["'none'"],
         objectSrc: ["'none'"],
         upgradeInsecureRequests: process.env.NODE_ENV === 'production' ? [] : null,
