@@ -14,6 +14,14 @@ build/
 .env.*.local
 **/.env
 **/.env.local
+# Secret hygiene: ignore any suffixed env file everywhere (e.g. a real .env.production),
+# but keep committed *.example templates AND the public Vite build config tracked.
+**/.env.*
+!**/.env.example
+!**/.env.*.example
+# Public, non-secret Vite build config (VITE_* baked into the client bundle):
+!portfolio-ui/.env.production
+!portfolio-ui/.env.development
 
 # IDE
 .idea/

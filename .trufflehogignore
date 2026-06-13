@@ -1,0 +1,9 @@
+# Paths excluded from trufflehog scans (regex, one per line).
+# Run: trufflehog filesystem . --exclude-paths .trufflehogignore --results=verified,unknown
+node_modules/
+\.git/
+dist/
+build/
+coverage/
+playwright-report/
+test-results/

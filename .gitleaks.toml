@@ -1,0 +1,41 @@
+# Gitleaks config for Portofolio_Website
+# Keeps the default ruleset; allowlists KNOWN non-secrets so scans surface real signal.
+# Verified 2026-06-13: full-history scan found ZERO live secrets (trufflehog verified-live = 0).
+# Philosophy: prefer value-regex allowlists over broad path excludes, so a genuinely new
+# accidental secret still trips even inside an otherwise-allowlisted area.
+
+title = "Portofolio_Website gitleaks config"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Known non-secrets: public tokens, placeholder templates, doc examples, CI test values"
+
+# Public-by-design files and pure templates/examples (cannot hold a private secret by nature).
+paths = [
+  '''portfolio-ui/scripts/seo/routes\.mjs''',          # IndexNow key — public by protocol
+  '''public/.*\.txt$''',                               # IndexNow verification file
+  '''.*\.env\.example$''',                             # committed env templates
+  '''.*\.env\..*\.example$''',                         # e.g. .env.production.example
+  '''portfolio-ui/\.env\.production$''',               # public VITE_* build config
+  '''portfolio-ui/\.env\.development$''',
+  '''node_modules/.*''',
+]
+
+# Specific placeholder / example values. These are sharp: a REAL secret in the same file
+# (incl. the API docs) still trips, because these match only the literal placeholders.
+regexes = [
+  '''00b81fad70da4ae7acdbfd756d25c510''',              # IndexNow key (public verification token)
+  '''CHANGE_THIS_TO_A_[0-9]+_CHARACTER[A-Z_]*''',
+  '''your-(jwt|smtp|redis|github|ipinfo|webhook|oauth|sentry)[a-z-]*''',
+  '''your_(github|google)_client_(id|secret)''',
+  '''USE_A_STRONG_PASSWORD_HERE''',
+  '''test-jwt-secret-key-for-ci''',                    # CI test value in workflow env blocks
+  '''change-this-password''',                          # helm/compose local-dev placeholder
+  '''postgres:postgres@postgres''',                    # local-dev throwaway DB creds
+  '''user:password@postgres''',                        # helm values example DB creds
+  '''eyJhbGciOiJIUzI1NiI[A-Za-z0-9]*\.\.\.''',         # truncated example JWT in API docs (ends in literal ...)
+  '''YOUR_ACCESS_TOKEN''',                             # placeholder bearer token in API docs
+  '''YOUR_REFRESH_TOKEN''',
+]
