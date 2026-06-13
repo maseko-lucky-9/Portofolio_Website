@@ -2,7 +2,7 @@ import { prisma } from '../config/database.js';
 import { cache, cacheKeys } from '../config/redis.js';
 import { config } from '../config/index.js';
 import { ApiError, PaginatedResult, paginate } from '../utils/errors.js';
-import { parseMarkdown, getReadingTime, getWordCount } from '../utils/markdown.js';
+import { parseMarkdown } from '../utils/markdown.js';
 import { ArticleStatus } from '@prisma/client';
 import { CreateArticleInput, UpdateArticleInput } from '../utils/validation.js';
 
@@ -230,7 +230,7 @@ export class ArticleService {
 
     // Parse markdown to generate excerpt and reading time
     const parsed = parseMarkdown(data.content);
-    const excerpt = data.excerpt || parsed.excerpt;
+    const excerpt = data.excerpt ? data.excerpt : parsed.excerpt;
     const readingTime = parsed.readingTime.minutes;
     const wordCount = parsed.wordCount;
 
@@ -307,7 +307,7 @@ export class ArticleService {
 
     if (data.content) {
       const parsed = parseMarkdown(data.content);
-      excerpt = data.excerpt || parsed.excerpt;
+      excerpt = data.excerpt ? data.excerpt : parsed.excerpt;
       readingTime = parsed.readingTime.minutes;
       wordCount = parsed.wordCount;
     }

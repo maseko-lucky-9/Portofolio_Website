@@ -60,10 +60,11 @@ function buildPageUrl(baseUrl: string | URL, page: number): string {
     const url = typeof baseUrl === 'string' ? new URL(baseUrl) : baseUrl;
     url.searchParams.set('page', page.toString());
     return url.toString();
-  } catch (error) {
+  } catch {
     // Fallback if URL parsing fails
-    const separator = baseUrl.toString().includes('?') ? '&' : '?';
-    return `${baseUrl}${separator}page=${page}`;
+    const baseUrlString = baseUrl.toString();
+    const separator = baseUrlString.includes('?') ? '&' : '?';
+    return `${baseUrlString}${separator}page=${page}`;
   }
 }
 
@@ -122,6 +123,6 @@ export function isValidApiResponse<T>(value: unknown): value is ApiResponse<T> {
     typeof value === 'object' &&
     value !== null &&
     'data' in value &&
-    (!('meta' in value) || typeof (value as any).meta === 'object')
+    (!('meta' in value) || typeof (value as Record<string, unknown>).meta === 'object')
   );
 }

@@ -1,9 +1,8 @@
-import { FastifyRequest, FastifyReply } from 'fastify';
 import { prisma } from '../config/database.js';
 import { config } from '../config/index.js';
 import { ApiError } from '../utils/errors.js';
 import { generateTokens } from '../middleware/auth.middleware.js';
-import { Role } from '@prisma/client';
+import { Role, Prisma } from '@prisma/client';
 
 // OAuth provider types
 export type OAuthProvider = 'github' | 'google';
@@ -15,6 +14,34 @@ export interface OAuthProfile {
   name?: string;
   avatarUrl?: string;
   username?: string;
+}
+
+// Shapes of the JSON returned by the OAuth providers' token/user endpoints.
+interface OAuthTokenResponse {
+  access_token?: string;
+  refresh_token?: string;
+  error?: string;
+  error_description?: string;
+}
+
+interface GitHubUser {
+  id: number | string;
+  email: string | null;
+  name: string | null;
+  avatar_url: string | null;
+  login: string;
+}
+
+interface GitHubEmail {
+  email: string;
+  primary: boolean;
+}
+
+interface GoogleUser {
+  id: string;
+  email: string;
+  name?: string;
+  picture?: string;
 }
 
 export class OAuthService {
@@ -38,6 +65,10 @@ export class OAuthService {
     refreshToken: string;
     isNewUser: boolean;
   }> {
+    // Prisma stores `profile` as Json; OAuthProfile is a plain JSON-serializable
+    // object, so cast to the Prisma JSON input type rather than `any`.
+    const profileJson = profile as unknown as Prisma.InputJsonValue;
+
     // Check if OAuth provider account exists
     const oauthAccount = await prisma.oAuthProvider.findUnique({
       where: {
@@ -60,7 +91,13 @@ export class OAuthService {
       },
     });
 
-    let user;
+    let user: {
+      id: string;
+      email: string;
+      role: Role;
+      firstName: string | null;
+      lastName: string | null;
+    };
     let isNewUser = false;
 
     if (oauthAccount) {
@@ -69,7 +106,13 @@ export class OAuthService {
         throw ApiError.unauthorized('User account is inactive');
       }
 
-      user = oauthAccount.user;
+      user = {
+        id: oauthAccount.user.id,
+        email: oauthAccount.user.email,
+        role: oauthAccount.user.role,
+        firstName: oauthAccount.user.firstName,
+        lastName: oauthAccount.user.lastName,
+      };
 
       // Update OAuth tokens
       await prisma.oAuthProvider.update({
@@ -78,7 +121,7 @@ export class OAuthService {
           accessToken,
           refreshToken,
           email: profile.email,
-          profile: profile as any,
+          profile: profileJson,
           updatedAt: new Date(),
         },
       });
@@ -116,11 +159,17 @@ export class OAuthService {
             email: profile.email,
             accessToken,
             refreshToken,
-            profile: profile as any,
+            profile: profileJson,
           },
         });
 
-        user = existingUser;
+        user = {
+          id: existingUser.id,
+          email: existingUser.email,
+          role: existingUser.role,
+          firstName: existingUser.firstName,
+          lastName: existingUser.lastName,
+        };
 
         // Update last login
         await prisma.user.update({
@@ -131,7 +180,7 @@ export class OAuthService {
         // Create new user
         isNewUser = true;
 
-        const [firstName = '', lastName = ''] = (profile.name || '').split(' ', 2);
+        const [firstName = '', lastName = ''] = (profile.name ?? '').split(' ', 2);
 
         const newUser = await prisma.user.create({
           data: {
@@ -139,7 +188,7 @@ export class OAuthService {
             passwordHash: '', // No password for OAuth-only users
             firstName: firstName || null,
             lastName: lastName || null,
-            avatar: profile.avatarUrl || null,
+            avatar: profile.avatarUrl ?? null,
             role: Role.VIEWER,
             oauthProviders: {
               create: {
@@ -148,7 +197,7 @@ export class OAuthService {
                 email: profile.email,
                 accessToken,
                 refreshToken,
-                profile: profile as any,
+                profile: profileJson,
               },
             },
           },
@@ -225,7 +274,7 @@ export class OAuthService {
         email: profile.email,
         accessToken,
         refreshToken,
-        profile: profile as any,
+        profile: profile as unknown as Prisma.InputJsonValue,
       },
     });
   }
@@ -251,7 +300,7 @@ export class OAuthService {
       select: { passwordHash: true },
     });
 
-    const hasOtherAuth = user && user.passwordHash && user.passwordHash !== '';
+    const hasOtherAuth = user?.passwordHash !== undefined && user.passwordHash !== '';
 
     const otherOAuthProviders = await prisma.oAuthProvider.count({
       where: {
@@ -321,7 +370,7 @@ export class OAuthService {
     const redirectUri = this.getRedirectUri(provider);
 
     switch (provider) {
-      case 'github':
+      case 'github': {
         const githubParams = new URLSearchParams({
           client_id: config.oauth.github.clientId,
           redirect_uri: redirectUri,
@@ -329,8 +378,9 @@ export class OAuthService {
           state,
         });
         return `https://github.com/login/oauth/authorize?${githubParams.toString()}`;
+      }
 
-      case 'google':
+      case 'google': {
         const googleParams = new URLSearchParams({
           client_id: config.oauth.google.clientId,
           redirect_uri: redirectUri,
@@ -341,6 +391,7 @@ export class OAuthService {
           prompt: 'consent',
         });
         return `https://accounts.google.com/o/oauth2/v2/auth?${googleParams.toString()}`;
+      }
 
       default:
         throw ApiError.badRequest('Unsupported OAuth provider');
@@ -357,7 +408,7 @@ export class OAuthService {
     const redirectUri = this.getRedirectUri(provider);
 
     switch (provider) {
-      case 'github':
+      case 'github': {
         const githubResponse = await fetch('https://github.com/login/oauth/access_token', {
           method: 'POST',
           headers: {
@@ -372,18 +423,19 @@ export class OAuthService {
           }),
         });
 
-        const githubData = (await githubResponse.json()) as any;
+        const githubData = (await githubResponse.json()) as OAuthTokenResponse;
 
         if (githubData.error) {
-          throw ApiError.badRequest(`GitHub OAuth error: ${githubData.error_description}`);
+          throw ApiError.badRequest(`GitHub OAuth error: ${githubData.error_description ?? ''}`);
         }
 
         return {
-          accessToken: githubData.access_token,
+          accessToken: githubData.access_token ?? '',
           refreshToken: githubData.refresh_token,
         };
+      }
 
-      case 'google':
+      case 'google': {
         const googleResponse = await fetch('https://oauth2.googleapis.com/token', {
           method: 'POST',
           headers: {
@@ -398,16 +450,17 @@ export class OAuthService {
           }),
         });
 
-        const googleData = (await googleResponse.json()) as any;
+        const googleData = (await googleResponse.json()) as OAuthTokenResponse;
 
         if (googleData.error) {
-          throw ApiError.badRequest(`Google OAuth error: ${googleData.error_description}`);
+          throw ApiError.badRequest(`Google OAuth error: ${googleData.error_description ?? ''}`);
         }
 
         return {
-          accessToken: googleData.access_token,
+          accessToken: googleData.access_token ?? '',
           refreshToken: googleData.refresh_token,
         };
+      }
 
       default:
         throw ApiError.badRequest('Unsupported OAuth provider');
@@ -419,7 +472,7 @@ export class OAuthService {
    */
   async getOAuthProfile(provider: OAuthProvider, accessToken: string): Promise<OAuthProfile> {
     switch (provider) {
-      case 'github':
+      case 'github': {
         const githubUserResponse = await fetch('https://api.github.com/user', {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -427,7 +480,7 @@ export class OAuthService {
           },
         });
 
-        const githubUser = (await githubUserResponse.json()) as any;
+        const githubUser = (await githubUserResponse.json()) as GitHubUser;
 
         // Get primary email
         const githubEmailResponse = await fetch('https://api.github.com/user/emails', {
@@ -437,25 +490,26 @@ export class OAuthService {
           },
         });
 
-        const githubEmails = (await githubEmailResponse.json()) as any[];
-        const primaryEmail = githubEmails.find((e: any) => e.primary)?.email || githubUser.email;
+        const githubEmails = (await githubEmailResponse.json()) as GitHubEmail[];
+        const primaryEmail = githubEmails.find((e) => e.primary)?.email ?? githubUser.email ?? '';
 
         return {
           id: String(githubUser.id),
           email: primaryEmail,
-          name: githubUser.name,
-          avatarUrl: githubUser.avatar_url,
+          name: githubUser.name ?? undefined,
+          avatarUrl: githubUser.avatar_url ?? undefined,
           username: githubUser.login,
         };
+      }
 
-      case 'google':
+      case 'google': {
         const googleUserResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
         });
 
-        const googleUser = (await googleUserResponse.json()) as any;
+        const googleUser = (await googleUserResponse.json()) as GoogleUser;
 
         return {
           id: googleUser.id,
@@ -463,6 +517,7 @@ export class OAuthService {
           name: googleUser.name,
           avatarUrl: googleUser.picture,
         };
+      }
 
       default:
         throw ApiError.badRequest('Unsupported OAuth provider');

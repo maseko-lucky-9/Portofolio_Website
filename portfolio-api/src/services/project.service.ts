@@ -239,7 +239,7 @@ export class ProjectService {
 
     // Parse markdown to generate excerpt if not provided
     const parsed = parseMarkdown(data.content);
-    const excerpt = data.excerpt || parsed.excerpt;
+    const excerpt = data.excerpt ? data.excerpt : parsed.excerpt;
 
     // Create project
     const project = await prisma.project.create({

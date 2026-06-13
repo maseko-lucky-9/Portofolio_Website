@@ -1,16 +1,17 @@
-import type { ErrorCode } from '@portfolio/shared/types';
-
 // Custom API Error class
 export class ApiError extends Error {
   public readonly statusCode: number;
-  public readonly code: ErrorCode | string;
+  // Accepts any error-code string. ErrorCode is a string subset, so a plain
+  // `string` covers all known codes without the redundant-type-constituents
+  // union (ErrorCode | string collapses to string anyway).
+  public readonly code: string;
   public readonly details?: unknown;
   public readonly isOperational: boolean;
 
   constructor(
     statusCode: number,
     message: string,
-    code: ErrorCode | string = 'INTERNAL_ERROR',
+    code: string = 'INTERNAL_ERROR',
     details?: unknown,
     isOperational: boolean = true
   ) {

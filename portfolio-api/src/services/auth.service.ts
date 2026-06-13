@@ -1,5 +1,5 @@
 import { prisma } from '../config/database.js';
-import { hashPassword, verifyPassword, generateToken } from '../utils/crypto.js';
+import { hashPassword, verifyPassword } from '../utils/crypto.js';
 import { generateTokens } from '../middleware/auth.middleware.js';
 import { ApiError } from '../utils/errors.js';
 import { Role } from '@prisma/client';
@@ -126,7 +126,7 @@ export class AuthService {
       include: { user: { select: { id: true, email: true, role: true, isActive: true } } },
     });
 
-    if (!stored || stored.revokedAt || stored.expiresAt < new Date()) {
+    if (!stored || stored.revokedAt !== null || stored.expiresAt < new Date()) {
       throw ApiError.unauthorized('Invalid refresh token');
     }
 

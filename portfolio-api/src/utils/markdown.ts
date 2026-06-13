@@ -25,7 +25,7 @@ marked.setOptions({
 const renderer = new marked.Renderer();
 
 renderer.code = function (code: string, language?: string): string {
-  const lang = language || 'text';
+  const lang = language ?? 'text';
   const grammar = Prism.languages[lang] || Prism.languages['text'];
 
   let highlighted: string;
@@ -76,11 +76,11 @@ export const slugify = (text: string): string => {
 export const extractToc = (markdown: string): TableOfContentsItem[] => {
   const headingRegex = /^(#{1,6})\s+(.+)$/gm;
   const toc: TableOfContentsItem[] = [];
-  let match;
+  let match: RegExpExecArray | null;
 
   while ((match = headingRegex.exec(markdown)) !== null) {
-    const level = match[1].length;
-    const text = match[2].trim();
+    const level = (match[1] ?? '').length;
+    const text = (match[2] ?? '').trim();
     const slug = slugify(text);
 
     toc.push({ level, text, slug });
