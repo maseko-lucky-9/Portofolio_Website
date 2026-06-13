@@ -62,11 +62,11 @@ const parseUserAgent = (
   const result = parser.getResult();
 
   return {
-    browser: result.browser.name || 'Unknown',
-    browserVersion: result.browser.version || '',
-    os: result.os.name || 'Unknown',
-    osVersion: result.os.version || '',
-    device: result.device.type || 'desktop',
+    browser: result.browser.name ?? 'Unknown',
+    browserVersion: result.browser.version ?? '',
+    os: result.os.name ?? 'Unknown',
+    osVersion: result.os.version ?? '',
+    device: result.device.type ?? 'desktop',
   };
 };
 
@@ -108,8 +108,8 @@ export const analyticsMiddleware = async (
   }
 
   const { sessionId, visitorId } = getOrCreateIds(request);
-  const userAgent = request.headers['user-agent'] || '';
-  const referrer = (request.headers.referer as string) || null;
+  const userAgent = request.headers['user-agent'] ?? '';
+  const referrer = (request.headers.referer as string) ?? null;
   const ipAddress = getClientIp(request);
   const uaInfo = parseUserAgent(userAgent);
   const utmParams = getUtmParams(request.query as Record<string, unknown>);
@@ -142,7 +142,7 @@ export const getGeoFromIp = async (
   const cacheKey = `geo:${ip}`;
   const cached = await redis.get(cacheKey);
   if (cached) {
-    return JSON.parse(cached);
+    return JSON.parse(cached) as { country: string; region: string; city: string };
   }
 
   try {
@@ -153,15 +153,15 @@ export const getGeoFromIp = async (
 
     const data = (await response.json()) as { country: string; region: string; city: string };
     const geo = {
-      country: data.country || 'Unknown',
-      region: data.region || 'Unknown',
-      city: data.city || 'Unknown',
+      country: data.country ?? 'Unknown',
+      region: data.region ?? 'Unknown',
+      city: data.city ?? 'Unknown',
     };
 
     // Cache for 24 hours
     await redis.setex(cacheKey, 86400, JSON.stringify(geo));
     return geo;
-  } catch (error) {
+  } catch (error: unknown) {
     logger.warn({ error, ip }, 'Failed to get geo data');
     return null;
   }
@@ -224,7 +224,7 @@ export const trackEvent = async (
     await redis.expire('realtime:visitors', 300); // 5 min TTL
 
     logger.debug({ eventType, sessionId: analytics.sessionId }, 'Event tracked');
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error({ error, eventType }, 'Failed to track event');
   }
 };
@@ -232,5 +232,5 @@ export const trackEvent = async (
 // Get real-time visitor count
 export const getRealtimeVisitors = async (): Promise<number> => {
   const count = await redis.get('realtime:visitors');
-  return parseInt(count || '0', 10);
+  return parseInt(count ?? '0', 10);
 };

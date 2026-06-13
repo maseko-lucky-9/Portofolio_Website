@@ -12,7 +12,7 @@ export const errorHandler = (error: Error, _request: FastifyRequest, reply: Fast
 
   // Handle ApiError
   if (error instanceof ApiError) {
-    reply.status(error.statusCode).send({
+    void reply.status(error.statusCode).send({
       success: false,
       error: {
         code: error.code,
@@ -30,7 +30,7 @@ export const errorHandler = (error: Error, _request: FastifyRequest, reply: Fast
       message: e.message,
     }));
 
-    reply.status(400).send({
+    void reply.status(400).send({
       success: false,
       error: {
         code: 'VALIDATION_ERROR',
@@ -47,7 +47,7 @@ export const errorHandler = (error: Error, _request: FastifyRequest, reply: Fast
 
     switch (prismaError.code) {
       case 'P2002': // Unique constraint violation
-        reply.status(409).send({
+        void reply.status(409).send({
           success: false,
           error: {
             code: 'CONFLICT',
@@ -57,7 +57,7 @@ export const errorHandler = (error: Error, _request: FastifyRequest, reply: Fast
         });
         return;
       case 'P2025': // Record not found
-        reply.status(404).send({
+        void reply.status(404).send({
           success: false,
           error: {
             code: 'NOT_FOUND',
@@ -72,7 +72,7 @@ export const errorHandler = (error: Error, _request: FastifyRequest, reply: Fast
 
   // Handle JWT errors
   if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
-    reply.status(401).send({
+    void reply.status(401).send({
       success: false,
       error: {
         code: 'UNAUTHORIZED',
@@ -83,7 +83,7 @@ export const errorHandler = (error: Error, _request: FastifyRequest, reply: Fast
   }
 
   // Default 500 error
-  reply.status(500).send({
+  void reply.status(500).send({
     success: false,
     error: {
       code: 'INTERNAL_ERROR',
@@ -125,7 +125,7 @@ export const validate = <T>(schema: ZodSchema<T>, source: 'body' | 'query' | 'pa
 
 // Not found handler
 export const notFoundHandler = (_request: FastifyRequest, reply: FastifyReply): void => {
-  reply.status(404).send({
+  void reply.status(404).send({
     success: false,
     error: {
       code: 'NOT_FOUND',

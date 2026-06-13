@@ -47,11 +47,11 @@ export const generateTokens = (user: {
   };
 
   const accessToken = jwt.sign(accessPayload, config.auth.jwtSecret, {
-    expiresIn: config.auth.accessExpiry as any,
+    expiresIn: config.auth.accessExpiry as jwt.SignOptions['expiresIn'],
   });
 
   const refreshToken = jwt.sign(refreshPayload, config.auth.jwtSecret, {
-    expiresIn: config.auth.refreshExpiry as any,
+    expiresIn: config.auth.refreshExpiry as jwt.SignOptions['expiresIn'],
   });
 
   return { accessToken, refreshToken };

@@ -67,7 +67,7 @@ export const createAuditLog = async (
       },
       'Audit log created'
     );
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error({ error, action, entity }, 'Failed to create audit log');
   }
 };
@@ -78,7 +78,7 @@ export const auditMiddleware = (action: AuditAction, entity: AuditEntity) => {
     // Store original values for UPDATE actions
     if (action === 'UPDATE' || action === 'DELETE') {
       const params = request.params as { id?: string; slug?: string };
-      const id = params.id || params.slug;
+      const id = params.id ?? params.slug;
 
       if (id) {
         // Store entity ID for post-response audit logging
@@ -155,8 +155,8 @@ export const getAuditLogs = async (options: {
     prisma.auditLog.findMany({
       where,
       orderBy: { createdAt: 'desc' },
-      take: options.limit || 50,
-      skip: options.offset || 0,
+      take: options.limit ?? 50,
+      skip: options.offset ?? 0,
       include: {
         user: {
           select: { email: true },

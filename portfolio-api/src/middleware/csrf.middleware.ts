@@ -71,9 +71,9 @@ export function verifyCsrfToken(sessionId: string, token: string): boolean {
  * 2. Client must include the same token in request header
  * 3. Server verifies both match for state-changing requests
  */
-export async function csrfProtection(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+export function csrfProtection(request: FastifyRequest, _reply: FastifyReply): void {
   const method = request.method;
-  const path = request.routeOptions?.url || request.url;
+  const path = request.routeOptions?.url ?? request.url;
 
   // Skip CSRF check for:
   // 1. Safe methods (GET, HEAD, OPTIONS)
@@ -103,7 +103,7 @@ export async function csrfProtection(request: FastifyRequest, reply: FastifyRepl
 
   // Get session ID for token validation
   const sessionId =
-    request.cookies['sessionId'] || (request.headers['x-session-id'] as string) || 'anonymous';
+    request.cookies['sessionId'] ?? (request.headers['x-session-id'] as string) ?? 'anonymous';
 
   // Verify token is valid and not expired
   if (!verifyCsrfToken(sessionId, cookieToken)) {
@@ -118,13 +118,13 @@ export async function csrfProtection(request: FastifyRequest, reply: FastifyRepl
 export function setCsrfToken(request: FastifyRequest, reply: FastifyReply): string {
   const token = generateCsrfToken();
   const sessionId =
-    request.cookies['sessionId'] || (request.headers['x-session-id'] as string) || 'anonymous';
+    request.cookies['sessionId'] ?? (request.headers['x-session-id'] as string) ?? 'anonymous';
 
   // Store token
   storeCsrfToken(sessionId, token);
 
   // Set cookie
-  reply.cookie(securityConfig.csrf.cookieName, token, {
+  void reply.cookie(securityConfig.csrf.cookieName, token, {
     httpOnly: false, // Must be readable by client
     secure: securityConfig.cookie.secure,
     sameSite: securityConfig.cookie.sameSite,
@@ -139,10 +139,7 @@ export function setCsrfToken(request: FastifyRequest, reply: FastifyReply): stri
  * Get CSRF token endpoint
  * Clients can call this to get a fresh token
  */
-export async function getCsrfToken(
-  request: FastifyRequest,
-  reply: FastifyReply
-): Promise<{ token: string }> {
+export function getCsrfToken(request: FastifyRequest, reply: FastifyReply): { token: string } {
   const token = setCsrfToken(request, reply);
   return { token };
 }
