@@ -183,19 +183,23 @@ function registerHooks(): void {
 function setupGracefulShutdown(): void {
   const signals: NodeJS.Signals[] = ['SIGTERM', 'SIGINT'];
 
-  signals.forEach((signal) => {
-    process.on(signal, async () => {
-      logger.info(`Received ${signal}, starting graceful shutdown`);
+  const shutdown = async (signal: NodeJS.Signals): Promise<void> => {
+    logger.info(`Received ${signal}, starting graceful shutdown`);
 
-      try {
-        await app.close();
-        await redis.quit();
-        logger.info('Server closed successfully');
-        process.exit(0);
-      } catch (error) {
-        logger.error({ error }, 'Error during shutdown');
-        process.exit(1);
-      }
+    try {
+      await app.close();
+      await redis.quit();
+      logger.info('Server closed successfully');
+      process.exit(0);
+    } catch (error: unknown) {
+      logger.error({ error }, 'Error during shutdown');
+      process.exit(1);
+    }
+  };
+
+  signals.forEach((signal) => {
+    process.on(signal, () => {
+      void shutdown(signal);
     });
   });
 
@@ -249,13 +253,13 @@ async function start(): Promise<void> {
 
     // Log API docs URL
     logger.info(`📚 API Documentation: ${config.appUrl}/api-docs`);
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error({ error }, 'Failed to start server');
     process.exit(1);
   }
 }
 
 // Start the server
-start();
+void start();
 
 export default app;

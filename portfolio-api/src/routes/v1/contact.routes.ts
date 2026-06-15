@@ -2,8 +2,21 @@ import { FastifyInstance } from 'fastify';
 import { authenticate, requireRole } from '../../middleware/auth.middleware.js';
 import { contactService } from '../../services/contact.service.js';
 import { newsletterService } from '../../services/newsletter.service.js';
+import type { ContactInput, NewsletterInput } from '../../utils/validation.js';
 
-export async function contactRoutes(app: FastifyInstance): Promise<void> {
+interface PaginationQuery {
+  page?: string;
+  limit?: string;
+  status?: string;
+  active?: string;
+}
+
+interface UpdateSubmissionBody {
+  status: string;
+  notes?: string;
+}
+
+export function contactRoutes(app: FastifyInstance): void {
   // Submit contact form
   app.post(
     '/submit',
@@ -35,7 +48,7 @@ export async function contactRoutes(app: FastifyInstance): Promise<void> {
       },
     },
     async (request) => {
-      const data = request.body as any;
+      const data = request.body as ContactInput;
       const metadata = {
         ip: request.ip,
         userAgent: request.headers['user-agent'],
@@ -66,10 +79,10 @@ export async function contactRoutes(app: FastifyInstance): Promise<void> {
       },
     },
     async (request) => {
-      const query = request.query as any;
+      const query = request.query as PaginationQuery;
       const result = await contactService.getSubmissions({
-        page: parseInt(query.page) || 1,
-        limit: parseInt(query.limit) || 20,
+        page: parseInt(query.page ?? '1', 10) || 1,
+        limit: parseInt(query.limit ?? '20', 10) || 20,
         status: query.status,
       });
       return result;

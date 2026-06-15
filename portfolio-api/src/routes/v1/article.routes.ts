@@ -1,8 +1,24 @@
 import { FastifyInstance } from 'fastify';
-import { authenticate, requireRole } from '../../middleware/auth.middleware.js';
+import {
+  authenticate,
+  requireRole,
+  AuthenticatedRequest,
+} from '../../middleware/auth.middleware.js';
 import { articleService } from '../../services/article.service.js';
+import type { CreateArticleInput, UpdateArticleInput } from '../../utils/validation.js';
 
-export async function articleRoutes(app: FastifyInstance): Promise<void> {
+interface ArticleListQuery {
+  page?: string;
+  limit?: string;
+  status?: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
+  featured?: string;
+  tag?: string;
+  search?: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}
+
+export function articleRoutes(app: FastifyInstance): void {
   // List articles
   app.get(
     '/',
@@ -35,16 +51,16 @@ export async function articleRoutes(app: FastifyInstance): Promise<void> {
       },
     },
     async (request) => {
-      const query = request.query as any;
+      const query = request.query as ArticleListQuery;
       const result = await articleService.listArticles({
-        page: parseInt(query.page) || 1,
-        limit: parseInt(query.limit) || 10,
+        page: parseInt(query.page ?? '1', 10) || 1,
+        limit: parseInt(query.limit ?? '10', 10) || 10,
         status: query.status,
         featured: query.featured === 'true' ? true : query.featured === 'false' ? false : undefined,
         tag: query.tag,
         search: query.search,
-        sortBy: query.sortBy || 'createdAt',
-        sortOrder: query.sortOrder || 'desc',
+        sortBy: query.sortBy ?? 'createdAt',
+        sortOrder: query.sortOrder ?? 'desc',
       });
       return result;
     }
@@ -108,8 +124,8 @@ export async function articleRoutes(app: FastifyInstance): Promise<void> {
       },
     },
     async (request, reply) => {
-      const data = request.body as any;
-      const user = (request as any).user;
+      const data = request.body as CreateArticleInput;
+      const { user } = request as AuthenticatedRequest;
       const article = await articleService.createArticle(data, user.id);
       return reply.code(201).send(article);
     }
@@ -154,7 +170,7 @@ export async function articleRoutes(app: FastifyInstance): Promise<void> {
     },
     async (request) => {
       const { id } = request.params as { id: string };
-      const data = request.body as any;
+      const data = request.body as UpdateArticleInput;
       const article = await articleService.updateArticle(id, data);
       return article;
     }
