@@ -32,8 +32,14 @@ ARG VITE_USE_API=true
 ARG VITE_ENABLE_MSW=false
 ARG VITE_APP_NAME=Portfolio
 
-# Build the application
-RUN npm run build
+# Build the application.
+# `build:app` is `vite build` alone — deliberately NOT the full `build`, which
+# also runs the six SEO scripts (static pages, OG cards via satori/resvg,
+# sitemap, RSS, fingerprint). Those need scripts/ + content/, which this image
+# does not copy, and resvg has no prebuilt binary for Alpine/musl. They exist
+# for the Cloudflare Workers deploy, which builds via wrangler.toml and never
+# uses this Dockerfile. This image only has to serve the SPA bundle.
+RUN npm run build:app
 
 # ==============================================
 # Stage 2: Production (Nginx)

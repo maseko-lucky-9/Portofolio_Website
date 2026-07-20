@@ -29,7 +29,7 @@ export function Logo({ size = "md", className = "" }: LogoProps) {
       className={`font-bold inline-block ${sizeClasses[size]} ${className}`}
       aria-label={personalData.name}
     >
-      <span className="text-primary">{firstName}</span>
+      <span className="text-gradient-primary">{firstName}</span>
       <span className="text-muted-foreground font-medium">.dev</span>
       {/* Visually-hidden full name for screen readers */}
       <span className="sr-only">{` ${personalData.name}`}</span>

@@ -13,7 +13,7 @@ export const personalData = {
   title: "Senior Backend & DevOps / Kubernetes Engineer",
 
   // EDIT: Your value proposition tagline (must be < 200 chars per personal.test.ts)
-  tagline: "I build production Kubernetes platforms and .NET services. 8+ years, mostly South African banking. AWS · Terraform · ArgoCD · Helm. Microsoft Certified: Azure Developer Associate.",
+  tagline: "8+ years building production Kubernetes platforms and .NET microservices for South African banking. AWS · Terraform · ArgoCD · Helm. Microsoft Certified: Azure Developer Associate.",
 
   // EDIT: Your email
   email: "ltmaseko7@gmail.com",
@@ -27,7 +27,7 @@ export const personalData = {
   // EDIT: Key metrics to display
   metrics: {
     projects: "20+",
-    experience: "8+ years",
+    experience: "8+ Years",
     clients: "10+",
   },
 

@@ -17,7 +17,7 @@ test.describe("Hero Section", () => {
   });
 
   test("CTA buttons are present", async ({ page }) => {
-    await expect(page.getByRole("button", { name: /See what I've built/i })).toBeVisible();
+    await expect(page.getByRole("button", { name: /View My Work/i })).toBeVisible();
     await expect(page.getByRole("button", { name: /Contact Me/i })).toBeVisible();
   });
 

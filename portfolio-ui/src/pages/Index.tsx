@@ -42,10 +42,6 @@ function SectionFallback() {
   );
 }
 
-import { Scene } from "@/components/canvas/Scene";
-import { ScrollSync } from "@/components/canvas/ScrollSync";
-import { CanvasErrorBoundary } from "@/components/canvas/CanvasErrorBoundary";
-
 const Index = () => {
   return (
     <ThemeProvider>
@@ -59,10 +55,6 @@ const Index = () => {
         <SmoothScroll />
         <CustomCursor />
         <ScrollProgress />
-        <CanvasErrorBoundary>
-          <ScrollSync />
-          <Scene />
-        </CanvasErrorBoundary>
         <Navbar />
         <main id="hero">
           <HeroSection />

@@ -96,13 +96,13 @@ const KIND_INDEX_DESCRIPTION = {
 const INLINE_CSS = `
   :root {
     color-scheme: light dark;
-    --bg: #f5f2ee;
-    --fg: #0b0d14;
-    --muted: #5b5e6b;
-    --accent: #d9744e;
-    --border: rgba(11, 13, 20, 0.08);
-    --font-body: ui-serif, "Source Serif 4", Georgia, serif;
-    --font-sans: system-ui, -apple-system, "Inter", sans-serif;
+    --bg: #f5f7f9;
+    --fg: #111622;
+    --muted: #6a7181;
+    --accent: #4259f0;
+    --border: rgba(17, 22, 34, 0.08);
+    --font-body: "Inter", system-ui, -apple-system, sans-serif;
+    --font-sans: "Inter", system-ui, -apple-system, sans-serif;
     --font-mono: ui-monospace, "JetBrains Mono", Menlo, monospace;
   }
   @media (prefers-color-scheme: dark) {
@@ -246,8 +246,8 @@ export function renderPage(args) {
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="alternate icon" href="/favicon.ico" />
-    <meta name="theme-color" content="#0B0D14" media="(prefers-color-scheme: dark)" />
-    <meta name="theme-color" content="#F5F2EE" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#090A11" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#F5F7F9" media="(prefers-color-scheme: light)" />
     <link rel="alternate" type="application/rss+xml" title="Thulani Maseko - Blog &amp; Answers" href="${SITE_ORIGIN}/rss.xml" />
 
     ${schemas.map(jsonLd).join('\n    ')}

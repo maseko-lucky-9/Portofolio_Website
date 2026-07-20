@@ -131,16 +131,19 @@ export function Navbar() {
         paddingBottom: isScrolled ? "10px" : "18px",
       }}
     >
-      {/* Scrolled paper background — flat, hairline-ruled. No backdrop-filter.
-          Rendered unconditionally; opacity animated via useEffect above. */}
+      {/* Scrolled glass background. Rendered unconditionally; opacity
+          animated via useEffect above. */}
       <div
         ref={paperBgRef}
         aria-hidden="true"
         className="absolute inset-0"
         style={{
           opacity: 0,
-          background: "oklch(var(--background))",
-          borderBottom: "1px solid oklch(var(--border))",
+          backdropFilter: "blur(20px) saturate(180%)",
+          WebkitBackdropFilter: "blur(20px) saturate(180%)",
+          background: "oklch(var(--background) / 0.75)",
+          borderBottom: "1px solid oklch(var(--border) / 0.6)",
+          boxShadow: "0 4px 24px hsl(0 0% 0% / 0.06)",
         }}
       />
 
