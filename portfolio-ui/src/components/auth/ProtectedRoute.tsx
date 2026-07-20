@@ -1,10 +1,10 @@
-import React from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import React from "react";
+import { Navigate, useLocation } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: 'VIEWER' | 'EDITOR' | 'ADMIN';
+  requiredRole?: "VIEWER" | "EDITOR" | "ADMIN";
   fallback?: React.ReactNode;
 }
 
@@ -40,9 +40,7 @@ export function ProtectedRoute({ children, requiredRole, fallback }: ProtectedRo
       return (
         <div className="flex flex-col items-center justify-center min-h-screen">
           <h1 className="text-2xl font-bold mb-2">Access Denied</h1>
-          <p className="text-muted-foreground">
-            You don't have permission to access this page.
-          </p>
+          <p className="text-muted-foreground">You don't have permission to access this page.</p>
         </div>
       );
     }

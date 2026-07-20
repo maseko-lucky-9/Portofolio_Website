@@ -1,18 +1,18 @@
 /**
  * Base Service Class
- * 
+ *
  * Generic service with common CRUD operations
  * Can be extended by resource-specific services
  */
 
-import { httpClient } from '@/lib/http-client';
-import type { ApiResponse, PaginatedResponse } from '@/types/api';
+import { httpClient } from "@/lib/http-client";
+import type { ApiResponse, PaginatedResponse } from "@/types/api";
 
 export interface QueryParams {
   page?: number;
   limit?: number;
   sortBy?: string;
-  order?: 'asc' | 'desc';
+  order?: "asc" | "desc";
   [key: string]: unknown;
 }
 
@@ -23,17 +23,17 @@ export abstract class BaseService<T> {
    * Build query string from params
    */
   protected buildQueryString(params?: QueryParams): string {
-    if (!params) return '';
+    if (!params) return "";
 
     const searchParams = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
+      if (value !== undefined && value !== null && value !== "") {
         searchParams.append(key, String(value));
       }
     });
 
     const query = searchParams.toString();
-    return query ? `?${query}` : '';
+    return query ? `?${query}` : "";
   }
 
   /**

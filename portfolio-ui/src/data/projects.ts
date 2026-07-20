@@ -113,7 +113,15 @@ export const projects: Project[] = [
     description:
       "pgvector-backed retrieval-augmented generation pipeline served via the Model Context Protocol — designed for Claude/agent integration with measurable accuracy and latency benchmarks.",
     thumbnail: "/images/projects/rag-mcp.png",
-    technologies: ["Python", "pgvector", "PostgreSQL", "MCP", "Anthropic Claude", "FastAPI", "Docker"],
+    technologies: [
+      "Python",
+      "pgvector",
+      "PostgreSQL",
+      "MCP",
+      "Anthropic Claude",
+      "FastAPI",
+      "Docker",
+    ],
     challenge:
       "Most RAG demos ship as notebooks. Need a production-pattern reference: ingestion pipeline, embedding store, retrieval API, MCP server interface, with explicit accuracy/latency SLOs.",
     solution:

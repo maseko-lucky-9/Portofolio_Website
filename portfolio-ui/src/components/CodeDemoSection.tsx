@@ -57,8 +57,7 @@ export function CodeDemoSection() {
           </span>
           <h2 className="section-title">Interactive Code Demo</h2>
           <p className="section-subtitle mx-auto">
-            Explore my coding style with live examples. Try running the code to see it in
-            action.
+            Explore my coding style with live examples. Try running the code to see it in action.
           </p>
         </div>
 
@@ -103,9 +102,7 @@ export function CodeDemoSection() {
                   <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
                 </div>
                 <span className="text-sm font-medium">{activeExample.title}</span>
-                <span className="text-xs text-muted-foreground">
-                  {activeExample.language}
-                </span>
+                <span className="text-xs text-muted-foreground">{activeExample.language}</span>
               </div>
               <div className="flex items-center gap-2">
                 <button

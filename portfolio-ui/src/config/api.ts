@@ -13,7 +13,7 @@
  *   const newProject = await api.post('/projects', { title: 'My Project' });
  */
 
-import { env, apiUrl } from './env';
+import { env, apiUrl } from "./env";
 
 // Custom error class for API errors
 export class ApiError extends Error {
@@ -21,15 +21,15 @@ export class ApiError extends Error {
     public status: number,
     public statusText: string,
     message: string,
-    public data?: unknown
+    public data?: unknown,
   ) {
     super(message);
-    this.name = 'ApiError';
+    this.name = "ApiError";
   }
 }
 
 // Request options type
-interface RequestOptions extends Omit<RequestInit, 'body'> {
+interface RequestOptions extends Omit<RequestInit, "body"> {
   body?: unknown;
 }
 
@@ -43,28 +43,25 @@ interface ApiResponse<T> {
 /**
  * Make a fetch request to the API
  */
-async function request<T>(
-  endpoint: string,
-  options: RequestOptions = {}
-): Promise<ApiResponse<T>> {
+async function request<T>(endpoint: string, options: RequestOptions = {}): Promise<ApiResponse<T>> {
   const url = apiUrl(endpoint);
   const { body, headers: customHeaders, ...restOptions } = options;
 
   const headers: HeadersInit = {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
     ...customHeaders,
   };
 
   // Add auth token if available
-  const token = localStorage.getItem('accessToken');
+  const token = localStorage.getItem("accessToken");
   if (token) {
-    (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
+    (headers as Record<string, string>)["Authorization"] = `Bearer ${token}`;
   }
 
   const config: RequestInit = {
     ...restOptions,
     headers,
-    credentials: 'include', // Include cookies for CORS
+    credentials: "include", // Include cookies for CORS
   };
 
   if (body) {
@@ -72,15 +69,15 @@ async function request<T>(
   }
 
   if (env.debug) {
-    console.log(`🌐 API Request: ${options.method || 'GET'} ${url}`);
+    console.log(`🌐 API Request: ${options.method || "GET"} ${url}`);
   }
 
   try {
     const response = await fetch(url, config);
 
     // Handle non-JSON responses
-    const contentType = response.headers.get('content-type');
-    const isJson = contentType?.includes('application/json');
+    const contentType = response.headers.get("content-type");
+    const isJson = contentType?.includes("application/json");
     const data = isJson ? await response.json() : await response.text();
 
     if (!response.ok) {
@@ -88,7 +85,7 @@ async function request<T>(
         response.status,
         response.statusText,
         data?.message || data?.error || `HTTP ${response.status}`,
-        data
+        data,
       );
     }
 
@@ -107,11 +104,11 @@ async function request<T>(
     }
 
     // Network or other error
-    console.error('API Error:', error);
+    console.error("API Error:", error);
     throw new ApiError(
       0,
-      'Network Error',
-      error instanceof Error ? error.message : 'Unknown error'
+      "Network Error",
+      error instanceof Error ? error.message : "Unknown error",
     );
   }
 }
@@ -121,19 +118,19 @@ async function request<T>(
  */
 export const api = {
   get: <T>(endpoint: string, options?: RequestOptions) =>
-    request<T>(endpoint, { ...options, method: 'GET' }),
+    request<T>(endpoint, { ...options, method: "GET" }),
 
   post: <T>(endpoint: string, body?: unknown, options?: RequestOptions) =>
-    request<T>(endpoint, { ...options, method: 'POST', body }),
+    request<T>(endpoint, { ...options, method: "POST", body }),
 
   put: <T>(endpoint: string, body?: unknown, options?: RequestOptions) =>
-    request<T>(endpoint, { ...options, method: 'PUT', body }),
+    request<T>(endpoint, { ...options, method: "PUT", body }),
 
   patch: <T>(endpoint: string, body?: unknown, options?: RequestOptions) =>
-    request<T>(endpoint, { ...options, method: 'PATCH', body }),
+    request<T>(endpoint, { ...options, method: "PATCH", body }),
 
   delete: <T>(endpoint: string, options?: RequestOptions) =>
-    request<T>(endpoint, { ...options, method: 'DELETE' }),
+    request<T>(endpoint, { ...options, method: "DELETE" }),
 };
 
 export default api;

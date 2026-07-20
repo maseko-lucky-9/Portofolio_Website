@@ -1,20 +1,20 @@
 /**
  * Projects Hooks
- * 
+ *
  * React Query hooks for project-related operations
  */
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
-import { projectsService } from '@/services/projects.service';
-import { queryKeys } from '@/lib/react-query';
-import { env } from '@/config/env';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { projectsService } from "@/services/projects.service";
+import { queryKeys } from "@/lib/react-query";
+import { env } from "@/config/env";
 import type {
   Project,
   ProjectQueryParams,
   CreateProjectData,
   UpdateProjectData,
-} from '@/types/api';
+} from "@/types/api";
 
 /**
  * Get all projects with pagination
@@ -86,20 +86,17 @@ export function useIncrementProjectViews() {
     mutationFn: (slug: string) => projectsService.incrementViews(slug),
     onSuccess: (_, slug) => {
       // Optimistically update the cache
-      queryClient.setQueryData(
-        queryKeys.projects.detail(slug),
-        (old: unknown) => {
-          const oldData = old as { data?: Project };
-          if (!oldData?.data) return old;
-          return {
-            ...oldData,
-            data: {
-              ...oldData.data,
-              views: (oldData.data.views || 0) + 1,
-            },
-          };
-        }
-      );
+      queryClient.setQueryData(queryKeys.projects.detail(slug), (old: unknown) => {
+        const oldData = old as { data?: Project };
+        if (!oldData?.data) return old;
+        return {
+          ...oldData,
+          data: {
+            ...oldData.data,
+            views: (oldData.data.views || 0) + 1,
+          },
+        };
+      });
     },
   });
 }
@@ -113,8 +110,8 @@ export function useToggleProjectLike() {
   return useMutation({
     mutationFn: (id: string) => projectsService.toggleLike(id),
     onSuccess: (response, id) => {
-      toast.success('Project liked!');
-      
+      toast.success("Project liked!");
+
       // Update cache
       queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
     },
@@ -130,7 +127,7 @@ export function useCreateProject() {
   return useMutation({
     mutationFn: (data: CreateProjectData) => projectsService.createProject(data),
     onSuccess: () => {
-      toast.success('Project created successfully');
+      toast.success("Project created successfully");
       queryClient.invalidateQueries({ queryKey: queryKeys.projects.lists() });
     },
   });
@@ -145,10 +142,10 @@ export function useUpdateProject() {
   return useMutation({
     mutationFn: (data: UpdateProjectData) => projectsService.updateProject(data),
     onSuccess: (response, variables) => {
-      toast.success('Project updated successfully');
+      toast.success("Project updated successfully");
       queryClient.invalidateQueries({ queryKey: queryKeys.projects.lists() });
-      queryClient.invalidateQueries({ 
-        queryKey: queryKeys.projects.detail(response.data.slug) 
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.projects.detail(response.data.slug),
       });
     },
   });
@@ -163,7 +160,7 @@ export function useDeleteProject() {
   return useMutation({
     mutationFn: (id: string) => projectsService.deleteProject(id),
     onSuccess: () => {
-      toast.success('Project deleted successfully');
+      toast.success("Project deleted successfully");
       queryClient.invalidateQueries({ queryKey: queryKeys.projects.lists() });
     },
   });

@@ -18,7 +18,7 @@ function renderHeroSection() {
   return render(
     <ThemeProvider>
       <HeroSection />
-    </ThemeProvider>
+    </ThemeProvider>,
   );
 }
 
@@ -58,7 +58,7 @@ describe("HeroSection", () => {
     expect(linkedinLink).toHaveAttribute("href", personalData.social.linkedin);
   });
 
-  it('renders projects CTA button', () => {
+  it("renders projects CTA button", () => {
     renderHeroSection();
     expect(screen.getByText("View My Work")).toBeInTheDocument();
   });

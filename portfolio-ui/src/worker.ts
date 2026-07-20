@@ -33,36 +33,36 @@ const CSP = [
   "base-uri 'self'",
   "form-action 'self'",
   "upgrade-insecure-requests",
-].join('; ');
+].join("; ");
 
 const PERMISSIONS_POLICY = [
-  'accelerometer=()',
-  'autoplay=()',
-  'camera=()',
-  'display-capture=()',
-  'geolocation=()',
-  'gyroscope=()',
-  'magnetometer=()',
-  'microphone=()',
-  'midi=()',
-  'payment=()',
-  'usb=()',
-  'xr-spatial-tracking=()',
-].join(', ');
+  "accelerometer=()",
+  "autoplay=()",
+  "camera=()",
+  "display-capture=()",
+  "geolocation=()",
+  "gyroscope=()",
+  "magnetometer=()",
+  "microphone=()",
+  "midi=()",
+  "payment=()",
+  "usb=()",
+  "xr-spatial-tracking=()",
+].join(", ");
 
 const STATIC_HEADERS: Record<string, string> = {
-  'Strict-Transport-Security': 'max-age=63072000; includeSubDomains; preload',
-  'X-Content-Type-Options': 'nosniff',
-  'X-Frame-Options': 'DENY',
-  'Referrer-Policy': 'strict-origin-when-cross-origin',
-  'Permissions-Policy': PERMISSIONS_POLICY,
-  'Cross-Origin-Opener-Policy': 'same-origin',
-  'Cross-Origin-Resource-Policy': 'same-site',
+  "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload",
+  "X-Content-Type-Options": "nosniff",
+  "X-Frame-Options": "DENY",
+  "Referrer-Policy": "strict-origin-when-cross-origin",
+  "Permissions-Policy": PERMISSIONS_POLICY,
+  "Cross-Origin-Opener-Policy": "same-origin",
+  "Cross-Origin-Resource-Policy": "same-site",
 };
 
 function isHtml(res: Response): boolean {
-  const ct = res.headers.get('content-type') ?? '';
-  return ct.includes('text/html');
+  const ct = res.headers.get("content-type") ?? "";
+  return ct.includes("text/html");
 }
 
 export default {
@@ -77,10 +77,10 @@ export default {
     }
 
     if (isHtml(res)) {
-      headers.set('Content-Security-Policy', CSP);
+      headers.set("Content-Security-Policy", CSP);
       // AI-training opt-out signal at the HTTP layer (complements the
       // <meta name="robots" content="noai, noimageai"> in index.html).
-      headers.set('X-Robots-Tag', 'index, follow, noai, noimageai');
+      headers.set("X-Robots-Tag", "index, follow, noai, noimageai");
     }
 
     return new Response(res.body, {

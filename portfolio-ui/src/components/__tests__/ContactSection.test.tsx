@@ -25,12 +25,12 @@ function renderContactSection() {
   return render(
     <ThemeProvider>
       <ContactSection />
-    </ThemeProvider>
+    </ThemeProvider>,
   );
 }
 
 describe("ContactSection", () => {
-  it('renders contact heading', () => {
+  it("renders contact heading", () => {
     renderContactSection();
     expect(screen.getByText("Say hi")).toBeInTheDocument();
   });

@@ -1,6 +1,6 @@
 /**
  * TypeScript Type Definitions for API
- * 
+ *
  * These interfaces match the backend Prisma schema and provide
  * type safety for all API requests and responses.
  */
@@ -10,51 +10,51 @@
 // ===========================================
 
 export enum Role {
-  VIEWER = 'VIEWER',
-  EDITOR = 'EDITOR',
-  ADMIN = 'ADMIN',
+  VIEWER = "VIEWER",
+  EDITOR = "EDITOR",
+  ADMIN = "ADMIN",
 }
 
 export enum ProjectStatus {
-  DRAFT = 'DRAFT',
-  PUBLISHED = 'PUBLISHED',
-  ARCHIVED = 'ARCHIVED',
+  DRAFT = "DRAFT",
+  PUBLISHED = "PUBLISHED",
+  ARCHIVED = "ARCHIVED",
 }
 
 export enum ArticleStatus {
-  DRAFT = 'DRAFT',
-  PUBLISHED = 'PUBLISHED',
-  ARCHIVED = 'ARCHIVED',
+  DRAFT = "DRAFT",
+  PUBLISHED = "PUBLISHED",
+  ARCHIVED = "ARCHIVED",
 }
 
 export enum ContactStatus {
-  NEW = 'NEW',
-  READ = 'READ',
-  REPLIED = 'REPLIED',
-  ARCHIVED = 'ARCHIVED',
-  SPAM = 'SPAM',
+  NEW = "NEW",
+  READ = "READ",
+  REPLIED = "REPLIED",
+  ARCHIVED = "ARCHIVED",
+  SPAM = "SPAM",
 }
 
 export enum DemoStatus {
-  PENDING = 'PENDING',
-  SCHEDULED = 'SCHEDULED',
-  COMPLETED = 'COMPLETED',
-  CANCELLED = 'CANCELLED',
+  PENDING = "PENDING",
+  SCHEDULED = "SCHEDULED",
+  COMPLETED = "COMPLETED",
+  CANCELLED = "CANCELLED",
 }
 
 export enum EventType {
-  PAGE_VIEW = 'PAGE_VIEW',
-  PROJECT_VIEW = 'PROJECT_VIEW',
-  PROJECT_CLICK = 'PROJECT_CLICK',
-  ARTICLE_VIEW = 'ARTICLE_VIEW',
-  RESUME_DOWNLOAD = 'RESUME_DOWNLOAD',
-  CONTACT_FORM = 'CONTACT_FORM',
-  NEWSLETTER_SIGNUP = 'NEWSLETTER_SIGNUP',
-  DEMO_REQUEST = 'DEMO_REQUEST',
-  CODE_EXECUTION = 'CODE_EXECUTION',
-  EXTERNAL_LINK = 'EXTERNAL_LINK',
-  SCROLL_DEPTH = 'SCROLL_DEPTH',
-  TIME_ON_PAGE = 'TIME_ON_PAGE',
+  PAGE_VIEW = "PAGE_VIEW",
+  PROJECT_VIEW = "PROJECT_VIEW",
+  PROJECT_CLICK = "PROJECT_CLICK",
+  ARTICLE_VIEW = "ARTICLE_VIEW",
+  RESUME_DOWNLOAD = "RESUME_DOWNLOAD",
+  CONTACT_FORM = "CONTACT_FORM",
+  NEWSLETTER_SIGNUP = "NEWSLETTER_SIGNUP",
+  DEMO_REQUEST = "DEMO_REQUEST",
+  CODE_EXECUTION = "CODE_EXECUTION",
+  EXTERNAL_LINK = "EXTERNAL_LINK",
+  SCROLL_DEPTH = "SCROLL_DEPTH",
+  TIME_ON_PAGE = "TIME_ON_PAGE",
 }
 
 // ===========================================
@@ -395,8 +395,8 @@ export interface ProjectQueryParams {
   category?: string;
   tag?: string;
   search?: string;
-  sortBy?: 'createdAt' | 'updatedAt' | 'views' | 'title' | 'sortOrder';
-  order?: 'asc' | 'desc';
+  sortBy?: "createdAt" | "updatedAt" | "views" | "title" | "sortOrder";
+  order?: "asc" | "desc";
   // Index signature — allows the interface to flow through the generic
   // Record<string, unknown> shape used by service-base buildQueryString.
   [key: string]: unknown;
@@ -409,9 +409,9 @@ export interface ArticleQueryParams {
   featured?: boolean;
   tag?: string;
   search?: string;
-  sortBy?: 'createdAt' | 'publishedAt' | 'views' | 'title';
-  sortOrder?: 'asc' | 'desc'; // alias for `order`; emitted by some consumers.
-  order?: 'asc' | 'desc';
+  sortBy?: "createdAt" | "publishedAt" | "views" | "title";
+  sortOrder?: "asc" | "desc"; // alias for `order`; emitted by some consumers.
+  order?: "asc" | "desc";
   [key: string]: unknown;
 }
 
@@ -450,7 +450,7 @@ export interface RefreshTokenResponse {
 // ===========================================
 
 export interface HealthCheck {
-  status: 'healthy' | 'unhealthy';
+  status: "healthy" | "unhealthy";
   timestamp: string;
   environment?: string;
   version?: string;

@@ -1,13 +1,13 @@
 /**
  * Example: Contact Form Component
- * 
+ *
  * Demonstrates form integration with shadcn-ui and React Hook Form
  */
 
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { useContactForm } from '@/hooks/use-contact';
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { useContactForm } from "@/hooks/use-contact";
 import {
   Form,
   FormControl,
@@ -16,20 +16,20 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { Loader2 } from 'lucide-react';
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Loader2 } from "lucide-react";
 
 // Validation schema
 const contactSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Invalid email address'),
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  email: z.string().email("Invalid email address"),
   company: z.string().optional(),
   subject: z.string().optional(),
-  message: z.string().min(10, 'Message must be at least 10 characters'),
+  message: z.string().min(10, "Message must be at least 10 characters"),
 });
 
 type ContactFormData = z.infer<typeof contactSchema>;
@@ -40,11 +40,11 @@ export function ContactFormExample() {
   const form = useForm<ContactFormData>({
     resolver: zodResolver(contactSchema),
     defaultValues: {
-      name: '',
-      email: '',
-      company: '',
-      subject: '',
-      message: '',
+      name: "",
+      email: "",
+      company: "",
+      subject: "",
+      message: "",
     },
   });
 
@@ -152,7 +152,7 @@ export function ContactFormExample() {
             {/* Submit Button */}
             <Button type="submit" disabled={isPending} className="w-full">
               {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isPending ? 'Sending...' : 'Send Message'}
+              {isPending ? "Sending..." : "Send Message"}
             </Button>
           </form>
         </Form>

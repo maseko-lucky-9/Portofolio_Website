@@ -13,13 +13,14 @@ interface MagneticLinkProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   strength?: number;
 }
 
-export const MagneticLink = forwardRef<HTMLButtonElement, MagneticLinkProps>(
-  function MagneticLink({ strength = 6, children, ...rest }, _forwardedRef) {
-    const magneticRef = useMagnetic<HTMLButtonElement>(strength);
-    return (
-      <button ref={magneticRef} {...rest}>
-        {children}
-      </button>
-    );
-  },
-);
+export const MagneticLink = forwardRef<HTMLButtonElement, MagneticLinkProps>(function MagneticLink(
+  { strength = 6, children, ...rest },
+  _forwardedRef,
+) {
+  const magneticRef = useMagnetic<HTMLButtonElement>(strength);
+  return (
+    <button ref={magneticRef} {...rest}>
+      {children}
+    </button>
+  );
+});

@@ -51,8 +51,8 @@
 
     /* Opacity scale. */
     --opacity-subtle: 0.06;
-    --opacity-soft: 0.30;
-    --opacity-overlay: 0.80;
+    --opacity-soft: 0.3;
+    --opacity-overlay: 0.8;
 
     /* Masthead rule opacity — light mode is paler, needs more weight. */
     --masthead-opacity: 0.65;
@@ -72,7 +72,7 @@
        darker --muted surface (4.61:1). */
     --muted-foreground: 0.523 0.025 264.3;
 
-    --accent: 0.953 0.020 279.0;
+    --accent: 0.953 0.02 279;
     --accent-foreground: 0.428 0.249 265.6;
 
     --destructive: 0.636 0.208 25.4;
@@ -100,27 +100,41 @@
     --shadow-xs: 0 1px 2px hsl(220 13% 10% / 0.04);
     --shadow-sm: 0 1px 3px hsl(220 13% 10% / 0.06), 0 1px 2px hsl(220 13% 10% / 0.04);
     --shadow-md: 0 4px 8px -2px hsl(220 13% 10% / 0.08), 0 2px 4px -2px hsl(220 13% 10% / 0.06);
-    --shadow-lg: 0 12px 24px -4px hsl(220 13% 10% / 0.10), 0 4px 8px -4px hsl(220 13% 10% / 0.06);
+    --shadow-lg: 0 12px 24px -4px hsl(220 13% 10% / 0.1), 0 4px 8px -4px hsl(220 13% 10% / 0.06);
     --shadow-xl: 0 24px 48px -8px hsl(220 13% 10% / 0.14), 0 8px 16px -8px hsl(220 13% 10% / 0.08);
 
     /* Brand glow — indigo, driven by --primary. */
-    --shadow-glow: 0 0 0 1px oklch(var(--primary) / 0.12), 0 4px 16px oklch(var(--primary) / 0.20);
-    --shadow-glow-secondary: 0 0 0 1px oklch(var(--secondary) / 0.12), 0 4px 16px oklch(var(--secondary) / 0.20);
+    --shadow-glow: 0 0 0 1px oklch(var(--primary) / 0.12), 0 4px 16px oklch(var(--primary) / 0.2);
+    --shadow-glow-secondary:
+      0 0 0 1px oklch(var(--secondary) / 0.12), 0 4px 16px oklch(var(--secondary) / 0.2);
 
     /* Gradients. The --gradient-primary stops sit slightly darker than
        --primary so white labels on the CTA fill clear AA (4.66:1). */
     --gradient-primary: linear-gradient(135deg, oklch(0.574 0.209 271.5), oklch(0.534 0.234 289.8));
-    --gradient-secondary: linear-gradient(135deg, oklch(0.495 0.103 162.1), oklch(0.462 0.091 176.6));
-    --gradient-hero: linear-gradient(160deg, oklch(0.975 0.004 264.5) 0%, oklch(0.951 0.017 274.6) 50%, oklch(0.957 0.017 296.4) 100%);
+    --gradient-secondary: linear-gradient(
+      135deg,
+      oklch(0.495 0.103 162.1),
+      oklch(0.462 0.091 176.6)
+    );
+    --gradient-hero: linear-gradient(
+      160deg,
+      oklch(0.975 0.004 264.5) 0%,
+      oklch(0.951 0.017 274.6) 50%,
+      oklch(0.957 0.017 296.4) 100%
+    );
     --gradient-card: linear-gradient(180deg, oklch(1 0 90) 0%, oklch(0.984 0.003 264.5) 100%);
-    --gradient-mesh: radial-gradient(ellipse 80% 60% at 50% -10%, oklch(0.908 0.039 278.7 / 0.6) 0%, transparent 70%);
+    --gradient-mesh: radial-gradient(
+      ellipse 80% 60% at 50% -10%,
+      oklch(0.908 0.039 278.7 / 0.6) 0%,
+      transparent 70%
+    );
 
     /* Sidebar tokens — OKLCH. */
     --sidebar-background: 0.985 0 90;
-    --sidebar-foreground: 0.370 0.012 285.8;
+    --sidebar-foreground: 0.37 0.012 285.8;
     --sidebar-primary: 0.516 0.241 268.7;
     --sidebar-primary-foreground: 1 0 90;
-    --sidebar-accent: 0.953 0.020 279.0;
+    --sidebar-accent: 0.953 0.02 279;
     --sidebar-accent-foreground: 0.428 0.249 265.6;
     --sidebar-border: 0.903 0.009 264.5;
     --sidebar-ring: 0.516 0.241 268.7;
@@ -133,24 +147,24 @@
        passes (foreground 17.57:1, muted-fg 6.55:1, pill 9.66:1,
        text-primary 4.65:1, white-on-CTA 4.88:1). */
     --background: 0.148 0.014 273.5;
-    --foreground: 0.960 0.007 247.9;
+    --foreground: 0.96 0.007 247.9;
 
-    --card: 0.180 0.019 273.5;
-    --card-foreground: 0.960 0.007 247.9;
+    --card: 0.18 0.019 273.5;
+    --card-foreground: 0.96 0.007 247.9;
 
-    --popover: 0.190 0.021 273.4;
-    --popover-foreground: 0.960 0.007 247.9;
+    --popover: 0.19 0.021 273.4;
+    --popover-foreground: 0.96 0.007 247.9;
 
     --primary: 0.595 0.197 272.4;
     --primary-foreground: 1 0 90;
-    --primary-glow: 0.640 0.180 273.2;
+    --primary-glow: 0.64 0.18 273.2;
 
     --secondary: 0.755 0.157 162.1;
     --secondary-foreground: 1 0 90;
 
     --opacity-subtle: 0.06;
-    --opacity-soft: 0.30;
-    --opacity-overlay: 0.80;
+    --opacity-soft: 0.3;
+    --opacity-overlay: 0.8;
 
     --masthead-opacity: 0.55;
 
@@ -161,36 +175,54 @@
     --accent-foreground: 0.672 0.156 274.8;
 
     --destructive: 0.523 0.185 26.5;
-    --destructive-foreground: 0.960 0.007 247.9;
+    --destructive-foreground: 0.96 0.007 247.9;
 
-    --border: 0.240 0.028 273.3;
-    --input: 0.240 0.028 273.3;
+    --border: 0.24 0.028 273.3;
+    --input: 0.24 0.028 273.3;
     --ring: 0.595 0.197 272.4;
 
     /* Dark shadows */
-    --shadow-xs: 0 1px 2px hsl(0 0% 0% / 0.20);
-    --shadow-sm: 0 1px 3px hsl(0 0% 0% / 0.30), 0 1px 2px hsl(0 0% 0% / 0.20);
-    --shadow-md: 0 4px 8px -2px hsl(0 0% 0% / 0.40), 0 2px 4px -2px hsl(0 0% 0% / 0.30);
-    --shadow-lg: 0 12px 24px -4px hsl(0 0% 0% / 0.50), 0 4px 8px -4px hsl(0 0% 0% / 0.35);
-    --shadow-xl: 0 24px 48px -8px hsl(0 0% 0% / 0.60), 0 8px 16px -8px hsl(0 0% 0% / 0.40);
-    --shadow-glow: 0 0 0 1px oklch(var(--primary) / 0.20), 0 4px 20px oklch(var(--primary) / 0.25);
-    --shadow-glow-secondary: 0 0 0 1px oklch(var(--secondary) / 0.20), 0 4px 20px oklch(var(--secondary) / 0.25);
+    --shadow-xs: 0 1px 2px hsl(0 0% 0% / 0.2);
+    --shadow-sm: 0 1px 3px hsl(0 0% 0% / 0.3), 0 1px 2px hsl(0 0% 0% / 0.2);
+    --shadow-md: 0 4px 8px -2px hsl(0 0% 0% / 0.4), 0 2px 4px -2px hsl(0 0% 0% / 0.3);
+    --shadow-lg: 0 12px 24px -4px hsl(0 0% 0% / 0.5), 0 4px 8px -4px hsl(0 0% 0% / 0.35);
+    --shadow-xl: 0 24px 48px -8px hsl(0 0% 0% / 0.6), 0 8px 16px -8px hsl(0 0% 0% / 0.4);
+    --shadow-glow: 0 0 0 1px oklch(var(--primary) / 0.2), 0 4px 20px oklch(var(--primary) / 0.25);
+    --shadow-glow-secondary:
+      0 0 0 1px oklch(var(--secondary) / 0.2), 0 4px 20px oklch(var(--secondary) / 0.25);
 
     /* Dark gradients — cinematic depth. */
     --gradient-primary: linear-gradient(135deg, oklch(0.563 0.214 271.1), oklch(0.508 0.246 287.8));
-    --gradient-secondary: linear-gradient(135deg, oklch(0.755 0.157 162.1), oklch(0.667 0.130 175.9));
-    --gradient-hero: linear-gradient(160deg, oklch(0.148 0.014 273.5) 0%, oklch(0.164 0.023 276.8) 50%, oklch(0.166 0.023 297.7) 100%);
-    --gradient-card: linear-gradient(180deg, oklch(0.190 0.021 273.4) 0%, oklch(0.166 0.019 273.5) 100%);
-    --gradient-mesh: radial-gradient(ellipse 80% 60% at 50% -10%, oklch(0.595 0.197 272.4 / 0.08) 0%, transparent 70%);
+    --gradient-secondary: linear-gradient(
+      135deg,
+      oklch(0.755 0.157 162.1),
+      oklch(0.667 0.13 175.9)
+    );
+    --gradient-hero: linear-gradient(
+      160deg,
+      oklch(0.148 0.014 273.5) 0%,
+      oklch(0.164 0.023 276.8) 50%,
+      oklch(0.166 0.023 297.7) 100%
+    );
+    --gradient-card: linear-gradient(
+      180deg,
+      oklch(0.19 0.021 273.4) 0%,
+      oklch(0.166 0.019 273.5) 100%
+    );
+    --gradient-mesh: radial-gradient(
+      ellipse 80% 60% at 50% -10%,
+      oklch(0.595 0.197 272.4 / 0.08) 0%,
+      transparent 70%
+    );
 
     /* Dark sidebar */
     --sidebar-background: 0.159 0.016 273.6;
-    --sidebar-foreground: 0.920 0.013 248.0;
+    --sidebar-foreground: 0.92 0.013 248;
     --sidebar-primary: 0.595 0.197 272.4;
     --sidebar-primary-foreground: 1 0 90;
     --sidebar-accent: 0.238 0.061 274.3;
     --sidebar-accent-foreground: 0.672 0.156 274.8;
-    --sidebar-border: 0.240 0.028 273.3;
+    --sidebar-border: 0.24 0.028 273.3;
     --sidebar-ring: 0.595 0.197 272.4;
   }
 }
@@ -213,7 +245,7 @@
 
   body {
     @apply bg-background text-foreground font-sans;
-    font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+    font-family: "Inter Variable", "Inter", system-ui, sans-serif;
     /* Inter character variants: cv02/03/04 = single-storey 'a', open '3',
        straight-legged 'g'; cv11 = single-storey 'l'. */
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
@@ -222,21 +254,28 @@
   /* Display register is the same grotesque as body — weight and size carry
      the hierarchy, not a contrasting face. `.font-display` is kept as a
      selector so existing consumers do not need touching. */
-  h1, h2, h3, .font-display {
-    font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+  h1,
+  h2,
+  h3,
+  .font-display {
+    font-family: "Inter Variable", "Inter", system-ui, sans-serif;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     letter-spacing: -0.012em;
     /* No text-wrap: balance — 4aaa2de let headings wrap naturally, and
        balancing changes where the hero subtitle breaks. */
   }
 
-  code, pre {
-    font-family: 'JetBrains Mono', ui-monospace, monospace;
-    font-feature-settings: "liga" 1, "calt" 1;
+  code,
+  pre {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-feature-settings:
+      "liga" 1,
+      "calt" 1;
   }
 
   /* Ensure buttons get cursor-pointer */
-  button, [role="button"] {
+  button,
+  [role="button"] {
     cursor: pointer;
   }
 }
@@ -255,7 +294,9 @@
 
   .btn-hero-primary:hover {
     transform: translate(var(--magnetic-x, 0), calc(var(--magnetic-y, 0) - 2px)) scale(1.02);
-    box-shadow: var(--shadow-xl), 0 0 32px oklch(var(--primary) / 0.45);
+    box-shadow:
+      var(--shadow-xl),
+      0 0 32px oklch(var(--primary) / 0.45);
   }
 
   .btn-hero-primary:active {
@@ -272,7 +313,7 @@
   }
 
   .btn-hero-secondary:hover {
-    background: oklch(var(--primary) / 0.10);
+    background: oklch(var(--primary) / 0.1);
     border-color: oklch(var(--primary) / 0.7);
     transform: translate(var(--magnetic-x, 0), calc(var(--magnetic-y, 0) - 2px)) scale(1.02);
     box-shadow: var(--shadow-glow);
@@ -360,7 +401,10 @@
   .timeline-dot {
     @apply w-3.5 h-3.5 rounded-full;
     background: oklch(var(--primary));
-    box-shadow: 0 0 0 3px oklch(var(--background)), 0 0 0 5px oklch(var(--primary) / 0.3), var(--shadow-sm);
+    box-shadow:
+      0 0 0 3px oklch(var(--background)),
+      0 0 0 5px oklch(var(--primary) / 0.3),
+      var(--shadow-sm);
   }
 
   .timeline-line {
@@ -431,7 +475,7 @@
   }
 
   .nav-link::after {
-    content: '';
+    content: "";
     @apply absolute -bottom-0.5 left-0 w-0 h-px transition-all;
     background: var(--gradient-primary);
     transition-duration: 250ms;
@@ -460,7 +504,7 @@
   }
 
   .section-mesh::before {
-    content: '';
+    content: "";
     position: absolute;
     inset: 0;
     background: var(--gradient-mesh);
@@ -528,34 +572,67 @@
   }
 
   @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-12px); }
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-12px);
+    }
   }
 
   @keyframes pulseGlow {
-    0%, 100% { box-shadow: var(--shadow-sm); }
-    50% { box-shadow: 0 0 0 1px oklch(var(--primary) / 0.3), 0 8px 32px oklch(var(--primary) / 0.50); }
+    0%,
+    100% {
+      box-shadow: var(--shadow-sm);
+    }
+    50% {
+      box-shadow:
+        0 0 0 1px oklch(var(--primary) / 0.3),
+        0 8px 32px oklch(var(--primary) / 0.5);
+    }
   }
 
   @keyframes slideUp {
-    from { opacity: 0; transform: translateY(24px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
 
   @keyframes shimmer {
-    from { background-position: 200% 0; }
-    to { background-position: -200% 0; }
+    from {
+      background-position: 200% 0;
+    }
+    to {
+      background-position: -200% 0;
+    }
   }
 
   @keyframes blobDrift {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    33% { transform: translate(20px, -25px) scale(1.05); }
-    66% { transform: translate(-15px, 12px) scale(0.95); }
+    0%,
+    100% {
+      transform: translate(0, 0) scale(1);
+    }
+    33% {
+      transform: translate(20px, -25px) scale(1.05);
+    }
+    66% {
+      transform: translate(-15px, 12px) scale(0.95);
+    }
   }
 
   /* ── Glassmorphism ──
@@ -575,12 +652,14 @@
 
   .glass-card {
     @apply backdrop-blur-lg border rounded-2xl;
-    background: oklch(var(--card) / 0.80);
+    background: oklch(var(--card) / 0.8);
     border-color: oklch(var(--border) / 0.6);
     /* Inset top highlight. NB: the 4aaa2de original wrote this as
        hsl(255 255% 255% / …) — an invalid color that silently no-ops.
        Corrected to a real white here. */
-    box-shadow: var(--shadow-md), inset 0 1px 0 hsl(0 0% 100% / 0.06);
+    box-shadow:
+      var(--shadow-md),
+      inset 0 1px 0 hsl(0 0% 100% / 0.06);
     transition: all var(--duration-base) var(--ease-spring);
   }
 
@@ -599,10 +678,13 @@
     box-shadow: var(--shadow-lg), var(--shadow-glow);
   }
 
-
   /* ── Scrollbar ── */
-  .custom-scrollbar::-webkit-scrollbar { width: 5px; }
-  .custom-scrollbar::-webkit-scrollbar-track { @apply bg-transparent; }
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 5px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
   .custom-scrollbar::-webkit-scrollbar-thumb {
     @apply rounded-full;
     background: oklch(var(--muted-foreground) / 0.25);
@@ -613,7 +695,9 @@
 
   /* ── Reduced motion ── */
   @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
+    *,
+    *::before,
+    *::after {
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;

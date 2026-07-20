@@ -1,14 +1,14 @@
 /**
  * Code Execution Hook
- * 
+ *
  * React Query hooks for code execution
  */
 
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { toast } from 'sonner';
-import { codeExecutionService } from '@/services/code-execution.service';
-import { queryKeys } from '@/lib/react-query';
-import type { CodeExecutionData } from '@/types/api';
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { codeExecutionService } from "@/services/code-execution.service";
+import { queryKeys } from "@/lib/react-query";
+import type { CodeExecutionData } from "@/types/api";
 
 /**
  * Get supported languages
@@ -28,7 +28,7 @@ export function useCodeExecution() {
   return useMutation({
     mutationFn: (data: CodeExecutionData) => codeExecutionService.execute(data),
     onError: () => {
-      toast.error('Code execution failed');
+      toast.error("Code execution failed");
     },
   });
 }

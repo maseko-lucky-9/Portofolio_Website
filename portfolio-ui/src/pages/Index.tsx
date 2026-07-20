@@ -15,14 +15,30 @@ import { LazySection } from "@/components/LazySection";
 // includes heavy Monaco Editor (~900 KB CDN JS). SkillsSection used to
 // pull in recharts (~144 KB gzip) but now uses a hand-rolled SVG radar
 // in SkillsRadar.tsx — chunk is now ~3 KB gzip.
-const SkillsSection = lazy(() => import("@/components/SkillsSection").then(m => ({ default: m.SkillsSection })));
-const ProjectsSection = lazy(() => import("@/components/ProjectsSection").then(m => ({ default: m.ProjectsSection })));
-const CodeDemoSection = lazy(() => import("@/components/CodeDemoSection").then(m => ({ default: m.CodeDemoSection })));
-const ExperienceSection = lazy(() => import("@/components/ExperienceSection").then(m => ({ default: m.ExperienceSection })));
-const ServicesSection = lazy(() => import("@/components/ServicesSection").then(m => ({ default: m.ServicesSection })));
-const CaseStudiesSection = lazy(() => import("@/components/CaseStudiesSection").then(m => ({ default: m.CaseStudiesSection })));
-const BlogSection = lazy(() => import("@/components/BlogSection").then(m => ({ default: m.BlogSection })));
-const ContactSection = lazy(() => import("@/components/ContactSection").then(m => ({ default: m.ContactSection })));
+const SkillsSection = lazy(() =>
+  import("@/components/SkillsSection").then((m) => ({ default: m.SkillsSection })),
+);
+const ProjectsSection = lazy(() =>
+  import("@/components/ProjectsSection").then((m) => ({ default: m.ProjectsSection })),
+);
+const CodeDemoSection = lazy(() =>
+  import("@/components/CodeDemoSection").then((m) => ({ default: m.CodeDemoSection })),
+);
+const ExperienceSection = lazy(() =>
+  import("@/components/ExperienceSection").then((m) => ({ default: m.ExperienceSection })),
+);
+const ServicesSection = lazy(() =>
+  import("@/components/ServicesSection").then((m) => ({ default: m.ServicesSection })),
+);
+const CaseStudiesSection = lazy(() =>
+  import("@/components/CaseStudiesSection").then((m) => ({ default: m.CaseStudiesSection })),
+);
+const BlogSection = lazy(() =>
+  import("@/components/BlogSection").then((m) => ({ default: m.BlogSection })),
+);
+const ContactSection = lazy(() =>
+  import("@/components/ContactSection").then((m) => ({ default: m.ContactSection })),
+);
 
 function SectionFallback() {
   return (

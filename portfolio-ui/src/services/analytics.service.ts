@@ -1,16 +1,12 @@
 /**
  * Analytics Service
- * 
+ *
  * Handles analytics tracking and reporting
  */
 
-import { httpClient } from '@/lib/http-client';
-import { EventType } from '@/types/api'; // enum — used as value at runtime
-import type {
-  AnalyticsQueryParams,
-  AnalyticsSummary,
-  ApiResponse,
-} from '@/types/api';
+import { httpClient } from "@/lib/http-client";
+import { EventType } from "@/types/api"; // enum — used as value at runtime
+import type { AnalyticsQueryParams, AnalyticsSummary, ApiResponse } from "@/types/api";
 
 interface TrackEventData {
   eventType: EventType;
@@ -22,7 +18,7 @@ interface TrackEventData {
 }
 
 class AnalyticsService {
-  private readonly basePath = '/analytics';
+  private readonly basePath = "/analytics";
   private sessionId: string;
 
   constructor() {
@@ -33,10 +29,10 @@ class AnalyticsService {
    * Get or create session ID
    */
   private getOrCreateSessionId(): string {
-    let sessionId = sessionStorage.getItem('sessionId');
+    let sessionId = sessionStorage.getItem("sessionId");
     if (!sessionId) {
       sessionId = this.generateId();
-      sessionStorage.setItem('sessionId', sessionId);
+      sessionStorage.setItem("sessionId", sessionId);
     }
     return sessionId;
   }
@@ -60,15 +56,15 @@ class AnalyticsService {
           sessionId: this.sessionId,
           timestamp: new Date().toISOString(),
         },
-        { 
+        {
           skipAuth: true,
           skipRetry: true, // Don't retry analytics
-        }
+        },
       );
     } catch (error) {
       // Silently fail analytics tracking
       if (import.meta.env.DEV) {
-        console.warn('Analytics tracking failed:', error);
+        console.warn("Analytics tracking failed:", error);
       }
     }
   }
@@ -139,21 +135,21 @@ class AnalyticsService {
   async getSummary(params?: AnalyticsQueryParams): Promise<ApiResponse<AnalyticsSummary[]>> {
     const query = params
       ? `?${new URLSearchParams(params as Record<string, string>).toString()}`
-      : '';
-    return httpClient.get<ApiResponse<AnalyticsSummary[]>>(
-      `${this.basePath}/summary${query}`
-    );
+      : "";
+    return httpClient.get<ApiResponse<AnalyticsSummary[]>>(`${this.basePath}/summary${query}`);
   }
 
   /**
    * Get analytics overview (admin)
    */
-  async getOverview(): Promise<ApiResponse<{
-    totalViews: number;
-    uniqueVisitors: number;
-    topProjects: Array<{ id: string; title: string; views: number }>;
-    topArticles: Array<{ id: string; title: string; views: number }>;
-  }>> {
+  async getOverview(): Promise<
+    ApiResponse<{
+      totalViews: number;
+      uniqueVisitors: number;
+      topProjects: Array<{ id: string; title: string; views: number }>;
+      topArticles: Array<{ id: string; title: string; views: number }>;
+    }>
+  > {
     type OverviewData = {
       totalViews: number;
       uniqueVisitors: number;

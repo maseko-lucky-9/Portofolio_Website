@@ -1,24 +1,31 @@
-import { useState } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Github } from 'lucide-react';
+import { useState } from "react";
+import { useNavigate, useLocation, Link } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Github } from "lucide-react";
 
 export function LoginForm() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { login, loginWithOAuth } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const from = (location.state as any)?.from?.pathname || '/dashboard';
+  const from = (location.state as any)?.from?.pathname || "/dashboard";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,24 +34,24 @@ export function LoginForm() {
     try {
       await login({ email, password });
       toast({
-        title: 'Login Successful',
-        description: 'Welcome back!',
+        title: "Login Successful",
+        description: "Welcome back!",
       });
       navigate(from, { replace: true });
     } catch (error: any) {
       toast({
-        variant: 'destructive',
-        title: 'Login Failed',
-        description: error.response?.data?.message || 'Invalid email or password',
+        variant: "destructive",
+        title: "Login Failed",
+        description: error.response?.data?.message || "Invalid email or password",
       });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleOAuthLogin = (provider: 'github' | 'google') => {
+  const handleOAuthLogin = (provider: "github" | "google") => {
     // Store intended destination for after OAuth
-    sessionStorage.setItem('oauth_redirect', from);
+    sessionStorage.setItem("oauth_redirect", from);
     loginWithOAuth(provider);
   };
 
@@ -62,7 +69,7 @@ export function LoginForm() {
           <div className="grid grid-cols-2 gap-4">
             <Button
               variant="outline"
-              onClick={() => handleOAuthLogin('github')}
+              onClick={() => handleOAuthLogin("github")}
               disabled={isLoading}
               className="w-full"
             >
@@ -71,7 +78,7 @@ export function LoginForm() {
             </Button>
             <Button
               variant="outline"
-              onClick={() => handleOAuthLogin('google')}
+              onClick={() => handleOAuthLogin("google")}
               disabled={isLoading}
               className="w-full"
             >
@@ -102,9 +109,7 @@ export function LoginForm() {
               <Separator />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                Or continue with
-              </span>
+              <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
             </div>
           </div>
 
@@ -125,10 +130,7 @@ export function LoginForm() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Password</Label>
-                <Link
-                  to="/forgot-password"
-                  className="text-sm text-primary hover:underline"
-                >
+                <Link to="/forgot-password" className="text-sm text-primary hover:underline">
                   Forgot password?
                 </Link>
               </div>
@@ -142,13 +144,13 @@ export function LoginForm() {
               />
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Signing in...' : 'Sign in'}
+              {isLoading ? "Signing in..." : "Sign in"}
             </Button>
           </form>
         </CardContent>
         <CardFooter className="flex justify-center">
           <p className="text-sm text-muted-foreground">
-            Don't have an account?{' '}
+            Don't have an account?{" "}
             <Link to="/register" className="text-primary hover:underline">
               Sign up
             </Link>

@@ -46,10 +46,7 @@ function polarToXY(angleRad: number, r: number) {
   };
 }
 
-export function SkillsRadar({
-  data,
-  color = "oklch(var(--primary))",
-}: SkillsRadarProps) {
+export function SkillsRadar({ data, color = "oklch(var(--primary))" }: SkillsRadarProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const polygonRef = useRef<SVGPolygonElement>(null);
 
@@ -72,9 +69,7 @@ export function SkillsRadar({
   // Mount-only entrance for the data polygon. Re-fires when the polygon
   // points change (e.g. category swap in SkillsSection) because the
   // dependency below tracks the points string.
-  const polygonPoints = axes
-    .map(({ point }) => `${point.x},${point.y}`)
-    .join(" ");
+  const polygonPoints = axes.map(({ point }) => `${point.x},${point.y}`).join(" ");
 
   useAnime(
     svgRef,
@@ -173,11 +168,7 @@ export function SkillsRadar({
       {axes.map(({ label, skill, angle }) => {
         // Anchor flips based on which side of center the label is on.
         const anchor =
-          Math.abs(Math.sin(angle)) < 0.05
-            ? "middle"
-            : Math.sin(angle) > 0
-              ? "start"
-              : "end";
+          Math.abs(Math.sin(angle)) < 0.05 ? "middle" : Math.sin(angle) > 0 ? "start" : "end";
         return (
           <text
             key={`label-${skill}`}
