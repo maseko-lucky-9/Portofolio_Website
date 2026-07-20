@@ -30,7 +30,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
+          # No `cache: npm` — this repo intentionally commits no lockfile
+          # (portfolio-ui/Dockerfile uses `npm install`, not `npm ci`), and
+          # setup-node hard-fails when the cache is on with no lockfile to key
+          # on. That failure is what skipped this job from May to July 2026.
 
       - name: Install dependencies
         run: npm ci --include=optional --no-audit --no-fund

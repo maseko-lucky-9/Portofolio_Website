@@ -35,9 +35,7 @@ export function BuildProgress({
   useAnime(
     svgRef,
     (scope) => {
-      const fill = svgRef.current?.querySelector<SVGRectElement>(
-        "[data-anime-fill]",
-      );
+      const fill = svgRef.current?.querySelector<SVGRectElement>("[data-anime-fill]");
       if (!fill) return;
       if (scope.matches.reducedMotion) {
         fill.setAttribute("width", String(width * fillRatio));
@@ -67,15 +65,7 @@ export function BuildProgress({
       {/* Rail */}
       <rect x="0" y="0" width={width} height={height} rx={height / 2} fill={railColor} />
       {/* Fill */}
-      <rect
-        data-anime-fill
-        x="0"
-        y="0"
-        width="0"
-        height={height}
-        rx={height / 2}
-        fill={color}
-      />
+      <rect data-anime-fill x="0" y="0" width="0" height={height} rx={height / 2} fill={color} />
     </svg>
   );
 }

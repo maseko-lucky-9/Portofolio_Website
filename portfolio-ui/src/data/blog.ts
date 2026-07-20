@@ -21,7 +21,8 @@ export const blogPosts: BlogPost[] = [
   {
     id: "react-performance-2024",
     title: "Optimizing React Performance in 2024",
-    excerpt: "Deep dive into modern React performance patterns including concurrent features, memo optimization, and bundle size reduction strategies.",
+    excerpt:
+      "Deep dive into modern React performance patterns including concurrent features, memo optimization, and bundle size reduction strategies.",
     publishedAt: "Dec 15, 2024",
     readTime: "8 min read",
     tags: ["React", "Performance", "JavaScript"],
@@ -32,7 +33,8 @@ export const blogPosts: BlogPost[] = [
   {
     id: "typescript-patterns",
     title: "Advanced TypeScript Patterns for Large-Scale Apps",
-    excerpt: "Explore type-safe patterns that make your codebase more maintainable, including branded types, discriminated unions, and more.",
+    excerpt:
+      "Explore type-safe patterns that make your codebase more maintainable, including branded types, discriminated unions, and more.",
     publishedAt: "Nov 28, 2024",
     readTime: "12 min read",
     tags: ["TypeScript", "Architecture", "Best Practices"],
@@ -43,7 +45,8 @@ export const blogPosts: BlogPost[] = [
   {
     id: "building-design-systems",
     title: "Building Scalable Design Systems with Tailwind",
-    excerpt: "How to create a comprehensive design system that scales across teams while maintaining consistency and developer experience.",
+    excerpt:
+      "How to create a comprehensive design system that scales across teams while maintaining consistency and developer experience.",
     publishedAt: "Oct 10, 2024",
     readTime: "10 min read",
     tags: ["CSS", "Design Systems", "Tailwind"],

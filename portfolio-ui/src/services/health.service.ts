@@ -1,18 +1,18 @@
 /**
  * Health Check Service
- * 
+ *
  * Monitors API health and status
  */
 
-import { httpClient } from '@/lib/http-client';
-import type { HealthCheck } from '@/types/api';
+import { httpClient } from "@/lib/http-client";
+import type { HealthCheck } from "@/types/api";
 
 class HealthService {
   /**
    * Check API health
    */
   async check(): Promise<HealthCheck> {
-    return httpClient.get<HealthCheck>('/health', {
+    return httpClient.get<HealthCheck>("/health", {
       skipAuth: true,
       timeout: 5000,
     });
@@ -24,7 +24,7 @@ class HealthService {
   async isAvailable(): Promise<boolean> {
     try {
       const health = await this.check();
-      return health.status === 'healthy';
+      return health.status === "healthy";
     } catch {
       return false;
     }

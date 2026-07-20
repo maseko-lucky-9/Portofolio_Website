@@ -1,7 +1,7 @@
-import { useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
+import { useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 export function OAuthCallback() {
   const navigate = useNavigate();
@@ -12,14 +12,14 @@ export function OAuthCallback() {
   useEffect(() => {
     const handleCallback = async () => {
       // Check for error
-      const error = searchParams.get('error');
+      const error = searchParams.get("error");
       if (error) {
         toast({
-          variant: 'destructive',
-          title: 'Authentication Failed',
+          variant: "destructive",
+          title: "Authentication Failed",
           description: decodeURIComponent(error),
         });
-        navigate('/login');
+        navigate("/login");
         return;
       }
 
@@ -29,22 +29,22 @@ export function OAuthCallback() {
         await refreshToken();
 
         toast({
-          title: 'Login Successful',
-          description: 'You have been logged in successfully.',
+          title: "Login Successful",
+          description: "You have been logged in successfully.",
         });
 
         // Redirect to dashboard or intended page
-        const from = sessionStorage.getItem('oauth_redirect') || '/dashboard';
-        sessionStorage.removeItem('oauth_redirect');
+        const from = sessionStorage.getItem("oauth_redirect") || "/dashboard";
+        sessionStorage.removeItem("oauth_redirect");
         navigate(from);
       } catch (err) {
-        console.error('Failed to complete OAuth login:', err);
+        console.error("Failed to complete OAuth login:", err);
         toast({
-          variant: 'destructive',
-          title: 'Authentication Failed',
-          description: 'Failed to complete login. Please try again.',
+          variant: "destructive",
+          title: "Authentication Failed",
+          description: "Failed to complete login. Please try again.",
         });
-        navigate('/login');
+        navigate("/login");
       }
     };
 

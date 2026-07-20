@@ -66,16 +66,8 @@ export function SectionBridge({ caption, id }: SectionBridgeProps) {
       const tl = createTimeline({ autoplay: false });
 
       // Phase 1 (0 – 400ms): hairlines grow outward from centre.
-      tl.add(
-        hairlineL,
-        { scaleX: [0, 1], duration: 400, ease: "outQuart" },
-        0,
-      );
-      tl.add(
-        hairlineR,
-        { scaleX: [0, 1], duration: 400, ease: "outQuart" },
-        0,
-      );
+      tl.add(hairlineL, { scaleX: [0, 1], duration: 400, ease: "outQuart" }, 0);
+      tl.add(hairlineR, { scaleX: [0, 1], duration: 400, ease: "outQuart" }, 0);
 
       // Phase 2 (400 – 800ms): brackets stroke-draw on.
       drawables.forEach((d, i) => {
@@ -132,9 +124,7 @@ export function SectionBridge({ caption, id }: SectionBridgeProps) {
 
   // Reduced-motion end-state styles. Applied via inline style so the
   // SVG transforms render statically with no scroll observer attached.
-  const hairlineStartStyle = reduced
-    ? { transform: "scaleX(1)" }
-    : { transform: "scaleX(0)" };
+  const hairlineStartStyle = reduced ? { transform: "scaleX(1)" } : { transform: "scaleX(0)" };
   const bracketStartStyle = reduced
     ? { strokeDasharray: "none", strokeDashoffset: "0" }
     : undefined;

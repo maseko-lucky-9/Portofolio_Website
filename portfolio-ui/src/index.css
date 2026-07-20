@@ -53,8 +53,8 @@
 
     /* Opacity scale. */
     --opacity-subtle: 0.06;
-    --opacity-soft: 0.30;
-    --opacity-overlay: 0.80;
+    --opacity-soft: 0.3;
+    --opacity-overlay: 0.8;
 
     /* Masthead rule opacity — light mode is paler, needs more weight. */
     --masthead-opacity: 0.65;
@@ -100,7 +100,7 @@
     --shadow-xs: 0 1px 2px hsl(220 13% 10% / 0.04);
     --shadow-sm: 0 1px 3px hsl(220 13% 10% / 0.06), 0 1px 2px hsl(220 13% 10% / 0.04);
     --shadow-md: 0 4px 8px -2px hsl(220 13% 10% / 0.08), 0 2px 4px -2px hsl(220 13% 10% / 0.06);
-    --shadow-lg: 0 12px 24px -4px hsl(220 13% 10% / 0.10), 0 4px 8px -4px hsl(220 13% 10% / 0.06);
+    --shadow-lg: 0 12px 24px -4px hsl(220 13% 10% / 0.1), 0 4px 8px -4px hsl(220 13% 10% / 0.06);
     --shadow-xl: 0 24px 48px -8px hsl(220 13% 10% / 0.14), 0 8px 16px -8px hsl(220 13% 10% / 0.08);
 
     /* Sidebar tokens — OKLCH. */
@@ -119,10 +119,10 @@
     --background: 0.13 0.008 250;
     --foreground: 0.96 0.005 250;
 
-    --card: 0.17 0.010 250;
+    --card: 0.17 0.01 250;
     --card-foreground: 0.96 0.005 250;
 
-    --popover: 0.17 0.010 250;
+    --popover: 0.17 0.01 250;
     --popover-foreground: 0.96 0.005 250;
 
     --primary: 0.66 0.18 35;
@@ -132,8 +132,8 @@
     --secondary-foreground: 0.96 0.005 250;
 
     --opacity-subtle: 0.06;
-    --opacity-soft: 0.30;
-    --opacity-overlay: 0.80;
+    --opacity-soft: 0.3;
+    --opacity-overlay: 0.8;
 
     /* Dark mode masthead rule — paper-on-dark wants less weight. */
     --masthead-opacity: 0.55;
@@ -147,25 +147,25 @@
     --destructive: 0.58 0.22 27;
     --destructive-foreground: 0.99 0.003 250;
 
-    --border: 0.30 0.012 250;
-    --input: 0.30 0.012 250;
+    --border: 0.3 0.012 250;
+    --input: 0.3 0.012 250;
     --ring: 0.66 0.18 35;
 
     /* Dark shadows */
-    --shadow-xs: 0 1px 2px hsl(0 0% 0% / 0.20);
-    --shadow-sm: 0 1px 3px hsl(0 0% 0% / 0.30), 0 1px 2px hsl(0 0% 0% / 0.20);
-    --shadow-md: 0 4px 8px -2px hsl(0 0% 0% / 0.40), 0 2px 4px -2px hsl(0 0% 0% / 0.30);
-    --shadow-lg: 0 12px 24px -4px hsl(0 0% 0% / 0.50), 0 4px 8px -4px hsl(0 0% 0% / 0.35);
-    --shadow-xl: 0 24px 48px -8px hsl(0 0% 0% / 0.60), 0 8px 16px -8px hsl(0 0% 0% / 0.40);
+    --shadow-xs: 0 1px 2px hsl(0 0% 0% / 0.2);
+    --shadow-sm: 0 1px 3px hsl(0 0% 0% / 0.3), 0 1px 2px hsl(0 0% 0% / 0.2);
+    --shadow-md: 0 4px 8px -2px hsl(0 0% 0% / 0.4), 0 2px 4px -2px hsl(0 0% 0% / 0.3);
+    --shadow-lg: 0 12px 24px -4px hsl(0 0% 0% / 0.5), 0 4px 8px -4px hsl(0 0% 0% / 0.35);
+    --shadow-xl: 0 24px 48px -8px hsl(0 0% 0% / 0.6), 0 8px 16px -8px hsl(0 0% 0% / 0.4);
 
     /* Dark sidebar — Deep ink (hue 250). */
-    --sidebar-background: 0.15 0.010 250;
+    --sidebar-background: 0.15 0.01 250;
     --sidebar-foreground: 0.88 0.008 250;
     --sidebar-primary: 0.66 0.18 35;
     --sidebar-primary-foreground: 0.13 0.008 250;
     --sidebar-accent: 0.22 0.012 250;
     --sidebar-accent-foreground: 0.96 0.005 250;
-    --sidebar-border: 0.30 0.012 250;
+    --sidebar-border: 0.3 0.012 250;
     --sidebar-ring: 0.66 0.18 35;
   }
 }
@@ -188,7 +188,7 @@
 
   body {
     @apply bg-background text-foreground font-sans;
-    font-family: 'Public Sans Variable', 'Public Sans', system-ui, sans-serif;
+    font-family: "Public Sans Variable", "Public Sans", system-ui, sans-serif;
     /* ss01 = single-storey 'a', tnum = tabular numerals.
        Public Sans ships these as opt-in stylistic sets — both improve
        readability at small UI sizes and align metric-card numerics. */
@@ -199,8 +199,11 @@
      Optical-size axis (`opsz`) is driven implicitly by font-size in
      supporting browsers; we set wght via Tailwind weight utilities.
      Tight tracking, balanced wrap on supporting browsers. */
-  h1, h2, h3, .font-display {
-    font-family: 'Source Serif 4 Variable', 'Source Serif 4', ui-serif, Georgia, serif;
+  h1,
+  h2,
+  h3,
+  .font-display {
+    font-family: "Source Serif 4 Variable", "Source Serif 4", ui-serif, Georgia, serif;
     font-feature-settings: "ss01", "onum";
     letter-spacing: -0.012em;
     text-wrap: balance;
@@ -209,13 +212,17 @@
   /* h4–h6 stay in body sans — paragraph-level headings should not
      compete with the display register reserved for section titles. */
 
-  code, pre {
-    font-family: 'JetBrains Mono', ui-monospace, monospace;
-    font-feature-settings: "liga" 1, "calt" 1;
+  code,
+  pre {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-feature-settings:
+      "liga" 1,
+      "calt" 1;
   }
 
   /* Ensure buttons get cursor-pointer */
-  button, [role="button"] {
+  button,
+  [role="button"] {
     cursor: pointer;
   }
 }
@@ -234,7 +241,9 @@
 
   .btn-hero-primary:hover {
     transform: translate(var(--magnetic-x, 0), calc(var(--magnetic-y, 0) - 2px)) scale(1.02);
-    box-shadow: var(--shadow-xl), 0 0 32px oklch(var(--primary) / 0.45);
+    box-shadow:
+      var(--shadow-xl),
+      0 0 32px oklch(var(--primary) / 0.45);
   }
 
   .btn-hero-primary:active {
@@ -251,7 +260,7 @@
   }
 
   .btn-hero-secondary:hover {
-    background: oklch(var(--primary) / 0.10);
+    background: oklch(var(--primary) / 0.1);
     border-color: oklch(var(--primary) / 0.7);
     transform: translate(var(--magnetic-x, 0), calc(var(--magnetic-y, 0) - 2px)) scale(1.02);
     box-shadow: var(--shadow-sm);
@@ -339,7 +348,10 @@
   .timeline-dot {
     @apply w-3.5 h-3.5 rounded-full;
     background: oklch(var(--primary));
-    box-shadow: 0 0 0 3px oklch(var(--background)), 0 0 0 5px oklch(var(--primary) / 0.3), var(--shadow-sm);
+    box-shadow:
+      0 0 0 3px oklch(var(--background)),
+      0 0 0 5px oklch(var(--primary) / 0.3),
+      var(--shadow-sm);
   }
 
   .timeline-line {
@@ -410,7 +422,7 @@
   }
 
   .nav-link::after {
-    content: '';
+    content: "";
     @apply absolute -bottom-0.5 left-0 w-0 h-px transition-all;
     background: oklch(var(--primary));
     transition-duration: 250ms;
@@ -439,7 +451,7 @@
   }
 
   .section-mesh::before {
-    content: '';
+    content: "";
     position: absolute;
     inset: 0;
     background: transparent;
@@ -496,34 +508,67 @@
   }
 
   @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-12px); }
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-12px);
+    }
   }
 
   @keyframes pulseGlow {
-    0%, 100% { box-shadow: var(--shadow-sm); }
-    50% { box-shadow: 0 0 0 1px oklch(var(--primary) / 0.3), 0 8px 32px oklch(var(--primary) / 0.50); }
+    0%,
+    100% {
+      box-shadow: var(--shadow-sm);
+    }
+    50% {
+      box-shadow:
+        0 0 0 1px oklch(var(--primary) / 0.3),
+        0 8px 32px oklch(var(--primary) / 0.5);
+    }
   }
 
   @keyframes slideUp {
-    from { opacity: 0; transform: translateY(24px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
 
   @keyframes shimmer {
-    from { background-position: 200% 0; }
-    to { background-position: -200% 0; }
+    from {
+      background-position: 200% 0;
+    }
+    to {
+      background-position: -200% 0;
+    }
   }
 
   @keyframes blobDrift {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    33% { transform: translate(20px, -25px) scale(1.05); }
-    66% { transform: translate(-15px, 12px) scale(0.95); }
+    0%,
+    100% {
+      transform: translate(0, 0) scale(1);
+    }
+    33% {
+      transform: translate(20px, -25px) scale(1.05);
+    }
+    66% {
+      transform: translate(-15px, 12px) scale(0.95);
+    }
   }
 
   /* ── Paper surfaces (retired glassmorphism) ──
@@ -550,8 +595,9 @@
     background: oklch(var(--card));
     border-color: oklch(var(--border));
     box-shadow: var(--shadow-xs);
-    transition: border-color var(--duration-base) var(--ease-spring),
-                box-shadow var(--duration-base) var(--ease-spring);
+    transition:
+      border-color var(--duration-base) var(--ease-spring),
+      box-shadow var(--duration-base) var(--ease-spring);
   }
 
   .glass-card:hover {
@@ -570,10 +616,13 @@
     box-shadow: none;
   }
 
-
   /* ── Scrollbar ── */
-  .custom-scrollbar::-webkit-scrollbar { width: 5px; }
-  .custom-scrollbar::-webkit-scrollbar-track { @apply bg-transparent; }
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 5px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
   .custom-scrollbar::-webkit-scrollbar-thumb {
     @apply rounded-full;
     background: oklch(var(--muted-foreground) / 0.25);
@@ -584,7 +633,9 @@
 
   /* ── Reduced motion ── */
   @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
+    *,
+    *::before,
+    *::after {
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;

@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 
 interface ScrollState {
   scrollProgress: number;
@@ -9,7 +9,7 @@ interface ScrollState {
 
 export const useScrollStore = create<ScrollState>((set) => ({
   scrollProgress: 0,
-  activeSection: 'hero',
+  activeSection: "hero",
   setScrollProgress: (progress) => set({ scrollProgress: progress }),
   setActiveSection: (section) => set({ activeSection: section }),
 }));

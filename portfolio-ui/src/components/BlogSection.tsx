@@ -63,7 +63,12 @@ export function BlogSection() {
   const rootRef = useRef<HTMLElement>(null);
 
   // Fetch latest 3 published articles
-  const { data: apiResponse, isLoading, isError, refetch } = useArticles({
+  const {
+    data: apiResponse,
+    isLoading,
+    isError,
+    refetch,
+  } = useArticles({
     status: ArticleStatus.PUBLISHED,
     limit: 3,
     sortBy: "publishedAt",
@@ -108,10 +113,10 @@ export function BlogSection() {
           <span className="inline-block text-xs font-semibold uppercase tracking-[0.18em] text-primary mb-3">
             Blog
           </span>
-          <h2 id="blog-heading" className="section-title">Notes</h2>
-          <p className="section-subtitle mx-auto">
-            Working notes on software I&apos;ve shipped.
-          </p>
+          <h2 id="blog-heading" className="section-title">
+            Notes
+          </h2>
+          <p className="section-subtitle mx-auto">Working notes on software I&apos;ve shipped.</p>
         </div>
 
         {/* Error State */}
@@ -119,10 +124,7 @@ export function BlogSection() {
           <div className="flex items-center justify-center gap-2 mb-8 p-3 rounded-lg bg-destructive/10 text-destructive text-sm animate-in fade-in duration-300">
             <AlertCircle className="w-4 h-4" />
             <span>Unable to load latest articles.</span>
-            <button
-              onClick={() => refetch()}
-              className="underline font-medium hover:no-underline"
-            >
+            <button onClick={() => refetch()} className="underline font-medium hover:no-underline">
               Retry
             </button>
           </div>
@@ -156,7 +158,8 @@ export function BlogSection() {
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLElement).style.transform = "translateY(-4px)";
                     (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-sm)";
-                    (e.currentTarget as HTMLElement).style.borderColor = "oklch(var(--primary) / 0.35)";
+                    (e.currentTarget as HTMLElement).style.borderColor =
+                      "oklch(var(--primary) / 0.35)";
                   }}
                   onMouseLeave={(e) => {
                     (e.currentTarget as HTMLElement).style.transform = "";
@@ -185,7 +188,10 @@ export function BlogSection() {
                     {/* Read time badge */}
                     <div
                       className="absolute top-4 right-4 flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium"
-                      style={{ background: "oklch(var(--background))", border: "1px solid oklch(var(--border))" }}
+                      style={{
+                        background: "oklch(var(--background))",
+                        border: "1px solid oklch(var(--border))",
+                      }}
                     >
                       <Clock className="w-3 h-3" />
                       {post.readTime}

@@ -19,10 +19,7 @@ import { memo } from "react";
 
 function PaperBackgroundImpl() {
   return (
-    <div
-      aria-hidden
-      className="pointer-events-none absolute inset-0 overflow-hidden select-none"
-    >
+    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden select-none">
       {/* Masthead rule — sits about 96px from top of section. Opacity
           driven by --masthead-opacity (0.65 light / 0.55 dark, defined
           in index.css :root + .dark blocks). */}

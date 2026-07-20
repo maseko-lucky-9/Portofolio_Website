@@ -86,15 +86,7 @@ export function AnimatedBrackets({
       <path data-anime-bracket d="M 16 6 L 21 12 L 16 18" />
       {/* Blinking cursor between the brackets */}
       {!noCursor && (
-        <rect
-          data-anime-cursor
-          x="11"
-          y="8"
-          width="2"
-          height="8"
-          fill={color}
-          stroke="none"
-        />
+        <rect data-anime-cursor x="11" y="8" width="2" height="8" fill={color} stroke="none" />
       )}
     </svg>
   );

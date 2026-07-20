@@ -41,8 +41,7 @@ function ShippedMeter({ reduced }: { reduced: boolean }) {
       className="pointer-events-none absolute top-6 right-6 z-20 hidden font-sans text-[11px] uppercase tracking-[0.18em] font-semibold sm:block"
       style={{ color: "oklch(var(--secondary))", opacity: 0.85 }}
     >
-      <span className="opacity-60">shipped:</span>{" "}
-      <span tabIndex={-1}>{n}</span>
+      <span className="opacity-60">shipped:</span> <span tabIndex={-1}>{n}</span>
     </div>
   );
 }
@@ -83,10 +82,9 @@ export function HeroSection() {
   useEffect(() => {
     const el = heroRef.current;
     if (!el || typeof IntersectionObserver === "undefined") return;
-    const io = new IntersectionObserver(
-      ([entry]) => setHeroInView(entry.isIntersecting),
-      { rootMargin: "0px" },
-    );
+    const io = new IntersectionObserver(([entry]) => setHeroInView(entry.isIntersecting), {
+      rootMargin: "0px",
+    });
     io.observe(el);
     return () => io.disconnect();
   }, []);
@@ -127,11 +125,7 @@ export function HeroSection() {
       for (const [selector, atMs] of cascade) {
         const el = q(selector);
         if (!el) continue;
-        tl.add(
-          el,
-          { opacity: [0, 1], translateY: [16, 0], duration: DURATION.base * 1000 },
-          atMs,
-        );
+        tl.add(el, { opacity: [0, 1], translateY: [16, 0], duration: DURATION.base * 1000 }, atMs);
       }
 
       // Right column: column slide + profile scale + metrics fade.
@@ -141,11 +135,7 @@ export function HeroSection() {
       }
       const profile = q('[data-anime-hero="profile"]');
       if (profile) {
-        tl.add(
-          profile,
-          { opacity: [0, 1], scale: [0.85, 1], duration: 600 },
-          400,
-        );
+        tl.add(profile, { opacity: [0, 1], scale: [0.85, 1], duration: 600 }, 400);
       }
       const metrics = q('[data-anime-hero="metrics"]');
       if (metrics) {
@@ -289,16 +279,17 @@ export function HeroSection() {
                 See what I&apos;ve built
                 <ArrowDown className="w-4 h-4" />
               </button>
-              <button ref={secondaryCtaRef} onClick={scrollToContact} className="btn-hero-secondary">
+              <button
+                ref={secondaryCtaRef}
+                onClick={scrollToContact}
+                className="btn-hero-secondary"
+              >
                 Contact Me
               </button>
             </div>
 
             {/* Social links */}
-            <div
-              data-anime-hero="social"
-              className="flex gap-3 justify-center lg:justify-start"
-            >
+            <div data-anime-hero="social" className="flex gap-3 justify-center lg:justify-start">
               {[
                 { href: personalData.social.github, Icon: Github, label: "GitHub" },
                 { href: personalData.social.linkedin, Icon: Linkedin, label: "LinkedIn" },
@@ -318,8 +309,10 @@ export function HeroSection() {
                   }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLElement).style.background = "oklch(var(--primary))";
-                    (e.currentTarget as HTMLElement).style.color = "oklch(var(--primary-foreground))";
-                    (e.currentTarget as HTMLElement).style.transform = "translateY(-3px) scale(1.08)";
+                    (e.currentTarget as HTMLElement).style.color =
+                      "oklch(var(--primary-foreground))";
+                    (e.currentTarget as HTMLElement).style.transform =
+                      "translateY(-3px) scale(1.08)";
                     (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-sm)";
                     (e.currentTarget as HTMLElement).style.borderColor = "transparent";
                   }}

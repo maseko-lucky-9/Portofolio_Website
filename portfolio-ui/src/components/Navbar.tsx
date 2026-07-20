@@ -149,7 +149,10 @@ export function Navbar() {
         <a
           href="#"
           className="z-10 inline-block transition-transform duration-200 ease-out hover:scale-[1.04]"
-          style={{ transformOrigin: "center", transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)" }}
+          style={{
+            transformOrigin: "center",
+            transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
+          }}
           onClick={(e) => {
             e.preventDefault();
             window.scrollTo({ top: 0, behavior: "smooth" });

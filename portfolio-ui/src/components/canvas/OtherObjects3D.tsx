@@ -1,8 +1,8 @@
-import { useRef } from 'react';
-import { useFrame } from '@react-three/fiber';
-import { Box, Cylinder } from '@react-three/drei';
-import * as THREE from 'three';
-import { useScrollStore } from '@/store/useScrollStore';
+import { useRef } from "react";
+import { useFrame } from "@react-three/fiber";
+import { Box, Cylinder } from "@react-three/drei";
+import * as THREE from "three";
+import { useScrollStore } from "@/store/useScrollStore";
 
 export function Projects3D() {
   const meshRef = useRef<THREE.Mesh>(null);
@@ -11,8 +11,8 @@ export function Projects3D() {
   useFrame((state) => {
     if (!meshRef.current) return;
     meshRef.current.rotation.y = state.clock.elapsedTime * 0.5;
-    
-    if (activeSection === 'projects') {
+
+    if (activeSection === "projects") {
       meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, 0, 0.1);
     } else {
       meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, -10, 0.1);
@@ -33,8 +33,8 @@ export function CodeDemo3D() {
   useFrame((state) => {
     if (!meshRef.current) return;
     meshRef.current.rotation.x = state.clock.elapsedTime * 0.5;
-    
-    if (activeSection === 'codedemo') {
+
+    if (activeSection === "codedemo") {
       meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, 0, 0.1);
     } else {
       meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, -10, 0.1);
@@ -55,7 +55,7 @@ export function Experience3D() {
   useFrame((state) => {
     if (!meshRef.current) return;
     meshRef.current.rotation.y = state.clock.elapsedTime * 0.2;
-    if (activeSection === 'experience' || activeSection === 'services') {
+    if (activeSection === "experience" || activeSection === "services") {
       meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, 0, 0.1);
     } else {
       meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, -10, 0.1);
@@ -76,7 +76,7 @@ export function Contact3D() {
   useFrame((state) => {
     if (!meshRef.current) return;
     meshRef.current.rotation.z = Math.sin(state.clock.elapsedTime) * 0.2;
-    if (activeSection === 'contact') {
+    if (activeSection === "contact") {
       meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, 0, 0.1);
     } else {
       meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, -10, 0.1);
@@ -84,7 +84,12 @@ export function Contact3D() {
   });
 
   return (
-    <Cylinder ref={meshRef} args={[0, 1, 1.5, 4]} position={[0, -10, -2]} rotation={[Math.PI / 2, 0, 0]}>
+    <Cylinder
+      ref={meshRef}
+      args={[0, 1, 1.5, 4]}
+      position={[0, -10, -2]}
+      rotation={[Math.PI / 2, 0, 0]}
+    >
       <meshStandardMaterial color="#df2225" roughness={0.1} metalness={0.8} />
     </Cylinder>
   );

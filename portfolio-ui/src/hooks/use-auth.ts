@@ -1,15 +1,15 @@
 /**
  * Authentication Hooks
- * 
+ *
  * React Query hooks for authentication operations
  */
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
-import { authService } from '@/services/auth.service';
-import { queryKeys } from '@/lib/react-query';
-import type { LoginData, RegisterData, User } from '@/types/api';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { authService } from "@/services/auth.service";
+import { queryKeys } from "@/lib/react-query";
+import type { LoginData, RegisterData, User } from "@/types/api";
 
 /**
  * Get current user
@@ -34,12 +34,12 @@ export function useLogin() {
   return useMutation({
     mutationFn: (credentials: LoginData) => authService.login(credentials),
     onSuccess: (response) => {
-      toast.success('Login successful!');
+      toast.success("Login successful!");
       queryClient.setQueryData(queryKeys.auth.user(), {
         success: true,
         data: response.data.user,
       });
-      navigate('/dashboard');
+      navigate("/dashboard");
     },
   });
 }
@@ -54,12 +54,12 @@ export function useRegister() {
   return useMutation({
     mutationFn: (data: RegisterData) => authService.register(data),
     onSuccess: (response) => {
-      toast.success('Registration successful!');
+      toast.success("Registration successful!");
       queryClient.setQueryData(queryKeys.auth.user(), {
         success: true,
         data: response.data.user,
       });
-      navigate('/dashboard');
+      navigate("/dashboard");
     },
   });
 }
@@ -74,9 +74,9 @@ export function useLogout() {
   return useMutation({
     mutationFn: () => authService.logout(),
     onSuccess: () => {
-      toast.success('Logged out successfully');
+      toast.success("Logged out successfully");
       queryClient.clear();
-      navigate('/');
+      navigate("/");
     },
   });
 }
@@ -90,7 +90,7 @@ export function useUpdateProfile() {
   return useMutation({
     mutationFn: (data: Partial<User>) => authService.updateProfile(data),
     onSuccess: (response) => {
-      toast.success('Profile updated successfully');
+      toast.success("Profile updated successfully");
       queryClient.setQueryData(queryKeys.auth.user(), response);
     },
   });
@@ -101,15 +101,15 @@ export function useUpdateProfile() {
  */
 export function useChangePassword() {
   return useMutation({
-    mutationFn: ({ 
-      currentPassword, 
-      newPassword 
-    }: { 
-      currentPassword: string; 
+    mutationFn: ({
+      currentPassword,
+      newPassword,
+    }: {
+      currentPassword: string;
       newPassword: string;
     }) => authService.changePassword(currentPassword, newPassword),
     onSuccess: () => {
-      toast.success('Password changed successfully');
+      toast.success("Password changed successfully");
     },
   });
 }
@@ -121,7 +121,7 @@ export function useRequestPasswordReset() {
   return useMutation({
     mutationFn: (email: string) => authService.requestPasswordReset(email),
     onSuccess: () => {
-      toast.success('Password reset link sent to your email');
+      toast.success("Password reset link sent to your email");
     },
   });
 }
@@ -136,8 +136,8 @@ export function useResetPassword() {
     mutationFn: ({ token, newPassword }: { token: string; newPassword: string }) =>
       authService.resetPassword(token, newPassword),
     onSuccess: () => {
-      toast.success('Password reset successful. You can now login.');
-      navigate('/login');
+      toast.success("Password reset successful. You can now login.");
+      navigate("/login");
     },
   });
 }

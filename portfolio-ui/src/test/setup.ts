@@ -8,7 +8,7 @@ class MockIntersectionObserver implements IntersectionObserver {
 
   constructor(
     private callback: IntersectionObserverCallback,
-    _options?: IntersectionObserverInit
+    _options?: IntersectionObserverInit,
   ) {}
 
   observe(_target: Element): void {}
@@ -43,7 +43,7 @@ function createStorage(): Storage {
     clear: () => {
       store = new Map();
     },
-    getItem: (key: string) => (store.has(key) ? store.get(key) ?? null : null),
+    getItem: (key: string) => (store.has(key) ? (store.get(key) ?? null) : null),
     key: (index: number) => Array.from(store.keys())[index] ?? null,
     removeItem: (key: string) => {
       store.delete(key);
