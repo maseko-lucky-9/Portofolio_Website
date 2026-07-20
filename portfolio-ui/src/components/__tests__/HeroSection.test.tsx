@@ -3,12 +3,6 @@ import { render, screen } from "@testing-library/react";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { personalData } from "@/data/personal";
 
-// PaperBackground is pure DOM (no WebGL) — but mock to keep test surface
-// stable and isolate HeroSection assertions from background rendering.
-vi.mock("@/components/PaperBackground", () => ({
-  PaperBackground: () => <div data-testid="paper-background" />,
-}));
-
 // Mock framer-motion to pass through children without animation
 vi.mock("framer-motion", async () => {
   const actual = await vi.importActual<typeof import("framer-motion")>("framer-motion");
@@ -66,7 +60,7 @@ describe("HeroSection", () => {
 
   it('renders projects CTA button', () => {
     renderHeroSection();
-    expect(screen.getByText("See what I've built")).toBeInTheDocument();
+    expect(screen.getByText("View My Work")).toBeInTheDocument();
   });
 
   it('renders "Contact Me" button', () => {
@@ -81,14 +75,12 @@ describe("HeroSection", () => {
     expect(screen.getByText(personalData.metrics.clients)).toBeInTheDocument();
   });
 
-  it("renders metric prose in the inline sentence", () => {
+  it("renders the metric card labels", () => {
     renderHeroSection();
-    // Metrics are no longer label/value cards — they're an inline sentence:
-    // "Shipped 20+ projects with 10+ clients over 8+ years."
-    // The whole sentence is a single accessible <p>; assert the substrings
-    // by matching against its text content rather than by individual spans.
-    const sentence = screen.getByText(/Shipped[\s\S]+projects[\s\S]+clients[\s\S]+/i);
-    expect(sentence).toBeInTheDocument();
+    // Metrics are three stat cards, each a value above a label.
+    expect(screen.getByText("Projects")).toBeInTheDocument();
+    expect(screen.getByText("Years Exp.")).toBeInTheDocument();
+    expect(screen.getByText("Clients")).toBeInTheDocument();
   });
 
   it("renders profile image with correct alt text", () => {

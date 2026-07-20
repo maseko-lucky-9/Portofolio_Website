@@ -14,24 +14,21 @@ export default {
     },
     extend: {
       fontFamily: {
-        // Body: Public Sans Variable (civic / operational). Reads as
-        // infrastructure, not brand. Used for nav, buttons, body copy.
+        // Body: Inter Variable. Single grotesque across the interface.
         sans: [
-          'Public Sans Variable',
-          'Public Sans',
+          'Inter Variable',
+          'Inter',
           'system-ui',
           'sans-serif',
         ],
-        // Display: Source Serif 4 Variable (wedge transitional serif,
-        // optical sizes axis). Reserved for headings, the masthead rule,
-        // and the folio mark — anywhere "publication" register is wanted.
-        // Apply via the `font-display` Tailwind utility (not the default).
+        // Display is the same face as body — hierarchy comes from weight and
+        // size, not a contrasting serif. The key is retained so the existing
+        // `font-display` consumers keep resolving.
         display: [
-          'Source Serif 4 Variable',
-          'Source Serif 4',
-          'ui-serif',
-          'Georgia',
-          'serif',
+          'Inter Variable',
+          'Inter',
+          'system-ui',
+          'sans-serif',
         ],
         // Mono: JetBrains Mono — narrow technical use only (tables,
         // code blocks, tabular numerics). NOT a default body face.
@@ -117,9 +114,10 @@ export default {
           "0%, 100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-12px)" },
         },
+        // --primary is an OKLCH triple; hsl() here produced an invalid color.
         "pulse-glow": {
-          "0%, 100%": { boxShadow: "0 0 0 1px hsl(var(--primary) / 0.15), 0 4px 16px hsl(var(--primary) / 0.25)" },
-          "50%": { boxShadow: "0 0 0 1px hsl(var(--primary) / 0.30), 0 8px 32px hsl(var(--primary) / 0.50)" },
+          "0%, 100%": { boxShadow: "0 0 0 1px oklch(var(--primary) / 0.15), 0 4px 16px oklch(var(--primary) / 0.25)" },
+          "50%": { boxShadow: "0 0 0 1px oklch(var(--primary) / 0.30), 0 8px 32px oklch(var(--primary) / 0.50)" },
         },
         "shimmer": {
           from: { backgroundPosition: "200% 0" },

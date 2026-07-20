@@ -46,11 +46,11 @@ const BOLD_WOFF2 = loadFont('@fontsource/inter/files/inter-latin-700-normal.woff
 const FONT_REG = Buffer.from(await wawoff.decompress(REG_WOFF2));
 const FONT_BOLD = Buffer.from(await wawoff.decompress(BOLD_WOFF2));
 
-const BG = '#0b0d14';
-const FG = '#f5f2ee';
-const MUTED = '#a4a8b3';
-const ACCENT = '#d9744e';
-const BORDER = 'rgba(245, 242, 238, 0.10)';
+const BG = '#090a11';
+const FG = '#eef2f6';
+const MUTED = '#8796ab';
+const ACCENT = '#5a6ef2';
+const BORDER = 'rgba(238, 242, 246, 0.10)';
 
 const KIND_LABEL = { blog: 'BLOG', answers: 'ANSWERS', projects: 'PROJECTS' };
 
