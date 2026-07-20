@@ -1,6 +1,6 @@
 /**
  * Enhanced HTTP Client with Interceptors
- * 
+ *
  * Extends the base API client with:
  * - Request/response interceptors
  * - Automatic token refresh
@@ -9,7 +9,7 @@
  * - Abort controller support
  */
 
-import { env, apiUrl } from '../config/env';
+import { env, apiUrl } from "../config/env";
 
 // ============================================
 // Types
@@ -21,10 +21,10 @@ export class ApiError extends Error {
     public statusText: string,
     message: string,
     public data?: unknown,
-    public code?: string
+    public code?: string,
   ) {
     super(message);
-    this.name = 'ApiError';
+    this.name = "ApiError";
   }
 
   isValidationError(): boolean {
@@ -53,13 +53,13 @@ export class ApiError extends Error {
 }
 
 export class NetworkError extends ApiError {
-  constructor(message: string = 'Network request failed') {
-    super(0, 'Network Error', message);
-    this.name = 'NetworkError';
+  constructor(message: string = "Network request failed") {
+    super(0, "Network Error", message);
+    this.name = "NetworkError";
   }
 }
 
-interface RequestOptions extends Omit<RequestInit, 'body'> {
+interface RequestOptions extends Omit<RequestInit, "body"> {
   body?: unknown;
   retry?: number;
   retryDelay?: number;
@@ -69,7 +69,9 @@ interface RequestOptions extends Omit<RequestInit, 'body'> {
 }
 
 interface RequestInterceptor {
-  onRequest?: (config: RequestInit & { url: string }) => RequestInit & { url: string } | Promise<RequestInit & { url: string }>;
+  onRequest?: (
+    config: RequestInit & { url: string },
+  ) => (RequestInit & { url: string }) | Promise<RequestInit & { url: string }>;
   onRequestError?: (error: Error) => void;
 }
 
@@ -92,8 +94,8 @@ class TokenManager {
   }
 
   private loadTokens() {
-    this.accessToken = localStorage.getItem('accessToken');
-    this.refreshToken = localStorage.getItem('refreshToken');
+    this.accessToken = localStorage.getItem("accessToken");
+    this.refreshToken = localStorage.getItem("refreshToken");
   }
 
   getAccessToken(): string | null {
@@ -107,15 +109,15 @@ class TokenManager {
   setTokens(accessToken: string, refreshToken: string) {
     this.accessToken = accessToken;
     this.refreshToken = refreshToken;
-    localStorage.setItem('accessToken', accessToken);
-    localStorage.setItem('refreshToken', refreshToken);
+    localStorage.setItem("accessToken", accessToken);
+    localStorage.setItem("refreshToken", refreshToken);
   }
 
   clearTokens() {
     this.accessToken = null;
     this.refreshToken = null;
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
   }
 
   async refreshAccessToken(): Promise<string> {
@@ -137,29 +139,29 @@ class TokenManager {
   private async performRefresh(): Promise<string> {
     const refreshToken = this.getRefreshToken();
     if (!refreshToken) {
-      throw new ApiError(401, 'Unauthorized', 'No refresh token available');
+      throw new ApiError(401, "Unauthorized", "No refresh token available");
     }
 
     try {
-      const response = await fetch(apiUrl('/auth/refresh'), {
-        method: 'POST',
+      const response = await fetch(apiUrl("/auth/refresh"), {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ refreshToken }),
-        credentials: 'include',
+        credentials: "include",
       });
 
       if (!response.ok) {
         this.clearTokens();
-        throw new ApiError(401, 'Unauthorized', 'Token refresh failed');
+        throw new ApiError(401, "Unauthorized", "Token refresh failed");
       }
 
       const data = await response.json();
       const newAccessToken = data.data.accessToken;
-      
+
       this.accessToken = newAccessToken;
-      localStorage.setItem('accessToken', newAccessToken);
+      localStorage.setItem("accessToken", newAccessToken);
 
       return newAccessToken;
     } catch (error) {
@@ -177,7 +179,7 @@ class RequestDeduplicator {
   private inFlightRequests = new Map<string, Promise<Response>>();
 
   getKey(url: string, options: RequestInit): string {
-    return `${options.method || 'GET'}:${url}:${JSON.stringify(options.body || '')}`;
+    return `${options.method || "GET"}:${url}:${JSON.stringify(options.body || "")}`;
   }
 
   has(key: string): boolean {
@@ -190,7 +192,7 @@ class RequestDeduplicator {
 
   set(key: string, promise: Promise<Response>): void {
     this.inFlightRequests.set(key, promise);
-    
+
     // Clean up after request completes
     promise.finally(() => {
       this.inFlightRequests.delete(key);
@@ -216,10 +218,7 @@ class HttpClient {
     this.responseInterceptors.push(interceptor);
   }
 
-  async request<T>(
-    endpoint: string,
-    options: RequestOptions = {}
-  ): Promise<T> {
+  async request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
     const {
       body,
       headers: customHeaders,
@@ -244,7 +243,7 @@ class HttpClient {
             headers: customHeaders,
             skipAuth,
           },
-          timeout
+          timeout,
         );
 
         return response;
@@ -289,19 +288,19 @@ class HttpClient {
       }
     }
 
-    throw new Error('Request failed after retries');
+    throw new Error("Request failed after retries");
   }
 
   private async executeRequest<T>(
     url: string,
     options: RequestOptions,
-    timeout: number
+    timeout: number,
   ): Promise<T> {
     const { body, headers: customHeaders, skipAuth, ...restOptions } = options;
 
     // Build headers
     const headers: HeadersInit = {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       ...customHeaders,
     };
 
@@ -309,7 +308,7 @@ class HttpClient {
     if (!skipAuth) {
       const token = this.tokenManager.getAccessToken();
       if (token) {
-        (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
+        (headers as Record<string, string>)["Authorization"] = `Bearer ${token}`;
       }
     }
 
@@ -317,7 +316,7 @@ class HttpClient {
     let config: RequestInit & { url: string } = {
       ...restOptions,
       headers,
-      credentials: 'include',
+      credentials: "include",
       url,
     };
 
@@ -355,14 +354,14 @@ class HttpClient {
     config.signal = controller.signal;
 
     if (env.debug) {
-      console.log(`🌐 API Request: ${config.method || 'GET'} ${config.url}`);
+      console.log(`🌐 API Request: ${config.method || "GET"} ${config.url}`);
     }
 
     try {
       // Execute request with deduplication
       const fetchPromise = fetch(config.url, config);
       this.deduplicator.set(dedupeKey, fetchPromise);
-      
+
       let response = await fetchPromise;
       clearTimeout(timeoutId);
 
@@ -381,12 +380,10 @@ class HttpClient {
 
       if (error instanceof ApiError) {
         apiError = error;
-      } else if ((error as Error).name === 'AbortError') {
-        apiError = new ApiError(0, 'Timeout', 'Request timeout');
+      } else if ((error as Error).name === "AbortError") {
+        apiError = new ApiError(0, "Timeout", "Request timeout");
       } else {
-        apiError = new NetworkError(
-          error instanceof Error ? error.message : 'Unknown error'
-        );
+        apiError = new NetworkError(error instanceof Error ? error.message : "Unknown error");
       }
 
       // Apply error interceptors
@@ -401,8 +398,8 @@ class HttpClient {
   }
 
   private async parseResponse<T>(response: Response): Promise<T> {
-    const contentType = response.headers.get('content-type');
-    const isJson = contentType?.includes('application/json');
+    const contentType = response.headers.get("content-type");
+    const isJson = contentType?.includes("application/json");
     const data = isJson ? await response.json() : await response.text();
 
     if (!response.ok) {
@@ -411,7 +408,7 @@ class HttpClient {
         response.statusText,
         data?.error?.message || data?.message || `HTTP ${response.status}`,
         data,
-        data?.error?.code
+        data?.error?.code,
       );
     }
 
@@ -424,23 +421,23 @@ class HttpClient {
 
   // Convenience methods
   get<T>(endpoint: string, options?: RequestOptions) {
-    return this.request<T>(endpoint, { ...options, method: 'GET' });
+    return this.request<T>(endpoint, { ...options, method: "GET" });
   }
 
   post<T>(endpoint: string, body?: unknown, options?: RequestOptions) {
-    return this.request<T>(endpoint, { ...options, method: 'POST', body });
+    return this.request<T>(endpoint, { ...options, method: "POST", body });
   }
 
   put<T>(endpoint: string, body?: unknown, options?: RequestOptions) {
-    return this.request<T>(endpoint, { ...options, method: 'PUT', body });
+    return this.request<T>(endpoint, { ...options, method: "PUT", body });
   }
 
   patch<T>(endpoint: string, body?: unknown, options?: RequestOptions) {
-    return this.request<T>(endpoint, { ...options, method: 'PATCH', body });
+    return this.request<T>(endpoint, { ...options, method: "PATCH", body });
   }
 
   delete<T>(endpoint: string, options?: RequestOptions) {
-    return this.request<T>(endpoint, { ...options, method: 'DELETE' });
+    return this.request<T>(endpoint, { ...options, method: "DELETE" });
   }
 
   // Token management methods
@@ -467,14 +464,14 @@ export const httpClient = new HttpClient();
 if (env.debug) {
   httpClient.addRequestInterceptor({
     onRequest: (config) => {
-      console.log('📤 Request:', config.method, config.url);
+      console.log("📤 Request:", config.method, config.url);
       return config;
     },
   });
 
   httpClient.addResponseInterceptor({
     onResponseError: (error) => {
-      console.error('📥 Response Error:', error);
+      console.error("📥 Response Error:", error);
     },
   });
 }

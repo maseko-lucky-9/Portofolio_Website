@@ -119,7 +119,7 @@ export function ContactSection() {
         ease: EASE_FN.emphasized,
       });
       const strokes = el.querySelectorAll<SVGElement>(
-        '[data-anime="success-icon"] path, [data-anime="success-icon"] circle, [data-anime="success-icon"] polyline'
+        '[data-anime="success-icon"] path, [data-anime="success-icon"] circle, [data-anime="success-icon"] polyline',
       );
       if (strokes.length) {
         strokes.forEach((s) => {
@@ -145,13 +145,9 @@ export function ContactSection() {
       const root = rootRef.current;
       if (!root) return;
       if (scope.matches.reducedMotion) return;
-      const errorKeys = Object.keys(errors).filter(
-        (k) => !!errors[k as keyof ContactFormData]
-      );
+      const errorKeys = Object.keys(errors).filter((k) => !!errors[k as keyof ContactFormData]);
       if (errorKeys.length === 0) return;
-      const invalidFields = root.querySelectorAll<HTMLElement>(
-        '[aria-invalid="true"]'
-      );
+      const invalidFields = root.querySelectorAll<HTMLElement>('[aria-invalid="true"]');
       if (invalidFields.length) {
         animate(invalidFields, shakeFieldAnim());
       }
@@ -168,9 +164,7 @@ export function ContactSection() {
     [errors],
   );
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     // Clear error on change
@@ -215,7 +209,7 @@ export function ContactSection() {
           // Global error toast handled by QueryClient config
           // No additional handling needed here
         },
-      }
+      },
     );
   };
 
@@ -232,10 +226,11 @@ export function ContactSection() {
           <span className="inline-block text-xs font-semibold uppercase tracking-[0.18em] text-primary mb-3">
             Contact
           </span>
-          <h2 id="contact-heading" className="section-title">Say hi</h2>
+          <h2 id="contact-heading" className="section-title">
+            Say hi
+          </h2>
           <p className="section-subtitle mx-auto">
-            Have a project in mind or want to discuss opportunities? I&apos;d love to hear
-            from you.
+            Have a project in mind or want to discuss opportunities? I&apos;d love to hear from you.
           </p>
         </div>
 
@@ -249,7 +244,10 @@ export function ContactSection() {
               <div className="flex items-center gap-4">
                 <div
                   className="w-12 h-12 rounded-xl flex items-center justify-center transition-all"
-                  style={{ background: "oklch(var(--primary) / 0.08)", border: "1px solid oklch(var(--primary) / 0.15)" }}
+                  style={{
+                    background: "oklch(var(--primary) / 0.08)",
+                    border: "1px solid oklch(var(--primary) / 0.15)",
+                  }}
                 >
                   <Mail className="w-5 h-5 text-primary" />
                 </div>
@@ -268,7 +266,10 @@ export function ContactSection() {
               <div className="flex items-center gap-4">
                 <div
                   className="w-12 h-12 rounded-xl flex items-center justify-center transition-all"
-                  style={{ background: "oklch(var(--secondary) / 0.08)", border: "1px solid oklch(var(--secondary) / 0.15)" }}
+                  style={{
+                    background: "oklch(var(--secondary) / 0.08)",
+                    border: "1px solid oklch(var(--secondary) / 0.15)",
+                  }}
                 >
                   <MapPin className="w-5 h-5 text-secondary" />
                 </div>
@@ -316,7 +317,8 @@ export function ContactSection() {
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)";
                     (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-sm)";
-                    (e.currentTarget as HTMLElement).style.borderColor = "oklch(var(--primary) / 0.3)";
+                    (e.currentTarget as HTMLElement).style.borderColor =
+                      "oklch(var(--primary) / 0.3)";
                   }}
                   onMouseLeave={(e) => {
                     (e.currentTarget as HTMLElement).style.transform = "";
@@ -345,7 +347,8 @@ export function ContactSection() {
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)";
                     (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-sm)";
-                    (e.currentTarget as HTMLElement).style.borderColor = "oklch(var(--primary) / 0.3)";
+                    (e.currentTarget as HTMLElement).style.borderColor =
+                      "oklch(var(--primary) / 0.3)";
                   }}
                   onMouseLeave={(e) => {
                     (e.currentTarget as HTMLElement).style.transform = "";
@@ -375,12 +378,12 @@ export function ContactSection() {
                 >
                   <div
                     className="w-16 h-16 rounded-full flex items-center justify-center mb-4"
-                    style={{ background: "oklch(var(--secondary) / 0.08)", border: "1px solid oklch(var(--secondary) / 0.2)" }}
+                    style={{
+                      background: "oklch(var(--secondary) / 0.08)",
+                      border: "1px solid oklch(var(--secondary) / 0.2)",
+                    }}
                   >
-                    <CheckCircle
-                      data-anime="success-icon"
-                      className="w-8 h-8 text-secondary"
-                    />
+                    <CheckCircle data-anime="success-icon" className="w-8 h-8 text-secondary" />
                   </div>
                   <h4 className="text-lg font-bold mb-2">Message Sent!</h4>
                   <p className="text-muted-foreground">
@@ -403,11 +406,7 @@ export function ContactSection() {
                         aria-describedby={errors.name ? "name-error" : undefined}
                       />
                       {errors.name && (
-                        <p
-                          id="name-error"
-                          role="alert"
-                          className="text-xs text-destructive"
-                        >
+                        <p id="name-error" role="alert" className="text-xs text-destructive">
                           {errors.name}
                         </p>
                       )}
@@ -427,11 +426,7 @@ export function ContactSection() {
                         aria-describedby={errors.email ? "email-error" : undefined}
                       />
                       {errors.email && (
-                        <p
-                          id="email-error"
-                          role="alert"
-                          className="text-xs text-destructive"
-                        >
+                        <p id="email-error" role="alert" className="text-xs text-destructive">
                           {errors.email}
                         </p>
                       )}
@@ -451,11 +446,7 @@ export function ContactSection() {
                       aria-describedby={errors.subject ? "subject-error" : undefined}
                     />
                     {errors.subject && (
-                      <p
-                        id="subject-error"
-                        role="alert"
-                        className="text-xs text-destructive"
-                      >
+                      <p id="subject-error" role="alert" className="text-xs text-destructive">
                         {errors.subject}
                       </p>
                     )}
@@ -475,11 +466,7 @@ export function ContactSection() {
                       aria-describedby={errors.message ? "message-error" : undefined}
                     />
                     {errors.message && (
-                      <p
-                        id="message-error"
-                        role="alert"
-                        className="text-xs text-destructive"
-                      >
+                      <p id="message-error" role="alert" className="text-xs text-destructive">
                         {errors.message}
                       </p>
                     )}

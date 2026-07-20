@@ -129,9 +129,7 @@ export function CustomCursor() {
         style={{
           width: hover ? "44px" : "28px",
           height: hover ? "44px" : "28px",
-          borderColor: hover
-            ? "oklch(var(--primary) / 0.7)"
-            : "oklch(var(--foreground) / 0.35)",
+          borderColor: hover ? "oklch(var(--primary) / 0.7)" : "oklch(var(--foreground) / 0.35)",
           opacity: active ? 1 : 0,
           mixBlendMode: "difference",
           willChange: "transform",

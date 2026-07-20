@@ -1,10 +1,10 @@
 /**
  * Authentication Service
- * 
+ *
  * Handles user authentication and token management
  */
 
-import { httpClient } from '@/lib/http-client';
+import { httpClient } from "@/lib/http-client";
 import type {
   User,
   LoginData,
@@ -12,27 +12,22 @@ import type {
   AuthResponse,
   RefreshTokenResponse,
   ApiResponse,
-} from '@/types/api';
+} from "@/types/api";
 
 class AuthService {
-  private readonly basePath = '/auth';
+  private readonly basePath = "/auth";
 
   /**
    * Login with email and password
    */
   async login(credentials: LoginData): Promise<AuthResponse> {
-    const response = await httpClient.post<AuthResponse>(
-      `${this.basePath}/login`,
-      credentials,
-      { skipAuth: true }
-    );
+    const response = await httpClient.post<AuthResponse>(`${this.basePath}/login`, credentials, {
+      skipAuth: true,
+    });
 
     // Store tokens
     if (response.success && response.data) {
-      httpClient.setTokens(
-        response.data.accessToken,
-        response.data.refreshToken
-      );
+      httpClient.setTokens(response.data.accessToken, response.data.refreshToken);
     }
 
     return response;
@@ -42,18 +37,13 @@ class AuthService {
    * Register new user
    */
   async register(data: RegisterData): Promise<AuthResponse> {
-    const response = await httpClient.post<AuthResponse>(
-      `${this.basePath}/register`,
-      data,
-      { skipAuth: true }
-    );
+    const response = await httpClient.post<AuthResponse>(`${this.basePath}/register`, data, {
+      skipAuth: true,
+    });
 
     // Store tokens
     if (response.success && response.data) {
-      httpClient.setTokens(
-        response.data.accessToken,
-        response.data.refreshToken
-      );
+      httpClient.setTokens(response.data.accessToken, response.data.refreshToken);
     }
 
     return response;
@@ -87,10 +77,7 @@ class AuthService {
   /**
    * Change password
    */
-  async changePassword(
-    currentPassword: string,
-    newPassword: string
-  ): Promise<ApiResponse<void>> {
+  async changePassword(currentPassword: string, newPassword: string): Promise<ApiResponse<void>> {
     return httpClient.post<ApiResponse<void>>(`${this.basePath}/change-password`, {
       currentPassword,
       newPassword,
@@ -104,7 +91,7 @@ class AuthService {
     return httpClient.post<ApiResponse<void>>(
       `${this.basePath}/forgot-password`,
       { email },
-      { skipAuth: true }
+      { skipAuth: true },
     );
   }
 
@@ -115,7 +102,7 @@ class AuthService {
     return httpClient.post<ApiResponse<void>>(
       `${this.basePath}/reset-password`,
       { token, newPassword },
-      { skipAuth: true }
+      { skipAuth: true },
     );
   }
 
@@ -123,11 +110,9 @@ class AuthService {
    * Refresh access token
    */
   async refreshToken(): Promise<RefreshTokenResponse> {
-    return httpClient.post<RefreshTokenResponse>(
-      `${this.basePath}/refresh`,
-      undefined,
-      { skipAuth: true }
-    );
+    return httpClient.post<RefreshTokenResponse>(`${this.basePath}/refresh`, undefined, {
+      skipAuth: true,
+    });
   }
 
   /**
@@ -147,8 +132,8 @@ class AuthService {
   /**
    * Initiate OAuth login flow
    */
-  loginWithOAuth(provider: 'github' | 'google'): void {
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+  loginWithOAuth(provider: "github" | "google"): void {
+    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
     window.location.href = `${apiUrl}/api/v1/auth/oauth/${provider}`;
   }
 
@@ -166,7 +151,7 @@ class AuthService {
   /**
    * Unlink OAuth provider from account
    */
-  async unlinkOAuthProvider(provider: 'github' | 'google'): Promise<ApiResponse<void>> {
+  async unlinkOAuthProvider(provider: "github" | "google"): Promise<ApiResponse<void>> {
     return httpClient.delete<ApiResponse<void>>(`${this.basePath}/oauth/unlink/${provider}`);
   }
 }

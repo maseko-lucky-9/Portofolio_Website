@@ -66,8 +66,7 @@ export function revealOnScroll(
 
   const anim = animate(els, {
     ...(options.anim ?? fadeUpAnim()),
-    delay:
-      options.staggerMs !== undefined ? stagger(options.staggerMs) : undefined,
+    delay: options.staggerMs !== undefined ? stagger(options.staggerMs) : undefined,
     autoplay: false,
   });
 

@@ -1,12 +1,12 @@
 /**
  * MSW Request Handlers
- * 
+ *
  * Define mock API responses for development and testing
  */
 
-import { http, HttpResponse, delay } from 'msw';
-import { mockProjects, mockArticles, mockTags, mockUser } from './data';
-import { env } from '@/config/env';
+import { http, HttpResponse, delay } from "msw";
+import { mockProjects, mockArticles, mockTags, mockUser } from "./data";
+import { env } from "@/config/env";
 
 const API_URL = env.apiUrl;
 
@@ -15,9 +15,9 @@ export const handlers = [
   http.get(`${API_URL}/health`, async () => {
     await delay(100);
     return HttpResponse.json({
-      status: 'healthy',
+      status: "healthy",
       timestamp: new Date().toISOString(),
-      environment: 'development',
+      environment: "development",
     });
   }),
 
@@ -25,8 +25,8 @@ export const handlers = [
   http.get(`${API_URL}/v1/projects`, async ({ request }) => {
     await delay(300);
     const url = new URL(request.url);
-    const page = Number(url.searchParams.get('page') || '1');
-    const limit = Number(url.searchParams.get('limit') || '10');
+    const page = Number(url.searchParams.get("page") || "1");
+    const limit = Number(url.searchParams.get("limit") || "10");
 
     return HttpResponse.json({
       success: true,
@@ -68,8 +68,8 @@ export const handlers = [
   http.get(`${API_URL}/v1/articles`, async ({ request }) => {
     await delay(300);
     const url = new URL(request.url);
-    const page = Number(url.searchParams.get('page') || '1');
-    const limit = Number(url.searchParams.get('limit') || '10');
+    const page = Number(url.searchParams.get("page") || "1");
+    const limit = Number(url.searchParams.get("limit") || "10");
 
     return HttpResponse.json({
       success: true,
@@ -116,12 +116,12 @@ export const handlers = [
     return HttpResponse.json({
       success: true,
       data: {
-        id: '1',
+        id: "1",
         ...(body as Record<string, unknown>),
-        status: 'NEW',
+        status: "NEW",
         createdAt: new Date().toISOString(),
       },
-      message: 'Contact form submitted successfully',
+      message: "Contact form submitted successfully",
     });
   }),
 
@@ -133,28 +133,28 @@ export const handlers = [
     return HttpResponse.json({
       success: true,
       data: {
-        id: '1',
+        id: "1",
         ...(body as Record<string, unknown>),
         isConfirmed: false,
         isActive: true,
         createdAt: new Date().toISOString(),
       },
-      message: 'Subscription successful. Please check your email.',
+      message: "Subscription successful. Please check your email.",
     });
   }),
 
   // Auth
   http.post(`${API_URL}/v1/auth/login`, async ({ request }) => {
     await delay(500);
-    const body = await request.json() as { email: string; password: string };
+    const body = (await request.json()) as { email: string; password: string };
 
-    if (body.email === 'admin@example.com' && body.password === 'password') {
+    if (body.email === "admin@example.com" && body.password === "password") {
       return HttpResponse.json({
         success: true,
         data: {
           user: mockUser,
-          accessToken: 'mock-access-token',
-          refreshToken: 'mock-refresh-token',
+          accessToken: "mock-access-token",
+          refreshToken: "mock-refresh-token",
         },
       });
     }
@@ -163,11 +163,11 @@ export const handlers = [
       {
         success: false,
         error: {
-          message: 'Invalid credentials',
-          code: 'INVALID_CREDENTIALS',
+          message: "Invalid credentials",
+          code: "INVALID_CREDENTIALS",
         },
       },
-      { status: 401 }
+      { status: 401 },
     );
   }),
 

@@ -26,14 +26,30 @@ export const experiences: Experience[] = [
     location: "Sandton, ZA",
     startDate: "Jun 2023",
     endDate: "Present",
-    description: "Maintaining and migrating legacy systems to the cloud by developing new service-oriented applications.",
+    description:
+      "Maintaining and migrating legacy systems to the cloud by developing new service-oriented applications.",
     achievements: [
       "Migrated on-premises applications to AWS using EC2 and EKS, improving scalability and reliability",
       "Rewrote monolithic applications into microservices using modern technologies",
       "Analyzed and optimized system performance by applying clean code principles",
       "Investigated and resolved production issues by identifying root causes and implementing fixes",
     ],
-    technologies: [".NET", "ASP.NET", "Java", "Spring Boot", "Python", "MS SQL Server", "DynamoDB", "PostgreSQL", "AWS", "Terraform", "Kubernetes", "ArgoCD", "Kafka", "SQS"],
+    technologies: [
+      ".NET",
+      "ASP.NET",
+      "Java",
+      "Spring Boot",
+      "Python",
+      "MS SQL Server",
+      "DynamoDB",
+      "PostgreSQL",
+      "AWS",
+      "Terraform",
+      "Kubernetes",
+      "ArgoCD",
+      "Kafka",
+      "SQS",
+    ],
   },
   {
     id: "invoke-solutions-dev",
@@ -42,13 +58,25 @@ export const experiences: Experience[] = [
     location: "Pretoria, ZA",
     startDate: "Jul 2022",
     endDate: "Jun 2023",
-    description: "Full-stack development across .NET and PHP ecosystems with Azure DevOps CI/CD workflows.",
+    description:
+      "Full-stack development across .NET and PHP ecosystems with Azure DevOps CI/CD workflows.",
     achievements: [
       "Developed full-stack features using .NET Framework, ASP.NET, and SQL Server",
       "Built and maintained applications with Laravel (PHP) and Vue.js",
       "Managed source control workflows across Git, Bitbucket, and Jenkins pipelines",
     ],
-    technologies: [".NET Framework", "ASP.NET", "SQL Server", "Laravel", "PHP", "Vue.js", "Azure DevOps", "Git", "Bitbucket", "Jenkins"],
+    technologies: [
+      ".NET Framework",
+      "ASP.NET",
+      "SQL Server",
+      "Laravel",
+      "PHP",
+      "Vue.js",
+      "Azure DevOps",
+      "Git",
+      "Bitbucket",
+      "Jenkins",
+    ],
   },
   {
     id: "e4-strategic-dev",
@@ -57,7 +85,8 @@ export const experiences: Experience[] = [
     location: "Johannesburg, ZA",
     startDate: "Nov 2020",
     endDate: "Jun 2022",
-    description: "Maintaining legacy systems and decommissioning them by developing new service-oriented applications.",
+    description:
+      "Maintaining legacy systems and decommissioning them by developing new service-oriented applications.",
     achievements: [
       "Developed new service-oriented applications to replace and decommission legacy systems",
       "Analyzed and improved performance on existing systems using clean code principles",
@@ -72,7 +101,8 @@ export const experiences: Experience[] = [
     location: "Johannesburg, ZA",
     startDate: "Apr 2017",
     endDate: "Nov 2020",
-    description: "Broad responsibilities on the Electronic Sales Platform (ESP) including UI development, design, and implementation.",
+    description:
+      "Broad responsibilities on the Electronic Sales Platform (ESP) including UI development, design, and implementation.",
     achievements: [
       "Involved in all phases of the project lifecycle: planning, analysis, design, implementation, testing, and maintenance",
       "Collaborated closely with team members to plan, design, and develop robust solutions using .NET Framework and ASP.NET",
@@ -87,7 +117,8 @@ export const experiences: Experience[] = [
     location: "Johannesburg, ZA",
     startDate: "Jan 2017",
     endDate: "Mar 2017",
-    description: "Built solutions for mobile payments and beacon technology as part of an intensive development programme.",
+    description:
+      "Built solutions for mobile payments and beacon technology as part of an intensive development programme.",
     achievements: [
       "Awarded Best Developer of the Quarter out of 30 interns",
       "Won Best App Solution of the Quarter for mobile payment and beacon technology projects",

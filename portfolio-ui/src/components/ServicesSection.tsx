@@ -1,10 +1,6 @@
 import { useRef } from "react";
 import { CheckCircle2, ArrowRight } from "lucide-react";
-import {
-  AnimatedBrackets,
-  BranchGraph,
-  CubeMorph,
-} from "@/components/icons/animated";
+import { AnimatedBrackets, BranchGraph, CubeMorph } from "@/components/icons/animated";
 
 import { revealOnScroll, useAnime } from "@/lib/use-anime";
 
@@ -123,8 +119,8 @@ export function ServicesSection() {
             Services
           </h2>
           <p className="section-subtitle mx-auto">
-            Focused freelance engagements across three disciplines — shipped to production,
-            not just delivered as a handover document.
+            Focused freelance engagements across three disciplines — shipped to production, not just
+            delivered as a handover document.
           </p>
         </div>
 
@@ -169,7 +165,10 @@ export function ServicesSection() {
                 {/* Capabilities list */}
                 <ul className="space-y-2 flex-1">
                   {service.capabilities.map((cap) => (
-                    <li key={cap} className="flex items-start gap-2.5 text-sm text-muted-foreground">
+                    <li
+                      key={cap}
+                      className="flex items-start gap-2.5 text-sm text-muted-foreground"
+                    >
                       <CheckCircle2
                         className="w-4 h-4 mt-0.5 shrink-0 text-primary"
                         aria-hidden="true"
