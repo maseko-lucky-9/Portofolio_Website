@@ -1,0 +1,25 @@
+# ==============================================
+# ConfigMap Patch - Development
+# ==============================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+data:
+  LOG_LEVEL: "debug"
+  LOG_FORMAT: "pretty"
+  DEMO_MODE: "true"
+
+  # Relaxed limits so experimenting does not trip rate limiting
+  RATE_LIMIT_MAX_ANONYMOUS: "500"
+  RATE_LIMIT_MAX_AUTHENTICATED: "5000"
+
+  # The dev frontend is served from its own host. Same-origin calls go through
+  # the nginx /api/ proxy inside the frontend pod, so this only matters for
+  # direct browser calls to api.dev.portfolio.homelab.
+  CORS_ORIGIN: "http://dev.portfolio.homelab,https://dev.portfolio.homelab"
+
+  ENABLE_CODE_EXECUTION: "false"
+  ENABLE_WEBSOCKETS: "true"
+  ENABLE_METRICS: "true"
+  ENABLE_TRACING: "false"

@@ -66,7 +66,16 @@ COPY --from=shared-builder /monorepo/shared ./shared
 # Set API as working directory
 WORKDIR /monorepo/portfolio-api
 
-# Copy package files and install production dependencies only
+# Copy package files and install production dependencies only.
+#
+# NOTE: `prisma` (the CLI) is deliberately a runtime dependency, not a
+# devDependency — this --omit=dev prunes devDependencies, and the
+# migrate-database initContainer (k8s/base/deployment.yaml) runs
+# `prisma migrate deploy` from this image. As a devDependency the CLI was
+# pruned here, so the initContainer died with `prisma: not found` and a fresh
+# database never received its schema. Do not "tidy" it back into
+# devDependencies. Prisma documents this exact workaround for environments
+# that prune dev dependencies.
 COPY portfolio-api/package*.json ./
 # Using npm install instead of npm ci — lock files are not committed
 RUN npm install --omit=dev && npm cache clean --force

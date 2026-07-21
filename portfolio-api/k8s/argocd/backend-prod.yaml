@@ -25,11 +25,12 @@ spec:
     namespace: prod
   
   syncPolicy:
-    # Manual sync for production
-    automated:
-      prune: false
-      selfHeal: false
-      allowEmpty: false
+    # FROZEN — genuinely manual now. The comment below used to say "Manual sync
+    # for production" while an `automated:` block sat right under it: with
+    # `automated` present, ArgoCD auto-syncs on every NEW GIT REVISION, and
+    # prune/selfHeal:false only suppress drift-triggered syncs. So every push to
+    # `main` still re-applied the prod overlay. Retiring backend-cd.yml stopped
+    # the image mirror but NOT this. Automated sync is now removed.
     syncOptions:
     - CreateNamespace=true
     - PrunePropagationPolicy=foreground

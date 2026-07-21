@@ -1,0 +1,109 @@
+# ==============================================
+# Kustomization - Backend API + data layer, dev
+# ==============================================
+# Written in modern kustomize syntax (`resources:` / `patches:`). The prod
+# overlay still uses `bases:` and `patchesStrategicMerge:`, which kustomize v5
+# accepts with a deprecation warning but v6 removes — new files should not
+# inherit that.
+#
+# NOTE the deliberate absence of `namePrefix`. Prod uses `prod-`, but the
+# namespace already isolates dev, and dropping the prefix keeps the Service
+# named `backend-api` — which is what portfolio-ui/nginx.conf proxies to and
+# what the postgres/redis NetworkPolicies select on.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: dev
+
+labels:
+  - pairs:
+      environment: dev
+      app.kubernetes.io/instance: dev
+    includeSelectors: false
+    includeTemplates: true
+
+resources:
+  - namespace.yaml
+  - default-deny.yaml
+  # Application
+  - ../../base
+  # Data layer — prod gets these from a SEPARATE ArgoCD Application
+  # (backend-database-apps.yaml), so an overlay that only referenced ../../base
+  # would produce an API with no database to talk to.
+  - ../../base/database
+  - ../../base/redis
+  # ESO plumbing — base/vault is referenced by no overlay; prod has it applied
+  # out-of-band. dev declares it so the stack is self-contained.
+  - ../../base/vault
+  # Backend ExternalSecret (absent from base — see the file header)
+  - external-secret.yaml
+
+images:
+  - name: ghcr.io/maseko-lucky-9/portofolio_website/backend
+    newName: localhost:32000/portfolio-backend
+    newTag: dev
+
+replicas:
+  - name: backend-api
+    count: 1
+
+patches:
+  - path: configmap-patch.yaml
+  - path: deployment-patch.yaml
+  - path: hpa-patch.yaml
+  - path: ingress-patch.yaml
+  - path: secret-store-patch.yaml
+  - path: data-layer-secrets-patch.yaml
+
+  # Postgres PVC 10Gi -> 5Gi.
+  # Must be a JSON6902 op: `volumeClaimTemplates` is a list with no patch merge
+  # key, so a strategic-merge patch REPLACES the whole list and drops
+  # accessModes/storageClassName, which the API server then rejects with
+  # `spec.volumeClaimTemplates[0].spec.accessModes: Required value`.
+  # (StatefulSet volumeClaimTemplates are immutable after creation — resizing
+  # later needs the StatefulSet recreated.)
+  - target:
+      group: apps
+      version: v1
+      kind: StatefulSet
+      name: postgres
+    patch: |-
+      - op: replace
+        path: /spec/volumeClaimTemplates/0/spec/resources/requests/storage
+        value: 5Gi
+
+  # Redis PVC 5Gi -> 1Gi
+  - target:
+      version: v1
+      kind: PersistentVolumeClaim
+      name: redis-data-pvc
+    patch: |-
+      - op: replace
+        path: /spec/resources/requests/storage
+        value: 1Gi
+
+  # Drop the nightly pg_dump from dev. base/database pulls in backup-cronjob.yaml,
+  # which brings a CronJob on the SAME `0 2 * * *` schedule as prod plus its own
+  # 20Gi PVC. On a single-node hostpath disk (which does not enforce PVC size)
+  # that is the largest single claim in the stack, for backups of a throwaway
+  # database. Removing both keeps dev at 6Gi instead of 26Gi.
+  - target:
+      group: batch
+      kind: CronJob
+      name: postgres-backup
+    patch: |-
+      $patch: delete
+      apiVersion: batch/v1
+      kind: CronJob
+      metadata:
+        name: postgres-backup
+  - target:
+      version: v1
+      kind: PersistentVolumeClaim
+      name: postgres-backup-pvc
+    patch: |-
+      $patch: delete
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        name: postgres-backup-pvc

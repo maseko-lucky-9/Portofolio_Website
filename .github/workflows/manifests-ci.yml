@@ -1,0 +1,140 @@
+# ==============================================
+# Manifests CI — kustomize overlays
+# ==============================================
+# Every overlay in the repo must render, and the dev overlay must not drift into
+# production territory. Without this, a broken overlay is only discovered when a
+# deploy fails on the homelab.
+#
+# The checks below are not hypothetical — each one corresponds to a defect that
+# was actually present:
+#   - a NetworkPolicy peer selector matching no pod (deprecated `commonLabels`
+#     injects into selector fields, so `{app: backend-api}` silently became
+#     `{app: backend-api, app.kubernetes.io/name: postgres}`);
+#   - a dev ExternalSecret still resolving the PRODUCTION Vault path;
+#   - a resource rendering into a namespace other than `dev`.
+# ==============================================
+
+name: Manifests CI
+
+on:
+  push:
+    branches: [main, homelab]
+    paths:
+      - 'portfolio-api/k8s/**'
+      - 'portfolio-ui/k8s/**'
+      - '.github/workflows/manifests-ci.yml'
+  pull_request:
+    paths:
+      - 'portfolio-api/k8s/**'
+      - 'portfolio-ui/k8s/**'
+      - '.github/workflows/manifests-ci.yml'
+
+permissions:
+  contents: read
+
+env:
+  KUSTOMIZE_VERSION: v5.5.0
+
+jobs:
+  kustomize:
+    name: Render & validate overlays
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Install kustomize
+        run: |
+          curl -sSLo /tmp/k.tar.gz \
+            "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2F${KUSTOMIZE_VERSION}/kustomize_${KUSTOMIZE_VERSION}_linux_amd64.tar.gz"
+          tar -xzf /tmp/k.tar.gz -C /tmp && sudo mv /tmp/kustomize /usr/local/bin/
+
+      - name: Every overlay renders
+        run: |
+          set -e
+          for d in portfolio-api/k8s/base portfolio-api/k8s/base/database \
+                   portfolio-api/k8s/base/redis portfolio-api/k8s/base/vault \
+                   portfolio-api/k8s/overlays/prod portfolio-api/k8s/overlays/dev \
+                   portfolio-ui/k8s/base portfolio-ui/k8s/overlays/prod \
+                   portfolio-ui/k8s/overlays/dev; do
+            kustomize build "$d" > /dev/null || { echo "::error::kustomize build failed: $d"; exit 1; }
+            echo "  OK $d"
+          done
+
+      - name: Dev bundle invariants
+        run: |
+          set -e
+          { kustomize build portfolio-api/k8s/overlays/dev; echo "---"; \
+            kustomize build portfolio-ui/k8s/overlays/dev; } > dev-stack.yaml
+
+          if grep -q 'portfolio/live' dev-stack.yaml; then
+            echo "::error::dev overlay resolves the PRODUCTION Vault path portfolio/live"; exit 1
+          fi
+          if grep -E '^\s+namespace:' dev-stack.yaml | grep -qv 'namespace: dev'; then
+            echo "::error::dev overlay renders into a namespace other than dev"
+            grep -E '^\s+namespace:' dev-stack.yaml | grep -v 'namespace: dev'; exit 1
+          fi
+          echo "dev bundle: $(grep -c '^kind:' dev-stack.yaml) resources, invariants hold"
+
+      - name: Selectors are not polluted, Services have endpoints
+        run: |
+          python3 - <<'PY'
+          import subprocess, sys, yaml
+
+          def render(path):
+              return [d for d in yaml.safe_load_all(
+                  subprocess.run(["kustomize", "build", path],
+                                 capture_output=True, text=True, check=True).stdout) if d]
+
+          bad = []
+          for bundle in (["portfolio-api/k8s/overlays/dev", "portfolio-ui/k8s/overlays/dev"],
+                         ["portfolio-api/k8s/overlays/prod", "portfolio-ui/k8s/overlays/prod"]):
+              docs = [d for p in bundle for d in render(p)]
+
+              pods = {}
+              for d in docs:
+                  k = d.get("kind")
+                  if k in ("Deployment", "StatefulSet"):
+                      pods[d["metadata"]["name"]] = d["spec"]["template"]["metadata"]["labels"]
+                  elif k == "CronJob":
+                      pods[d["metadata"]["name"]] = \
+                          d["spec"]["jobTemplate"]["spec"]["template"]["metadata"]["labels"]
+
+              for d in docs:
+                  name = d["metadata"]["name"]
+
+                  # (1) Selector pollution. Peers in this repo are always keyed on
+                  # the plain `app` label. The deprecated `commonLabels` injects
+                  # into SELECTOR fields, so a peer silently grows an
+                  # `app.kubernetes.io/*` key belonging to the OTHER component and
+                  # then matches nothing. That is the defect this guards.
+                  #
+                  # Deliberately not "every peer must resolve inside the bundle":
+                  # overlays are legitimately partial (prod gets its data layer
+                  # from a separate ArgoCD Application, and dev drops the backup
+                  # CronJob), so that rule produces false failures.
+                  if d.get("kind") == "NetworkPolicy":
+                      for direction, key in (("ingress", "from"), ("egress", "to")):
+                          for rule in d["spec"].get(direction, []) or []:
+                              for peer in rule.get(key, []) or []:
+                                  sel = (peer.get("podSelector") or {}).get("matchLabels") or {}
+                                  polluted = [k for k in sel if k.startswith("app.kubernetes.io/")]
+                                  if polluted:
+                                      bad.append(
+                                          f"NetworkPolicy/{name} {direction} peer {sel} carries "
+                                          f"{polluted} — selector pollution, matches nothing. "
+                                          f"Use `labels:` with includeSelectors:false, not `commonLabels`.")
+
+                  # (2) A Service and its workload always live in the same overlay,
+                  # so this one CAN be required to resolve.
+                  if d.get("kind") == "Service" and d["spec"].get("selector"):
+                      sel = d["spec"]["selector"]
+                      if not any(all(l.get(k) == v for k, v in sel.items()) for l in pods.values()):
+                          bad.append(f"Service/{name} selector {sel} matches no workload (no endpoints)")
+
+          for b in bad:
+              print(f"::error::{b}")
+          print("selectors clean" if not bad else f"{len(bad)} problem(s)")
+          sys.exit(1 if bad else 0)
+          PY

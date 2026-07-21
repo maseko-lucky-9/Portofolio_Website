@@ -23,7 +23,13 @@ spec:
     namespace: prod
   
   syncPolicy:
-    # Manual sync for production (no automated)
+    # Manual sync for production (no automated) — correct as-is, and FROZEN:
+    # homelab is dev-only now, so this app should not be synced at all.
+    #
+    # DANGER: the `resources-finalizer.argocd.argoproj.io` above means deleting
+    # this Application CASCADE-DELETES the live resources it manages, including
+    # the prod Postgres PVC. Never `kubectl delete application frontend-prod`.
+    # To retire prod: back up the PVC, remove the finalizer, then delete.
     syncOptions:
       - CreateNamespace=true
       - PrunePropagationPolicy=foreground
