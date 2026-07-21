@@ -77,7 +77,7 @@ export function CodeDemoSection() {
               }`}
               style={{
                 ...(activeExample.id === example.id
-                  ? { background: "oklch(var(--primary))", boxShadow: "var(--shadow-sm)" }
+                  ? { background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }
                   : { background: "oklch(var(--card))", borderColor: "oklch(var(--border))" }),
                 transition: "all 200ms cubic-bezier(0.16, 1, 0.3, 1)",
               }}
@@ -121,9 +121,13 @@ export function CodeDemoSection() {
                   onClick={handleRunCode}
                   disabled={isRunning}
                   className="flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-medium text-secondary-foreground hover:opacity-90 disabled:opacity-50 transition-all"
+                  // Emerald gradient. This previously painted white
+                  // (--secondary-foreground) on oklch(var(--foreground)) —
+                  // near-white in dark mode, so the label measured 1.12:1 and
+                  // was invisible. The green fill + theme-aware label fixes it.
                   style={{
-                    background: "oklch(var(--foreground))",
-                    boxShadow: "var(--shadow-sm)",
+                    background: "var(--gradient-secondary)",
+                    boxShadow: "var(--shadow-glow-secondary)",
                   }}
                 >
                   <Play className="w-4 h-4" />
