@@ -63,9 +63,11 @@ function ExperienceRow({
         <ul className="space-y-2">
           {exp.achievements.map((achievement, i) => (
             <li key={i} className="flex items-start gap-2.5 text-sm">
+              {/* Emerald, matching the hero availability badge. Step number,
+                  card bar and tech pill stay indigo. */}
               <span
                 className="mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0"
-                style={{ background: "oklch(var(--primary))" }}
+                style={{ background: "oklch(var(--secondary))" }}
               />
               <span className="text-foreground/85">{achievement}</span>
             </li>

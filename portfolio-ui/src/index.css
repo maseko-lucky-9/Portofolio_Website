@@ -49,6 +49,13 @@
     --secondary: 0.495 0.103 162.1;
     --secondary-foreground: 1 0 90;
 
+    /* Skills category accent. Frontend reuses --primary and backend reuses
+       --secondary (so the Skills backend green matches the hero availability
+       pill and the Experience bullets exactly); only the devops purple needs
+       its own token. Pulled to L 0.500 so an --background label clears AA at
+       6.23:1 — the 4aaa2de original (L 0.636) managed only 3.75:1. */
+    --cat-devops: 0.5 0.2 313;
+
     /* Opacity scale. */
     --opacity-subtle: 0.06;
     --opacity-soft: 0.3;
@@ -160,7 +167,13 @@
     --primary-glow: 0.64 0.18 273.2;
 
     --secondary: 0.755 0.157 162.1;
-    --secondary-foreground: 1 0 90;
+    /* Ink, not white: dark --secondary is a BRIGHT mint (L 0.755), so a white
+       label on it measures 2.04:1. Against --background it is 9.65:1. Light
+       mode keeps white because its --secondary is dark (L 0.495 → 5.81:1). */
+    --secondary-foreground: 0.148 0.014 273.5;
+
+    /* Skills category accent — see the :root note. hsl(280 65% 62%) converted. */
+    --cat-devops: 0.636 0.195 313;
 
     --opacity-subtle: 0.06;
     --opacity-soft: 0.3;

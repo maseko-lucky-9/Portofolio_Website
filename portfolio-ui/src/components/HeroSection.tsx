@@ -326,13 +326,17 @@ export function HeroSection() {
                   className="absolute inset-[5px] z-10 w-[calc(100%-10px)] h-[calc(100%-10px)] rounded-full object-cover"
                 />
               </picture>
-              {/* "Open to work" pill — gradient chip, y-bobble loop. */}
+              {/* "Open to work" pill — emerald gradient chip, y-bobble loop.
+                  Same green as the availability badge above. --secondary-
+                  foreground is theme-aware, so the label is ink on the bright
+                  dark-mode mint (9.65:1) and white on the darker light-mode
+                  green (5.81:1). */}
               <div
                 ref={pillRef}
-                className="absolute -bottom-3 -right-3 z-20 px-3 py-1.5 rounded-xl text-xs font-semibold text-primary-foreground"
+                className="absolute -bottom-3 -right-3 z-20 px-3 py-1.5 rounded-xl text-xs font-semibold text-secondary-foreground"
                 style={{
-                  background: "var(--gradient-primary)",
-                  boxShadow: "var(--shadow-glow)",
+                  background: "var(--gradient-secondary)",
+                  boxShadow: "var(--shadow-glow-secondary)",
                   willChange: heroInView ? "transform" : "auto",
                 }}
               >
