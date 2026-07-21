@@ -44,6 +44,11 @@ permissions:
 jobs:
   deploy:
     name: Build & Deploy
+    # This file also exists in the homelab dev repo (the two repos share git
+    # history, so every promotion carries it across). Without this guard, a
+    # `main` branch appearing in that repo would deploy it to PRODUCTION.
+    # homelab-cd.yml carries the mirror-image guard.
+    if: github.repository == 'maseko-lucky-9/Portofolio_Website'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
