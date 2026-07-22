@@ -147,7 +147,7 @@ docker compose -f docker-compose.dev.yml up -d
 docker compose -f docker-compose.dev.yml ps
 
 # View backend logs (includes Prisma migration output)
-docker compose -f docker-compose.dev.yml logs backend -f
+docker compose -f docker-compose.dev.yml logs backend-api -f
 
 # Teardown
 docker compose -f docker-compose.dev.yml down -v

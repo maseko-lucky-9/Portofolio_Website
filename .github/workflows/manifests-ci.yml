@@ -71,9 +71,10 @@ jobs:
           if grep -q 'portfolio/live' dev-stack.yaml; then
             echo "::error::dev overlay resolves the PRODUCTION Vault path portfolio/live"; exit 1
           fi
-          if grep -E '^\s+namespace:' dev-stack.yaml | grep -qv 'namespace: dev'; then
+          # Anchored ($) so `dev2`/`development` cannot pass as a substring.
+          if grep -E '^\s+namespace:' dev-stack.yaml | grep -qvE 'namespace: dev$'; then
             echo "::error::dev overlay renders into a namespace other than dev"
-            grep -E '^\s+namespace:' dev-stack.yaml | grep -v 'namespace: dev'; exit 1
+            grep -E '^\s+namespace:' dev-stack.yaml | grep -vE 'namespace: dev$'; exit 1
           fi
           echo "dev bundle: $(grep -c '^kind:' dev-stack.yaml) resources, invariants hold"
 

@@ -97,6 +97,14 @@ jobs:
             echo "::error::built bundle ships useApi=true, but this deploy has no backend"
             exit 1
           fi
+          # Fail-CLOSED companion: the healthy shape must be PRESENT. Without
+          # this, a minifier change that stops emitting the pattern above would
+          # silently defeat the tripwire forever and the original silent-405
+          # bug could ship under green CI.
+          if ! grep -qE 'useApi:[A-Za-z_$][A-Za-z0-9_$]*\("false"' dist/assets/*.js; then
+            echo "::error::expected useApi=(\"false\") shape not found in bundle — minifier output changed; update both greps in this step"
+            exit 1
+          fi
           echo "OK — bundle is backend-free"
 
       - name: Deploy to Cloudflare Workers

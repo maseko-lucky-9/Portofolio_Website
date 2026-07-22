@@ -24,11 +24,25 @@
 # holds credentials that reach the homelab).
 #
 # Required repository secrets — mint NEW ones, do NOT reuse the production
-# repo's HOMELAB_SSH_KEY. That key is an unrestricted shell for a user in the
-# `docker` group (root-equivalent) with kubectl access to the prod namespace.
-#   HOMELAB_DEV_SSH_KEY        - key for a dev-only user, constrained in
-#                                authorized_keys with
-#                                restrict,from="100.64.0.0/10",command="/usr/local/bin/deploy-dev.sh"
+# repo's HOMELAB_SSH_KEY. That key is an unrestricted shell for svc-ai-agent
+# with kubectl access to the prod namespace.
+#   HOMELAB_DEV_SSH_KEY        - key for a dedicated dev-only user, constrained
+#                                in authorized_keys with
+#                                restrict,from="100.64.0.0/10"
+#                                (no PTY/forwarding, Tailscale-CGNAT source only).
+#                                A forced command= is deliberately NOT specified:
+#                                sshd substitutes it for EVERY client command,
+#                                which would break both the scp upload and the
+#                                inline script below. What actually bounds this
+#                                key: the dedicated user's kubeconfig is
+#                                RoleBound to the dev namespace only, and the
+#                                tag:ci-dev Tailscale ACL reaches only this host.
+#                                The user DOES need docker access for the mirror
+#                                step (a real trade-off — docker group is
+#                                root-equivalent on the host). Follow-up that
+#                                removes it: pull straight from GHCR in-cluster
+#                                (public packages or an imagePullSecret) and
+#                                delete the mirror step entirely.
 #   TS_DEV_OAUTH_CLIENT_ID     - Tailscale OAuth client tagged tag:ci-dev
 #   TS_DEV_OAUTH_SECRET
 #   CF_API_TOKEN / CF_ACCOUNT_ID - for the Cloudflare preview upload
@@ -122,7 +136,7 @@ jobs:
           severity: CRITICAL,HIGH
 
       - name: Upload scan results
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@48ab28a6f5dbc2a99bf1e0131198dd8f1df78169 # v3.28.0
         if: always()
         with:
           sarif_file: trivy-backend.sarif
@@ -162,10 +176,12 @@ jobs:
             kustomize build portfolio-ui/k8s/overlays/dev
           } > dev-stack.yaml
           test -s dev-stack.yaml || { echo "::error::empty render"; exit 1; }
-          # The dev overlays must never emit a resource aimed at another namespace.
-          if grep -E '^\s+namespace:' dev-stack.yaml | grep -qv 'namespace: dev'; then
+          # The dev overlays must never emit a resource aimed at another
+          # namespace. Anchored ($) so `dev2`/`development` cannot slip through
+          # as a substring match.
+          if grep -E '^\s+namespace:' dev-stack.yaml | grep -qvE 'namespace: dev$'; then
             echo "::error::rendered bundle references a namespace other than dev"
-            grep -E '^\s+namespace:' dev-stack.yaml | grep -v 'namespace: dev'
+            grep -E '^\s+namespace:' dev-stack.yaml | grep -vE 'namespace: dev$'
             exit 1
           fi
           # Guard the Vault path: dev must never resolve production secrets.
@@ -194,6 +210,10 @@ jobs:
     needs: render
     permissions:
       contents: read
+      # GHCR packages created by CI default to PRIVATE even in a public repo.
+      # The GITHUB_TOKEN handed to the homelab for `docker pull` therefore needs
+      # packages:read, or the very first mirror step 401s.
+      packages: read
     environment:
       name: dev
       url: https://dev.portfolio.homelab
@@ -249,7 +269,12 @@ jobs:
             # 2. Mirror both images into the in-cluster registry. Source paths
             #    come from ${{ github.repository }}, so this follows the repo
             #    rather than pointing at production.
+            #    The token is consumed by `docker login` and immediately unset;
+            #    the trap guarantees the stored credential is removed from
+            #    ~/.docker/config.json even if a later step aborts the script.
+            trap 'docker logout ghcr.io >/dev/null 2>&1 || true' EXIT
             echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
+            unset GHCR_TOKEN
             docker pull "$SRC_BACKEND"
             docker tag  "$SRC_BACKEND"  localhost:32000/portfolio-backend:dev
             docker push localhost:32000/portfolio-backend:dev
@@ -278,9 +303,14 @@ jobs:
 
             # 6. Smoke test. /ready touches the database; /live is a hardcoded
             #    literal and would pass against a completely broken stack.
+            #    The API image is node:20-alpine with NO curl (its own
+            #    HEALTHCHECK uses `node -e` for the same reason) — an exec'd
+            #    curl here fails deterministically after a successful rollout,
+            #    and with `set -e` the cleanup below would never run.
             kubectl exec -n "$NS" deployment/backend-api -- \
-              curl -sf http://localhost:3000/api/v1/health/ready
+              node -e "require('http').get('http://localhost:3000/api/v1/health/ready',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"
             # Proves the frontend nginx proxy AND the NetworkPolicy path.
+            # (curl exists in the frontend image — its Dockerfile installs it.)
             kubectl exec -n "$NS" deployment/frontend -- \
               curl -sf http://localhost:8080/api/v1/health/ready
             echo "smoke tests passed"
@@ -312,7 +342,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
         with:
           node-version: '20.x'
 
@@ -328,6 +358,19 @@ jobs:
         env:
           VITE_USE_API: 'false'
           VITE_ENABLE_ANALYTICS: 'false'
+
+      # Same two tripwires as cloudflare-cd.yml — this job builds the identical
+      # production bundle, so it must satisfy the identical assertions.
+      - name: Assert preview bundle expects no backend
+        working-directory: portfolio-ui
+        run: |
+          if grep -qE 'useApi:[A-Za-z_$][A-Za-z0-9_$]*\("true"' dist/assets/*.js; then
+            echo "::error::preview bundle ships useApi=true"; exit 1
+          fi
+          if ! grep -qE 'useApi:[A-Za-z_$][A-Za-z0-9_$]*\("false"' dist/assets/*.js; then
+            echo "::error::expected useApi=(\"false\") shape absent — minifier output changed"; exit 1
+          fi
+          echo "OK — preview bundle is backend-free"
 
       # `versions upload` publishes a preview URL WITHOUT promoting it to the
       # live deployment.

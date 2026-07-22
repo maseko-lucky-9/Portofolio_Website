@@ -96,9 +96,23 @@ resolvable, which is why the mailto path exists.
 an unrestricted shell for a user in the `docker` group (root-equivalent) with `kubectl exec`
 into the prod namespace.
 
-- `HOMELAB_DEV_SSH_KEY` — dev-only user, constrained in `authorized_keys`:
-  `restrict,from="100.64.0.0/10",command="/usr/local/bin/deploy-dev.sh"`, not in the `docker`
-  group, kubeconfig RoleBound to `dev` only
+- `HOMELAB_DEV_SSH_KEY` — key for a **dedicated dev-only user** (`svc-deploy-dev`), constrained
+  in `authorized_keys` with `restrict,from="100.64.0.0/10"` (kills PTY/agent/port forwarding,
+  accepts only Tailscale-CGNAT sources). Two honest caveats, because earlier drafts of this
+  doc overclaimed:
+  - **No forced `command=`.** sshd substitutes a forced command for *every* client command,
+    which would break both the scp upload and the inline deploy script this workflow sends.
+    A forced-command dispatcher only becomes possible once the deploy logic moves server-side
+    (see follow-up below).
+  - **The user needs docker access** — the mirror step runs `docker pull/tag/push`. Docker
+    group membership is root-equivalent on the host; the boundaries that actually contain
+    this key are the RoleBound-to-`dev`-only kubeconfig and the `tag:ci-dev` Tailscale ACL
+    (reach: this host only).
+  - *Follow-up that removes both caveats:* let the cluster pull images straight from GHCR
+    (make the two packages public, or add an imagePullSecret in `dev`) and delete the mirror
+    step. The SSH script then shrinks to `sha256sum + kubectl`, needs no docker group, and
+    becomes simple enough for a forced-command dispatcher. This also lets images be pinned by
+    digest instead of the mutable `:dev` tag.
 - `TS_DEV_OAUTH_CLIENT_ID` / `TS_DEV_OAUTH_SECRET` — Tailscale OAuth client tagged `tag:ci-dev`
 - `CF_API_TOKEN` / `CF_ACCOUNT_ID` — for the preview upload
 
@@ -113,7 +127,7 @@ path "kv/data/portfolio/dev"     { capabilities = ["read"] }
 path "kv/metadata/portfolio/dev" { capabilities = ["read", "list"] }
 ```
 
-All 13 properties must exist at `kv/portfolio/dev` — External Secrets Operator fails the
+All 15 properties must exist at `kv/portfolio/dev` — External Secrets Operator fails the
 *entire* ExternalSecret if one `remoteRef.property` is missing:
 `database-url`, `redis-url`, `redis-password`, `jwt-secret`, `jwt-access-expiry`,
 `jwt-refresh-expiry`, `postgres-username`, `postgres-password`, `postgres-root-password`,

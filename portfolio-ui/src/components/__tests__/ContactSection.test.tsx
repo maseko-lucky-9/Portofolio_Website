@@ -101,8 +101,17 @@ describe("ContactSection", () => {
       );
       await user.click(screen.getByText("Send Message"));
 
-      await waitFor(() => expect(stub.href).toMatch(/^mailto:/));
-      expect(stub.href).toContain(encodeURIComponent("Contract role"));
+      // Recipient is asserted as a HARDCODED literal, deliberately not
+      // personalData.email: src/data/personal.ts is hand-edited template data
+      // ("// EDIT: Your email"), and a stale/wrong address there would send
+      // every production lead's draft to the wrong mailbox while a
+      // data-derived assertion stayed green — the exact silent-lead-loss this
+      // fix exists to prevent, one file over.
+      await waitFor(() => expect(stub.href.startsWith("mailto:ltmaseko7@gmail.com?")).toBe(true));
+      // Anchor the param NAMES too: bare toContain() would still pass if
+      // subject= and body= were swapped (the body embeds the sender email).
+      expect(stub.href).toContain(`subject=${encodeURIComponent("Contract role")}`);
+      expect(stub.href).toContain("&body=");
       expect(stub.href).toContain(encodeURIComponent("ada@example.com"));
       // the lead must never be handed to a backend that does not exist
       expect(mutateSpy).not.toHaveBeenCalled();
