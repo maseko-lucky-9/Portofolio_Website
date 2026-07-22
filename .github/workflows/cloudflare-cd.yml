@@ -44,6 +44,11 @@ permissions:
 jobs:
   deploy:
     name: Build & Deploy
+    # This file also exists in the homelab dev repo (the two repos share git
+    # history, so every promotion carries it across). Without this guard, a
+    # `main` branch appearing in that repo would deploy it to PRODUCTION.
+    # homelab-cd.yml carries the mirror-image guard.
+    if: github.repository == 'maseko-lucky-9/Portofolio_Website'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -63,6 +68,11 @@ jobs:
       - name: Build portfolio-ui
         run: npm run build --workspace=portfolio-ui
         env:
+          # This deploy has NO backend — the API lives on the homelab only.
+          # VITE_USE_API must stay 'false' so the data hooks fall back to the
+          # static content in src/data and the contact form uses its mailto
+          # path instead of POSTing into a 405. See the assertion step below.
+          VITE_USE_API: 'false'
           VITE_API_URL: ${{ vars.VITE_API_URL }}
           VITE_ENABLE_ANALYTICS: ${{ vars.VITE_ENABLE_ANALYTICS || 'false' }}
 
@@ -70,6 +80,32 @@ jobs:
         run: |
           test -f portfolio-ui/dist/index.html || (echo "::error::dist/index.html missing" && exit 1)
           du -sh portfolio-ui/dist/assets/*.js | sort -h | tail -5
+
+      - name: Assert bundle expects no backend
+        working-directory: portfolio-ui
+        run: |
+          # A tracked .env.production (homelab-shaped: VITE_USE_API=true,
+          # VITE_API_URL=/api) used to leak into this bundle, because `vite build`
+          # loads that file on EVERY production build. Result: the contact form
+          # POSTed to a static host, got a bare 405, and silently dropped every
+          # message. Two tripwires so it cannot come back.
+          if [ -f .env.production ]; then
+            echo "::error::portfolio-ui/.env.production exists — vite build will load it and override the env: block above"
+            exit 1
+          fi
+          if grep -qE 'useApi:[A-Za-z_$][A-Za-z0-9_$]*\("true"' dist/assets/*.js; then
+            echo "::error::built bundle ships useApi=true, but this deploy has no backend"
+            exit 1
+          fi
+          # Fail-CLOSED companion: the healthy shape must be PRESENT. Without
+          # this, a minifier change that stops emitting the pattern above would
+          # silently defeat the tripwire forever and the original silent-405
+          # bug could ship under green CI.
+          if ! grep -qE 'useApi:[A-Za-z_$][A-Za-z0-9_$]*\("false"' dist/assets/*.js; then
+            echo "::error::expected useApi=(\"false\") shape not found in bundle — minifier output changed; update both greps in this step"
+            exit 1
+          fi
+          echo "OK — bundle is backend-free"
 
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3

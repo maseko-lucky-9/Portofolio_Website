@@ -1,0 +1,44 @@
+# ==============================================
+# NetworkPolicy - PostgreSQL
+# ==============================================
+# Postgres previously had NO NetworkPolicy at all, in any namespace. Since a
+# pod with no policy selecting it is default-allow, ANY pod in the cluster —
+# including an ad-hoc `kubectl run` in another namespace — could open a
+# connection to port 5432. That became concrete once a second (dev) namespace
+# started running its own data layer alongside prod.
+#
+# podSelector peers are evaluated within this policy's own namespace, so this
+# permits only the same-namespace backend API. Cross-namespace access (dev ->
+# prod) is denied because a bare podSelector never matches a pod in another
+# namespace.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: postgres
+  labels:
+    app: postgres
+    component: database
+    tier: data
+spec:
+  podSelector:
+    matchLabels:
+      app: postgres
+  policyTypes:
+    - Ingress
+  ingress:
+    # Only the backend API, same namespace, on the Postgres port.
+    - from:
+        - podSelector:
+            matchLabels:
+              app: backend-api
+      ports:
+        - protocol: TCP
+          port: 5432
+    # The scheduled pg_dump CronJob (backup-cronjob.yaml).
+    - from:
+        - podSelector:
+            matchLabels:
+              app: postgres-backup
+      ports:
+        - protocol: TCP
+          port: 5432

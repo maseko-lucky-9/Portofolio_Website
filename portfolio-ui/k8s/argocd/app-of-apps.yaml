@@ -22,7 +22,15 @@ spec:
     server: https://kubernetes.default.svc
     namespace: argocd
   
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
+  # FROZEN — homelab is a dev-only environment; the `prod` namespace no longer
+  # receives deploys. Automated sync is OFF deliberately. Do not re-enable
+  # without reading the warning below.
+  #
+  # DANGER: this Application manages `path: portfolio-ui/k8s/argocd`, and
+  # `frontend-prod` (application-prod.yaml) carries
+  # `resources-finalizer.argocd.argoproj.io`. With `prune: true` here, DELETING
+  # OR RENAMING an Application file in that directory made ArgoCD prune the
+  # child, whose finalizer then cascade-deleted the live resources — including
+  # the prod Postgres PVC. That is a data-loss path triggered by an ordinary
+  # git refactor, with nobody typing `kubectl delete`. Pruning is now off.
+  syncPolicy: {}

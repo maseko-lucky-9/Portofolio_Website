@@ -14,6 +14,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { personalData } from "@/data/personal";
+import { env } from "@/config/env";
 import { useContactForm } from "@/hooks/use-contact";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -186,6 +187,25 @@ export function ContactSection() {
         }
       });
       setErrors(fieldErrors);
+      return;
+    }
+
+    // ponytail: the Cloudflare production deploy has no backend, so POSTing
+    // here returned a bare 405 and silently dropped the message. With no API,
+    // hand the draft to the visitor's own mail client instead — a lead that
+    // needs one extra click beats a lead that vanishes. Upgrade path: once
+    // a domain is onboarded to Cloudflare Email Sending, add a send_email
+    // binding + route in src/worker.ts and drop this branch.
+    if (!env.useApi) {
+      const body = `${result.data.message}\n\n— ${result.data.name} <${result.data.email}>`;
+      window.location.href =
+        `mailto:${personalData.email}` +
+        `?subject=${encodeURIComponent(result.data.subject)}` +
+        `&body=${encodeURIComponent(body)}`;
+      setIsSubmitted(true);
+      setFormData({ name: "", email: "", subject: "", message: "" });
+      setErrors({});
+      setTimeout(() => setIsSubmitted(false), 5000);
       return;
     }
 
@@ -385,9 +405,13 @@ export function ContactSection() {
                   >
                     <CheckCircle data-anime="success-icon" className="w-8 h-8 text-secondary" />
                   </div>
-                  <h4 className="text-lg font-bold mb-2">Message Sent!</h4>
+                  <h4 className="text-lg font-bold mb-2">
+                    {env.useApi ? "Message Sent!" : "Your email is ready"}
+                  </h4>
                   <p className="text-muted-foreground">
-                    Thanks for reaching out. I&apos;ll get back to you soon.
+                    {env.useApi
+                      ? "Thanks for reaching out. I'll get back to you soon."
+                      : "I've opened your email app with the message drafted — just hit send."}
                   </p>
                 </div>
               ) : (

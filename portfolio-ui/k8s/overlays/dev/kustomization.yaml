@@ -1,0 +1,74 @@
+# ==============================================
+# Kustomization - Frontend, dev
+# ==============================================
+# Modern kustomize syntax (`resources:` / `patches:`); the prod overlay's
+# `bases:` / `patchesStrategicMerge:` are removed in kustomize v6.
+#
+# No `nameSuffix` (prod uses `-prod`): the namespace isolates dev, and the
+# Service must stay named `frontend` for the Ingress backend reference.
+#
+# The `dev` Namespace is declared once, by
+# portfolio-api/k8s/overlays/dev/namespace.yaml — the two overlays are rendered
+# into a single applied bundle, and duplicating the Namespace object across
+# both would put two copies in one `kubectl apply`.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: dev
+
+labels:
+  - pairs:
+      environment: dev
+      app.kubernetes.io/instance: dev
+    includeSelectors: false
+    includeTemplates: true
+
+resources:
+  - ../../base
+  - ingress.yaml
+
+images:
+  - name: ghcr.io/maseko-lucky-9/portofolio_website/frontend
+    newName: localhost:32000/portfolio-frontend
+    newTag: dev
+
+replicas:
+  - name: frontend
+    count: 1
+
+patches:
+  - path: configmap-patch.yaml
+
+  # base/hpa.yaml would otherwise scale the frontend back up regardless of
+  # `replicas: 1` above.
+  - target:
+      group: autoscaling
+      version: v2
+      kind: HorizontalPodAutoscaler
+      name: frontend
+    patch: |-
+      - op: replace
+        path: /spec/minReplicas
+        value: 1
+      - op: replace
+        path: /spec/maxReplicas
+        value: 2
+
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: frontend
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/memory
+        value: "96Mi"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/cpu
+        value: "50m"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/memory
+        value: "192Mi"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/cpu
+        value: "300m"

@@ -40,11 +40,15 @@ spec:
     - protocol: TCP
       port: 53
   
-  # Allow access to backend API
+  # Allow access to backend API.
+  # Label is `app: backend-api` (portfolio-api/k8s/base/deployment.yaml) — the
+  # old `app: backend` selector matched nothing, so Calico silently dropped
+  # every frontend->API packet. Same class of typo as the nginx proxy_pass;
+  # fixing only that one leaves the request failing at the CNI instead.
   - to:
     - podSelector:
         matchLabels:
-          app: backend
+          app: backend-api
     ports:
     - protocol: TCP
       port: 3000

@@ -6,15 +6,33 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-commonLabels:
-  app.kubernetes.io/name: postgres
-  app.kubernetes.io/component: database
-  app.kubernetes.io/part-of: portfolio
+# `labels` with includeSelectors:false — NOT the deprecated `commonLabels`.
+# commonLabels injects into SELECTOR fields, including NetworkPolicy podSelector
+# peers. That silently rewrote this component's ingress peer from
+#   {app: backend-api}
+# to
+#   {app: backend-api, app.kubernetes.io/name: postgres, ...}
+# which matches no pod, so Postgres would have refused every connection from the
+# API while looking correctly configured. portfolio-api/k8s/base already used
+# this modern form, which is why only its policies resolved.
+labels:
+  - pairs:
+      app.kubernetes.io/name: postgres
+      app.kubernetes.io/component: database
+      app.kubernetes.io/part-of: portfolio
+    includeSelectors: false
+    includeTemplates: true
 
 resources:
 - statefulset.yaml
 - service.yaml
 - configmap.yaml
-# secret.yaml removed — secrets managed by ExternalSecrets (Vault)
+# Secrets come from ExternalSecrets (Vault). The old secret.yaml is now
+# secret.yaml.example — as a live `kind: Secret` with placeholder passwords it
+# was a clobbering hazard: backend-database-apps.yaml syncs this directory in
+# raw `directory:` mode (not kustomize), which ignores this resources list and
+# would have applied it over the Vault-managed Secret. The .example extension
+# is not parsed as a manifest.
 - external-secret.yaml
+- networkpolicy.yaml
 - backup-cronjob.yaml

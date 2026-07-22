@@ -1,0 +1,19 @@
+# ==============================================
+# Namespace - dev
+# ==============================================
+# `kubectl apply` does NOT create namespaces implicitly. Prod gets one from
+# ArgoCD's `CreateNamespace=true` sync option, but the dev stack is applied
+# imperatively over SSH, so without this manifest every resource in the bundle
+# fails on the very first run with:
+#   Error from server (NotFound): namespaces "dev" not found
+#
+# This must sort first in the applied bundle; `kubectl apply --server-side` on a
+# single concatenated file handles that ordering for namespaces automatically.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev
+  labels:
+    name: dev
+    environment: dev
+    app.kubernetes.io/part-of: portfolio

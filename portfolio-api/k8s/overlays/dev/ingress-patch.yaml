@@ -1,0 +1,31 @@
+# ==============================================
+# Ingress Patch - Development
+# ==============================================
+# Distinct TLS secret name from prod's `homelab-tls`. Two Ingresses with
+# different hosts sharing one secretName makes cert-manager's ingress-shim
+# create competing Certificate objects over a single Secret; whichever
+# reconciles last wins and the other host's TLS silently breaks.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: backend-api
+  annotations:
+    cert-manager.io/cluster-issuer: homelab-ca
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  ingressClassName: public
+  tls:
+    - secretName: dev-api-portfolio-tls
+      hosts:
+        - api.dev.portfolio.homelab
+  rules:
+    - host: api.dev.portfolio.homelab
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: backend-api
+                port:
+                  number: 3000
