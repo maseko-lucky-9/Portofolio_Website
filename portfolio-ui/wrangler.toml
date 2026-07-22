@@ -50,6 +50,12 @@ main = "src/worker.ts"
 # `wrangler delete prudentia-digital-portfolio` or the Cloudflare
 # dashboard (Workers & Pages → prudentia-digital-portfolio → Delete).
 
+# WARNING: `wrangler deploy` re-runs this command EVERY time, anywhere —
+# including inside CI steps that already built and verified dist/. Whatever
+# VITE_* env is present in the shell running `wrangler deploy` is what ships;
+# cloudflare-cd.yml therefore sets the same env on its deploy step as on its
+# build step, and asserts the LIVE bundle afterwards.
+#
 # Workers Builds runs this from the wrangler.toml directory (portfolio-ui/).
 # `cd ..` ascends to the monorepo root so npm workspaces resolve correctly,
 # then builds only the UI workspace (skipping portfolio-api which needs
