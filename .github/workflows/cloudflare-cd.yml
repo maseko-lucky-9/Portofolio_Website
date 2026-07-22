@@ -114,6 +114,19 @@ jobs:
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
           workingDirectory: portfolio-ui
           command: deploy
+        # CRITICAL: wrangler.toml has a [build] block, and `wrangler deploy`
+        # RE-RUNS that build command itself — so the dist/ this workflow built,
+        # asserted, and smoke-checked above is thrown away and rebuilt inside
+        # this step. Without these env vars, that rebuild had VITE_USE_API
+        # undefined and shipped `useApi: void 0` — an unverified artifact —
+        # while every assertion upstream passed against the discarded build.
+        # The same mechanism is how the tracked .env.production originally
+        # leaked useApi=true into production. Keep this env block in lockstep
+        # with the "Build portfolio-ui" step above.
+        env:
+          VITE_USE_API: 'false'
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
+          VITE_ENABLE_ANALYTICS: ${{ vars.VITE_ENABLE_ANALYTICS || 'false' }}
 
       - name: Smoke-check deployed worker
         env:
@@ -125,3 +138,26 @@ jobs:
           if [ "$status" != "200" ]; then
             echo "::warning::Smoke check returned HTTP $status (may be propagation lag)"
           fi
+
+      - name: Assert LIVE bundle expects no backend
+        env:
+          DEPLOYED_URL: https://thulani-portfolio.masekotlg.workers.dev
+        run: |
+          # The dist/ assertion above validates a build that `wrangler deploy`
+          # then discards and re-runs (see the deploy step's env note). This
+          # step closes the loop by asserting what production actually serves.
+          # Retries cover edge-cache propagation of the fresh deployment.
+          for attempt in 1 2 3 4 5; do
+            html=$(curl -s "$DEPLOYED_URL/__deploy-check-$(date +%s)")
+            asset=$(echo "$html" | grep -o '/assets/index-[^"]*\.js' | head -1)
+            [ -n "$asset" ] || { echo "no index asset in HTML (attempt $attempt)"; sleep 15; continue; }
+            bundle=$(curl -s "$DEPLOYED_URL$asset")
+            if echo "$bundle" | grep -qE 'useApi:[A-Za-z_$][A-Za-z0-9_$]*\("false"'; then
+              echo "OK — live bundle ($asset) ships useApi=false"
+              exit 0
+            fi
+            echo "live bundle not updated yet (attempt $attempt): $(echo "$bundle" | grep -o 'useApi:[^,]*' | head -1)"
+            sleep 15
+          done
+          echo "::error::live bundle never showed useApi=(\"false\") — the deployed artifact is not the verified build"
+          exit 1
