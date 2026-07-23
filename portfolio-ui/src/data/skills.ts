@@ -34,8 +34,9 @@ export const skills: Skill[] = [
   // Backend (core engineering)
   { name: ".NET Core / .NET 9", proficiency: 95, category: "backend", type: "framework" },
   { name: "C#", proficiency: 95, category: "backend", type: "language" },
+  { name: "Java", proficiency: 82, category: "backend", type: "language" },
   { name: "ASP.NET Core", proficiency: 92, category: "backend", type: "framework" },
-  { name: "Java / Spring Boot", proficiency: 80, category: "backend", type: "framework" },
+  { name: "Java / Spring Boot 4", proficiency: 82, category: "backend", type: "framework" },
   { name: "Python", proficiency: 75, category: "backend", type: "language" },
   { name: "Apache Kafka", proficiency: 82, category: "backend", type: "tool" },
   { name: "REST APIs", proficiency: 95, category: "backend", type: "tool" },
@@ -63,7 +64,7 @@ export const radarSkills = {
   backend: [
     { skill: ".NET / C#", value: 95 },
     { skill: "ASP.NET Core", value: 92 },
-    { skill: "Java / Spring", value: 80 },
+    { skill: "Java / Spring", value: 82 },
     { skill: "Microservices", value: 90 },
     { skill: "Databases (SQL)", value: 90 },
     { skill: "Kafka / Messaging", value: 82 },
