@@ -78,31 +78,34 @@ export const projects: Project[] = [
     githubUrl: "https://github.com/maseko-lucky-9/terraform-aws-eks-opinionated",
     featured: true,
   },
-  // Project 3: .NET microservices + Kafka (planned)
+  // Project 3: Fraud Rule Engine — Java 21 + Kafka (shipped, public repo)
   {
-    id: "dotnet-events",
-    title: ".NET Microservices + Kafka Event-Driven Backend",
-    tagline: "Reliable messaging at scale.",
+    id: "fraud-rule-engine",
+    title: "Fraud Rule Engine — Java 21 + Kafka",
+    tagline: "Deterministic. Explainable. Event-driven.",
     description:
-      "Greenfield ASP.NET Core 9 microservices with MassTransit + Apache Kafka, transactional outbox pattern, OpenTelemetry distributed tracing, xUnit + Testcontainers integration tests, deployed via Helm to the K8s reference cluster.",
-    thumbnail: "/images/projects/dotnet-events.png",
+      "A Spring Boot 4 fraud engine that ingests transactions over REST and Kafka, evaluates them against versioned YAML rules, persists explainable decisions to PostgreSQL, and republishes results to a downstream Kafka topic via a transactional outbox. Ships with a Python red-team simulator that drives the live engine with scripted and LLM-driven adversaries.",
+    thumbnail: "/images/projects/fraud-rule-engine.png",
     technologies: [
-      ".NET 9",
-      "ASP.NET Core",
+      "Java 21",
+      "Spring Boot 4",
       "Apache Kafka",
-      "MassTransit",
       "PostgreSQL",
-      "OpenTelemetry",
-      "Helm",
+      "Redis",
+      "Flyway",
+      "Spring Security",
+      "Testcontainers",
+      "Prometheus",
       "Docker",
+      "Python",
     ],
     challenge:
-      "Show what production .NET event-driven backends look like — the kind I ship inside banks — without leaking any prior-employer code or data. Reliable messaging, tested, observable, deployable.",
+      "Fraud decisions must be deterministic, explainable, and auditable — never a black box — while handling both synchronous REST calls and asynchronous Kafka event streams with idempotency and no double-processing.",
     solution:
-      "Producers and consumers via MassTransit, transactional outbox for at-least-once delivery, OpenTelemetry traces propagated through Kafka headers, integration tests using Testcontainers, Helm chart for K8s deploy.",
+      "A bounded predicate registry (velocity, geo-mismatch, device-fingerprint, merchant-blacklist) evaluates versioned YAML rules; Redis backs idempotency and rate-limiting; a transactional outbox republishes every decision; Prometheus metrics and Testcontainers integration tests cover the stack. An optional Ollama AI advisory assists reviewers but is non-authoritative by design.",
     impact:
-      "Throughput > 5k messages/sec on commodity hardware; zero message loss across simulated broker failures; sub-second p95 end-to-end trace visibility.",
-    githubUrl: "https://github.com/maseko-lucky-9/dotnet-events",
+      "Every decision is explainable and audit-logged; AI commentary is opt-in and never blocks the deterministic engine; a Python red-team simulator continuously surfaces detection gaps. Demonstrates polyglot delivery — a Java engine with Python tooling — with idempotency, outbox, and observability treated as first-class.",
+    githubUrl: "https://github.com/maseko-lucky-9/fraud-rule-engine",
     featured: true,
   },
   // Project 4: RAG + MCP server (planned, deferable)
