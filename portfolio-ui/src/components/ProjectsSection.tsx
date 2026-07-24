@@ -267,8 +267,7 @@ export function ProjectsSection() {
                     onError={(e) => {
                       // ponytail: guard against a missing thumbnail rendering a broken-image icon
                       const img = e.currentTarget;
-                      const fallback =
-                        "https://placehold.co/600x400/1e293b/94a3b8?text=Project";
+                      const fallback = "https://placehold.co/600x400/1e293b/94a3b8?text=Project";
                       if (img.src !== fallback) img.src = fallback;
                     }}
                   />
