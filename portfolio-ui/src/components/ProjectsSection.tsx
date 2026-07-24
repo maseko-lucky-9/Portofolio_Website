@@ -264,6 +264,12 @@ export function ProjectsSection() {
                     width={600}
                     height={400}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    onError={(e) => {
+                      // ponytail: guard against a missing thumbnail rendering a broken-image icon
+                      const img = e.currentTarget;
+                      const fallback = "https://placehold.co/600x400/1e293b/94a3b8?text=Project";
+                      if (img.src !== fallback) img.src = fallback;
+                    }}
                   />
                   <div
                     className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
