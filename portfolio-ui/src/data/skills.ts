@@ -2,7 +2,8 @@
  * =============================================
  * SKILLS DATA CONFIGURATION
  * =============================================
- * CV-aligned skill list for Senior Backend & DevOps / Kubernetes Engineer.
+ * CV-aligned skill list. Ordering is deliberate: DevOps/cloud-native leads because it
+ * is the differentiator, even though the role title is "Software Developer".
  * Schema is locked to 3 categories (frontend/backend/devops) — cloud-native
  * skills live under "devops" with type: "cloud" or "tool".
  * Frontend skills are intentionally listed as supporting (per CV).

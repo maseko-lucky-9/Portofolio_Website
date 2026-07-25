@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { personalData } from "../src/data/personal";
 
 test.describe("Hero Section", () => {
   test.beforeEach(async ({ page }) => {
@@ -9,11 +10,12 @@ test.describe("Hero Section", () => {
     // Name should be visible (split across elements in hero)
     await expect(page.locator("#about").getByText("Thulani")).toBeVisible();
 
-    // Title should be visible
-    await expect(page.locator("#about").getByText(/Senior Backend.*DevOps.*Kubernetes Engineer/)).toBeVisible();
-
-    // Availability badge
-    await expect(page.getByText(/Available for K8s.*microservices/)).toBeVisible();
+    // Title and availability are asserted against personalData rather than literals:
+    // both are load-bearing strings the chatbot reads (availability is quoted verbatim
+    // under chat.ts rule 3), so they change together with the data and a hardcoded
+    // copy here would just go stale silently — as it did.
+    await expect(page.locator("#about").getByText(personalData.title)).toBeVisible();
+    await expect(page.getByText(personalData.availability)).toBeVisible();
   });
 
   test("CTA buttons are present", async ({ page }) => {

@@ -8,7 +8,10 @@ export default tseslint.config(
   { ignores: ["dist"] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
-    files: ["**/*.{ts,tsx}"],
+    // mts/mjs included so src/lib/kb-patterns.mjs — the shared PII gate the chatbot's
+    // publication path depends on — is actually linted. Scoped to **/*.{ts,tsx} it
+    // matched no config object at all and ran with zero rules.
+    files: ["**/*.{ts,tsx,mts,mjs}"],
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,

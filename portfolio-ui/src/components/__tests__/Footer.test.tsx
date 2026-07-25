@@ -29,13 +29,25 @@ describe("Footer", () => {
     render(<Footer />);
     expect(screen.getByLabelText("GitHub")).toBeInTheDocument();
     expect(screen.getByLabelText("LinkedIn")).toBeInTheDocument();
-    expect(screen.getByLabelText("Twitter")).toBeInTheDocument();
+    // Twitter is deliberately absent: personal.ts ships `twitter: ""` and the
+    // components filter unset links out, because href="" resolves to the current
+    // page rather than being inert. Asserting the absence keeps that intentional.
+    expect(screen.queryByLabelText("Twitter")).not.toBeInTheDocument();
   });
 
   it("social links have correct hrefs", () => {
     render(<Footer />);
     expect(screen.getByLabelText("GitHub")).toHaveAttribute("href", personalData.social.github);
     expect(screen.getByLabelText("LinkedIn")).toHaveAttribute("href", personalData.social.linkedin);
-    expect(screen.getByLabelText("Twitter")).toHaveAttribute("href", personalData.social.twitter);
+  });
+
+  // Written against the data rather than a hardcoded list, so it keeps holding when
+  // twitter/calendar are eventually filled in — and still fails if someone drops the
+  // .filter() and reintroduces a link that silently reloads the page.
+  it("never renders a social link with an empty href", () => {
+    render(<Footer />);
+    for (const anchor of screen.getAllByRole("link")) {
+      expect(anchor.getAttribute("href")).toBeTruthy();
+    }
   });
 });

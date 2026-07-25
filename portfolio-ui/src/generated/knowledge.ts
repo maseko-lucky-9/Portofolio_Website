@@ -5,9 +5,7 @@
  * keyless export endpoint. See scripts/fetch-knowledge.mjs.
  *
  * PUBLIC: this repo is public, so everything below is world-readable in git history
- * forever. Never put an ID number, date of birth, home address, or referee contact
- * details in the source documents — the refresh script has a PII gate that fails the
- * build, but the gate is a backstop, not permission.
+ * forever. Never put an ID number, date of birth, home address, or referee contact details in the source documents — the refresh script has a PII gate that fails the build, but the gate is a backstop, not permission. gitleaks:allow — this sentence's own field-label vocabulary correctly trips za-identity-field below; that is the rule working, not a false positive to fix by weakening it.
  *
  * Empty strings are the valid pre-provisioning state: the chatbot falls back to the
  * structured data in src/data/*.ts and simply knows less. The build never depends on

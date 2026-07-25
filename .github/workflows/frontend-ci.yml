@@ -64,9 +64,12 @@ jobs:
         working-directory: ${{ env.WORKING_DIRECTORY }}
         run: npx tsc --noEmit
 
+      # mts/mjs included deliberately: src/lib/kb-patterns.mjs holds the PII rules
+      # that gate what the chatbot publishes. Under the previous glob the one
+      # safety-critical file in src/ was the only one no formatter or linter saw.
       - name: Check code formatting
         working-directory: ${{ env.WORKING_DIRECTORY }}
-        run: npx prettier --check "src/**/*.{ts,tsx,js,jsx,json,css}"
+        run: npx prettier --check "src/**/*.{ts,tsx,mts,js,mjs,jsx,json,css}"
 
       # The "Build & Test" job below never actually ran the suite, so every vitest
       # file in the repo was unenforced. Runs here in `quality` because `build`

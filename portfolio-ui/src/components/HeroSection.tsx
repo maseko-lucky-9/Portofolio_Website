@@ -243,39 +243,44 @@ export function HeroSection() {
                 { href: personalData.social.github, Icon: Github, label: "GitHub" },
                 { href: personalData.social.linkedin, Icon: Linkedin, label: "LinkedIn" },
                 { href: personalData.social.twitter, Icon: Twitter, label: "Twitter" },
-              ].map(({ href, Icon, label }) => (
-                <a
-                  key={label}
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={label}
-                  className="p-3 rounded-xl transition-all focus-visible:ring-2 focus-visible:ring-primary/30"
-                  style={{
-                    background: "oklch(var(--muted))",
-                    border: "1px solid oklch(var(--border))",
-                    transition: "all 250ms cubic-bezier(0.16, 1, 0.3, 1)",
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.background = "oklch(var(--primary))";
-                    (e.currentTarget as HTMLElement).style.color =
-                      "oklch(var(--primary-foreground))";
-                    (e.currentTarget as HTMLElement).style.transform =
-                      "translateY(-3px) scale(1.08)";
-                    (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-sm)";
-                    (e.currentTarget as HTMLElement).style.borderColor = "transparent";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.background = "oklch(var(--muted))";
-                    (e.currentTarget as HTMLElement).style.color = "";
-                    (e.currentTarget as HTMLElement).style.transform = "";
-                    (e.currentTarget as HTMLElement).style.boxShadow = "";
-                    (e.currentTarget as HTMLElement).style.borderColor = "oklch(var(--border))";
-                  }}
-                >
-                  <Icon className="w-5 h-5" />
-                </a>
-              ))}
+              ]
+                // twitter is "" until set up (personal.ts). An <a href=""> is not inert —
+                // it resolves to the current page, so the icon rendered and silently
+                // reloaded the site.
+                .filter(({ href }) => href)
+                .map(({ href, Icon, label }) => (
+                  <a
+                    key={label}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={label}
+                    className="p-3 rounded-xl transition-all focus-visible:ring-2 focus-visible:ring-primary/30"
+                    style={{
+                      background: "oklch(var(--muted))",
+                      border: "1px solid oklch(var(--border))",
+                      transition: "all 250ms cubic-bezier(0.16, 1, 0.3, 1)",
+                    }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLElement).style.background = "oklch(var(--primary))";
+                      (e.currentTarget as HTMLElement).style.color =
+                        "oklch(var(--primary-foreground))";
+                      (e.currentTarget as HTMLElement).style.transform =
+                        "translateY(-3px) scale(1.08)";
+                      (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-sm)";
+                      (e.currentTarget as HTMLElement).style.borderColor = "transparent";
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLElement).style.background = "oklch(var(--muted))";
+                      (e.currentTarget as HTMLElement).style.color = "";
+                      (e.currentTarget as HTMLElement).style.transform = "";
+                      (e.currentTarget as HTMLElement).style.boxShadow = "";
+                      (e.currentTarget as HTMLElement).style.borderColor = "oklch(var(--border))";
+                    }}
+                  >
+                    <Icon className="w-5 h-5" />
+                  </a>
+                ))}
             </div>
           </div>
 
@@ -349,7 +354,7 @@ export function HeroSection() {
               {[
                 { value: personalData.metrics.projects, label: "Projects" },
                 { value: personalData.metrics.experience, label: "Years Exp." },
-                { value: personalData.metrics.clients, label: "Clients" },
+                { value: personalData.metrics.certifications, label: "Certifications" },
               ].map(({ value, label }) => (
                 <div key={label} className="text-center p-4 rounded-2xl glass-card">
                   <div className="text-2xl lg:text-3xl font-bold text-gradient-primary mb-0.5">

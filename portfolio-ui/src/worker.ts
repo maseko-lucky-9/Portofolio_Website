@@ -14,9 +14,16 @@
  */
 
 import { handleChat, type ChatEnv } from "./chat";
+import { refreshKb } from "./kb";
 
 interface Env extends ChatEnv {
   ASSETS: { fetch: (req: Request) => Promise<Response> };
+}
+
+/** Structural — see the note in chat.ts on why @cloudflare/workers-types is absent. */
+interface ScheduledController {
+  cron: string;
+  scheduledTime: number;
 }
 
 // CSP is intentionally permissive on initial rollout to avoid breaking
@@ -97,5 +104,22 @@ export default {
       statusText: res.statusText,
       headers,
     });
+  },
+
+  /**
+   * Cron Trigger — see [triggers] in wrangler.toml. Pulls the chatbot's knowledge
+   * base from Google Docs into KV.
+   *
+   * Awaited directly rather than wrapped in ctx.waitUntil: the runtime already keeps
+   * the invocation alive for the promise returned by scheduled(), and waitUntil is
+   * only needed for work that is NOT awaited.
+   *
+   * Cron invokes this handler directly — it does not route through the asset router,
+   * so `run_worker_first` in wrangler.toml is irrelevant here. (It does mean the
+   * local `wrangler dev --test-scheduled` endpoint gets swallowed by the fetch
+   * handler above and returns the SPA shell; test refreshKb directly instead.)
+   */
+  async scheduled(_controller: ScheduledController, env: Env): Promise<void> {
+    await refreshKb(env);
   },
 } satisfies ExportedHandler<Env>;
