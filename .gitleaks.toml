@@ -62,6 +62,21 @@ regex = '''(?i)\b(?:id\s*(?:no\.?|nr\.?|number)|identity\s*(?:no\.?|number)|date
 path = '''(portfolio-ui/src/generated/.*|portfolio-ui/public/.*\.pdf)'''
 
 [[allowlists]]
+# gitleaks git . walks FULL HISTORY, so a rule added today is checked against blobs
+# committed before the rule existed. knowledge.ts's own safety-comment warning ("Never
+# put an ID number, date of birth, home address, or referee contact...") has been on
+# main since PR #39 (8a9ef02) — merged, public, unrelated to this rule's introduction.
+# Without this, za-identity-field would fail `gitleaks git .` on main permanently: the
+# offending blob is already in history and cannot be edited there. regexTarget = "line"
+# matches the literal warning sentence itself (stable across every commit that has
+# carried it), not any occurrence of these words in real document content — a real CV
+# would never contain the sentence "Never put an ID number...".
+description = "knowledge.ts's own PII warning comment, present in git history since before this rule"
+targetRules = ["za-identity-field"]
+regexTarget = "line"
+regexes = ['''Never put an ID number, date of birth, home address, or referee contact''']
+
+[[allowlists]]
 description = "Known non-secrets: public tokens, placeholder templates, doc examples, CI test values"
 
 # Public-by-design files and pure templates/examples (cannot hold a private secret by nature).
