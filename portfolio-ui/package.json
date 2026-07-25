@@ -15,6 +15,7 @@
     "seo:verify": "node scripts/inject-verification.mjs",
     "seo:fingerprint": "node scripts/inject-fingerprint.mjs",
     "seo:indexnow": "node scripts/indexnow-submit.mjs",
+    "kb:refresh": "node --env-file-if-exists=../.env scripts/fetch-knowledge.mjs && prettier --write src/generated/knowledge.ts",
     "lint": "eslint .",
     "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css}\"",

@@ -113,6 +113,11 @@ jobs:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
           workingDirectory: portfolio-ui
+          # Pinned because wrangler.toml now carries [ai] and [[ratelimits]], and
+          # wrangler treats UNKNOWN top-level keys as a warning, not an error. An
+          # older floating version would therefore deploy green with CHAT_LIMITER
+          # undefined, and chat would be dead in production with a passing CI run.
+          wranglerVersion: "4.114.0"
           command: deploy
         # CRITICAL: wrangler.toml has a [build] block, and `wrangler deploy`
         # RE-RUNS that build command itself — so the dist/ this workflow built,

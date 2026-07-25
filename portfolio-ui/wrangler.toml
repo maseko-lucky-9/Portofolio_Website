@@ -83,3 +83,23 @@ html_handling = "drop-trailing-slash"
 # Observability is on by default in 2025+ wrangler.
 [observability]
 enabled = true
+
+# Workers AI — powers POST /api/chat (see src/chat.ts).
+#
+# COST SAFETY DEPENDS ON THIS ACCOUNT STAYING ON WORKERS FREE. The free tier is a
+# hard cap of 10,000 Neurons/day: over it the binding returns error 4006 and stops,
+# and on the Free plan it cannot bill. On Workers Paid the same overage bills at
+# $0.011/1,000 Neurons with no per-binding ceiling — so if this account is ever
+# upgraded for an unrelated reason, revisit the abuse controls in src/chat.ts first.
+[ai]
+binding = "AI"
+
+# Per-IP throttle so one script cannot burn the day's neuron budget in two minutes.
+# No charge beyond normal Workers request cost. Per-colo rather than global, which is
+# acceptable because the neuron cap is the real hard stop and it fails closed.
+# Note this does NOT defend against a page driving requests from many visitors' IPs —
+# the content-type / sec-fetch-site gate in src/chat.ts is what covers that.
+[[ratelimits]]
+name = "CHAT_LIMITER"
+namespace_id = "4201"                 # account-scoped: must not collide with other Workers
+simple = { limit = 8, period = 60 }   # period accepts only 10 or 60
