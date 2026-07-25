@@ -9,6 +9,31 @@ title = "Portofolio_Website gitleaks config"
 [extend]
 useDefault = true
 
+# ---------------------------------------------------------------------------
+# Personal-information rules for the chatbot knowledge base.
+#
+# These are not "secrets" in the credential sense — they are PII that must never
+# reach a PUBLIC repo, where git history is effectively permanent (GitHub keeps
+# unreachable blobs and mirrors scrape within hours). South African CV conventions
+# routinely carry an ID number and contact details, and under POPIA some of that is
+# special personal information.
+#
+# scripts/fetch-knowledge.mjs has the same checks and fails the refresh before
+# anything is written. These rules are the backstop for a hand-edit that bypasses it.
+# ---------------------------------------------------------------------------
+
+[[rules]]
+id = "za-id-number"
+description = "South African ID number (13 digits, YYMMDD-prefixed) — PII, never commit"
+regex = '''\b\d{6}[ -]?\d{4}[ -]?[01]\d{2}\b'''
+path = '''(portfolio-ui/src/generated/.*|portfolio-ui/public/.*\.pdf)'''
+
+[[rules]]
+id = "za-mobile-number"
+description = "South African mobile number — PII, never commit"
+regex = '''(?:\+27|\b0)\s?[6-8]\d(?:\s?\d){7}\b'''
+path = '''(portfolio-ui/src/generated/.*|portfolio-ui/public/.*\.pdf)'''
+
 [[allowlists]]
 description = "Known non-secrets: public tokens, placeholder templates, doc examples, CI test values"
 

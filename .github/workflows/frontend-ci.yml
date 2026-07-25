@@ -63,6 +63,13 @@ jobs:
         working-directory: ${{ env.WORKING_DIRECTORY }}
         run: npx prettier --check "src/**/*.{ts,tsx,js,jsx,json,css}"
 
+      # The "Build & Test" job below never actually ran the suite, so every vitest
+      # file in the repo was unenforced. Runs here in `quality` because `build`
+      # depends on this job, so a red test now blocks the build.
+      - name: Run unit tests
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: npm test
+
   # ==============================================
   # Job 2: Security Scanning
   # ==============================================

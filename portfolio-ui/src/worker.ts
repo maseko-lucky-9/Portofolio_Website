@@ -13,7 +13,9 @@
  * The [assets] binding name `ASSETS` is the default.
  */
 
-interface Env {
+import { handleChat, type ChatEnv } from "./chat";
+
+interface Env extends ChatEnv {
   ASSETS: { fetch: (req: Request) => Promise<Response> };
 }
 
@@ -67,6 +69,13 @@ function isHtml(res: Response): boolean {
 
 export default {
   async fetch(req: Request, env: Env): Promise<Response> {
+    // Handled before the ASSETS wrapper below, for three reasons: the SSE body must
+    // pass through untouched (10 ms CPU limit — no per-chunk work), it must not
+    // inherit the static-asset headers, and with
+    // not_found_handling = "single-page-application" an un-intercepted POST would
+    // otherwise return the index.html shell at HTTP 200.
+    if (new URL(req.url).pathname === "/api/chat") return handleChat(req, env);
+
     const res = await env.ASSETS.fetch(req);
 
     // Clone so we can mutate headers (the original Response is immutable

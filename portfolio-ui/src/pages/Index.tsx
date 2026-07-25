@@ -9,6 +9,7 @@ import { CustomCursor } from "@/components/CustomCursor";
 import { SectionBridge } from "@/components/SectionBridge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LazySection } from "@/components/LazySection";
+import { ChatWidget } from "@/components/ChatWidget";
 
 // Lazy-load below-fold sections. LazySection triggers each chunk when the
 // user scrolls within 300 px of the section. CodeDemoSection still
@@ -141,6 +142,10 @@ const Index = () => {
           </div>
         </main>
         <Footer />
+        {/* Fixed overlay, so deliberately not wrapped in LazySection (that defers on
+            scroll position, which a fixed element never reaches). Mounted here rather
+            than in App.tsx to keep it off the NotFound route. */}
+        <ChatWidget />
       </div>
     </ThemeProvider>
   );
