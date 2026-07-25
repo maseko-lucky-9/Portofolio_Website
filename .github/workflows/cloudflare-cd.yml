@@ -58,7 +58,16 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          # 22.x, not 20.x: wrangler v4.x requires Node >= 22 and hard-exits
+          # otherwise ("Wrangler requires at least Node.js v22.0.0"). This bit
+          # only when wranglerVersion was pinned below — before that, the action
+          # silently resolved an older Node-20-compatible wrangler.
+          #
+          # This is required regardless of the pin: `wrangler deploy` re-runs
+          # wrangler.toml's [build] command itself, so the production build
+          # executes under whatever Node wrangler runs on. Keeping the two in
+          # sync here means CI builds on the same major that ships the artifact.
+          node-version: '22.x'
 
       - name: Install dependencies (workspace root)
         run: npm install --include=optional --no-audit --no-fund
