@@ -307,18 +307,21 @@ export function ContactSection() {
                     { href: personalData.social.github, Icon: Github, label: "GitHub" },
                     { href: personalData.social.linkedin, Icon: Linkedin, label: "LinkedIn" },
                     { href: personalData.social.twitter, Icon: Twitter, label: "Twitter" },
-                  ].map(({ href, Icon, label }) => (
-                    <a
-                      key={label}
-                      href={href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={label}
-                      className="social-link w-10 h-10"
-                    >
-                      <Icon className="w-5 h-5" />
-                    </a>
-                  ))}
+                  ]
+                    // Skip unset links — href="" resolves to the current page.
+                    .filter(({ href }) => href)
+                    .map(({ href, Icon, label }) => (
+                      <a
+                        key={label}
+                        href={href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={label}
+                        className="social-link w-10 h-10"
+                      >
+                        <Icon className="w-5 h-5" />
+                      </a>
+                    ))}
                 </div>
               </div>
 
@@ -353,35 +356,40 @@ export function ContactSection() {
                   </div>
                 </a>
 
-                <a
-                  href={personalData.social.calendar}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 w-full p-4 rounded-xl border transition-all"
-                  style={{
-                    background: "oklch(var(--card))",
-                    boxShadow: "var(--shadow-sm)",
-                    borderColor: "oklch(var(--border))",
-                    transition: "all 300ms cubic-bezier(0.16, 1, 0.3, 1)",
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)";
-                    (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-sm)";
-                    (e.currentTarget as HTMLElement).style.borderColor =
-                      "oklch(var(--primary) / 0.3)";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.transform = "";
-                    (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-sm)";
-                    (e.currentTarget as HTMLElement).style.borderColor = "oklch(var(--border))";
-                  }}
-                >
-                  <Calendar className="w-5 h-5 text-secondary" />
-                  <div>
-                    <p className="font-medium">Schedule a Call</p>
-                    <p className="text-xs text-muted-foreground">30 min meeting</p>
-                  </div>
-                </a>
+                {/* Only rendered once a booking URL exists. personal.ts ships calendar: ""
+                    until one is set up, and this is the highest-intent control on the page —
+                    an empty href made "Schedule a Call" reload the page instead. */}
+                {personalData.social.calendar && (
+                  <a
+                    href={personalData.social.calendar}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 w-full p-4 rounded-xl border transition-all"
+                    style={{
+                      background: "oklch(var(--card))",
+                      boxShadow: "var(--shadow-sm)",
+                      borderColor: "oklch(var(--border))",
+                      transition: "all 300ms cubic-bezier(0.16, 1, 0.3, 1)",
+                    }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)";
+                      (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-sm)";
+                      (e.currentTarget as HTMLElement).style.borderColor =
+                        "oklch(var(--primary) / 0.3)";
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLElement).style.transform = "";
+                      (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-sm)";
+                      (e.currentTarget as HTMLElement).style.borderColor = "oklch(var(--border))";
+                    }}
+                  >
+                    <Calendar className="w-5 h-5 text-secondary" />
+                    <div>
+                      <p className="font-medium">Schedule a Call</p>
+                      <p className="text-xs text-muted-foreground">30 min meeting</p>
+                    </div>
+                  </a>
+                )}
               </div>
             </div>
           </div>

@@ -78,18 +78,21 @@ export function Footer() {
               { href: personalData.social.github, Icon: Github, label: "GitHub" },
               { href: personalData.social.linkedin, Icon: Linkedin, label: "LinkedIn" },
               { href: personalData.social.twitter, Icon: Twitter, label: "Twitter" },
-            ].map(({ href, Icon, label }) => (
-              <a
-                key={label}
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={label}
-                className="social-link w-9 h-9"
-              >
-                <Icon className="w-4 h-4" />
-              </a>
-            ))}
+            ]
+              // Skip unset links — href="" resolves to the current page.
+              .filter(({ href }) => href)
+              .map(({ href, Icon, label }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={label}
+                  className="social-link w-9 h-9"
+                >
+                  <Icon className="w-4 h-4" />
+                </a>
+              ))}
           </div>
         </div>
 

@@ -72,7 +72,7 @@ describe("HeroSection", () => {
     renderHeroSection();
     expect(screen.getByText(personalData.metrics.projects)).toBeInTheDocument();
     expect(screen.getByText(personalData.metrics.experience)).toBeInTheDocument();
-    expect(screen.getByText(personalData.metrics.clients)).toBeInTheDocument();
+    expect(screen.getByText(personalData.metrics.certifications)).toBeInTheDocument();
   });
 
   it("renders the metric card labels", () => {
@@ -80,7 +80,7 @@ describe("HeroSection", () => {
     // Metrics are three stat cards, each a value above a label.
     expect(screen.getByText("Projects")).toBeInTheDocument();
     expect(screen.getByText("Years Exp.")).toBeInTheDocument();
-    expect(screen.getByText("Clients")).toBeInTheDocument();
+    expect(screen.getByText("Certifications")).toBeInTheDocument();
   });
 
   it("renders profile image with correct alt text", () => {

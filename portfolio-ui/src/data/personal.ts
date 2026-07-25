@@ -10,7 +10,13 @@ export const personalData = {
   name: "Thulani Maseko",
 
   // EDIT: Your role/title
-  title: "Senior Backend & DevOps / Kubernetes Engineer",
+  //
+  // Keep the leading noun identical to the CV ("Software Developer"). src/chat.ts:80
+  // rule 8 tells the chatbot to prefer the CV wherever it disagrees with the site, so
+  // a grander title here does not win — it just makes the bot contradict this page.
+  // experience.ts already lists the role as "Software Developer" in all four
+  // permanent positions. The suffix is a domain qualifier, not a claimed seniority.
+  title: "Software Developer — Kubernetes, .NET & Platform",
 
   // EDIT: Your value proposition tagline (must be < 200 chars per personal.test.ts)
   tagline:
@@ -23,13 +29,27 @@ export const personalData = {
   location: "Gauteng, South Africa (GMT+2)",
 
   // EDIT: Your availability status
-  availability: "Available for K8s, IaC, and .NET microservices contracts",
+  //
+  // LOAD-BEARING, not decorative. src/chat.ts:75 rule 3 says "Never state availability
+  // beyond the AVAILABILITY line", and that line is this string. Whatever is omitted
+  // here, the chatbot is instructed to refuse — so the previous contract-only wording
+  // made it decline the single highest-intent question a recruiter asks ("is he open
+  // to permanent?"), no matter what the screening-notes document said. Rule 8's
+  // document-wins override applies to PROFESSIONAL HISTORY only, not to this line.
+  availability:
+    "Open to permanent roles and contract work — Kubernetes, IaC, and .NET microservices",
 
   // EDIT: Key metrics to display
+  //
+  // Every value here must be defensible, because src/chat.ts:90 puts `experience` in
+  // the chatbot's prompt and the other two render 300 px above the chat widget.
+  // `clients: "10+"` used to sit in the third slot: the CV shows five employers, four
+  // of them permanent, so "who are his ten clients?" hit rule 1's refusal string while
+  // the number was still on screen. Certifications are countable and on the CV.
   metrics: {
     projects: "20+",
     experience: "8+ Years",
-    clients: "10+",
+    certifications: "3",
   },
 
   // EDIT: Social links — github + linkedin required; twitter + calendar optional (empty until set up)
@@ -68,8 +88,8 @@ export const personalData = {
 };
 
 export const seoData = {
-  // EDIT: SEO title
-  title: "Thulani Maseko — senior software developer",
+  // EDIT: SEO title — keep the role noun consistent with personalData.title above.
+  title: "Thulani Maseko — Software Developer, Kubernetes & .NET",
 
   // EDIT: Meta description
   description:
