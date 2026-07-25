@@ -12,12 +12,17 @@ on:
       - 'portfolio-ui/**'
       - 'shared/**'
       - '.github/workflows/frontend-ci.yml'
+  # NOTE: deliberately NOT path-filtered, unlike the push trigger above.
+  # `CI Success` below is a REQUIRED status check on main. When a workflow is
+  # skipped by a path filter its checks never report and sit at "Expected —
+  # waiting for status", blocking the PR forever. PR #40 (a workflow-only
+  # change) hit exactly that: only gitleaks ran.
+  #
+  # So this must report on every PR, even ones that touch no frontend code.
+  # The cost is ~2 min of runner time on off-path PRs; the alternative is a
+  # required check that silently blocks unrelated work.
   pull_request:
     branches: [main, homelab]
-    paths:
-      - 'portfolio-ui/**'
-      - 'shared/**'
-      - '.github/workflows/frontend-ci.yml'
 
 env:
   NODE_VERSION: '20.x'
@@ -243,14 +248,32 @@ jobs:
   # ==============================================
   # Summary Job
   # ==============================================
+  # REQUIRED status check on main. Two rules govern this job; breaking either
+  # one silently disables branch protection rather than failing loudly.
+  #
+  # 1. `if: always()` — NOT `if: success()`. GitHub reports a SKIPPED job as
+  #    *successful* to branch protection. With `if: success()`, a failing
+  #    `quality` job skips this one, and the required check goes green while
+  #    CI is red. That is strictly worse than having no protection at all.
+  #
+  # 2. The result of every dependency is evaluated explicitly below. `needs:`
+  #    alone does not fail this job when `always()` is set — it only orders it.
   ci-success:
     name: CI Success
     runs-on: ubuntu-latest
     needs: [quality, security, build, bundle-size, lighthouse]
-    if: success()
-    
+    if: always()
+
     steps:
-      - name: CI Pipeline Success
+      - name: Verify all upstream jobs succeeded
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
         run: |
+          echo "Upstream job results: $RESULTS"
+          for r in $RESULTS; do
+            case "$r" in
+              success|skipped) ;;
+              *) echo "::error::A required CI job did not succeed (results: $RESULTS)"; exit 1 ;;
+            esac
+          done
           echo "✅ All CI checks passed successfully!"
-          echo "🎉 Code is ready for deployment"
