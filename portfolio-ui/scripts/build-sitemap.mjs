@@ -38,7 +38,7 @@ const repoLastMod = gitLastMod('.');
 
 // Pull dynamically-generated content routes from the manifest written by
 // build-static-pages.mjs (must run before this script — see package.json).
-let contentRoutes = [];
+const contentRoutes = [];
 if (existsSync(MANIFEST)) {
   try {
     const m = JSON.parse(readFileSync(MANIFEST, 'utf8'));

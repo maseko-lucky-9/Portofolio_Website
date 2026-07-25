@@ -18,20 +18,47 @@ useDefault = true
 # routinely carry an ID number and contact details, and under POPIA some of that is
 # special personal information.
 #
-# scripts/fetch-knowledge.mjs has the same checks and fails the refresh before
-# anything is written. These rules are the backstop for a hand-edit that bypasses it.
+# portfolio-ui/src/lib/kb-patterns.mjs holds the authoritative rules, shared by the
+# refresh script and the Worker's hourly sync. These are the backstop for a hand-edit
+# that bypasses both.
+#
+# THEY ARE MIRRORED BY HAND, and cannot simply be copy-pasted, because gitleaks uses
+# Go RE2 while the shared module is JavaScript:
+#   * RE2 has NO lookarounds — the (?<!...) anchors used there must become \b here.
+#   * RE2's \s is [\t\n\f\r ] and does NOT include U+00A0, which JS \s does match.
+#     The shared module NFKC-normalises before scanning; gitleaks cannot, so the
+#     separator class below lists the Unicode dashes explicitly.
+#   * RE2 cannot run the Luhn/date validation that keeps the JS ID rule free of
+#     false positives, so the ID rule here is necessarily looser.
+# src/__tests__/kb-patterns.test.ts parses this file and asserts these regexes still
+# block the shared corpus, so drift fails CI rather than going unnoticed.
+#
+# The previous mobile rule was byte-identical to the script's, and shared its defect:
+# it allowed a space but not a hyphen between digit groups, so the real CV's number
+# passed all three gates at once.
+#
+# Paths are scoped to where knowledge-base content can land in git. Note that KV
+# content under live sync never touches git at all — the Worker-side gate is the only
+# control there, which is why it must not depend on this one.
 # ---------------------------------------------------------------------------
 
 [[rules]]
 id = "za-id-number"
 description = "South African ID number (13 digits, YYMMDD-prefixed) — PII, never commit"
-regex = '''\b\d{6}[ -]?\d{4}[ -]?[01]\d{2}\b'''
+regex = '''\b\d{6}[ .\x{2010}-\x{2015}/-]?\d{4}[ .\x{2010}-\x{2015}/-]?[01]\d{2}\b'''
 path = '''(portfolio-ui/src/generated/.*|portfolio-ui/public/.*\.pdf)'''
 
 [[rules]]
-id = "za-mobile-number"
-description = "South African mobile number — PII, never commit"
-regex = '''(?:\+27|\b0)\s?[6-8]\d(?:\s?\d){7}\b'''
+id = "za-phone-number"
+description = "South African phone number (mobile or landline) — PII, never commit"
+# All area codes, not just [6-8] mobile: landlines identify a person just as well.
+regex = '''(?:\+27|0027|\b0)[ .\x{2010}-\x{2015}/-]?(?:\(0\))?[ .\x{2010}-\x{2015}/-]?[1-8]\d(?:[ .\x{2010}-\x{2015}/-]?\d){7}\b'''
+path = '''(portfolio-ui/src/generated/.*|portfolio-ui/public/.*\.pdf)'''
+
+[[rules]]
+id = "za-identity-field"
+description = "Identity field label on a CV (ID no, DOB, address, referee) — PII, never commit"
+regex = '''(?i)\b(?:id\s*(?:no\.?|nr\.?|number)|identity\s*(?:no\.?|number)|date\s*of\s*birth|marital\s*status|nationality|home\s*address|residential\s*address|next[\s-]*of[\s-]*kin|population\s*group|passport\s*(?:no\.?|number)|tax\s*(?:no\.?|number))\b|(?i)\b(?:gender|sex|race|religion|dob)\s*[:=]'''
 path = '''(portfolio-ui/src/generated/.*|portfolio-ui/public/.*\.pdf)'''
 
 [[allowlists]]

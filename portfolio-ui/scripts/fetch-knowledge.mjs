@@ -21,6 +21,9 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
+// Shared with the Worker (src/kb.ts) and mirrored by hand in .gitleaks.toml, so
+// all three gates block the same things. See that file for why it is not inline.
+import { findPii, tidy } from "../src/lib/kb-patterns.mjs";
 
 const execFileAsync = promisify(execFile);
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -28,22 +31,18 @@ const OUT_TS = path.join(here, "../src/generated/knowledge.ts");
 const OUT_PDF = path.join(here, "../public/resume.pdf");
 
 /**
- * Patterns that must never reach a public repo. Unlike a network failure (which is
- * survivable — we keep the committed file), a PII hit is a hard stop: exit non-zero
- * so CI and the developer both notice. South-African CV conventions are unusually
- * PII-dense, and under POPIA some of these are special personal information.
+ * Unlike a network failure (survivable — we keep the committed file), a PII hit is a
+ * hard stop: exit non-zero so CI and the developer both notice. South-African CV
+ * conventions are unusually PII-dense, and under POPIA some fields are special
+ * personal information.
+ *
+ * The patterns live in src/lib/kb-patterns.mjs because the Worker needs the identical
+ * set. They previously lived here and had a defect that mattered: the SA-mobile
+ * pattern accepted a space but not a hyphen between digit groups, so the real CV's
+ * number passed straight through. Do not re-inline them.
  */
-const PII = [
-  { name: "SA ID number", re: /\b\d{6}[ -]?\d{4}[ -]?[01]\d{2}\b/ },
-  { name: "SA mobile number", re: /(?:\+27|\b0)\s?[6-8]\d(?:\s?\d){7}\b/ },
-  {
-    name: "identity field",
-    re: /\b(id no\.?|identity number|date of birth|marital status|nationality|home address)\b/i,
-  },
-];
-
 function scanForPii(label, text) {
-  const hits = PII.filter((p) => p.re.test(text)).map((p) => p.name);
+  const hits = findPii(text);
   if (hits.length > 0) {
     console.error(
       `\n✗ ${label} contains what looks like personal information: ${hits.join(", ")}.\n` +
@@ -61,15 +60,6 @@ async function exportDoc(id, format) {
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return format === "pdf" ? Buffer.from(await res.arrayBuffer()) : await res.text();
-}
-
-/** Google's markdown export escapes angle brackets and leaves image placeholders. */
-function tidy(md) {
-  return md
-    .replace(/\\([<>[\]])/g, "$1")
-    .replace(/^\s*\[image\d*\]\s*$/gim, "")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
 }
 
 async function main() {
