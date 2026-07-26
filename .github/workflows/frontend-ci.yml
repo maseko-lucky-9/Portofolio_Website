@@ -60,9 +60,13 @@ jobs:
         working-directory: ${{ env.WORKING_DIRECTORY }}
         run: npm run lint
 
+      # `-b` (build mode) is required, not optional: tsconfig.json is a
+      # solution-style config ("files": [] + references), so a bare
+      # `tsc --noEmit` compiles ZERO files and exits 0 no matter what is
+      # broken. This gate silently checked nothing until 2026-07-26.
       - name: Run TypeScript type check
         working-directory: ${{ env.WORKING_DIRECTORY }}
-        run: npx tsc --noEmit
+        run: npm run typecheck
 
       # mts/mjs included deliberately: src/lib/kb-patterns.mjs holds the PII rules
       # that gate what the chatbot publishes. Under the previous glob the one

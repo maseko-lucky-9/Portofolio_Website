@@ -26,5 +26,8 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src"]
+  "include": ["src"],
+  // Cloudflare Workers runtime code — type-checked by tsconfig.worker.json,
+  // which supplies the Workers globals this DOM-targeted project lacks.
+  "exclude": ["src/worker.ts"]
 }

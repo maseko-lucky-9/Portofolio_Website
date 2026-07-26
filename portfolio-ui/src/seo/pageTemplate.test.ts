@@ -8,7 +8,6 @@
 
 import { describe, expect, it } from "vitest";
 
-// @ts-expect-error - resolved at runtime; vitest handles .mjs imports
 import { renderPage, renderIndex } from "../../scripts/seo/page-template.mjs";
 
 function extractJsonLdBlocks(html: string): unknown[] {

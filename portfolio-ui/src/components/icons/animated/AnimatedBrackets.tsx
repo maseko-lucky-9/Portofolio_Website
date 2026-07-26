@@ -9,8 +9,11 @@
  * Reduced-motion: renders the brackets fully drawn, no animation.
  */
 import { useRef } from "react";
-import { animate, createDrawable, createTimeline, stagger } from "animejs";
+import { animate, createDrawable, createTimeline } from "animejs";
 import { useAnime } from "@/lib/use-anime";
+
+/** Per-bracket draw-on offset, ms. */
+const BRACKET_STAGGER_MS = 80;
 
 export interface AnimatedBracketsProps {
   size?: number;
@@ -41,10 +44,13 @@ export function AnimatedBrackets({
       const drawables = Array.from(paths).map((p) => createDrawable(p));
       const tl = createTimeline({ autoplay: true });
       drawables.forEach((d, i) => {
+        // Linear 80 ms stagger. Previously called stagger(80) manually with a
+        // dummy target to compute this; the arithmetic is identical and does
+        // not need a fake Element cast.
         tl.add(
           d,
           { draw: ["0 0", "0 1"], duration: 500, ease: "outQuart" },
-          stagger(80)({} as Element, i, drawables.length),
+          i * BRACKET_STAGGER_MS,
         );
       });
 
