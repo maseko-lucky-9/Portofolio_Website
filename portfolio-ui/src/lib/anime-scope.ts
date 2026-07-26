@@ -15,8 +15,8 @@
  *   - Single source of truth if we later add coarse-pointer or
  *     forced-colors-aware scopes.
  */
-import { createScope, type Scope } from "animejs";
-import { DURATION, EASE } from "./motion";
+import { createScope, type DOMTarget, type Scope } from "animejs";
+import { DURATION, EASE_FN } from "./motion";
 
 const MEDIA_QUERIES = {
   reducedMotion: "(prefers-reduced-motion: reduce)",
@@ -34,14 +34,16 @@ export type MotionScope = Scope & {
  * Returns the scope so the caller can `.add(...)` animations and
  * `.revert()` on cleanup.
  */
-export function createMotionScope(root: HTMLElement | null): MotionScope {
+export function createMotionScope(root: DOMTarget | null): MotionScope {
   return createScope({
     root: root ?? undefined,
     defaults: {
       // anime.js durations are in ms. DURATION values are seconds (kept that
       // way for framer-motion legacy callers); multiply at scope creation.
       duration: DURATION.base * 1000,
-      ease: EASE.emphasized,
+      // EASE_FN.* is the cubicBezier-wrapped form anime.js `ease:` fields
+      // require; EASE.* holds the raw tuples for CSS/framer callers.
+      ease: EASE_FN.emphasized,
     },
     mediaQueries: MEDIA_QUERIES,
   }) as MotionScope;

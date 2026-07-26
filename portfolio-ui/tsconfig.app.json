@@ -26,5 +26,15 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src"]
+  "include": ["src"],
+  // Cloudflare Workers runtime code — type-checked by tsconfig.worker.json,
+  // which supplies the Workers globals this DOM-targeted project lacks.
+  //
+  // Only worker.ts can actually be excluded. chat.ts and kb.ts are worker-side
+  // too, but src/__tests__/{chat,kb}.test.ts import them and those tests belong
+  // to this project, so TS pulls them back in regardless of any exclude entry.
+  // They therefore compile twice — DOM types here, Workers types there — and
+  // must pass under both. Listing them here would imply an exclusion that does
+  // not happen.
+  "exclude": ["src/worker.ts"]
 }

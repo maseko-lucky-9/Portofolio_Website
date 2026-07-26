@@ -78,7 +78,9 @@ export function Navbar() {
       duration: 200,
       ease: EASE_FN.out,
     });
-    return () => anim.cancel();
+    return () => {
+      anim.cancel();
+    };
   }, [isScrolled, prefersReducedMotion]);
 
   // Mobile drawer enter/exit. Rendered unconditionally; pointer-events

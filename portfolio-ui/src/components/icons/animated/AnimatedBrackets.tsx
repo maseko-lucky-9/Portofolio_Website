@@ -9,8 +9,12 @@
  * Reduced-motion: renders the brackets fully drawn, no animation.
  */
 import { useRef } from "react";
-import { animate, createDrawable, createTimeline, stagger } from "animejs";
+import { animate, createDrawable, createTimeline } from "animejs";
 import { useAnime } from "@/lib/use-anime";
+
+/** Per-bracket draw-on offset, ms. Exported so the regression test pins the
+ *  real value rather than a copy that can drift. */
+export const BRACKET_STAGGER_MS = 80;
 
 export interface AnimatedBracketsProps {
   size?: number;
@@ -41,10 +45,16 @@ export function AnimatedBrackets({
       const drawables = Array.from(paths).map((p) => createDrawable(p));
       const tl = createTimeline({ autoplay: true });
       drawables.forEach((d, i) => {
+        // Linear 80 ms stagger. This previously called stagger(80) by hand as
+        // `stagger(80)({} as Element, i, drawables.length)` — passing a NUMBER
+        // where anime expects the targets ARRAY. `(4).length` is undefined, so
+        // stagger's fill loop never ran and it returned 0 for every index: the
+        // brackets all drew at once. This restores the stagger that was always
+        // intended. See anime-helpers.test.ts.
         tl.add(
           d,
           { draw: ["0 0", "0 1"], duration: 500, ease: "outQuart" },
-          stagger(80)({} as Element, i, drawables.length),
+          i * BRACKET_STAGGER_MS,
         );
       });
 

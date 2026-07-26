@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2023"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+
+    /* Cloudflare Workers runtime globals (ExportedHandler, Request, Env…).
+       Kept in its own project so these globals never leak into the DOM app
+       project, and the app's DOM lib never leaks in here. */
+    "types": ["@cloudflare/workers-types"],
+
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["src/worker.ts", "src/chat.ts", "src/kb.ts"]
+}
