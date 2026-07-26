@@ -8,6 +8,10 @@
 
 import { describe, expect, it } from "vitest";
 
+// page-template.mjs is plain ESM outside the app tsconfig's program, so these
+// imports are implicitly `any` (tolerated only because noImplicitAny is off).
+// It needed a @ts-expect-error until 2026-07-26; that directive is now unused,
+// but the underlying gap it documented still stands.
 import { renderPage, renderIndex } from "../../scripts/seo/page-template.mjs";
 
 function extractJsonLdBlocks(html: string): unknown[] {
