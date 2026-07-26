@@ -19,6 +19,8 @@ spec:
     - secretName: homelab-tls
       hosts:
         - api.portfolio.homelab
+        - portfolio.homelab
+        - print-calc.homelab
   rules:
   - host: api.portfolio.homelab
     http:
