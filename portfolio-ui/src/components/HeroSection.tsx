@@ -259,7 +259,7 @@ export function HeroSection() {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={label}
-                    className="p-3 rounded-xl transition-all focus-visible:ring-2 focus-visible:ring-primary/30"
+                    className="p-3 rounded-xl transition-all"
                     style={{
                       background: "oklch(var(--muted))",
                       border: "1px solid oklch(var(--border))",
