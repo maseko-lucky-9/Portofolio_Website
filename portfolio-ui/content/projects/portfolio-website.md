@@ -50,7 +50,7 @@ The site you're reading right now. Vite + React 18 SPA with a `@react-three/fibe
 ```
 vite build
   -> Vite + Rollup -> dist/index.html + chunked assets
-                       (vendor splits: react, three, radix, motion, monaco)
+                       (vendor splits: react, three, radix, motion)
 node scripts/build-static-pages.mjs
   -> reads content/{blog,answers,projects}/*.md via unified + remark
   -> writes dist/<kind>/<slug>/index.html with JSON-LD per page

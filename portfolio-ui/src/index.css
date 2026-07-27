@@ -254,6 +254,9 @@
 
   *:focus-visible {
     @apply outline-2 outline-offset-2 outline-primary;
+    /* Without an explicit style the outline stays at the UA `auto` default,
+       and Chromium paints its own ring while ignoring outline-color. */
+    outline-style: solid;
   }
 
   body {
@@ -336,7 +339,9 @@
     transform: translate(var(--magnetic-x, 0), var(--magnetic-y, 0)) scale(0.98);
   }
 
-  /* ── Green (emerald) CTA modifier — swaps primary→secondary tokens ── */
+  /* ── Green (emerald) CTA modifier — swaps primary→secondary tokens.
+     Only meaningful compounded with .btn-hero-primary / .btn-hero-secondary;
+     on its own it contributes just the focus-ring colour. ── */
   .btn-hero-primary.btn-green {
     @apply text-secondary-foreground;
     background: var(--gradient-secondary);
