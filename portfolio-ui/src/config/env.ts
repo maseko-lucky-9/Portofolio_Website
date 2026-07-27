@@ -32,7 +32,6 @@ export const env = {
   useApi: toBool(import.meta.env.VITE_USE_API, false),
   enableMsw: toBool(import.meta.env.VITE_ENABLE_MSW, false),
   enableAnalytics: toBool(import.meta.env.VITE_ENABLE_ANALYTICS, true),
-  enableCodeExecution: toBool(import.meta.env.VITE_ENABLE_CODE_EXECUTION, true),
   enableComments: toBool(import.meta.env.VITE_ENABLE_COMMENTS, true),
 
   // Debug Mode
@@ -75,7 +74,6 @@ if (env.debug) {
     mode: env.mode,
     features: {
       analytics: env.enableAnalytics,
-      codeExecution: env.enableCodeExecution,
       comments: env.enableComments,
     },
   });

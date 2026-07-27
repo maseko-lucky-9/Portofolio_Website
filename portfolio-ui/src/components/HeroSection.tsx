@@ -224,14 +224,18 @@ export function HeroSection() {
               data-anime-hero="ctas"
               className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start mb-9"
             >
-              <button ref={primaryCtaRef} onClick={scrollToProjects} className="btn-hero-primary">
+              <button
+                ref={primaryCtaRef}
+                onClick={scrollToProjects}
+                className="btn-hero-primary btn-green"
+              >
                 View My Work
                 <ArrowDown className="w-4 h-4" />
               </button>
               <button
                 ref={secondaryCtaRef}
                 onClick={scrollToContact}
-                className="btn-hero-secondary"
+                className="btn-hero-secondary btn-green"
               >
                 Contact Me
               </button>
