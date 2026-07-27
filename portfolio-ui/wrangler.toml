@@ -103,3 +103,14 @@ binding = "AI"
 name = "CHAT_LIMITER"
 namespace_id = "4201"                 # account-scoped: must not collide with other Workers
 simple = { limit = 8, period = 60 }   # period accepts only 10 or 60
+
+# Knowledge-base live sync (see src/kb.ts). GDOC_CV_ID / GDOC_BRIEF_ID are Worker
+# secrets, not vars — a link-viewable doc id is a bearer capability for that document.
+[[kv_namespaces]]
+binding = "KB"
+id = "d9e5b519d4ce40cea8a078d24fa7867a"
+
+# Hourly, off the top-of-hour scheduler peak. refreshKb() no-ops safely if the two
+# GDOC_*_ID secrets are ever unset.
+[triggers]
+crons = ["17 * * * *"]
