@@ -180,6 +180,11 @@ export function ChatWidget() {
             role="log"
             aria-live="polite"
             aria-relevant="additions"
+            // Lenis (SmoothScroll.tsx) preventDefaults every wheel event and virtual-scrolls
+            // the document, so without this opt-out the page moves behind the panel and the
+            // log never scrolls. Scoped here rather than flipping Lenis's global
+            // allowNestedScroll — this is the only nested scroller in the app.
+            data-lenis-prevent
             className="flex-1 overflow-y-auto custom-scrollbar p-4 flex flex-col gap-3"
           >
             {msgs.length === 0 && (

@@ -204,7 +204,7 @@ export function ServicesSection() {
           </p>
           <a
             href="#contact"
-            className="btn-hero-secondary inline-flex items-center gap-2"
+            className="btn-hero-secondary btn-green inline-flex items-center gap-2"
             onClick={(e) => {
               e.preventDefault();
               document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
