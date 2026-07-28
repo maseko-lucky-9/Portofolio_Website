@@ -256,7 +256,7 @@ export function BlogSection() {
         {/* View All Link */}
         {!isLoading && blogPosts.length > 0 && (
           <div data-anime className="text-center mt-12">
-            <a href="/blog" className="btn-hero-secondary">
+            <a href="/blog" className="btn-hero-secondary btn-green">
               View All Articles
               <ArrowRight className="w-4 h-4" />
             </a>

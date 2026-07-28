@@ -150,7 +150,6 @@ jobs:
           VITE_API_BASE_URL: https://api.example.com
           VITE_API_VERSION: v1
           VITE_ENABLE_ANALYTICS: true
-          VITE_ENABLE_CODE_DEMO: true
 
       - name: Check build output
         working-directory: ${{ env.WORKING_DIRECTORY }}

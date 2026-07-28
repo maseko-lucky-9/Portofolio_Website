@@ -86,7 +86,7 @@ export const springAnimeHero = spring(SPRING_PARAMS.hero);
 export const springAnimeSkills = spring(SPRING_PARAMS.skills);
 
 // Legacy framer-format helpers — removed in Phase F once SPRING_*
-// consumers (currently un-migrated parts of Navbar/CodeDemo/etc.) are
+// consumers (currently un-migrated parts of Navbar/etc.) are
 // all on the anime side.
 export const springTransition = SPRING_DEFAULT;
 export const snappyTransition = {

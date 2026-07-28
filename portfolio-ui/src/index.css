@@ -254,6 +254,9 @@
 
   *:focus-visible {
     @apply outline-2 outline-offset-2 outline-primary;
+    /* Without an explicit style the outline stays at the UA `auto` default,
+       and Chromium paints its own ring while ignoring outline-color. */
+    outline-style: solid;
   }
 
   body {
@@ -334,6 +337,37 @@
 
   .btn-hero-secondary:active {
     transform: translate(var(--magnetic-x, 0), var(--magnetic-y, 0)) scale(0.98);
+  }
+
+  /* ── Green (emerald) CTA modifier — swaps primary→secondary tokens.
+     Only meaningful compounded with .btn-hero-primary / .btn-hero-secondary;
+     on its own it contributes just the focus-ring colour. ── */
+  .btn-hero-primary.btn-green {
+    @apply text-secondary-foreground;
+    background: var(--gradient-secondary);
+    box-shadow: var(--shadow-md), var(--shadow-glow-secondary);
+  }
+
+  .btn-hero-primary.btn-green:hover {
+    box-shadow:
+      var(--shadow-xl),
+      0 0 32px oklch(var(--secondary) / 0.45);
+  }
+
+  .btn-hero-secondary.btn-green {
+    @apply text-secondary;
+    border-color: oklch(var(--secondary) / 0.4);
+    background: oklch(var(--secondary) / 0.05);
+  }
+
+  .btn-hero-secondary.btn-green:hover {
+    background: oklch(var(--secondary) / 0.1);
+    border-color: oklch(var(--secondary) / 0.7);
+    box-shadow: var(--shadow-glow-secondary);
+  }
+
+  .btn-green:focus-visible {
+    @apply outline-secondary;
   }
 
   /* ── Project cards ── */
@@ -466,12 +500,6 @@
       oklch(var(--primary) / 0.5) 40%,
       transparent
     );
-  }
-
-  /* ── Code editor ── */
-  .code-editor-wrapper {
-    @apply rounded-2xl overflow-hidden border bg-card;
-    box-shadow: var(--shadow-xl);
   }
 
   /* ── Skill radar ── */
