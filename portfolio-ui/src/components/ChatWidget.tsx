@@ -188,7 +188,9 @@ export function ChatWidget() {
             // overscroll-contain is the other half: data-lenis-prevent only makes Lenis
             // stand down, so at the log's scroll boundary the wheel chained to the document
             // and jumped the page behind the panel — and as a native scroll, not a smoothed
-            // one. Together they keep the wheel inside the panel in every position.
+            // one. Together they keep the wheel inside the LOG at any scroll position.
+            // Scoped to the log, not the panel: wheeling over the header or composer still
+            // scrolls the page, which is pre-existing and fine for a non-modal panel.
             className="flex-1 overflow-y-auto overscroll-contain custom-scrollbar p-4 flex flex-col gap-3"
           >
             {msgs.length === 0 && (

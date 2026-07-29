@@ -34,9 +34,13 @@ async function openOverflowingChat(page: Page) {
   await panel.getByPlaceholder("Ask a question…").fill("tell me everything");
   await page.keyboard.press("Enter");
 
-  // Wait for the stream to finish, not just to overflow: ChatWidget re-pins the
-  // log to the bottom on every token, which would undo the scrollTop the tests set.
-  await expect(panel.getByText(/Thinking…/)).toBeHidden();
+  // Wait for the LAST token, not for "Thinking…" to clear — ChatWidget renders that
+  // as {busy && !live}, so it disappears on the first token, not at stream end. This
+  // matters because ChatWidget re-pins the log to the bottom on every token, which
+  // would undo the scrollTop each test sets. Today route.fulfill happens to deliver
+  // the whole SSE body atomically so the race can't fire; asserting on the final
+  // token keeps that true if the stub is ever made genuinely chunked.
+  await expect(log).toContainText("token219");
   await expect
     .poll(() => log.evaluate((el) => el.scrollHeight - el.clientHeight), { timeout: 20000 })
     .toBeGreaterThan(50);
