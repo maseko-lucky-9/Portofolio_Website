@@ -20,7 +20,6 @@ data:
   
   # Feature Flags
   VITE_ENABLE_ANALYTICS: "true"
-  VITE_ENABLE_CODE_DEMO: "true"
   VITE_ENABLE_COMMENTS: "true"
   VITE_DEBUG_MODE: "false"
   

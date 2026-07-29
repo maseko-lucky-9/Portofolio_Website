@@ -507,7 +507,7 @@ export function ContactSection() {
                   <Button
                     type="submit"
                     disabled={isPending}
-                    className="w-full btn-hero-primary !rounded-lg"
+                    className="w-full btn-hero-primary btn-green !rounded-lg focus-visible:ring-secondary"
                   >
                     {isPending ? (
                       <>
