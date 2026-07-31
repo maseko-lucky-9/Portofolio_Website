@@ -12,6 +12,10 @@ import { fileURLToPath } from 'node:url';
 
 import { SITE_ORIGIN } from './seo/routes.mjs';
 
+// Derived, not a fifth hardcoded copy of the domain — noreply@<host> for the
+// three RSS contact fields below, which don't accept a full URL.
+const NOREPLY = 'noreply@' + new URL(SITE_ORIGIN).hostname;
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, '..');
 const DIST = resolve(REPO_ROOT, 'dist');
@@ -69,7 +73,7 @@ const itemXml = items
       '      <category>' + escapeXml(it.kind) + '</category>\n' +
       it.keywords.map((k) => '      <category>' + escapeXml(k) + '</category>').join('\n') +
       (it.keywords.length ? '\n' : '') +
-      '      <author>noreply@thulanimaseko.co.za (Thulani Maseko)</author>\n' +
+      '      <author>' + NOREPLY + ' (Thulani Maseko)</author>\n' +
       '    </item>'
   )
   .join('\n');
@@ -86,8 +90,8 @@ const xml =
   '    <lastBuildDate>' + rfc822(latestPubDate) + '</lastBuildDate>\n' +
   '    <pubDate>' + rfc822(latestPubDate) + '</pubDate>\n' +
   '    <generator>build-rss.mjs (custom)</generator>\n' +
-  '    <managingEditor>noreply@thulanimaseko.co.za (Thulani Maseko)</managingEditor>\n' +
-  '    <webMaster>noreply@thulanimaseko.co.za (Thulani Maseko)</webMaster>\n' +
+  '    <managingEditor>' + NOREPLY + ' (Thulani Maseko)</managingEditor>\n' +
+  '    <webMaster>' + NOREPLY + ' (Thulani Maseko)</webMaster>\n' +
   itemXml + '\n' +
   '  </channel>\n' +
   '</rss>\n';

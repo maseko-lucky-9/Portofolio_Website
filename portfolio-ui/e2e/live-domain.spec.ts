@@ -61,12 +61,18 @@ test.describe("live domain", () => {
 
     // The Person @id is the anchor every generated page's JSON-LD references.
     // If index.html and the build scripts disagree, entity disambiguation
-    // breaks silently — no error, just a broken graph for crawlers.
+    // breaks silently — no error, just a broken graph for crawlers. Parsed
+    // rather than substring-matched so this survives reformatting of the
+    // inline JSON-LD, not just today's exact whitespace.
     const ld = await page
       .locator('script[type="application/ld+json"]')
       .first()
       .textContent();
-    expect(ld).toContain(`"@id": "${expectedOrigin}/#thulani"`);
+    const graph = JSON.parse(ld ?? "{}") as {
+      "@graph"?: Array<Record<string, unknown>>;
+    };
+    const person = graph["@graph"]?.find((n) => n["@type"] === "Person");
+    expect(person?.["@id"]).toBe(`${expectedOrigin}/#thulani`);
   });
 
   test.describe("SEO surfaces carry the right domain", () => {

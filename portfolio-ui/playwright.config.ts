@@ -9,6 +9,13 @@ const liveBaseUrl = process.env.E2E_BASE_URL;
 
 export default defineConfig({
   testDir: "./e2e",
+  // When targeting a live deployment, restrict to the spec built for that —
+  // e2e/live-domain.spec.ts is read-only by design, but nothing stops the
+  // other 8 specs from also matching if someone runs the bare `test:e2e`
+  // script (or a future spec) with E2E_BASE_URL still exported in their
+  // shell. Scoping here means production can only ever receive the traffic
+  // this file's specs were reviewed for producing.
+  testMatch: liveBaseUrl ? "live-domain.spec.ts" : undefined,
   // 2 local workers (one per project) keeps the preview server from being hit by
   // more concurrent page.goto() calls than it can serve without timeout. CI uses
   // 1 worker sequentially.
@@ -22,7 +29,6 @@ export default defineConfig({
   use: {
     baseURL: liveBaseUrl ?? "http://localhost:5173",
     trace: "on-first-retry",
-    screenshot: "on",
     navigationTimeout: 45000,
     actionTimeout: 15000,
     // reducedMotion:"reduce" serves double duty in headless Chromium:
