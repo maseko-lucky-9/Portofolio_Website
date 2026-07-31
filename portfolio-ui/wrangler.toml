@@ -17,19 +17,20 @@ name = "thulani-portfolio"
 compatibility_date = "2025-04-26"
 workers_dev = true
 
-# Custom-domain routes (uncomment AFTER the zone is Active in
-# Cloudflare — see docs/seo/custom-domain-setup.md). `custom_domain = true`
-# makes Cloudflare auto-provision DNS records + TLS cert.
-#
-# [[routes]]
-# pattern = "thulanimaseko.co.za/*"
-# zone_name = "thulanimaseko.co.za"
-# custom_domain = true
-#
-# [[routes]]
-# pattern = "www.thulanimaseko.co.za/*"
-# zone_name = "thulanimaseko.co.za"
-# custom_domain = true
+# Custom-domain routes. Zone verified Active 2026-07-31: NS delegation
+# confirmed at all three .co.za registry servers (not just a resolver cache),
+# apex + www both hold zero DNS records, mail records (SPF/DMARC/null-MX) are
+# live — see docs/seo/custom-domain-setup.md for the full exit-gate check.
+# `custom_domain = true` auto-provisions DNS records + TLS cert.
+[[routes]]
+pattern = "thulanimaseko.co.za/*"
+zone_name = "thulanimaseko.co.za"
+custom_domain = true
+
+[[routes]]
+pattern = "www.thulanimaseko.co.za/*"
+zone_name = "thulanimaseko.co.za"
+custom_domain = true
 
 # Worker entry-point: wraps the ASSETS binding to inject security and
 # AI-opt-out response headers (see src/worker.ts). Disable by clearing
