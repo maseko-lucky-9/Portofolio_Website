@@ -51,7 +51,7 @@ These can't be expressed in `robots.txt`. Configure in the Cloudflare dashboard 
 
 Verify after each deploy with:
 ```
-curl -A "AhrefsBot" -I https://thulanimaseko.com/        # expect 403
-curl -A "Googlebot/2.1" -I https://thulanimaseko.com/    # expect 200
-curl -A "python-requests/2.31" -I https://thulanimaseko.com/  # expect challenge page
+curl -A "AhrefsBot" -I https://thulanimaseko.co.za/        # expect 403
+curl -A "Googlebot/2.1" -I https://thulanimaseko.co.za/    # expect 200
+curl -A "python-requests/2.31" -I https://thulanimaseko.co.za/  # expect challenge page
 ```

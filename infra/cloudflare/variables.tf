@@ -12,5 +12,5 @@ variable "cf_account_id" {
 variable "cf_zone_name" {
   description = "Apex domain of the target Cloudflare zone."
   type        = string
-  default     = "thulanimaseko.com"
+  default     = "thulanimaseko.co.za"
 }

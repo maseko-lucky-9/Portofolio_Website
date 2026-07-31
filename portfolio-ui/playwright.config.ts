@@ -1,5 +1,12 @@
 import { defineConfig, devices } from "@playwright/test";
 
+// Set E2E_BASE_URL to point the suite at an already-running host instead of a
+// locally-built preview — e.g. verifying a custom domain after a DNS cutover:
+//   E2E_BASE_URL=https://thulanimaseko.co.za npx playwright test e2e/live-domain.spec.ts
+// When it is set the webServer block is dropped, so nothing is built or served
+// locally and the tests hit the real deployment.
+const liveBaseUrl = process.env.E2E_BASE_URL;
+
 export default defineConfig({
   testDir: "./e2e",
   // 2 local workers (one per project) keeps the preview server from being hit by
@@ -13,8 +20,9 @@ export default defineConfig({
   // 60s per-test timeout covers lazy-loaded Suspense sections + scroll + assertions.
   timeout: 60000,
   use: {
-    baseURL: "http://localhost:5173",
+    baseURL: liveBaseUrl ?? "http://localhost:5173",
     trace: "on-first-retry",
+    screenshot: "on",
     navigationTimeout: 45000,
     actionTimeout: 15000,
     // reducedMotion:"reduce" serves double duty in headless Chromium:
@@ -45,15 +53,20 @@ export default defineConfig({
       use: { ...devices["iPhone 13"] },
     },
   ],
-  webServer: {
-    // VITE_USE_API=false  → static data, no API calls, no isLoading→isError re-renders
-    // VITE_DISABLE_WEBGL=true → AuroraBackground skips Three.js Canvas entirely,
-    //   which would otherwise crash headless Chromium (no GPU → WebGL context fails →
-    //   r3f throws → React unmounts the entire tree including the Navbar).
-    // Also avoids HMR (dev server) which triggers full page reloads in headless mode.
-    command: "VITE_USE_API=false VITE_DISABLE_WEBGL=true npm run build && npm run preview",
-    url: "http://localhost:5173",
-    reuseExistingServer: !process.env.CI,
-    timeout: 120000,
-  },
+  // Skipped entirely when E2E_BASE_URL targets a live deployment — there is
+  // nothing to build or serve in that case.
+  webServer: liveBaseUrl
+    ? undefined
+    : {
+        // VITE_USE_API=false  → static data, no API calls, no isLoading→isError re-renders
+        // VITE_DISABLE_WEBGL=true → AuroraBackground skips Three.js Canvas entirely,
+        //   which would otherwise crash headless Chromium (no GPU → WebGL context fails →
+        //   r3f throws → React unmounts the entire tree including the Navbar).
+        // Also avoids HMR (dev server) which triggers full page reloads in headless mode.
+        command:
+          "VITE_USE_API=false VITE_DISABLE_WEBGL=true npm run build && npm run preview",
+        url: "http://localhost:5173",
+        reuseExistingServer: !process.env.CI,
+        timeout: 120000,
+      },
 });

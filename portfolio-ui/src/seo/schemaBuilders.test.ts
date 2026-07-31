@@ -11,9 +11,9 @@ import {
 describe("schemaBuilders", () => {
   it("buildBreadcrumbList — assigns positions starting at 1", () => {
     const out = buildBreadcrumbList([
-      { name: "Home", url: "https://thulanimaseko.com/" },
-      { name: "Projects", url: "https://thulanimaseko.com/projects" },
-      { name: "Foo", url: "https://thulanimaseko.com/projects/foo" },
+      { name: "Home", url: "https://thulanimaseko.co.za/" },
+      { name: "Projects", url: "https://thulanimaseko.co.za/projects" },
+      { name: "Foo", url: "https://thulanimaseko.co.za/projects/foo" },
     ]);
     expect(out["@type"]).toBe("BreadcrumbList");
     expect((out.itemListElement as Array<{ position: number }>)[0].position).toBe(1);
@@ -26,10 +26,10 @@ describe("schemaBuilders", () => {
       headline: "Hello",
       description: "desc",
       datePublished: "2026-05-01T00:00:00Z",
-      image: "https://thulanimaseko.com/og/blog-hello.png",
+      image: "https://thulanimaseko.co.za/og/blog-hello.png",
     });
     expect(out.dateModified).toBe("2026-05-01T00:00:00Z");
-    expect(out["@id"]).toBe("https://thulanimaseko.com/blog/hello#blogposting");
+    expect(out["@id"]).toBe("https://thulanimaseko.co.za/blog/hello#blogposting");
   });
 
   it("buildBlogPosting — only emits optional fields when provided", () => {
@@ -38,7 +38,7 @@ describe("schemaBuilders", () => {
       headline: "A",
       description: "d",
       datePublished: "2026-05-01T00:00:00Z",
-      image: "https://thulanimaseko.com/og/a.png",
+      image: "https://thulanimaseko.co.za/og/a.png",
     });
     expect(minimal.wordCount).toBeUndefined();
     expect(minimal.keywords).toBeUndefined();
@@ -48,7 +48,7 @@ describe("schemaBuilders", () => {
       headline: "A",
       description: "d",
       datePublished: "2026-05-01T00:00:00Z",
-      image: "https://thulanimaseko.com/og/a.png",
+      image: "https://thulanimaseko.co.za/og/a.png",
       wordCount: 1500,
       keywords: ["kubernetes", "argocd"],
     });

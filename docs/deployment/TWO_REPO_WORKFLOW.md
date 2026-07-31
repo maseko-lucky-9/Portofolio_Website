@@ -87,7 +87,7 @@ Per-target values now come from:
 Production has no backend by design. The contact form detects this (`env.useApi === false`)
 and hands the message to the visitor's mail client instead of dropping it. To give production
 a real endpoint later, onboard a domain to Cloudflare Email Sending and add a
-`POST /api/v1/contact/submit` route to `worker.ts` — `thulanimaseko.com` is not currently
+`POST /api/v1/contact/submit` route to `worker.ts` — `thulanimaseko.co.za` is not currently
 resolvable, which is why the mailto path exists.
 
 ## One-time setup

@@ -10,7 +10,7 @@
  * the test surface stays trivial.
  */
 
-const SITE_ORIGIN = "https://thulanimaseko.com";
+const SITE_ORIGIN = "https://thulanimaseko.co.za";
 const PERSON_ID = `${SITE_ORIGIN}/#thulani`;
 
 export interface BreadcrumbCrumb {

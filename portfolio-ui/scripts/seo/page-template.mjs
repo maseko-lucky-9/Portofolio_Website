@@ -5,7 +5,7 @@
 //
 // Keep this lean: every byte added ships on every blog/answers page.
 
-const SITE_ORIGIN = 'https://thulanimaseko.com';
+const SITE_ORIGIN = 'https://thulanimaseko.co.za';
 
 // Schema builders re-implemented here as plain JS (src/seo/schemaBuilders.ts
 // is TypeScript and can't be imported directly from a Node script without a
@@ -254,7 +254,7 @@ export function renderPage(args) {
 
     <style>${INLINE_CSS}</style>
 
-    <script defer data-domain="thulanimaseko.com" src="https://plausible.io/js/script.js"></script>
+    <script defer data-domain="thulanimaseko.co.za" src="https://plausible.io/js/script.js"></script>
   </head>
   <body>
     <header class="site">
@@ -345,7 +345,7 @@ export function renderIndex(kind, posts) {
       main.article ul li a:hover { color: var(--accent); }
       main.article ul li p { margin: 6px 0 0; color: var(--muted); }
     </style>
-    <script defer data-domain="thulanimaseko.com" src="https://plausible.io/js/script.js"></script>
+    <script defer data-domain="thulanimaseko.co.za" src="https://plausible.io/js/script.js"></script>
   </head>
   <body>
     <header class="site">

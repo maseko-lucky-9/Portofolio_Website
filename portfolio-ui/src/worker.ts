@@ -60,7 +60,16 @@ const PERMISSIONS_POLICY = [
 ].join(", ");
 
 const STATIC_HEADERS: Record<string, string> = {
-  "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload",
+  // Deliberately short and un-preloaded while thulanimaseko.co.za is being
+  // onboarded. `preload` is itself the consent signal — hstspreload.org accepts
+  // submissions from anyone once the header qualifies, and removal takes months
+  // of browser-release cycles. `includeSubDomains` binds every depth for the
+  // full max-age, but Cloudflare Universal SSL only covers the apex and
+  // first-level subdomains, so a future homelab.<apex> host would be
+  // unreachable with no bypass. Raise to max-age=31536000 a week after the
+  // domain is confirmed stable; re-add includeSubDomains only alongside a
+  // subdomain cert strategy.
+  "Strict-Transport-Security": "max-age=300",
   "X-Content-Type-Options": "nosniff",
   "X-Frame-Options": "DENY",
   "Referrer-Policy": "strict-origin-when-cross-origin",
