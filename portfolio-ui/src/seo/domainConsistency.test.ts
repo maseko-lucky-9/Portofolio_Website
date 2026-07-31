@@ -27,10 +27,7 @@ import { renderPage } from "../../scripts/seo/page-template.mjs";
 import { buildBlogPosting } from "./schemaBuilders";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const indexHtml = readFileSync(
-  resolve(__dirname, "../../index.html"),
-  "utf-8",
-);
+const indexHtml = readFileSync(resolve(__dirname, "../../index.html"), "utf-8");
 
 describe("domain consistency across independent SITE_ORIGIN copies", () => {
   it("routes.mjs SITE_ORIGIN is a well-formed https origin with no trailing slash", () => {
@@ -48,9 +45,7 @@ describe("domain consistency across independent SITE_ORIGIN copies", () => {
       datePublished: "2026-01-01T00:00:00Z",
       htmlBody: "<p>x</p>",
     });
-    expect(html).toContain(
-      `<link rel="canonical" href="${ROUTES_ORIGIN}/blog/domain-check" />`,
-    );
+    expect(html).toContain(`<link rel="canonical" href="${ROUTES_ORIGIN}/blog/domain-check" />`);
   });
 
   it("schemaBuilders.ts agrees with routes.mjs", () => {
@@ -65,9 +60,7 @@ describe("domain consistency across independent SITE_ORIGIN copies", () => {
   });
 
   it("index.html's canonical link agrees with routes.mjs", () => {
-    expect(indexHtml).toContain(
-      `<link rel="canonical" href="${ROUTES_ORIGIN}/" />`,
-    );
+    expect(indexHtml).toContain(`<link rel="canonical" href="${ROUTES_ORIGIN}/" />`);
   });
 
   it("index.html's Person @id agrees with routes.mjs", () => {
