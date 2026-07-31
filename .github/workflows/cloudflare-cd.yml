@@ -144,34 +144,51 @@ jobs:
 
       - name: Smoke-check deployed worker
         env:
-          DEPLOYED_URL: https://thulani-portfolio.masekotlg.workers.dev
+          # Custom domain attached 2026-07-31 (see docs/seo/custom-domain-setup.md).
+          # Both hosts checked — workers.dev never stops resolving, so it stays
+          # the reliable fallback signal if the custom domain ever has DNS/TLS
+          # trouble independent of the deploy itself.
+          DEPLOYED_URLS: >-
+            https://thulani-portfolio.masekotlg.workers.dev
+            https://thulanimaseko.co.za
         run: |
           sleep 5
-          status=$(curl -s -o /dev/null -w "%{http_code}" "$DEPLOYED_URL" || echo "000")
-          echo "GET $DEPLOYED_URL -> HTTP $status"
-          if [ "$status" != "200" ]; then
-            echo "::warning::Smoke check returned HTTP $status (may be propagation lag)"
-          fi
+          for url in $DEPLOYED_URLS; do
+            status=$(curl -s -o /dev/null -w "%{http_code}" "$url" || echo "000")
+            echo "GET $url -> HTTP $status"
+            if [ "$status" != "200" ]; then
+              echo "::warning::Smoke check for $url returned HTTP $status (may be propagation lag)"
+            fi
+          done
 
       - name: Assert LIVE bundle expects no backend
         env:
-          DEPLOYED_URL: https://thulani-portfolio.masekotlg.workers.dev
+          DEPLOYED_URLS: >-
+            https://thulani-portfolio.masekotlg.workers.dev
+            https://thulanimaseko.co.za
         run: |
           # The dist/ assertion above validates a build that `wrangler deploy`
           # then discards and re-runs (see the deploy step's env note). This
-          # step closes the loop by asserting what production actually serves.
-          # Retries cover edge-cache propagation of the fresh deployment.
-          for attempt in 1 2 3 4 5; do
-            html=$(curl -s "$DEPLOYED_URL/__deploy-check-$(date +%s)")
-            asset=$(echo "$html" | grep -o '/assets/index-[^"]*\.js' | head -1)
-            [ -n "$asset" ] || { echo "no index asset in HTML (attempt $attempt)"; sleep 15; continue; }
-            bundle=$(curl -s "$DEPLOYED_URL$asset")
-            if echo "$bundle" | grep -qE 'useApi:[A-Za-z_$][A-Za-z0-9_$]*\("false"'; then
-              echo "OK — live bundle ($asset) ships useApi=false"
-              exit 0
-            fi
-            echo "live bundle not updated yet (attempt $attempt): $(echo "$bundle" | grep -o 'useApi:[^,]*' | head -1)"
-            sleep 15
+          # step closes the loop by asserting what production actually serves
+          # — on both hosts, so a route-binding regression on the custom
+          # domain can't hide behind workers.dev still passing. Retries cover
+          # edge-cache propagation, per host.
+          fail=0
+          for url in $DEPLOYED_URLS; do
+            ok=0
+            for attempt in 1 2 3 4 5; do
+              html=$(curl -s "$url/__deploy-check-$(date +%s)")
+              asset=$(echo "$html" | grep -o '/assets/index-[^"]*\.js' | head -1)
+              [ -n "$asset" ] || { echo "$url: no index asset in HTML (attempt $attempt)"; sleep 15; continue; }
+              bundle=$(curl -s "$url$asset")
+              if echo "$bundle" | grep -qE 'useApi:[A-Za-z_$][A-Za-z0-9_$]*\("false"'; then
+                echo "OK — $url live bundle ($asset) ships useApi=false"
+                ok=1
+                break
+              fi
+              echo "$url: live bundle not updated yet (attempt $attempt): $(echo "$bundle" | grep -o 'useApi:[^,]*' | head -1)"
+              sleep 15
+            done
+            [ "$ok" -eq 1 ] || { echo "::error::$url never showed useApi=(\"false\") — the deployed artifact is not the verified build"; fail=1; }
           done
-          echo "::error::live bundle never showed useApi=(\"false\") — the deployed artifact is not the verified build"
-          exit 1
+          [ "$fail" -eq 0 ] || exit 1
