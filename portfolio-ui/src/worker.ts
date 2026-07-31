@@ -14,6 +14,7 @@
  */
 
 import { handleChat, type ChatEnv } from "./chat";
+import { httpsRedirectTarget } from "./https-redirect";
 import { refreshKb } from "./kb";
 
 interface Env extends ChatEnv {
@@ -88,12 +89,26 @@ function isHtml(res: Response): boolean {
 
 export default {
   async fetch(req: Request, env: Env): Promise<Response> {
+    // HTTPS enforcement lives here, not in the dashboard — Cloudflare's
+    // zone-level "Always Use HTTPS" does not fire for this Worker's
+    // custom-domain routes (see src/https-redirect.ts for the evidence).
+    //
+    // Deliberately the FIRST statement in the handler, ahead of the /api/chat
+    // branch below: a plaintext POST to the chat endpoint must be bounced, not
+    // processed. src/chat.ts notes visitors volunteer names and phone numbers
+    // there, so it must never be handled over cleartext. Reordering this below
+    // the chat branch would silently reintroduce that exposure.
+    const redirectTo = httpsRedirectTarget(req.url);
+    if (redirectTo) return Response.redirect(redirectTo, 301);
+
+    const url = new URL(req.url);
+
     // Handled before the ASSETS wrapper below, for three reasons: the SSE body must
     // pass through untouched (10 ms CPU limit — no per-chunk work), it must not
     // inherit the static-asset headers, and with
     // not_found_handling = "single-page-application" an un-intercepted POST would
     // otherwise return the index.html shell at HTTP 200.
-    if (new URL(req.url).pathname === "/api/chat") return handleChat(req, env);
+    if (url.pathname === "/api/chat") return handleChat(req, env);
 
     const res = await env.ASSETS.fetch(req);
 
