@@ -23,5 +23,10 @@
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src/worker.ts", "src/chat.ts", "src/kb.ts"]
+  "include": [
+    "src/worker.ts",
+    "src/chat.ts",
+    "src/kb.ts",
+    "src/https-redirect.ts"
+  ]
 }
