@@ -1,5 +1,5 @@
 ###############################################################################
-# WAF custom rules for thulanimaseko.com
+# WAF custom rules for thulanimaseko.co.za
 #
 # Encodes the 5-rule policy from docs/seo/bot-policy.md. Rules are
 # evaluated top-down inside the single Cloudflare-managed `http_request_firewall_custom`

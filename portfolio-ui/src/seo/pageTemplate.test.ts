@@ -42,7 +42,7 @@ describe("renderPage — blog kind", () => {
 
   it("includes canonical URL", () => {
     expect(html).toContain(
-      '<link rel="canonical" href="https://thulanimaseko.com/blog/test-post" />',
+      '<link rel="canonical" href="https://thulanimaseko.co.za/blog/test-post" />',
     );
   });
 

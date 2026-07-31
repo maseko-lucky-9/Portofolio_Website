@@ -157,6 +157,41 @@ jobs:
           ls -la dist
           du -sh dist
 
+      - name: Assert SEO surfaces carry the canonical domain
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        env:
+          SITE_HOST: thulanimaseko.co.za
+          STALE_HOST: thulanimaseko.com
+        run: |
+          # sitemap.xml and rss.xml are generated from SITE_ORIGIN in
+          # scripts/seo/routes.mjs, which has NO unit-test coverage — nothing
+          # else in CI would catch it drifting from the canonical domain.
+          # index.html carries the same domain independently (canonical,
+          # hreflang, OG, JSON-LD @id, Plausible data-domain) via its own
+          # literal strings, not routes.mjs — proven uncovered by reverting
+          # just its canonical link and confirming this step still passed.
+          # Both directions are checked on every file, so this cannot rot
+          # into a vacuous pass: the right host must be PRESENT and the old
+          # host ABSENT. grep -F because both hosts contain literal dots.
+          fail=0
+          for f in dist/index.html dist/sitemap.xml dist/rss.xml dist/robots.txt; do
+            if [ ! -f "$f" ]; then
+              echo "::error::$f missing — the SEO build step did not run"
+              fail=1
+              continue
+            fi
+            if ! grep -qF "$SITE_HOST" "$f"; then
+              echo "::error::$f does not reference $SITE_HOST"
+              fail=1
+            fi
+            if grep -qF "$STALE_HOST" "$f"; then
+              echo "::error::$f still references $STALE_HOST — incomplete domain rename"
+              fail=1
+            fi
+          done
+          [ "$fail" -eq 0 ] || exit 1
+          echo "OK — index.html, sitemap, rss and robots all carry $SITE_HOST"
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
