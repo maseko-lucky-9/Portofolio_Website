@@ -18,13 +18,7 @@
 
 // `wrangler dev` serves over plain http on loopback — never redirect there, or
 // local development breaks.
-const LOCAL_HOSTS = new Set([
-  "localhost",
-  "127.0.0.1",
-  "0.0.0.0",
-  "::1",
-  "[::1]",
-]);
+const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "0.0.0.0", "::1", "[::1]"]);
 
 /**
  * Returns the https URL a plaintext request should be sent to, or null when the

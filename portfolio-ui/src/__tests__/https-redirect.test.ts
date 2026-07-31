@@ -19,15 +19,13 @@ import { httpsRedirectTarget } from "../https-redirect";
 
 describe("httpsRedirectTarget", () => {
   it("upgrades a plain http URL to https", () => {
-    expect(httpsRedirectTarget("http://thulanimaseko.co.za/")).toBe(
-      "https://thulanimaseko.co.za/",
-    );
+    expect(httpsRedirectTarget("http://thulanimaseko.co.za/")).toBe("https://thulanimaseko.co.za/");
   });
 
   it("preserves path and query", () => {
-    expect(
-      httpsRedirectTarget("http://thulanimaseko.co.za/blog/hello?utm=x&b=2"),
-    ).toBe("https://thulanimaseko.co.za/blog/hello?utm=x&b=2");
+    expect(httpsRedirectTarget("http://thulanimaseko.co.za/blog/hello?utm=x&b=2")).toBe(
+      "https://thulanimaseko.co.za/blog/hello?utm=x&b=2",
+    );
   });
 
   it("drops an explicit :80 rather than emitting https://host:80", () => {
@@ -52,20 +50,17 @@ describe("httpsRedirectTarget", () => {
     expect(httpsRedirectTarget("https://thulanimaseko.co.za/")).toBeNull();
   });
 
-  it.each([
-    "http://localhost:5173/",
-    "http://localhost:8787/api/chat",
-    "http://127.0.0.1:8787/",
-  ])("does not redirect %s — wrangler dev serves plain http on loopback", (url) => {
-    expect(httpsRedirectTarget(url)).toBeNull();
-  });
+  it.each(["http://localhost:5173/", "http://localhost:8787/api/chat", "http://127.0.0.1:8787/"])(
+    "does not redirect %s — wrangler dev serves plain http on loopback",
+    (url) => {
+      expect(httpsRedirectTarget(url)).toBeNull();
+    },
+  );
 
   it("does not redirect a host merely containing 'localhost'", () => {
     // Guards against a future refactor swapping the exact-Set check for a
     // substring match, which would hand an attacker-controlled hostname like
     // localhost.evil.com a free pass out of HTTPS enforcement.
-    expect(httpsRedirectTarget("http://localhost.evil.com/")).toBe(
-      "https://localhost.evil.com/",
-    );
+    expect(httpsRedirectTarget("http://localhost.evil.com/")).toBe("https://localhost.evil.com/");
   });
 });
