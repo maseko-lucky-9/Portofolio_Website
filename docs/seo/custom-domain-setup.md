@@ -96,11 +96,17 @@ Cloudflare's "Edit Cloudflare Workers" template: it bundles account-wide
 `Workers KV:Edit`, granting write access to the `KB` namespace that holds the CV
 and screening brief.
 
-## Step 7 — Plausible
+## Step 7 — Analytics: none, deliberately
 
-The script tag in `index.html` declares `data-domain="thulanimaseko.co.za"`.
-Analytics record **nothing** until that exact domain is registered at
-<https://plausible.io/sites/new>. Do this at cutover, not later.
+There is nothing to do here. Plausible was removed on 2026-07-31 — the site had
+never been registered against a Plausible account, so it recorded nothing, and
+Plausible Cloud is a paid subscription that wasn't worth carrying for a personal
+portfolio.
+
+The site now ships **no third-party scripts at all**, which is why the Worker's
+CSP `script-src` is `'self'`-only. Re-adding any analytics means touching three
+places plus the CSP — see the comment in `portfolio-ui/index.html` where the tag
+used to be.
 
 ## Step 8 — WAF rules (last)
 

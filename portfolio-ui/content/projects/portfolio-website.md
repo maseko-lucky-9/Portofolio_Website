@@ -87,7 +87,7 @@ Enforced by `size-limit` in CI (`.github/workflows/bundle-size.yml`):
 
 - **Full Vite + Puppeteer prerender of every route** — collides with the R3F home scene (frame-0 black canvas in headless Chromium). Deferred unless the 3D scene becomes optional.
 - **Server-side rendering** — Workers Assets serves prerendered HTML for content pages; the SPA hydrates `/` on the client. No Node SSR server to manage.
-- **External analytics** — Plausible self-hosted on the [homelab cluster](/projects/homelab-kubernetes); no Google Analytics.
+- **Analytics of any kind** — no Plausible, no Google Analytics, no third-party scripts at all. `script-src` in the Worker's CSP is `'self'`-only as a result.
 
 ## See also
 

@@ -254,7 +254,6 @@ export function renderPage(args) {
 
     <style>${INLINE_CSS}</style>
 
-    <script defer data-domain="thulanimaseko.co.za" src="https://plausible.io/js/script.js"></script>
   </head>
   <body>
     <header class="site">
@@ -345,7 +344,6 @@ export function renderIndex(kind, posts) {
       main.article ul li a:hover { color: var(--accent); }
       main.article ul li p { margin: 6px 0 0; color: var(--muted); }
     </style>
-    <script defer data-domain="thulanimaseko.co.za" src="https://plausible.io/js/script.js"></script>
   </head>
   <body>
     <header class="site">

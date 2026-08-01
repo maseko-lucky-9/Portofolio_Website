@@ -154,15 +154,18 @@
     }
     </script>
 
-    <!-- Plausible analytics — privacy-first, no cookies, GDPR compliant.
-         Domain changed from thulani-portfolio.masekotlg.workers.dev to
-         thulanimaseko.co.za as part of the SEO/AEO rework (see
-         ~/.claude/plans/atomic-toasting-locket.md). Register the new
-         domain at https://plausible.io before traffic appears in the
-         dashboard; the script is a no-op until then. (The company site at
-         prudentiadigital.co.za is tracked under its own Plausible entry,
-         from its own repo.) -->
-    <script defer data-domain="thulanimaseko.co.za" src="https://plausible.io/js/script.js"></script>
+    <!-- No analytics. Plausible was removed 2026-07-31: the site was never
+         registered against a Plausible account, so it recorded nothing, and
+         Plausible Cloud is a paid subscription that was not worth carrying
+         for a personal portfolio. Removing it also drops the last
+         third-party origin from the CSP (see src/worker.ts) and one blocking
+         DNS lookup per visit.
+
+         If analytics are wanted later, the useful signal is referrer data —
+         which channel a recruiter arrived from. Re-adding means: the script
+         tag here, the same tag in scripts/seo/page-template.mjs (twice, for
+         generated pages), and the third-party origin back in worker.ts's CSP
+         script-src + connect-src. -->
 
     <!-- Fonts are self-hosted via @fontsource (see src/index.css).
          Google Fonts CDN links removed to eliminate third-party round-trip

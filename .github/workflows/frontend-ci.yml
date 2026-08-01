@@ -167,7 +167,7 @@ jobs:
           # scripts/seo/routes.mjs, which has NO unit-test coverage — nothing
           # else in CI would catch it drifting from the canonical domain.
           # index.html carries the same domain independently (canonical,
-          # hreflang, OG, JSON-LD @id, Plausible data-domain) via its own
+          # hreflang, OG, JSON-LD @id) via its own
           # literal strings, not routes.mjs — proven uncovered by reverting
           # just its canonical link and confirming this step still passed.
           # Both directions are checked on every file, so this cannot rot
