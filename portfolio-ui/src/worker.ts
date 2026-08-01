@@ -27,16 +27,18 @@ interface ScheduledController {
   scheduledTime: number;
 }
 
-// CSP is intentionally permissive on initial rollout to avoid breaking
-// the existing Plausible integration (index.html line ~139). Tighten to
-// nonce-based in Phase 4 hardening.
+// No third-party script origins: Plausible was removed 2026-07-31 and fonts
+// are self-hosted via @fontsource, so script-src is 'self'-only. The
+// remaining looseness is 'unsafe-inline', still required by inline
+// bootstrap/JSON-LD in index.html — tighten to nonce-based in Phase 4
+// hardening.
 const CSP = [
   "default-src 'self'",
-  "script-src 'self' https://plausible.io 'unsafe-inline'",
+  "script-src 'self' 'unsafe-inline'",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
-  "connect-src 'self' https://plausible.io https://api.indexnow.org",
+  "connect-src 'self' https://api.indexnow.org",
   "media-src 'self'",
   "object-src 'none'",
   "frame-ancestors 'none'",
