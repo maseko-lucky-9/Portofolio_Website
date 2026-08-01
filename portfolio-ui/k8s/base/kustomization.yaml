@@ -8,10 +8,19 @@ kind: Kustomization
 
 namespace: default
 
-commonLabels:
-  app.kubernetes.io/name: frontend
-  app.kubernetes.io/component: ui
-  app.kubernetes.io/part-of: portfolio
+# `labels` with includeSelectors:false — NOT the deprecated `commonLabels`,
+# which injects into SELECTOR fields including NetworkPolicy peers. It rewrote
+# this component's egress peer from {app: backend-api} to
+# {app: backend-api, app.kubernetes.io/name: frontend, ...}, matching nothing —
+# so correcting the label VALUE in networkpolicy.yaml was necessary but not
+# sufficient; Calico still dropped every frontend -> API packet.
+labels:
+  - pairs:
+      app.kubernetes.io/name: frontend
+      app.kubernetes.io/component: ui
+      app.kubernetes.io/part-of: portfolio
+    includeSelectors: false
+    includeTemplates: true
 
 resources:
 - serviceaccount.yaml

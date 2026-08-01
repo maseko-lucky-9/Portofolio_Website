@@ -39,7 +39,11 @@ services:
       retries: 10
 
   # Backend API
-  backend:
+  # Named `backend-api` to match the Kubernetes Service
+  # (portfolio-api/k8s/base/service.yaml), so portfolio-ui/nginx.conf can use one
+  # upstream hostname in both environments. Renaming it here was cheaper than
+  # keeping two different names and a config that only worked in one of them.
+  backend-api:
     build:
       context: .
       dockerfile: portfolio-api/Dockerfile
@@ -80,7 +84,7 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - backend
+      - backend-api
 
 volumes:
   postgres_dev_data:

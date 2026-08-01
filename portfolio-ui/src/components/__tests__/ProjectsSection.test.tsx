@@ -24,7 +24,6 @@ vi.mock("@/config/env", () => ({
     useApi: false,
     enableMsw: false,
     enableAnalytics: false,
-    enableCodeExecution: false,
     enableComments: false,
     debug: false,
     mode: "test",

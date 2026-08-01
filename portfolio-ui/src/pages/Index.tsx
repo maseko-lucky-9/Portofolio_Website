@@ -9,20 +9,33 @@ import { CustomCursor } from "@/components/CustomCursor";
 import { SectionBridge } from "@/components/SectionBridge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LazySection } from "@/components/LazySection";
+import { ChatWidget } from "@/components/ChatWidget";
 
 // Lazy-load below-fold sections. LazySection triggers each chunk when the
-// user scrolls within 300 px of the section. CodeDemoSection still
-// includes heavy Monaco Editor (~900 KB CDN JS). SkillsSection used to
+// user scrolls within 300 px of the section. SkillsSection used to
 // pull in recharts (~144 KB gzip) but now uses a hand-rolled SVG radar
 // in SkillsRadar.tsx — chunk is now ~3 KB gzip.
-const SkillsSection = lazy(() => import("@/components/SkillsSection").then(m => ({ default: m.SkillsSection })));
-const ProjectsSection = lazy(() => import("@/components/ProjectsSection").then(m => ({ default: m.ProjectsSection })));
-const CodeDemoSection = lazy(() => import("@/components/CodeDemoSection").then(m => ({ default: m.CodeDemoSection })));
-const ExperienceSection = lazy(() => import("@/components/ExperienceSection").then(m => ({ default: m.ExperienceSection })));
-const ServicesSection = lazy(() => import("@/components/ServicesSection").then(m => ({ default: m.ServicesSection })));
-const CaseStudiesSection = lazy(() => import("@/components/CaseStudiesSection").then(m => ({ default: m.CaseStudiesSection })));
-const BlogSection = lazy(() => import("@/components/BlogSection").then(m => ({ default: m.BlogSection })));
-const ContactSection = lazy(() => import("@/components/ContactSection").then(m => ({ default: m.ContactSection })));
+const SkillsSection = lazy(() =>
+  import("@/components/SkillsSection").then((m) => ({ default: m.SkillsSection })),
+);
+const ProjectsSection = lazy(() =>
+  import("@/components/ProjectsSection").then((m) => ({ default: m.ProjectsSection })),
+);
+const ExperienceSection = lazy(() =>
+  import("@/components/ExperienceSection").then((m) => ({ default: m.ExperienceSection })),
+);
+const ServicesSection = lazy(() =>
+  import("@/components/ServicesSection").then((m) => ({ default: m.ServicesSection })),
+);
+const CaseStudiesSection = lazy(() =>
+  import("@/components/CaseStudiesSection").then((m) => ({ default: m.CaseStudiesSection })),
+);
+const BlogSection = lazy(() =>
+  import("@/components/BlogSection").then((m) => ({ default: m.BlogSection })),
+);
+const ContactSection = lazy(() =>
+  import("@/components/ContactSection").then((m) => ({ default: m.ContactSection })),
+);
 
 function SectionFallback() {
   return (
@@ -42,10 +55,6 @@ function SectionFallback() {
   );
 }
 
-import { Scene } from "@/components/canvas/Scene";
-import { ScrollSync } from "@/components/canvas/ScrollSync";
-import { CanvasErrorBoundary } from "@/components/canvas/CanvasErrorBoundary";
-
 const Index = () => {
   return (
     <ThemeProvider>
@@ -59,15 +68,11 @@ const Index = () => {
         <SmoothScroll />
         <CustomCursor />
         <ScrollProgress />
-        <CanvasErrorBoundary>
-          <ScrollSync />
-          <Scene />
-        </CanvasErrorBoundary>
         <Navbar />
         <main id="hero">
           <HeroSection />
           {/* LazySection defers the Suspense boundary until the section
-              approaches the viewport — prevents Monaco / recharts / etc.
+              approaches the viewport — prevents recharts / etc.
               from loading their chunks during the initial page load. */}
           <div id="skills">
             <LazySection minHeight="800px">
@@ -87,15 +92,7 @@ const Index = () => {
               </Suspense>
             </LazySection>
           </div>
-          <SectionBridge id="projects-codedemo" caption="Projects · Code" />
-          <div id="codedemo">
-            <LazySection minHeight="700px">
-              <Suspense fallback={<SectionFallback />}>
-                <CodeDemoSection />
-              </Suspense>
-            </LazySection>
-          </div>
-          <SectionBridge id="codedemo-experience" caption="Code · Experience" />
+          <SectionBridge id="projects-experience" caption="Projects · Experience" />
           <div id="experience">
             <LazySection minHeight="600px">
               <Suspense fallback={<SectionFallback />}>
@@ -133,6 +130,10 @@ const Index = () => {
           </div>
         </main>
         <Footer />
+        {/* Fixed overlay, so deliberately not wrapped in LazySection (that defers on
+            scroll position, which a fixed element never reaches). Mounted here rather
+            than in App.tsx to keep it off the NotFound route. */}
+        <ChatWidget />
       </div>
     </ThemeProvider>
   );

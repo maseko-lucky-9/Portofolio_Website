@@ -22,11 +22,11 @@ spec:
     server: https://kubernetes.default.svc
     namespace: argocd
   
+  # FROZEN — homelab is a dev-only environment; the `prod` namespace no longer
+  # receives deploys. `selfHeal: true` previously meant this Application kept
+  # reconciling prod from git, so a promoted commit touching
+  # portfolio-api/k8s/base/** landed in live prod. Automated sync is OFF.
   syncPolicy:
-    automated:
-      prune: false
-      selfHeal: true
-      allowEmpty: false
     syncOptions:
     - CreateNamespace=true
     retry:

@@ -4,8 +4,8 @@
  *
  * Why: React.lazy + Suspense still triggers the import() on the *first render*
  * of the Suspense boundary — even if the section is far off-screen.  Wrapping
- * each heavy section in LazySection prevents the lazy chunk (and any CDN deps
- * like Monaco) from loading until the user is about to see the section.
+ * each heavy section in LazySection prevents the lazy chunk (and any CDN
+ * deps) from loading until the user is about to see the section.
  *
  * The placeholder <div> preserves approximate vertical space via a `minHeight`
  * prop so the layout does not collapse (preventing CLS when the real content
@@ -58,7 +58,7 @@ export function LazySection({
           observer.disconnect();
         }
       },
-      { rootMargin }
+      { rootMargin },
     );
 
     observer.observe(el);

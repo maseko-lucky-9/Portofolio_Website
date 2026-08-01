@@ -1,0 +1,47 @@
+# ==============================================
+# NetworkPolicy - default deny (dev)
+# ==============================================
+# Baseline deny for the dev namespace. Everything the stack legitimately needs
+# is then re-allowed by the per-component policies inherited from base:
+# backend-api (base/networkpolicy.yaml), frontend (portfolio-ui base),
+# postgres and redis (base/database, base/redis).
+#
+# NetworkPolicies are additive: a pod is allowed traffic if ANY policy selecting
+# it permits that traffic. So this does not override the specific allows; it
+# only removes the default-allow that applies to pods no policy selects at all.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+  labels:
+    app.kubernetes.io/part-of: portfolio
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+---
+# DNS must stay open for every pod, or nothing in the namespace can resolve a
+# Service name — including nginx, which refuses to start when its proxy_pass
+# upstream does not resolve.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns
+  labels:
+    app.kubernetes.io/part-of: portfolio
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53

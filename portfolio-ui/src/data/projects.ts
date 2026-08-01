@@ -2,8 +2,23 @@
  * =============================================
  * PROJECTS DATA CONFIGURATION
  * =============================================
- * Greenfield portfolio builds for the Prudentia Digital freelance launch.
- * Phase 2 shortlist from wiki/career/project/portfolio-projects-shortlist.md.
+ * Greenfield portfolio builds. Originally seeded from the Phase 2 shortlist in
+ * wiki/career/project/portfolio-projects-shortlist.md — which listed projects that
+ * were, at the time, still planned.
+ *
+ * EVERY ENTRY MUST BE REAL. Two earlier entries (terraform-aws-eks-opinionated,
+ * rag-mcp-demo) shipped with githubUrl values that returned 404, and with `impact`
+ * metrics that had never been measured: "recall@10 > 85%", "p95 query latency
+ * < 500 ms", "Clients adopt the module to skip 2 weeks of bootstrapping". Those were
+ * aspirations copied out of the planning doc into a field that reads as fact.
+ *
+ * Two rules, because src/chat.ts:66 feeds this file straight into the recruiter
+ * chatbot's system prompt. Every entry is spoken aloud to people deciding whether to
+ * hire — and `featured` is only a badge (ProjectsSection.tsx:313), not a filter, so
+ * nothing here is hidden from either the page or the bot:
+ *
+ *   1. githubUrl must resolve. Check it; do not assume it.
+ *   2. `impact` states only what the repo's README supports. No invented numbers.
  */
 
 export interface Project {
@@ -52,76 +67,90 @@ export const projects: Project[] = [
     githubUrl: "https://github.com/maseko-lucky-9/k8s-ref",
     featured: true,
   },
-  // Project 2: AWS EKS Terraform module (planned)
+  // Project 2: n8n on Kubernetes — Helm + ArgoCD + Vault (shipped, public repo)
   {
-    id: "terraform-aws-eks-opinionated",
-    title: "AWS EKS Terraform Module — Opinionated",
-    tagline: "Sane defaults. Multi-env. OPA-guarded.",
+    id: "n8n-self-hosting",
+    title: "Self-Hosted n8n on Kubernetes",
+    tagline: "One chart. Two clusters. Vault-backed.",
     description:
-      "Production-ready Terraform module for AWS EKS, published to the public Terraform Registry. Multi-environment (dev/staging/prod), IRSA, optional Karpenter, and OPA policy guardrails baked in.",
-    thumbnail: "/images/projects/terraform-aws-eks.png",
+      "A Helm chart running n8n and PostgreSQL across two clusters from a single source of truth — Minikube locally, MicroK8s live — delivered by ArgoCD App-of-Apps, with live credentials synced out of HashiCorp Vault by the External Secrets Operator.",
+    thumbnail: "/images/projects/n8n-self-hosting.png",
     technologies: [
-      "Terraform",
-      "AWS EKS",
-      "Karpenter",
-      "IRSA",
-      "OPA",
-      "GitHub Actions",
-      "Atlantis",
-    ],
-    challenge:
-      "Most public Terraform EKS modules are either too thin (toy clusters) or too kitchen-sink (unused features bloat the blast radius). Need a module that codifies a sensible production baseline.",
-    solution:
-      "VPC + private/public subnets (or BYO-VPC), EKS with managed node groups or Karpenter, IRSA for service accounts, OIDC provider, optional add-ons (cert-manager, ESO, ArgoCD, ALB controller). Multi-env tfvars templates plus OPA policies on critical resources.",
-    impact:
-      "Clients adopt the module to skip 2 weeks of bootstrapping and inherit production defaults. Public Terraform Registry visibility provides independent third-party validation.",
-    githubUrl: "https://github.com/maseko-lucky-9/terraform-aws-eks-opinionated",
-    featured: true,
-  },
-  // Project 3: .NET microservices + Kafka (planned)
-  {
-    id: "dotnet-events",
-    title: ".NET Microservices + Kafka Event-Driven Backend",
-    tagline: "Reliable messaging at scale.",
-    description:
-      "Greenfield ASP.NET Core 9 microservices with MassTransit + Apache Kafka, transactional outbox pattern, OpenTelemetry distributed tracing, xUnit + Testcontainers integration tests, deployed via Helm to the K8s reference cluster.",
-    thumbnail: "/images/projects/dotnet-events.png",
-    technologies: [
-      ".NET 9",
-      "ASP.NET Core",
-      "Apache Kafka",
-      "MassTransit",
-      "PostgreSQL",
-      "OpenTelemetry",
+      "Kubernetes",
       "Helm",
-      "Docker",
+      "ArgoCD",
+      "External Secrets",
+      "HashiCorp Vault",
+      "PostgreSQL",
+      "MicroK8s",
+      "GitHub Actions",
     ],
     challenge:
-      "Show what production .NET event-driven backends look like — the kind I ship inside banks — without leaking any prior-employer code or data. Reliable messaging, tested, observable, deployable.",
+      "Running one workload both locally and live usually ends in two sets of manifests that quietly drift apart. The live side needs real secret management; the local side should need none at all. Holding both in one chart is where most self-hosting setups fork.",
     solution:
-      "Producers and consumers via MassTransit, transactional outbox for at-least-once delivery, OpenTelemetry traces propagated through Kafka headers, integration tests using Testcontainers, Helm chart for K8s deploy.",
+      "One chart, two values files, one child ArgoCD application per environment under an App-of-Apps root — local auto-syncs, live syncs deliberately. External Secrets Operator pulls Postgres credentials from Vault into Kubernetes Secrets on the live path only, so local development needs no secret backend.",
     impact:
-      "Throughput > 5k messages/sec on commodity hardware; zero message loss across simulated broker failures; sub-second p95 end-to-end trace visibility.",
-    githubUrl: "https://github.com/maseko-lucky-9/dotnet-events",
+      "Where the reference architecture above is the pattern, this is a real workload running on it — including the failures that only surface in practice. Each is documented with its fix: the missing pgcrypto extension that crash-loops n8n's migrations, the UID/fsGroup mismatch behind EACCES on /.n8n, and a Service selector matching no pods.",
+    githubUrl: "https://github.com/maseko-lucky-9/n8n-self-hosting",
     featured: true,
   },
-  // Project 4: RAG + MCP server (planned, deferable)
+  // Project 3: Fraud Rule Engine — Java 21 + Kafka (shipped, public repo)
   {
-    id: "rag-mcp-demo",
-    title: "RAG Pipeline + MCP Server Demo",
-    tagline: "Production-grade AI integration.",
+    id: "fraud-rule-engine",
+    title: "Fraud Rule Engine — Java 21 + Kafka",
+    tagline: "Deterministic. Explainable. Event-driven.",
     description:
-      "pgvector-backed retrieval-augmented generation pipeline served via the Model Context Protocol — designed for Claude/agent integration with measurable accuracy and latency benchmarks.",
-    thumbnail: "/images/projects/rag-mcp.png",
-    technologies: ["Python", "pgvector", "PostgreSQL", "MCP", "Anthropic Claude", "FastAPI", "Docker"],
+      "A Spring Boot 4 fraud engine that ingests transactions over REST and Kafka, evaluates them against versioned YAML rules, persists explainable decisions to PostgreSQL, and republishes results to a downstream Kafka topic via a transactional outbox. Ships with a Python red-team simulator that drives the live engine with scripted and LLM-driven adversaries.",
+    thumbnail: "/images/projects/fraud-rule-engine.png",
+    technologies: [
+      "Java 21",
+      "Spring Boot 4",
+      "Apache Kafka",
+      "PostgreSQL",
+      "Redis",
+      "Flyway",
+      "Spring Security",
+      "Testcontainers",
+      "Prometheus",
+      "Docker",
+      "Python",
+    ],
     challenge:
-      "Most RAG demos ship as notebooks. Need a production-pattern reference: ingestion pipeline, embedding store, retrieval API, MCP server interface, with explicit accuracy/latency SLOs.",
+      "Fraud decisions must be deterministic, explainable, and auditable — never a black box — while handling both synchronous REST calls and asynchronous Kafka event streams with idempotency and no double-processing.",
     solution:
-      "Document chunking + embedding pipeline (sentence-transformers), pgvector indexed retrieval, FastAPI service exposing MCP-compatible tool/resource endpoints, evaluation harness measuring retrieval recall and answer quality.",
+      "A bounded predicate registry (velocity, geo-mismatch, device-fingerprint, merchant-blacklist) evaluates versioned YAML rules; Redis backs idempotency and rate-limiting; a transactional outbox republishes every decision; Prometheus metrics and Testcontainers integration tests cover the stack. An optional Ollama AI advisory assists reviewers but is non-authoritative by design.",
     impact:
-      "Retrieval recall@10 > 85% on a public benchmark; p95 query latency < 500 ms; MCP server consumable directly from Claude Code or any MCP client.",
-    githubUrl: "https://github.com/maseko-lucky-9/rag-mcp-demo",
-    featured: false,
+      "Every decision is explainable and audit-logged; AI commentary is opt-in and never blocks the deterministic engine; a Python red-team simulator continuously surfaces detection gaps. Demonstrates polyglot delivery — a Java engine with Python tooling — with idempotency, outbox, and observability treated as first-class.",
+    githubUrl: "https://github.com/maseko-lucky-9/fraud-rule-engine",
+    featured: true,
+  },
+  // Project 4: Reelsmith — async staged pipeline with live progress (shipped, public repo)
+  {
+    id: "reelsmith",
+    title: "Reelsmith — Async Media Pipeline",
+    tagline: "Staged. Observable. Never lies about progress.",
+    description:
+      "A FastAPI service that drives multi-minute video jobs through a ten-stage async pipeline — download, transcribe, score, caption, render — and streams per-stage progress to a React dashboard over Server-Sent Events, with job state persisted in PostgreSQL.",
+    thumbnail: "/images/projects/reelsmith.png",
+    technologies: [
+      "Python",
+      "FastAPI",
+      "PostgreSQL",
+      "SQLAlchemy 2 async",
+      "Alembic",
+      "Server-Sent Events",
+      "Whisper",
+      "React 19",
+      "pytest",
+    ],
+    challenge:
+      "A ten-stage job that runs for minutes has to report progress without lying about it. SSE reconnects, tab refocus and out-of-order events all push a naive progress UI backwards — and a stage that un-completes reads as a bug even when the underlying work is fine.",
+    solution:
+      "Job state in PostgreSQL is the source of truth; the event stream is a low-latency optimisation over it, reconciled by max-merge so a stage can never regress. A pure deriveStageStates(job, events) helper keeps that rule testable without a browser, and new input sources plug in through an adapter registry rather than branching the orchestrator.",
+    impact:
+      "Async SQLAlchemy 2 with Alembic migrations, an event bus with swappable in-memory and PostgreSQL job stores, and pytest plus vitest covering both halves. Three ADRs record the design turns. The progress timeline announces only stage transitions to screen readers — roughly ten per job rather than sixty — and degrades through an error boundary instead of blanking the page.",
+    githubUrl: "https://github.com/maseko-lucky-9/reelsmith",
+    featured: true,
   },
 ];
 

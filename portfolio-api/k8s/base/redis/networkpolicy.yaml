@@ -1,0 +1,30 @@
+# ==============================================
+# NetworkPolicy - Redis
+# ==============================================
+# Same gap as Postgres: Redis had no NetworkPolicy in any namespace, so it was
+# default-allow and reachable from any pod in the cluster on port 6379.
+#
+# podSelector peers are scoped to this policy's own namespace, so only the
+# same-namespace backend API is permitted; a dev pod cannot reach prod Redis.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: redis
+  labels:
+    app: redis
+    component: cache
+    tier: data
+spec:
+  podSelector:
+    matchLabels:
+      app: redis
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: backend-api
+      ports:
+        - protocol: TCP
+          port: 6379

@@ -7,17 +7,22 @@ name: Frontend CI
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, homelab]
     paths:
       - 'portfolio-ui/**'
       - 'shared/**'
       - '.github/workflows/frontend-ci.yml'
+  # NOTE: deliberately NOT path-filtered, unlike the push trigger above.
+  # `CI Success` below is a REQUIRED status check on main. When a workflow is
+  # skipped by a path filter its checks never report and sit at "Expected —
+  # waiting for status", blocking the PR forever. PR #40 (a workflow-only
+  # change) hit exactly that: only gitleaks ran.
+  #
+  # So this must report on every PR, even ones that touch no frontend code.
+  # The cost is ~2 min of runner time on off-path PRs; the alternative is a
+  # required check that silently blocks unrelated work.
   pull_request:
-    branches: [main, develop]
-    paths:
-      - 'portfolio-ui/**'
-      - 'shared/**'
-      - '.github/workflows/frontend-ci.yml'
+    branches: [main, homelab]
 
 env:
   NODE_VERSION: '20.x'
@@ -55,13 +60,27 @@ jobs:
         working-directory: ${{ env.WORKING_DIRECTORY }}
         run: npm run lint
 
+      # `-b` (build mode) is required, not optional: tsconfig.json is a
+      # solution-style config ("files": [] + references), so a bare
+      # `tsc --noEmit` compiles ZERO files and exits 0 no matter what is
+      # broken. This gate silently checked nothing until 2026-07-26.
       - name: Run TypeScript type check
         working-directory: ${{ env.WORKING_DIRECTORY }}
-        run: npx tsc --noEmit
+        run: npm run typecheck
 
+      # mts/mjs included deliberately: src/lib/kb-patterns.mjs holds the PII rules
+      # that gate what the chatbot publishes. Under the previous glob the one
+      # safety-critical file in src/ was the only one no formatter or linter saw.
       - name: Check code formatting
         working-directory: ${{ env.WORKING_DIRECTORY }}
-        run: npx prettier --check "src/**/*.{ts,tsx,js,jsx,json,css}"
+        run: npx prettier --check "src/**/*.{ts,tsx,mts,js,mjs,jsx,json,css}"
+
+      # The "Build & Test" job below never actually ran the suite, so every vitest
+      # file in the repo was unenforced. Runs here in `quality` because `build`
+      # depends on this job, so a red test now blocks the build.
+      - name: Run unit tests
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: npm test
 
   # ==============================================
   # Job 2: Security Scanning
@@ -131,13 +150,47 @@ jobs:
           VITE_API_BASE_URL: https://api.example.com
           VITE_API_VERSION: v1
           VITE_ENABLE_ANALYTICS: true
-          VITE_ENABLE_CODE_DEMO: true
 
       - name: Check build output
         working-directory: ${{ env.WORKING_DIRECTORY }}
         run: |
           ls -la dist
           du -sh dist
+
+      - name: Assert SEO surfaces carry the canonical domain
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        env:
+          SITE_HOST: thulanimaseko.co.za
+          STALE_HOST: thulanimaseko.com
+        run: |
+          # sitemap.xml and rss.xml are generated from SITE_ORIGIN in
+          # scripts/seo/routes.mjs, which has NO unit-test coverage — nothing
+          # else in CI would catch it drifting from the canonical domain.
+          # index.html carries the same domain independently (canonical,
+          # hreflang, OG, JSON-LD @id) via its own
+          # literal strings, not routes.mjs — proven uncovered by reverting
+          # just its canonical link and confirming this step still passed.
+          # Both directions are checked on every file, so this cannot rot
+          # into a vacuous pass: the right host must be PRESENT and the old
+          # host ABSENT. grep -F because both hosts contain literal dots.
+          fail=0
+          for f in dist/index.html dist/sitemap.xml dist/rss.xml dist/robots.txt; do
+            if [ ! -f "$f" ]; then
+              echo "::error::$f missing — the SEO build step did not run"
+              fail=1
+              continue
+            fi
+            if ! grep -qF "$SITE_HOST" "$f"; then
+              echo "::error::$f does not reference $SITE_HOST"
+              fail=1
+            fi
+            if grep -qF "$STALE_HOST" "$f"; then
+              echo "::error::$f still references $STALE_HOST — incomplete domain rename"
+              fail=1
+            fi
+          done
+          [ "$fail" -eq 0 ] || exit 1
+          echo "OK — index.html, sitemap, rss and robots all carry $SITE_HOST"
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -236,14 +289,32 @@ jobs:
   # ==============================================
   # Summary Job
   # ==============================================
+  # REQUIRED status check on main. Two rules govern this job; breaking either
+  # one silently disables branch protection rather than failing loudly.
+  #
+  # 1. `if: always()` — NOT `if: success()`. GitHub reports a SKIPPED job as
+  #    *successful* to branch protection. With `if: success()`, a failing
+  #    `quality` job skips this one, and the required check goes green while
+  #    CI is red. That is strictly worse than having no protection at all.
+  #
+  # 2. The result of every dependency is evaluated explicitly below. `needs:`
+  #    alone does not fail this job when `always()` is set — it only orders it.
   ci-success:
     name: CI Success
     runs-on: ubuntu-latest
     needs: [quality, security, build, bundle-size, lighthouse]
-    if: success()
-    
+    if: always()
+
     steps:
-      - name: CI Pipeline Success
+      - name: Verify all upstream jobs succeeded
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
         run: |
+          echo "Upstream job results: $RESULTS"
+          for r in $RESULTS; do
+            case "$r" in
+              success|skipped) ;;
+              *) echo "::error::A required CI job did not succeed (results: $RESULTS)"; exit 1 ;;
+            esac
+          done
           echo "✅ All CI checks passed successfully!"
-          echo "🎉 Code is ready for deployment"

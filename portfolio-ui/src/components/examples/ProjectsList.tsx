@@ -1,23 +1,30 @@
 /**
  * Example: Projects List Component
- * 
+ *
  * Demonstrates integration of API hooks with shadcn-ui components
  */
 
-import { useState } from 'react';
-import { useProjects } from '@/hooks/use-projects';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { AlertCircle, Eye, Heart, ExternalLink, Github } from 'lucide-react';
-import { ProjectStatus } from '@/types/api'; // enum — used at runtime
+import { useState } from "react";
+import { useProjects } from "@/hooks/use-projects";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { AlertCircle, Eye, Heart, ExternalLink, Github } from "lucide-react";
+import { ProjectStatus } from "@/types/api"; // enum — used at runtime
 
 export function ProjectsList() {
   const [page, setPage] = useState(1);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
 
   // Use the projects hook with pagination and search
   const { data, isLoading, error, isError } = useProjects({
@@ -52,7 +59,7 @@ export function ProjectsList() {
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          {error instanceof Error ? error.message : 'Failed to load projects'}
+          {error instanceof Error ? error.message : "Failed to load projects"}
         </AlertDescription>
       </Alert>
     );
@@ -96,9 +103,7 @@ export function ProjectsList() {
               <CardHeader>
                 <CardTitle className="line-clamp-2">{project.title}</CardTitle>
                 {project.subtitle && (
-                  <CardDescription className="line-clamp-2">
-                    {project.subtitle}
-                  </CardDescription>
+                  <CardDescription className="line-clamp-2">{project.subtitle}</CardDescription>
                 )}
               </CardHeader>
 
@@ -134,9 +139,7 @@ export function ProjectsList() {
 
               <CardFooter className="flex gap-2">
                 <Button variant="default" className="flex-1" asChild>
-                  <a href={`/projects/${project.slug}`}>
-                    View Project
-                  </a>
+                  <a href={`/projects/${project.slug}`}>View Project</a>
                 </Button>
                 {project.githubUrl && (
                   <Button variant="outline" size="icon" asChild>

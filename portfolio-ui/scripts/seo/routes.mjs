@@ -7,7 +7,7 @@
 // sitemap will advertise URLs that 404 (or that all serve the SPA
 // shell — equivalent from a crawler's perspective).
 
-export const SITE_ORIGIN = 'https://thulanimaseko.com';
+export const SITE_ORIGIN = 'https://thulanimaseko.co.za';
 
 /** @type {Array<{path: string, priority: number, changefreq: string}>} */
 export const STATIC_ROUTES = [

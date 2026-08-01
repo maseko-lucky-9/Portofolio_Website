@@ -17,24 +17,38 @@ name = "thulani-portfolio"
 compatibility_date = "2025-04-26"
 workers_dev = true
 
-# Custom-domain routes (uncomment AFTER the zone is Active in
-# Cloudflare — see docs/seo/custom-domain-setup.md). `custom_domain = true`
-# makes Cloudflare auto-provision DNS records + TLS cert.
-#
-# [[routes]]
-# pattern = "thulanimaseko.com/*"
-# zone_name = "thulanimaseko.com"
-# custom_domain = true
-#
-# [[routes]]
-# pattern = "www.thulanimaseko.com/*"
-# zone_name = "thulanimaseko.com"
-# custom_domain = true
-
 # Worker entry-point: wraps the ASSETS binding to inject security and
 # AI-opt-out response headers (see src/worker.ts). Disable by clearing
 # `main` to fall back to pure-static behavior.
+#
+# Must stay ABOVE the [[routes]] blocks below. TOML has no syntax to
+# "close" an array-of-tables and return to root-level keys — a bare
+# `key = value` after [[routes]] gets folded into the last routes entry,
+# not the top-level table. Wrangler then rejects the whole config with
+# "Expected routes to be an array of ... these weren't valid" because the
+# route object gained a stray `main` field. Confirmed by hitting this
+# exact failure in CI (run 30652975711) the first time these routes were
+# uncommented — this ordering is load-bearing, not stylistic.
 main = "src/worker.ts"
+
+# Custom-domain routes. Zone verified Active 2026-07-31: NS delegation
+# confirmed at all three .co.za registry servers (not just a resolver cache),
+# apex + www both hold zero DNS records, mail records (SPF/DMARC/null-MX) are
+# live — see docs/seo/custom-domain-setup.md for the full exit-gate check.
+# `custom_domain = true` auto-provisions DNS records + TLS cert. Unlike a
+# wildcard Route, a Custom Domain matches one exact hostname only — no `/*`,
+# no path. `wrangler deploy --dry-run` rejected the wildcarded form with
+# "Wildcard operators (*) are not allowed in Custom Domains" the first time
+# this was tried; bare hostnames are the correct (and only valid) shape.
+[[routes]]
+pattern = "thulanimaseko.co.za"
+zone_name = "thulanimaseko.co.za"
+custom_domain = true
+
+[[routes]]
+pattern = "www.thulanimaseko.co.za"
+zone_name = "thulanimaseko.co.za"
+custom_domain = true
 
 # Personal portfolio for Thulani Maseko — deploys to
 # `thulani-portfolio.<account>.workers.dev`. No production custom domain
@@ -50,6 +64,12 @@ main = "src/worker.ts"
 # `wrangler delete prudentia-digital-portfolio` or the Cloudflare
 # dashboard (Workers & Pages → prudentia-digital-portfolio → Delete).
 
+# WARNING: `wrangler deploy` re-runs this command EVERY time, anywhere —
+# including inside CI steps that already built and verified dist/. Whatever
+# VITE_* env is present in the shell running `wrangler deploy` is what ships;
+# cloudflare-cd.yml therefore sets the same env on its deploy step as on its
+# build step, and asserts the LIVE bundle afterwards.
+#
 # Workers Builds runs this from the wrangler.toml directory (portfolio-ui/).
 # `cd ..` ascends to the monorepo root so npm workspaces resolve correctly,
 # then builds only the UI workspace (skipping portfolio-api which needs
@@ -77,3 +97,34 @@ html_handling = "drop-trailing-slash"
 # Observability is on by default in 2025+ wrangler.
 [observability]
 enabled = true
+
+# Workers AI — powers POST /api/chat (see src/chat.ts).
+#
+# COST SAFETY DEPENDS ON THIS ACCOUNT STAYING ON WORKERS FREE. The free tier is a
+# hard cap of 10,000 Neurons/day: over it the binding returns error 4006 and stops,
+# and on the Free plan it cannot bill. On Workers Paid the same overage bills at
+# $0.011/1,000 Neurons with no per-binding ceiling — so if this account is ever
+# upgraded for an unrelated reason, revisit the abuse controls in src/chat.ts first.
+[ai]
+binding = "AI"
+
+# Per-IP throttle so one script cannot burn the day's neuron budget in two minutes.
+# No charge beyond normal Workers request cost. Per-colo rather than global, which is
+# acceptable because the neuron cap is the real hard stop and it fails closed.
+# Note this does NOT defend against a page driving requests from many visitors' IPs —
+# the content-type / sec-fetch-site gate in src/chat.ts is what covers that.
+[[ratelimits]]
+name = "CHAT_LIMITER"
+namespace_id = "4201"                 # account-scoped: must not collide with other Workers
+simple = { limit = 8, period = 60 }   # period accepts only 10 or 60
+
+# Knowledge-base live sync (see src/kb.ts). GDOC_CV_ID / GDOC_BRIEF_ID are Worker
+# secrets, not vars — a link-viewable doc id is a bearer capability for that document.
+[[kv_namespaces]]
+binding = "KB"
+id = "d9e5b519d4ce40cea8a078d24fa7867a"
+
+# Hourly, off the top-of-hour scheduler peak. refreshKb() no-ops safely if the two
+# GDOC_*_ID secrets are ever unset.
+[triggers]
+crons = ["17 * * * *"]

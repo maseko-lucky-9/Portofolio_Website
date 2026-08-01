@@ -1,10 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type KeyboardEvent,
-} from "react";
+import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { Building2, Calendar, MapPin } from "lucide-react";
 import { experiences, type Experience } from "@/data/experience";
 import { useReducedMotion } from "@/lib/motion";
@@ -14,24 +8,10 @@ const HOVER_CLOSE_MS = 120;
 
 function GridBackground() {
   return (
-    <svg
-      className="timeline-grid-bg"
-      aria-hidden="true"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg className="timeline-grid-bg" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <pattern
-          id="exp-grid"
-          width="40"
-          height="40"
-          patternUnits="userSpaceOnUse"
-        >
-          <path
-            d="M 40 0 L 0 0 0 40"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1"
-          />
+        <pattern id="exp-grid" width="40" height="40" patternUnits="userSpaceOnUse">
+          <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="1" />
         </pattern>
       </defs>
       <rect width="100%" height="100%" fill="url(#exp-grid)" />
@@ -76,21 +56,18 @@ function ExperienceRow({
   );
 
   const expandedPanel = (
-    <div
-      id={detailsId}
-      className="mt-4 pt-4 border-t border-border/60 space-y-4"
-    >
-      <p className="text-sm text-foreground/85 leading-relaxed">
-        {exp.description}
-      </p>
+    <div id={detailsId} className="mt-4 pt-4 border-t border-border/60 space-y-4">
+      <p className="text-sm text-foreground/85 leading-relaxed">{exp.description}</p>
 
       {exp.achievements.length > 0 && (
         <ul className="space-y-2">
           {exp.achievements.map((achievement, i) => (
             <li key={i} className="flex items-start gap-2.5 text-sm">
+              {/* Emerald, matching the hero availability badge. Step number,
+                  card bar and tech pill stay indigo. */}
               <span
                 className="mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0"
-                style={{ background: "oklch(var(--primary))" }}
+                style={{ background: "oklch(var(--secondary))" }}
               />
               <span className="text-foreground/85">{achievement}</span>
             </li>
@@ -126,10 +103,7 @@ function ExperienceRow({
         className="timeline-node hidden md:block md:left-1/2 md:top-8 md:-translate-x-1/2"
         aria-hidden="true"
       />
-      <div
-        className="timeline-node md:hidden left-[19px] top-8"
-        aria-hidden="true"
-      />
+      <div className="timeline-node md:hidden left-[19px] top-8" aria-hidden="true" />
 
       {/* Card slot */}
       <div className="w-full md:w-[calc(50%-40px)] pl-14 md:pl-0">
@@ -150,8 +124,7 @@ function ExperienceRow({
             boxShadow: isOpen
               ? "var(--shadow-xl), 0 0 0 1px oklch(var(--primary) / 0.18)"
               : "var(--shadow-md)",
-            transition:
-              "box-shadow 0.3s ease, border-color 0.3s ease, transform 0.3s ease",
+            transition: "box-shadow 0.3s ease, border-color 0.3s ease, transform 0.3s ease",
           }}
         >
           <span className="experience-card-bar" aria-hidden="true" />
@@ -172,9 +145,7 @@ function ExperienceRow({
               />
             )}
             <div className="min-w-0">
-              <h3 className="text-lg font-bold text-foreground leading-snug">
-                {exp.role}
-              </h3>
+              <h3 className="text-lg font-bold text-foreground leading-snug">{exp.role}</h3>
               <div className="flex items-center gap-1.5 text-primary text-sm font-medium mt-0.5">
                 <Building2 className="w-3.5 h-3.5 flex-shrink-0" />
                 <span className="truncate">{exp.company}</span>
@@ -330,10 +301,7 @@ export function ExperienceSection() {
             className="timeline-spine hidden md:block left-1/2 -translate-x-1/2"
             aria-hidden="true"
           />
-          <div
-            className="timeline-spine md:hidden left-[27px]"
-            aria-hidden="true"
-          />
+          <div className="timeline-spine md:hidden left-[27px]" aria-hidden="true" />
 
           {experiences.map((exp, index) => (
             <ExperienceRow

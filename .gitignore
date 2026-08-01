@@ -14,6 +14,18 @@ build/
 .env.*.local
 **/.env
 **/.env.local
+# Secret hygiene: ignore any suffixed env file everywhere (e.g. a real .env.production),
+# but keep committed *.example templates AND the public Vite build config tracked.
+**/.env.*
+!**/.env.example
+!**/.env.*.example
+# Public, non-secret Vite build config (VITE_* baked into the client bundle).
+# .env.production is deliberately NOT tracked: `vite build` loads it for EVERY
+# production build, so a homelab-shaped file (VITE_USE_API=true, VITE_API_URL=/api)
+# silently leaked into the Cloudflare bundle, which has no backend. Per-target
+# VITE_* values now come from the deploy workflow's env: block (Cloudflare) and
+# the Dockerfile's ARG defaults (homelab).
+!portfolio-ui/.env.development
 
 # IDE
 .idea/
@@ -77,3 +89,7 @@ hero-*.png
 *-final-*.png
 ruvector.db
 **/ruvector.db
+# Agent vector stores: index repository content, must never be committed
+*.rvf
+*.rvf.lock
+agentdb.*

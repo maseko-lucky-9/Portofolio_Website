@@ -1,0 +1,108 @@
+# Gitleaks config for Portofolio_Website
+# Keeps the default ruleset; allowlists KNOWN non-secrets so scans surface real signal.
+# Verified 2026-06-13: full-history scan found ZERO live secrets (trufflehog verified-live = 0).
+# Philosophy: prefer value-regex allowlists over broad path excludes, so a genuinely new
+# accidental secret still trips even inside an otherwise-allowlisted area.
+
+title = "Portofolio_Website gitleaks config"
+
+[extend]
+useDefault = true
+
+# ---------------------------------------------------------------------------
+# Personal-information rules for the chatbot knowledge base.
+#
+# These are not "secrets" in the credential sense — they are PII that must never
+# reach a PUBLIC repo, where git history is effectively permanent (GitHub keeps
+# unreachable blobs and mirrors scrape within hours). South African CV conventions
+# routinely carry an ID number and contact details, and under POPIA some of that is
+# special personal information.
+#
+# portfolio-ui/src/lib/kb-patterns.mjs holds the authoritative rules, shared by the
+# refresh script and the Worker's hourly sync. These are the backstop for a hand-edit
+# that bypasses both.
+#
+# THEY ARE MIRRORED BY HAND, and cannot simply be copy-pasted, because gitleaks uses
+# Go RE2 while the shared module is JavaScript:
+#   * RE2 has NO lookarounds — the (?<!...) anchors used there must become \b here.
+#   * RE2's \s is [\t\n\f\r ] and does NOT include U+00A0, which JS \s does match.
+#     The shared module NFKC-normalises before scanning; gitleaks cannot, so the
+#     separator class below lists the Unicode dashes explicitly.
+#   * RE2 cannot run the Luhn/date validation that keeps the JS ID rule free of
+#     false positives, so the ID rule here is necessarily looser.
+# src/__tests__/kb-patterns.test.ts parses this file and asserts these regexes still
+# block the shared corpus, so drift fails CI rather than going unnoticed.
+#
+# The previous mobile rule was byte-identical to the script's, and shared its defect:
+# it allowed a space but not a hyphen between digit groups, so the real CV's number
+# passed all three gates at once.
+#
+# Paths are scoped to where knowledge-base content can land in git. Note that KV
+# content under live sync never touches git at all — the Worker-side gate is the only
+# control there, which is why it must not depend on this one.
+# ---------------------------------------------------------------------------
+
+[[rules]]
+id = "za-id-number"
+description = "South African ID number (13 digits, YYMMDD-prefixed) — PII, never commit"
+regex = '''\b\d{6}[ .\x{2010}-\x{2015}/-]?\d{4}[ .\x{2010}-\x{2015}/-]?[01]\d{2}\b'''
+path = '''(portfolio-ui/src/generated/.*|portfolio-ui/public/.*\.pdf)'''
+
+[[rules]]
+id = "za-phone-number"
+description = "South African phone number (mobile or landline) — PII, never commit"
+# All area codes, not just [6-8] mobile: landlines identify a person just as well.
+regex = '''(?:\+27|0027|\b0)[ .\x{2010}-\x{2015}/-]?(?:\(0\))?[ .\x{2010}-\x{2015}/-]?[1-8]\d(?:[ .\x{2010}-\x{2015}/-]?\d){7}\b'''
+path = '''(portfolio-ui/src/generated/.*|portfolio-ui/public/.*\.pdf)'''
+
+[[rules]]
+id = "za-identity-field"
+description = "Identity field label on a CV (ID no, DOB, address, referee) — PII, never commit"
+regex = '''(?i)\b(?:id\s*(?:no\.?|nr\.?|number)|identity\s*(?:no\.?|number)|date\s*of\s*birth|marital\s*status|nationality|home\s*address|residential\s*address|next[\s-]*of[\s-]*kin|population\s*group|passport\s*(?:no\.?|number)|tax\s*(?:no\.?|number))\b|(?i)\b(?:gender|sex|race|religion|dob)\s*[:=]'''
+path = '''(portfolio-ui/src/generated/.*|portfolio-ui/public/.*\.pdf)'''
+
+[[allowlists]]
+# gitleaks git . walks FULL HISTORY, so a rule added today is checked against blobs
+# committed before the rule existed. knowledge.ts's own safety-comment warning ("Never
+# put an ID number, date of birth, home address, or referee contact...") has been on
+# main since PR #39 (8a9ef02) — merged, public, unrelated to this rule's introduction.
+# Without this, za-identity-field would fail `gitleaks git .` on main permanently: the
+# offending blob is already in history and cannot be edited there. regexTarget = "line"
+# matches the literal warning sentence itself (stable across every commit that has
+# carried it), not any occurrence of these words in real document content — a real CV
+# would never contain the sentence "Never put an ID number...".
+description = "knowledge.ts's own PII warning comment, present in git history since before this rule"
+targetRules = ["za-identity-field"]
+regexTarget = "line"
+regexes = ['''Never put an ID number, date of birth, home address, or referee contact''']
+
+[[allowlists]]
+description = "Known non-secrets: public tokens, placeholder templates, doc examples, CI test values"
+
+# Public-by-design files and pure templates/examples (cannot hold a private secret by nature).
+paths = [
+  '''portfolio-ui/scripts/seo/routes\.mjs''',          # IndexNow key — public by protocol
+  '''public/.*\.txt$''',                               # IndexNow verification file
+  '''.*\.env\.example$''',                             # committed env templates
+  '''.*\.env\..*\.example$''',                         # e.g. .env.production.example
+  '''portfolio-ui/\.env\.production$''',               # public VITE_* build config
+  '''portfolio-ui/\.env\.development$''',
+  '''node_modules/.*''',
+]
+
+# Specific placeholder / example values. These are sharp: a REAL secret in the same file
+# (incl. the API docs) still trips, because these match only the literal placeholders.
+regexes = [
+  '''00b81fad70da4ae7acdbfd756d25c510''',              # IndexNow key (public verification token)
+  '''CHANGE_THIS_TO_A_[0-9]+_CHARACTER[A-Z_]*''',
+  '''your-(jwt|smtp|redis|github|ipinfo|webhook|oauth|sentry)[a-z-]*''',
+  '''your_(github|google)_client_(id|secret)''',
+  '''USE_A_STRONG_PASSWORD_HERE''',
+  '''test-jwt-secret-key-for-ci''',                    # CI test value in workflow env blocks
+  '''change-this-password''',                          # helm/compose local-dev placeholder
+  '''postgres:postgres@postgres''',                    # local-dev throwaway DB creds
+  '''user:password@postgres''',                        # helm values example DB creds
+  '''eyJhbGciOiJIUzI1NiI[A-Za-z0-9]*\.\.\.''',         # truncated example JWT in API docs (ends in literal ...)
+  '''YOUR_ACCESS_TOKEN''',                             # placeholder bearer token in API docs
+  '''YOUR_REFRESH_TOKEN''',
+]

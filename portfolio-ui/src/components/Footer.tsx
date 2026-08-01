@@ -29,14 +29,14 @@ export function Footer() {
   };
 
   return (
-    <footer
-      className="relative"
-      style={{ background: "oklch(var(--card) / 0.5)" }}
-    >
+    <footer className="relative" style={{ background: "oklch(var(--card) / 0.5)" }}>
       {/* Top gradient divider */}
       <div
         className="absolute inset-x-0 top-0 h-px"
-        style={{ background: "linear-gradient(90deg, transparent, oklch(var(--primary) / 0.3), oklch(var(--secondary) / 0.3), transparent)" }}
+        style={{
+          background:
+            "linear-gradient(90deg, transparent, oklch(var(--primary) / 0.3), oklch(var(--secondary) / 0.3), transparent)",
+        }}
       />
 
       <div className="section-container !py-14">
@@ -45,7 +45,10 @@ export function Footer() {
           <div className="text-center md:text-left">
             <a
               href="#"
-              onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+              onClick={(e) => {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
               className="inline-block mb-2 transition-opacity hover:opacity-80"
             >
               <Logo size="lg" />
@@ -54,7 +57,10 @@ export function Footer() {
           </div>
 
           {/* Nav links */}
-          <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2" aria-label="Footer navigation">
+          <nav
+            className="flex flex-wrap justify-center gap-x-6 gap-y-2"
+            aria-label="Footer navigation"
+          >
             {navLinks.map((link) => (
               <button
                 key={link.href}
@@ -72,18 +78,21 @@ export function Footer() {
               { href: personalData.social.github, Icon: Github, label: "GitHub" },
               { href: personalData.social.linkedin, Icon: Linkedin, label: "LinkedIn" },
               { href: personalData.social.twitter, Icon: Twitter, label: "Twitter" },
-            ].map(({ href, Icon, label }) => (
-              <a
-                key={label}
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={label}
-                className="social-link w-9 h-9"
-              >
-                <Icon className="w-4 h-4" />
-              </a>
-            ))}
+            ]
+              // Skip unset links — href="" resolves to the current page.
+              .filter(({ href }) => href)
+              .map(({ href, Icon, label }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={label}
+                  className="social-link w-9 h-9"
+                >
+                  <Icon className="w-4 h-4" />
+                </a>
+              ))}
           </div>
         </div>
 
@@ -110,9 +119,8 @@ export function Footer() {
           style={{ borderTop: "1px solid oklch(var(--border) / 0.5)" }}
         >
           <p className="text-xs text-muted-foreground">
-            © {currentYear}{" "}
-            <span className="text-foreground font-medium">{personalData.name}</span>
-            {" "}· Crafted with precision &amp; care.
+            © {currentYear} <span className="text-foreground font-medium">{personalData.name}</span>{" "}
+            · Crafted with precision &amp; care.
           </p>
         </div>
       </div>

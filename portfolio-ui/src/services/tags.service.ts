@@ -1,16 +1,16 @@
 /**
  * Tags Service
- * 
+ *
  * Handles tag operations
  */
 
-import { BaseService } from './base.service';
-import { httpClient } from '@/lib/http-client';
-import type { Tag, ApiResponse } from '@/types/api';
+import { BaseService } from "./base.service";
+import { httpClient } from "@/lib/http-client";
+import type { Tag, ApiResponse } from "@/types/api";
 
 class TagsService extends BaseService<Tag> {
   constructor() {
-    super('/tags');
+    super("/tags");
   }
 
   /**
@@ -31,9 +31,7 @@ class TagsService extends BaseService<Tag> {
    * Get popular tags
    */
   async getPopular(limit: number = 10): Promise<ApiResponse<Tag[]>> {
-    return httpClient.get<ApiResponse<Tag[]>>(
-      `${this.basePath}/popular?limit=${limit}`
-    );
+    return httpClient.get<ApiResponse<Tag[]>>(`${this.basePath}/popular?limit=${limit}`);
   }
 }
 

@@ -14,6 +14,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { personalData } from "@/data/personal";
+import { env } from "@/config/env";
 import { useContactForm } from "@/hooks/use-contact";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -119,7 +120,7 @@ export function ContactSection() {
         ease: EASE_FN.emphasized,
       });
       const strokes = el.querySelectorAll<SVGElement>(
-        '[data-anime="success-icon"] path, [data-anime="success-icon"] circle, [data-anime="success-icon"] polyline'
+        '[data-anime="success-icon"] path, [data-anime="success-icon"] circle, [data-anime="success-icon"] polyline',
       );
       if (strokes.length) {
         strokes.forEach((s) => {
@@ -145,13 +146,9 @@ export function ContactSection() {
       const root = rootRef.current;
       if (!root) return;
       if (scope.matches.reducedMotion) return;
-      const errorKeys = Object.keys(errors).filter(
-        (k) => !!errors[k as keyof ContactFormData]
-      );
+      const errorKeys = Object.keys(errors).filter((k) => !!errors[k as keyof ContactFormData]);
       if (errorKeys.length === 0) return;
-      const invalidFields = root.querySelectorAll<HTMLElement>(
-        '[aria-invalid="true"]'
-      );
+      const invalidFields = root.querySelectorAll<HTMLElement>('[aria-invalid="true"]');
       if (invalidFields.length) {
         animate(invalidFields, shakeFieldAnim());
       }
@@ -168,9 +165,7 @@ export function ContactSection() {
     [errors],
   );
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     // Clear error on change
@@ -195,6 +190,25 @@ export function ContactSection() {
       return;
     }
 
+    // ponytail: the Cloudflare production deploy has no backend, so POSTing
+    // here returned a bare 405 and silently dropped the message. With no API,
+    // hand the draft to the visitor's own mail client instead — a lead that
+    // needs one extra click beats a lead that vanishes. Upgrade path: once
+    // a domain is onboarded to Cloudflare Email Sending, add a send_email
+    // binding + route in src/worker.ts and drop this branch.
+    if (!env.useApi) {
+      const body = `${result.data.message}\n\n— ${result.data.name} <${result.data.email}>`;
+      window.location.href =
+        `mailto:${personalData.email}` +
+        `?subject=${encodeURIComponent(result.data.subject)}` +
+        `&body=${encodeURIComponent(body)}`;
+      setIsSubmitted(true);
+      setFormData({ name: "", email: "", subject: "", message: "" });
+      setErrors({});
+      setTimeout(() => setIsSubmitted(false), 5000);
+      return;
+    }
+
     // Submit to API
     submitContact(
       {
@@ -215,7 +229,7 @@ export function ContactSection() {
           // Global error toast handled by QueryClient config
           // No additional handling needed here
         },
-      }
+      },
     );
   };
 
@@ -232,10 +246,11 @@ export function ContactSection() {
           <span className="inline-block text-xs font-semibold uppercase tracking-[0.18em] text-primary mb-3">
             Contact
           </span>
-          <h2 id="contact-heading" className="section-title">Say hi</h2>
+          <h2 id="contact-heading" className="section-title">
+            Say hi
+          </h2>
           <p className="section-subtitle mx-auto">
-            Have a project in mind or want to discuss opportunities? I&apos;d love to hear
-            from you.
+            Have a project in mind or want to discuss opportunities? I&apos;d love to hear from you.
           </p>
         </div>
 
@@ -249,7 +264,10 @@ export function ContactSection() {
               <div className="flex items-center gap-4">
                 <div
                   className="w-12 h-12 rounded-xl flex items-center justify-center transition-all"
-                  style={{ background: "oklch(var(--primary) / 0.08)", border: "1px solid oklch(var(--primary) / 0.15)" }}
+                  style={{
+                    background: "oklch(var(--primary) / 0.08)",
+                    border: "1px solid oklch(var(--primary) / 0.15)",
+                  }}
                 >
                   <Mail className="w-5 h-5 text-primary" />
                 </div>
@@ -268,7 +286,10 @@ export function ContactSection() {
               <div className="flex items-center gap-4">
                 <div
                   className="w-12 h-12 rounded-xl flex items-center justify-center transition-all"
-                  style={{ background: "oklch(var(--secondary) / 0.08)", border: "1px solid oklch(var(--secondary) / 0.15)" }}
+                  style={{
+                    background: "oklch(var(--secondary) / 0.08)",
+                    border: "1px solid oklch(var(--secondary) / 0.15)",
+                  }}
                 >
                   <MapPin className="w-5 h-5 text-secondary" />
                 </div>
@@ -286,18 +307,21 @@ export function ContactSection() {
                     { href: personalData.social.github, Icon: Github, label: "GitHub" },
                     { href: personalData.social.linkedin, Icon: Linkedin, label: "LinkedIn" },
                     { href: personalData.social.twitter, Icon: Twitter, label: "Twitter" },
-                  ].map(({ href, Icon, label }) => (
-                    <a
-                      key={label}
-                      href={href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={label}
-                      className="social-link w-10 h-10"
-                    >
-                      <Icon className="w-5 h-5" />
-                    </a>
-                  ))}
+                  ]
+                    // Skip unset links — href="" resolves to the current page.
+                    .filter(({ href }) => href)
+                    .map(({ href, Icon, label }) => (
+                      <a
+                        key={label}
+                        href={href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={label}
+                        className="social-link w-10 h-10"
+                      >
+                        <Icon className="w-5 h-5" />
+                      </a>
+                    ))}
                 </div>
               </div>
 
@@ -316,7 +340,8 @@ export function ContactSection() {
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)";
                     (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-sm)";
-                    (e.currentTarget as HTMLElement).style.borderColor = "oklch(var(--primary) / 0.3)";
+                    (e.currentTarget as HTMLElement).style.borderColor =
+                      "oklch(var(--primary) / 0.3)";
                   }}
                   onMouseLeave={(e) => {
                     (e.currentTarget as HTMLElement).style.transform = "";
@@ -331,34 +356,40 @@ export function ContactSection() {
                   </div>
                 </a>
 
-                <a
-                  href={personalData.social.calendar}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 w-full p-4 rounded-xl border transition-all"
-                  style={{
-                    background: "oklch(var(--card))",
-                    boxShadow: "var(--shadow-sm)",
-                    borderColor: "oklch(var(--border))",
-                    transition: "all 300ms cubic-bezier(0.16, 1, 0.3, 1)",
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)";
-                    (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-sm)";
-                    (e.currentTarget as HTMLElement).style.borderColor = "oklch(var(--primary) / 0.3)";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.transform = "";
-                    (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-sm)";
-                    (e.currentTarget as HTMLElement).style.borderColor = "oklch(var(--border))";
-                  }}
-                >
-                  <Calendar className="w-5 h-5 text-secondary" />
-                  <div>
-                    <p className="font-medium">Schedule a Call</p>
-                    <p className="text-xs text-muted-foreground">30 min meeting</p>
-                  </div>
-                </a>
+                {/* Only rendered once a booking URL exists. personal.ts ships calendar: ""
+                    until one is set up, and this is the highest-intent control on the page —
+                    an empty href made "Schedule a Call" reload the page instead. */}
+                {personalData.social.calendar && (
+                  <a
+                    href={personalData.social.calendar}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 w-full p-4 rounded-xl border transition-all"
+                    style={{
+                      background: "oklch(var(--card))",
+                      boxShadow: "var(--shadow-sm)",
+                      borderColor: "oklch(var(--border))",
+                      transition: "all 300ms cubic-bezier(0.16, 1, 0.3, 1)",
+                    }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)";
+                      (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-sm)";
+                      (e.currentTarget as HTMLElement).style.borderColor =
+                        "oklch(var(--primary) / 0.3)";
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLElement).style.transform = "";
+                      (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-sm)";
+                      (e.currentTarget as HTMLElement).style.borderColor = "oklch(var(--border))";
+                    }}
+                  >
+                    <Calendar className="w-5 h-5 text-secondary" />
+                    <div>
+                      <p className="font-medium">Schedule a Call</p>
+                      <p className="text-xs text-muted-foreground">30 min meeting</p>
+                    </div>
+                  </a>
+                )}
               </div>
             </div>
           </div>
@@ -375,16 +406,20 @@ export function ContactSection() {
                 >
                   <div
                     className="w-16 h-16 rounded-full flex items-center justify-center mb-4"
-                    style={{ background: "oklch(var(--secondary) / 0.08)", border: "1px solid oklch(var(--secondary) / 0.2)" }}
+                    style={{
+                      background: "oklch(var(--secondary) / 0.08)",
+                      border: "1px solid oklch(var(--secondary) / 0.2)",
+                    }}
                   >
-                    <CheckCircle
-                      data-anime="success-icon"
-                      className="w-8 h-8 text-secondary"
-                    />
+                    <CheckCircle data-anime="success-icon" className="w-8 h-8 text-secondary" />
                   </div>
-                  <h4 className="text-lg font-bold mb-2">Message Sent!</h4>
+                  <h4 className="text-lg font-bold mb-2">
+                    {env.useApi ? "Message Sent!" : "Your email is ready"}
+                  </h4>
                   <p className="text-muted-foreground">
-                    Thanks for reaching out. I&apos;ll get back to you soon.
+                    {env.useApi
+                      ? "Thanks for reaching out. I'll get back to you soon."
+                      : "I've opened your email app with the message drafted — just hit send."}
                   </p>
                 </div>
               ) : (
@@ -403,11 +438,7 @@ export function ContactSection() {
                         aria-describedby={errors.name ? "name-error" : undefined}
                       />
                       {errors.name && (
-                        <p
-                          id="name-error"
-                          role="alert"
-                          className="text-xs text-destructive"
-                        >
+                        <p id="name-error" role="alert" className="text-xs text-destructive">
                           {errors.name}
                         </p>
                       )}
@@ -427,11 +458,7 @@ export function ContactSection() {
                         aria-describedby={errors.email ? "email-error" : undefined}
                       />
                       {errors.email && (
-                        <p
-                          id="email-error"
-                          role="alert"
-                          className="text-xs text-destructive"
-                        >
+                        <p id="email-error" role="alert" className="text-xs text-destructive">
                           {errors.email}
                         </p>
                       )}
@@ -451,11 +478,7 @@ export function ContactSection() {
                       aria-describedby={errors.subject ? "subject-error" : undefined}
                     />
                     {errors.subject && (
-                      <p
-                        id="subject-error"
-                        role="alert"
-                        className="text-xs text-destructive"
-                      >
+                      <p id="subject-error" role="alert" className="text-xs text-destructive">
                         {errors.subject}
                       </p>
                     )}
@@ -475,11 +498,7 @@ export function ContactSection() {
                       aria-describedby={errors.message ? "message-error" : undefined}
                     />
                     {errors.message && (
-                      <p
-                        id="message-error"
-                        role="alert"
-                        className="text-xs text-destructive"
-                      >
+                      <p id="message-error" role="alert" className="text-xs text-destructive">
                         {errors.message}
                       </p>
                     )}
@@ -488,7 +507,7 @@ export function ContactSection() {
                   <Button
                     type="submit"
                     disabled={isPending}
-                    className="w-full btn-hero-primary !rounded-lg"
+                    className="w-full btn-hero-primary btn-green !rounded-lg focus-visible:ring-secondary"
                   >
                     {isPending ? (
                       <>

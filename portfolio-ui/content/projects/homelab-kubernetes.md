@@ -70,7 +70,6 @@ Five workloads as of writing:
 
 | Workload | Purpose |
 |---|---|
-| Plausible | Self-hosted analytics for portfolio + Prudentia Digital |
 | Vault | Secret backend for the cluster + dev work |
 | HomeAssistant | Lights, climate, observability |
 | n8n | Workflow automation (RSS scraping, scheduled jobs) |

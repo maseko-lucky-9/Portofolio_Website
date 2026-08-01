@@ -1,0 +1,17 @@
+# ==============================================
+# Development ConfigMap Patch
+# ==============================================
+# The SPA reaches the API same-origin through the nginx `location /api/` proxy
+# in the frontend pod (portfolio-ui/nginx.conf), so no absolute API host is
+# needed here. VITE_* values are baked in at image build time by the Dockerfile
+# ARGs, not read from this ConfigMap at runtime — this exists for parity with
+# prod and for anything that reads config at runtime.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-config
+data:
+  VITE_API_BASE_URL: "/api"
+  VITE_DEBUG_MODE: "true"
+  VITE_ENABLE_ANALYTICS: "false"
+  VITE_ENABLE_COMMENTS: "true"

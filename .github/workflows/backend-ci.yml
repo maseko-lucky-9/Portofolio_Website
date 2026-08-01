@@ -7,13 +7,13 @@ name: Backend CI
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, homelab]
     paths:
       - 'portfolio-api/**'
       - 'shared/**'
       - '.github/workflows/backend-ci.yml'
   pull_request:
-    branches: [main, develop]
+    branches: [main, homelab]
     paths:
       - 'portfolio-api/**'
       - 'shared/**'

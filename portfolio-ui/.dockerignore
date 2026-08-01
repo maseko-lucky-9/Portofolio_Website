@@ -65,5 +65,7 @@ Thumbs.db
 .editorconfig
 .eslintrc*
 .prettierrc*
-tsconfig*.json
+# NOT tsconfig*.json — Dockerfile line 19 does `COPY tsconfig*.json ./`, and a
+# wildcard COPY that matches zero files is a hard BuildKit error. Excluding it
+# here is why this image had never built successfully.
 vite.config.ts.timestamp-*

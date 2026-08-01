@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.w3.org/community/reports/tdmrep/CG-FINAL-tdmrep-20240202/schema/tdmrep.schema.json",
-  "location": "https://thulanimaseko.com/",
+  "location": "https://thulanimaseko.co.za/",
   "tdm-reservation": 1,
-  "tdm-policy": "https://thulanimaseko.com/.well-known/tdm-policy.json"
+  "tdm-policy": "https://thulanimaseko.co.za/.well-known/tdm-policy.json"
 }

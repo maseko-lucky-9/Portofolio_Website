@@ -1,11 +1,11 @@
 /**
  * Articles Service
- * 
+ *
  * Handles all article/blog-related API operations
  */
 
-import { BaseService } from './base.service';
-import { httpClient } from '@/lib/http-client';
+import { BaseService } from "./base.service";
+import { httpClient } from "@/lib/http-client";
 import type {
   Article,
   ArticleQueryParams,
@@ -13,11 +13,11 @@ import type {
   PaginatedResponse,
   CreateArticleData,
   UpdateArticleData,
-} from '@/types/api';
+} from "@/types/api";
 
 class ArticlesService extends BaseService<Article> {
   constructor() {
-    super('/articles');
+    super("/articles");
   }
 
   /**
@@ -38,29 +38,23 @@ class ArticlesService extends BaseService<Article> {
    * Get featured articles
    */
   async getFeatured(limit: number = 6): Promise<ApiResponse<Article[]>> {
-    return httpClient.get<ApiResponse<Article[]>>(
-      `${this.basePath}?featured=true&limit=${limit}`
-    );
+    return httpClient.get<ApiResponse<Article[]>>(`${this.basePath}?featured=true&limit=${limit}`);
   }
 
   /**
    * Increment article views
    */
   async incrementViews(slug: string): Promise<ApiResponse<void>> {
-    return httpClient.post<ApiResponse<void>>(
-      `${this.basePath}/slug/${slug}/views`,
-      undefined,
-      { skipAuth: true }
-    );
+    return httpClient.post<ApiResponse<void>>(`${this.basePath}/slug/${slug}/views`, undefined, {
+      skipAuth: true,
+    });
   }
 
   /**
    * Toggle article like
    */
   async toggleLike(id: string): Promise<ApiResponse<{ likes: number }>> {
-    return httpClient.post<ApiResponse<{ likes: number }>>(
-      `${this.basePath}/${id}/like`
-    );
+    return httpClient.post<ApiResponse<{ likes: number }>>(`${this.basePath}/${id}/like`);
   }
 
   /**
@@ -91,7 +85,10 @@ class ArticlesService extends BaseService<Article> {
   /**
    * Get articles by tag
    */
-  async getByTag(tagSlug: string, params?: ArticleQueryParams): Promise<PaginatedResponse<Article>> {
+  async getByTag(
+    tagSlug: string,
+    params?: ArticleQueryParams,
+  ): Promise<PaginatedResponse<Article>> {
     const query = this.buildQueryString({ ...params, tag: tagSlug });
     return httpClient.get<PaginatedResponse<Article>>(`${this.basePath}${query}`);
   }
@@ -99,7 +96,10 @@ class ArticlesService extends BaseService<Article> {
   /**
    * Search articles
    */
-  async search(searchQuery: string, params?: ArticleQueryParams): Promise<PaginatedResponse<Article>> {
+  async search(
+    searchQuery: string,
+    params?: ArticleQueryParams,
+  ): Promise<PaginatedResponse<Article>> {
     const query = this.buildQueryString({ ...params, search: searchQuery });
     return httpClient.get<PaginatedResponse<Article>>(`${this.basePath}${query}`);
   }

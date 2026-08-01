@@ -1,10 +1,6 @@
 import { useRef } from "react";
-import { CheckCircle2, ArrowRight } from "lucide-react";
-import {
-  AnimatedBrackets,
-  BranchGraph,
-  CubeMorph,
-} from "@/components/icons/animated";
+import { CheckCircle2, ArrowRight, Server, Cloud } from "lucide-react";
+import { AnimatedBrackets } from "@/components/icons/animated";
 
 import { revealOnScroll, useAnime } from "@/lib/use-anime";
 
@@ -25,7 +21,7 @@ interface Service {
 const services: Service[] = [
   {
     id: "k8s-ops",
-    icon: CubeMorph,
+    icon: Server,
     label: "DevOps",
     title: "Kubernetes Operations",
     description:
@@ -44,7 +40,7 @@ const services: Service[] = [
   },
   {
     id: "iac",
-    icon: BranchGraph,
+    icon: Cloud,
     label: "Infrastructure",
     title: "Terraform / IaC",
     description:
@@ -123,8 +119,8 @@ export function ServicesSection() {
             Services
           </h2>
           <p className="section-subtitle mx-auto">
-            Focused freelance engagements across three disciplines — shipped to production,
-            not just delivered as a handover document.
+            Focused freelance engagements across three disciplines — shipped to production, not just
+            delivered as a handover document.
           </p>
         </div>
 
@@ -148,7 +144,12 @@ export function ServicesSection() {
                   <div
                     className={`inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br ${service.gradient}`}
                   >
-                    <Icon className="w-7 h-7 text-foreground" aria-hidden="true" />
+                    {/* text-primary, not text-foreground: the lucide icons
+                        stroke with currentColor, while AnimatedBrackets ignores
+                        className and hard-defaults to oklch(var(--primary)).
+                        Keeping this indigo is what stops the two lucide cards
+                        rendering neutral beside an indigo Backend card. */}
+                    <Icon className="w-7 h-7 text-primary" aria-hidden="true" />
                   </div>
                   <span className="tech-badge text-xs">{service.label}</span>
                 </div>
@@ -169,7 +170,10 @@ export function ServicesSection() {
                 {/* Capabilities list */}
                 <ul className="space-y-2 flex-1">
                   {service.capabilities.map((cap) => (
-                    <li key={cap} className="flex items-start gap-2.5 text-sm text-muted-foreground">
+                    <li
+                      key={cap}
+                      className="flex items-start gap-2.5 text-sm text-muted-foreground"
+                    >
                       <CheckCircle2
                         className="w-4 h-4 mt-0.5 shrink-0 text-primary"
                         aria-hidden="true"
@@ -200,7 +204,7 @@ export function ServicesSection() {
           </p>
           <a
             href="#contact"
-            className="btn-hero-secondary inline-flex items-center gap-2"
+            className="btn-hero-secondary btn-green inline-flex items-center gap-2"
             onClick={(e) => {
               e.preventDefault();
               document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });

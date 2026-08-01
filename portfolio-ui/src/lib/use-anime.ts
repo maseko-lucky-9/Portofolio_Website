@@ -31,7 +31,7 @@
  *   }, []);
  */
 import { useEffect, type RefObject } from "react";
-import { animate, stagger, type AnimationParams } from "animejs";
+import { animate, stagger, type AnimationParams, type DOMTarget } from "animejs";
 import { createMotionScope, type MotionScope } from "./anime-scope";
 import { fadeUpAnim } from "./motion";
 
@@ -66,8 +66,7 @@ export function revealOnScroll(
 
   const anim = animate(els, {
     ...(options.anim ?? fadeUpAnim()),
-    delay:
-      options.staggerMs !== undefined ? stagger(options.staggerMs) : undefined,
+    delay: options.staggerMs !== undefined ? stagger(options.staggerMs) : undefined,
     autoplay: false,
   });
 
@@ -116,7 +115,7 @@ export function revealOnScroll(
  * @param deps     When any dep changes, the previous scope is reverted and
  *                 the factory re-runs. Pass `[]` for mount-only effects.
  */
-export function useAnime<T extends HTMLElement>(
+export function useAnime<T extends DOMTarget>(
   rootRef: RefObject<T | null>,
   factory: AnimeFactory,
   deps: unknown[],
@@ -127,10 +126,14 @@ export function useAnime<T extends HTMLElement>(
     if (!root) return;
 
     const scope = createMotionScope(root);
-    let factoryCleanup: void | (() => void);
+    // Narrowed via typeof rather than typing this as `void | (() => void)`:
+    // a union containing `void` is not callable, so `factoryCleanup?.()` below
+    // would not type-check.
+    let factoryCleanup: (() => void) | undefined;
 
     scope.add(() => {
-      factoryCleanup = factory(scope);
+      const cleanup = factory(scope);
+      if (typeof cleanup === "function") factoryCleanup = cleanup;
     });
 
     return () => {

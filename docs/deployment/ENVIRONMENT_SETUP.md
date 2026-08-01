@@ -66,7 +66,6 @@ VITE_APP_DESCRIPTION=My Portfolio Website
 
 # Feature Flags
 VITE_ENABLE_ANALYTICS=true
-VITE_ENABLE_CODE_EXECUTION=true
 VITE_ENABLE_COMMENTS=true
 
 # Debug Mode

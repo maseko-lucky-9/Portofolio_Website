@@ -14,25 +14,24 @@
 // Helper to convert string to boolean
 const toBool = (value: string | undefined, defaultValue: boolean = false): boolean => {
   if (value === undefined) return defaultValue;
-  return value.toLowerCase() === 'true';
+  return value.toLowerCase() === "true";
 };
 
 // Environment configuration object
 export const env = {
   // API Configuration
-  apiUrl: import.meta.env.VITE_API_URL || 'http://localhost:3000',
-  apiVersion: import.meta.env.VITE_API_VERSION || 'v1',
-  wsUrl: import.meta.env.VITE_WS_URL || 'ws://localhost:3000',
+  apiUrl: import.meta.env.VITE_API_URL || "http://localhost:3000",
+  apiVersion: import.meta.env.VITE_API_VERSION || "v1",
+  wsUrl: import.meta.env.VITE_WS_URL || "ws://localhost:3000",
 
   // App Configuration
-  appName: import.meta.env.VITE_APP_NAME || 'Portfolio',
-  appDescription: import.meta.env.VITE_APP_DESCRIPTION || 'My Portfolio Website',
+  appName: import.meta.env.VITE_APP_NAME || "Portfolio",
+  appDescription: import.meta.env.VITE_APP_DESCRIPTION || "My Portfolio Website",
 
   // Feature Flags
   useApi: toBool(import.meta.env.VITE_USE_API, false),
   enableMsw: toBool(import.meta.env.VITE_ENABLE_MSW, false),
   enableAnalytics: toBool(import.meta.env.VITE_ENABLE_ANALYTICS, true),
-  enableCodeExecution: toBool(import.meta.env.VITE_ENABLE_CODE_EXECUTION, true),
   enableComments: toBool(import.meta.env.VITE_ENABLE_COMMENTS, true),
 
   // Debug Mode
@@ -50,9 +49,9 @@ export const env = {
  * @returns Full URL (e.g., 'http://localhost:3000/v1/projects')
  */
 export const apiUrl = (path: string): string => {
-  const base = env.apiUrl.replace(/\/$/, ''); // Remove trailing slash
+  const base = env.apiUrl.replace(/\/$/, ""); // Remove trailing slash
   const version = env.apiVersion;
-  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  const cleanPath = path.startsWith("/") ? path : `/${path}`;
   return `${base}/api/${version}${cleanPath}`;
 };
 
@@ -61,21 +60,20 @@ export const apiUrl = (path: string): string => {
  * @param path - The WebSocket endpoint path
  * @returns Full WebSocket URL
  */
-export const wsUrl = (path: string = ''): string => {
-  const base = env.wsUrl.replace(/\/$/, '');
-  const cleanPath = path.startsWith('/') ? path : path ? `/${path}` : '';
+export const wsUrl = (path: string = ""): string => {
+  const base = env.wsUrl.replace(/\/$/, "");
+  const cleanPath = path.startsWith("/") ? path : path ? `/${path}` : "";
   return `${base}${cleanPath}`;
 };
 
 // Log environment in development
 if (env.debug) {
-  console.log('🔧 Environment Configuration:', {
+  console.log("🔧 Environment Configuration:", {
     apiUrl: env.apiUrl,
     apiVersion: env.apiVersion,
     mode: env.mode,
     features: {
       analytics: env.enableAnalytics,
-      codeExecution: env.enableCodeExecution,
       comments: env.enableComments,
     },
   });

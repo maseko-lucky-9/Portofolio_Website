@@ -17,7 +17,7 @@ function renderNavbar() {
   return render(
     <ThemeProvider>
       <Navbar />
-    </ThemeProvider>
+    </ThemeProvider>,
   );
 }
 
@@ -47,9 +47,7 @@ describe("Navbar", () => {
   it("has a theme toggle button", () => {
     renderNavbar();
     // "Toggle theme" is provided as accessible name via aria-label, not text node.
-    expect(
-      screen.getByRole("button", { name: /toggle theme/i })
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /toggle theme/i })).toBeInTheDocument();
   });
 
   it("has a mobile menu button", () => {

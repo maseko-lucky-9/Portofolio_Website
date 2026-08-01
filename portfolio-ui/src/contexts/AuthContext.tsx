@@ -1,13 +1,13 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { authService as authApi } from '../services/auth.service';
-import type { User, LoginData as LoginCredentials } from '../types/api';
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { authService as authApi } from "../services/auth.service";
+import type { User, LoginData as LoginCredentials } from "../types/api";
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (credentials: LoginCredentials) => Promise<void>;
-  loginWithOAuth: (provider: 'github' | 'google') => void;
+  loginWithOAuth: (provider: "github" | "google") => void;
   logout: () => Promise<void>;
   refreshToken: () => Promise<void>;
   updateProfile: (data: Partial<User>) => Promise<void>;
@@ -27,7 +27,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Service wraps in ApiResponse<User>; unwrap at boundary.
         setUser((response as unknown as { data?: User }).data ?? null);
       } catch (error) {
-        console.error('Failed to load user:', error);
+        console.error("Failed to load user:", error);
         setUser(null);
       } finally {
         setIsLoading(false);
@@ -47,12 +47,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
           await authApi.refreshToken();
         } catch (error) {
-          console.error('Failed to refresh token:', error);
+          console.error("Failed to refresh token:", error);
           // If refresh fails, log out the user
           await logout();
         }
       },
-      10 * 60 * 1000 // 10 minutes
+      10 * 60 * 1000, // 10 minutes
     );
 
     return () => clearInterval(refreshInterval);
@@ -69,9 +69,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const loginWithOAuth = useCallback((provider: 'github' | 'google') => {
+  const loginWithOAuth = useCallback((provider: "github" | "google") => {
     // Redirect to OAuth endpoint
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
     window.location.href = `${apiUrl}/api/v1/auth/oauth/${provider}`;
   }, []);
 
@@ -112,7 +112,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }

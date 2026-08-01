@@ -1,0 +1,18 @@
+# ==============================================
+# HPA Patch - Development
+# ==============================================
+# base/hpa.yaml sets minReplicas: 2. An HPA overrides the Deployment's replica
+# count, so without this patch the dev API would silently scale itself back to 2
+# regardless of `replicas: 1` in deployment-patch.yaml — doubling its footprint
+# on a single-node box that is also still running prod.
+#
+# (Whether the HPA acts at all depends on metrics-server, which
+# portfolio-ui/scripts/setup-microk8s.sh does not enable. Pin it low either way
+# rather than relying on it being inert.)
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: backend-api
+spec:
+  minReplicas: 1
+  maxReplicas: 2

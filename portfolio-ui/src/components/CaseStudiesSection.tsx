@@ -1,12 +1,5 @@
 import { useRef } from "react";
-import {
-  Server,
-  GitBranch,
-  BarChart3,
-  Clock,
-  ExternalLink,
-  Construction,
-} from "lucide-react";
+import { Server, GitBranch, BarChart3, Clock, ExternalLink, Construction } from "lucide-react";
 
 import { revealOnScroll, useAnime } from "@/lib/use-anime";
 
@@ -43,7 +36,16 @@ const caseStudies: CaseStudy[] = [
     description:
       "A self-hosted, single-node MicroK8s cluster that mirrors the architecture of a production platform — ArgoCD App-of-Apps GitOps, External Secrets Operator, cert-manager, Prometheus/Grafana stack, and Cloudflare Tunnel exposure. Built to demonstrate that homelab ≠ toy.",
     icon: Server,
-    stack: ["MicroK8s", "ArgoCD", "Helm", "Prometheus", "Grafana", "cert-manager", "ESO", "Cloudflare"],
+    stack: [
+      "MicroK8s",
+      "ArgoCD",
+      "Helm",
+      "Prometheus",
+      "Grafana",
+      "cert-manager",
+      "ESO",
+      "Cloudflare",
+    ],
     metrics: [
       { label: "Setup to ArgoCD sync", value: "< 2h" },
       { label: "TLS provisioned via", value: "cert-manager" },
@@ -56,7 +58,10 @@ const caseStudies: CaseStudy[] = [
 
 const statusConfig: Record<CaseStudyStatus, { label: string; colour: string }> = {
   live: { label: "Live", colour: "text-emerald-500 bg-emerald-500/10 border-emerald-500/20" },
-  "in-progress": { label: "In Progress", colour: "text-amber-500 bg-amber-500/10 border-amber-500/20" },
+  "in-progress": {
+    label: "In Progress",
+    colour: "text-amber-500 bg-amber-500/10 border-amber-500/20",
+  },
   planned: { label: "Planned", colour: "text-muted-foreground bg-muted/60 border-border" },
 };
 
@@ -91,8 +96,8 @@ export function CaseStudiesSection() {
             Case Studies
           </h2>
           <p className="section-subtitle mx-auto">
-            Architecture decisions, trade-off analysis, and measured outcomes — not just
-            a list of technologies used.
+            Architecture decisions, trade-off analysis, and measured outcomes — not just a list of
+            technologies used.
           </p>
         </div>
 
@@ -141,20 +146,14 @@ export function CaseStudiesSection() {
                       {cs.status === "in-progress" && (
                         <Construction className="w-3 h-3" aria-hidden="true" />
                       )}
-                      {cs.status === "live" && (
-                        <GitBranch className="w-3 h-3" aria-hidden="true" />
-                      )}
-                      {cs.status === "planned" && (
-                        <Clock className="w-3 h-3" aria-hidden="true" />
-                      )}
+                      {cs.status === "live" && <GitBranch className="w-3 h-3" aria-hidden="true" />}
+                      {cs.status === "planned" && <Clock className="w-3 h-3" aria-hidden="true" />}
                       {statusLabel}
                     </span>
                   </div>
 
                   {/* Description */}
-                  <p className="text-muted-foreground leading-relaxed mb-6">
-                    {cs.description}
-                  </p>
+                  <p className="text-muted-foreground leading-relaxed mb-6">{cs.description}</p>
 
                   {/* Metrics grid */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6 p-4 rounded-xl bg-muted/40 border border-border/60">
@@ -166,9 +165,7 @@ export function CaseStudiesSection() {
                             {m.label}
                           </span>
                         </div>
-                        <span className="text-sm font-semibold text-foreground">
-                          {m.value}
-                        </span>
+                        <span className="text-sm font-semibold text-foreground">{m.value}</span>
                       </div>
                     ))}
                   </div>

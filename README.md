@@ -147,7 +147,7 @@ docker compose -f docker-compose.dev.yml up -d
 docker compose -f docker-compose.dev.yml ps
 
 # View backend logs (includes Prisma migration output)
-docker compose -f docker-compose.dev.yml logs backend -f
+docker compose -f docker-compose.dev.yml logs backend-api -f
 
 # Teardown
 docker compose -f docker-compose.dev.yml down -v
@@ -645,7 +645,7 @@ node scripts/inject-fingerprint.mjs
 | L8 | Fastify rate-limit on `/api/*` | `portfolio-api/index.ts` |
 | L9 | Build fingerprint for post-hoc theft detection | `portfolio-ui/scripts/inject-fingerprint.mjs` |
 
-Apply WAF rules: `cd infra/cloudflare && terraform apply -var cf_api_token=…`. See `docs/seo/bot-policy.md` for the per-category rationale.
+Apply WAF rules: `cd infra/cloudflare && TF_VAR_cf_api_token=… terraform apply -var-file=terraform.tfvars`. Pass the token by env var, never `-var` — a `-var` argument is readable via `ps aux` and lands in shell history. See `docs/seo/bot-policy.md` for the per-category rationale.
 
 ### Build-time env vars (Workers dashboard)
 

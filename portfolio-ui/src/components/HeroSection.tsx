@@ -2,50 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { animate, createTimeline } from "animejs";
 import { ArrowDown, Github, Linkedin, Twitter } from "lucide-react";
 import { personalData } from "@/data/personal";
-import { PaperBackground } from "@/components/PaperBackground";
 import { DURATION, EASE_FN, useMagnetic, useReducedMotion } from "@/lib/motion";
 import { useAnime } from "@/lib/use-anime";
-
-// Build-time commit count — reflects real shipping cadence, no runtime cost.
-const SHIPPED_TOTAL = Number.parseInt(__SHIPPED_COUNT__, 10) || 0;
-
-/**
- * `shipped: <n>` meter — quiet signal of real, shipping work.
- * 600ms count-up on first paint; static under prefers-reduced-motion.
- */
-function ShippedMeter({ reduced }: { reduced: boolean }) {
-  const [n, setN] = useState(reduced ? SHIPPED_TOTAL : 0);
-
-  useEffect(() => {
-    if (reduced || SHIPPED_TOTAL === 0) {
-      setN(SHIPPED_TOTAL);
-      return;
-    }
-    const start = performance.now();
-    const dur = 600;
-    let rafId = 0;
-    const tick = (now: number) => {
-      const t = Math.min(1, (now - start) / dur);
-      // ease-out cubic
-      const eased = 1 - Math.pow(1 - t, 3);
-      setN(Math.round(SHIPPED_TOTAL * eased));
-      if (t < 1) rafId = requestAnimationFrame(tick);
-    };
-    rafId = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(rafId);
-  }, [reduced]);
-
-  return (
-    <div
-      aria-label={`shipped: ${SHIPPED_TOTAL} commits`}
-      className="pointer-events-none absolute top-6 right-6 z-20 hidden font-sans text-[11px] uppercase tracking-[0.18em] font-semibold sm:block"
-      style={{ color: "oklch(var(--secondary))", opacity: 0.85 }}
-    >
-      <span className="opacity-60">shipped:</span>{" "}
-      <span tabIndex={-1}>{n}</span>
-    </div>
-  );
-}
 
 export function HeroSection() {
   const prefersReducedMotion = useReducedMotion();
@@ -83,10 +41,9 @@ export function HeroSection() {
   useEffect(() => {
     const el = heroRef.current;
     if (!el || typeof IntersectionObserver === "undefined") return;
-    const io = new IntersectionObserver(
-      ([entry]) => setHeroInView(entry.isIntersecting),
-      { rootMargin: "0px" },
-    );
+    const io = new IntersectionObserver(([entry]) => setHeroInView(entry.isIntersecting), {
+      rootMargin: "0px",
+    });
     io.observe(el);
     return () => io.disconnect();
   }, []);
@@ -127,11 +84,7 @@ export function HeroSection() {
       for (const [selector, atMs] of cascade) {
         const el = q(selector);
         if (!el) continue;
-        tl.add(
-          el,
-          { opacity: [0, 1], translateY: [16, 0], duration: DURATION.base * 1000 },
-          atMs,
-        );
+        tl.add(el, { opacity: [0, 1], translateY: [16, 0], duration: DURATION.base * 1000 }, atMs);
       }
 
       // Right column: column slide + profile scale + metrics fade.
@@ -141,11 +94,7 @@ export function HeroSection() {
       }
       const profile = q('[data-anime-hero="profile"]');
       if (profile) {
-        tl.add(
-          profile,
-          { opacity: [0, 1], scale: [0.85, 1], duration: 600 },
-          400,
-        );
+        tl.add(profile, { opacity: [0, 1], scale: [0.85, 1], duration: 600 }, 400);
       }
       const metrics = q('[data-anime-hero="metrics"]');
       if (metrics) {
@@ -200,38 +149,46 @@ export function HeroSection() {
       ref={heroRef}
       id="about"
       aria-labelledby="hero-heading"
-      className={`relative min-h-screen flex items-center justify-center overflow-hidden bg-background${
+      className={`relative min-h-screen flex items-center justify-center overflow-hidden${
         heroInView ? "" : " hero-paused"
       }`}
+      style={{ background: "var(--gradient-hero)" }}
     >
-      {/* Paper-tinted editorial backdrop — replaces aurora */}
-      <PaperBackground />
-
-      {/* Quiet operator signal — real shipping cadence */}
-      <ShippedMeter reduced={!!prefersReducedMotion} />
+      {/* Ambient blob layer. Pure CSS — no WebGL, no canvas. The `blur-3xl`
+          class is load-bearing: e2e/hero.spec.ts matches on it. */}
+      {!prefersReducedMotion && (
+        <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+          <div className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full opacity-[0.07] dark:opacity-[0.05] bg-primary blur-3xl animate-blob" />
+          <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] rounded-full opacity-[0.06] dark:opacity-[0.04] bg-secondary blur-3xl animate-blob-delay" />
+        </div>
+      )}
 
       <div className="section-container relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Left — Text content */}
           <div data-anime-hero="left" className="text-center lg:text-left">
-            {/* Availability badge — monochrome treatment for full WCAG AA
-                contrast. The single mint dot carries the "available"
-                signal; the text itself stays on the foreground token. */}
+            {/* Availability badge — emerald tint on the secondary token.
+                Measured at WCAG AA in both themes (9.66:1 dark, 4.82:1
+                light); the light --secondary is darkened for that reason. */}
             <div
               data-anime-hero="badge"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-7 bg-muted border border-border"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-7"
+              style={{
+                background: "oklch(var(--secondary) / 0.08)",
+                border: "1px solid oklch(var(--secondary) / 0.25)",
+              }}
             >
               <span className="relative flex h-2 w-2 flex-shrink-0">
                 <span
                   className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-70"
-                  style={{ background: "oklch(var(--primary))" }}
+                  style={{ background: "oklch(var(--secondary))" }}
                 />
                 <span
                   className="relative inline-flex rounded-full h-2 w-2"
-                  style={{ background: "oklch(var(--primary))" }}
+                  style={{ background: "oklch(var(--secondary))" }}
                 />
               </span>
-              <span className="text-sm font-medium text-foreground">
+              <span className="text-sm font-medium text-secondary">
                 {personalData.availability}
               </span>
             </div>
@@ -243,25 +200,7 @@ export function HeroSection() {
               className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-bold mb-4"
               style={{ letterSpacing: "-0.03em", lineHeight: "1.05" }}
             >
-              {(() => {
-                const [first, ...rest] = personalData.name.split(" ");
-                const surname = rest.join(" ");
-                return (
-                  <>
-                    <span className="font-normal text-foreground">Hi, I&apos;m</span>{" "}
-                    <span className="text-foreground">{first}</span>{" "}
-                    <span
-                      className="text-foreground [text-underline-offset:0.14em] [text-decoration-thickness:2px]"
-                      style={{
-                        textDecoration: "underline",
-                        textDecorationColor: "oklch(var(--primary))",
-                      }}
-                    >
-                      {surname}
-                    </span>
-                  </>
-                );
-              })()}
+              Hi, I&apos;m <span className="text-gradient-primary">{personalData.name}</span>
             </h1>
 
             {/* Title */}
@@ -285,69 +224,93 @@ export function HeroSection() {
               data-anime-hero="ctas"
               className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start mb-9"
             >
-              <button ref={primaryCtaRef} onClick={scrollToProjects} className="btn-hero-primary">
-                See what I&apos;ve built
+              <button
+                ref={primaryCtaRef}
+                onClick={scrollToProjects}
+                className="btn-hero-primary btn-green"
+              >
+                View My Work
                 <ArrowDown className="w-4 h-4" />
               </button>
-              <button ref={secondaryCtaRef} onClick={scrollToContact} className="btn-hero-secondary">
+              <button
+                ref={secondaryCtaRef}
+                onClick={scrollToContact}
+                className="btn-hero-secondary btn-green"
+              >
                 Contact Me
               </button>
             </div>
 
             {/* Social links */}
-            <div
-              data-anime-hero="social"
-              className="flex gap-3 justify-center lg:justify-start"
-            >
+            <div data-anime-hero="social" className="flex gap-3 justify-center lg:justify-start">
               {[
                 { href: personalData.social.github, Icon: Github, label: "GitHub" },
                 { href: personalData.social.linkedin, Icon: Linkedin, label: "LinkedIn" },
                 { href: personalData.social.twitter, Icon: Twitter, label: "Twitter" },
-              ].map(({ href, Icon, label }) => (
-                <a
-                  key={label}
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={label}
-                  className="p-3 rounded-xl transition-all focus-visible:ring-2 focus-visible:ring-primary/30"
-                  style={{
-                    background: "oklch(var(--muted))",
-                    border: "1px solid oklch(var(--border))",
-                    transition: "all 250ms cubic-bezier(0.16, 1, 0.3, 1)",
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.background = "oklch(var(--primary))";
-                    (e.currentTarget as HTMLElement).style.color = "oklch(var(--primary-foreground))";
-                    (e.currentTarget as HTMLElement).style.transform = "translateY(-3px) scale(1.08)";
-                    (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-sm)";
-                    (e.currentTarget as HTMLElement).style.borderColor = "transparent";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.background = "oklch(var(--muted))";
-                    (e.currentTarget as HTMLElement).style.color = "";
-                    (e.currentTarget as HTMLElement).style.transform = "";
-                    (e.currentTarget as HTMLElement).style.boxShadow = "";
-                    (e.currentTarget as HTMLElement).style.borderColor = "oklch(var(--border))";
-                  }}
-                >
-                  <Icon className="w-5 h-5" />
-                </a>
-              ))}
+              ]
+                // twitter is "" until set up (personal.ts). An <a href=""> is not inert —
+                // it resolves to the current page, so the icon rendered and silently
+                // reloaded the site.
+                .filter(({ href }) => href)
+                .map(({ href, Icon, label }) => (
+                  <a
+                    key={label}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={label}
+                    className="p-3 rounded-xl transition-all"
+                    style={{
+                      background: "oklch(var(--muted))",
+                      border: "1px solid oklch(var(--border))",
+                      transition: "all 250ms cubic-bezier(0.16, 1, 0.3, 1)",
+                    }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLElement).style.background = "oklch(var(--primary))";
+                      (e.currentTarget as HTMLElement).style.color =
+                        "oklch(var(--primary-foreground))";
+                      (e.currentTarget as HTMLElement).style.transform =
+                        "translateY(-3px) scale(1.08)";
+                      (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-sm)";
+                      (e.currentTarget as HTMLElement).style.borderColor = "transparent";
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLElement).style.background = "oklch(var(--muted))";
+                      (e.currentTarget as HTMLElement).style.color = "";
+                      (e.currentTarget as HTMLElement).style.transform = "";
+                      (e.currentTarget as HTMLElement).style.boxShadow = "";
+                      (e.currentTarget as HTMLElement).style.borderColor = "oklch(var(--border))";
+                    }}
+                  >
+                    <Icon className="w-5 h-5" />
+                  </a>
+                ))}
             </div>
           </div>
 
           {/* Right — Profile + metrics */}
           <div data-anime-hero="right" className="relative flex flex-col items-center">
-            {/* Profile image — single hairline ring + quiet halo. No gradient. */}
+            {/* Profile image — glowing gradient ring. Three stacked layers:
+                a pulsing outer glow, a solid gradient ring, then the photo
+                inset by 5px. The <picture>/AVIF srcSet below is load-bearing
+                for the LCP preload in index.html — do not replace it with a
+                plain <img>. */}
             <div
               data-anime-hero="profile"
-              className="relative mx-auto w-56 h-56 sm:w-72 sm:h-72 lg:w-80 lg:h-80 mb-9 rounded-full"
-              style={{
-                border: "1px solid oklch(var(--primary))",
-                boxShadow: "0 0 0 16px oklch(var(--primary) / 0.10)",
-              }}
+              className="relative mx-auto w-56 h-56 sm:w-72 sm:h-72 lg:w-80 lg:h-80 mb-9"
             >
+              <div
+                className="absolute inset-0 rounded-full animate-pulse-glow"
+                style={{ background: "var(--gradient-primary)", padding: "3px" }}
+                aria-hidden="true"
+              >
+                <div className="w-full h-full rounded-full bg-background" />
+              </div>
+              <div
+                className="absolute inset-[3px] rounded-full"
+                style={{ background: "var(--gradient-primary)" }}
+                aria-hidden="true"
+              />
               <picture>
                 <source
                   type="image/avif"
@@ -369,16 +332,20 @@ export function HeroSection() {
                   loading="eager"
                   width={320}
                   height={320}
-                  className="absolute inset-0 z-10 w-full h-full rounded-full object-cover"
+                  className="absolute inset-[5px] z-10 w-[calc(100%-10px)] h-[calc(100%-10px)] rounded-full object-cover"
                 />
               </picture>
-              {/* "Open to work" pill — solid accent, y-bobble loop. */}
+              {/* "Open to work" pill — emerald gradient chip, y-bobble loop.
+                  Same green as the availability badge above. --secondary-
+                  foreground is theme-aware, so the label is ink on the bright
+                  dark-mode mint (9.65:1) and white on the darker light-mode
+                  green (5.81:1). */}
               <div
                 ref={pillRef}
-                className="absolute -bottom-3 -right-3 z-20 px-3 py-1.5 rounded-xl text-xs font-semibold text-primary-foreground"
+                className="absolute -bottom-3 -right-3 z-20 px-3 py-1.5 rounded-xl text-xs font-semibold text-secondary-foreground"
                 style={{
-                  background: "oklch(var(--primary))",
-                  boxShadow: "var(--shadow-sm)",
+                  background: "var(--gradient-secondary)",
+                  boxShadow: "var(--shadow-glow-secondary)",
                   willChange: heroInView ? "transform" : "auto",
                 }}
               >
@@ -386,25 +353,21 @@ export function HeroSection() {
               </div>
             </div>
 
-            {/* Metrics — inline sentence, not a card grid. */}
-            <p
-              data-anime-hero="metrics"
-              className="font-sans text-sm md:text-base text-muted-foreground max-w-sm text-center leading-relaxed"
-            >
-              Shipped{" "}
-              <span className="font-display font-bold text-foreground">
-                {personalData.metrics.projects}
-              </span>{" "}
-              projects with{" "}
-              <span className="font-display font-bold text-foreground">
-                {personalData.metrics.clients}
-              </span>{" "}
-              clients over{" "}
-              <span className="font-display font-bold text-foreground">
-                {personalData.metrics.experience}
-              </span>
-              .
-            </p>
+            {/* Metrics — three glass stat cards. */}
+            <div data-anime-hero="metrics" className="grid grid-cols-3 gap-4 w-full max-w-sm">
+              {[
+                { value: personalData.metrics.projects, label: "Projects" },
+                { value: personalData.metrics.experience, label: "Years Exp." },
+                { value: personalData.metrics.certifications, label: "Certifications" },
+              ].map(({ value, label }) => (
+                <div key={label} className="text-center p-4 rounded-2xl glass-card">
+                  <div className="text-2xl lg:text-3xl font-bold text-gradient-primary mb-0.5">
+                    {value}
+                  </div>
+                  <div className="text-xs text-muted-foreground font-medium">{label}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

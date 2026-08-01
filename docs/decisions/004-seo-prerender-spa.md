@@ -112,7 +112,6 @@ Each generated content page:
 - Ships its own `<title>`, `<meta name="description">`, canonical link, hreflang cluster (en-ZA / en / x-default), geo meta, OG card, Twitter card, robots `noai` meta.
 - Embeds `BlogPosting` (or `SpeakableArticle` for `/answers`) + `BreadcrumbList` JSON-LD via the same schema builders used by the SPA.
 - Includes a minimal CSS (~3 KB) so it reads cleanly without the app bundle.
-- Loads Plausible analytics (same `data-domain`) so traffic counts.
 - Links back to the SPA (`/`, `/blog`, `/answers`) so humans can dive into the full experience.
 
 ### Deferred work

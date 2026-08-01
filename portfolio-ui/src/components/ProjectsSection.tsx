@@ -97,10 +97,7 @@ export function ProjectsSection() {
   }, [projects, apiResponse]);
 
   const filteredProjects = useMemo(
-    () =>
-      activeFilter
-        ? projects.filter((p) => p.technologies.includes(activeFilter))
-        : projects,
+    () => (activeFilter ? projects.filter((p) => p.technologies.includes(activeFilter)) : projects),
     [projects, activeFilter],
   );
 
@@ -195,7 +192,9 @@ export function ProjectsSection() {
           <span className="inline-block text-xs font-semibold uppercase tracking-[0.18em] text-primary mb-3">
             Portfolio
           </span>
-          <h2 id="projects-heading" className="section-title">Featured Projects</h2>
+          <h2 id="projects-heading" className="section-title">
+            Featured Projects
+          </h2>
           <p className="section-subtitle mx-auto">
             Things I&apos;ve shipped to production — banking, infra, internal platforms.
           </p>
@@ -240,10 +239,7 @@ export function ProjectsSection() {
           <div className="flex items-center justify-center gap-2 mb-8 p-3 rounded-lg bg-destructive/10 text-destructive text-sm animate-in fade-in duration-300">
             <AlertCircle className="w-4 h-4" />
             <span>Unable to load latest projects.</span>
-            <button
-              onClick={() => refetch()}
-              className="underline font-medium hover:no-underline"
-            >
+            <button onClick={() => refetch()} className="underline font-medium hover:no-underline">
               Retry
             </button>
           </div>
@@ -268,6 +264,12 @@ export function ProjectsSection() {
                     width={600}
                     height={400}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    onError={(e) => {
+                      // ponytail: guard against a missing thumbnail rendering a broken-image icon
+                      const img = e.currentTarget;
+                      const fallback = "https://placehold.co/600x400/1e293b/94a3b8?text=Project";
+                      if (img.src !== fallback) img.src = fallback;
+                    }}
                   />
                   <div
                     className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
@@ -316,9 +318,7 @@ export function ProjectsSection() {
                   </div>
 
                   {project.tagline && (
-                    <p className="text-sm font-medium text-foreground mb-3">
-                      {project.tagline}
-                    </p>
+                    <p className="text-sm font-medium text-foreground mb-3">{project.tagline}</p>
                   )}
 
                   <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
@@ -380,8 +380,13 @@ export function ProjectsSection() {
         {/* Empty State */}
         {!isLoading && displayed.length === 0 && (
           <div className="flex flex-col items-center justify-center py-16 text-center animate-in fade-in duration-300">
-            <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
-              style={{ background: "oklch(var(--primary) / 0.08)", border: "1px solid oklch(var(--primary) / 0.15)" }}>
+            <div
+              className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
+              style={{
+                background: "oklch(var(--primary) / 0.08)",
+                border: "1px solid oklch(var(--primary) / 0.15)",
+              }}
+            >
               <FolderOpen className="w-8 h-8 text-primary" />
             </div>
             <p className="text-lg font-medium text-muted-foreground mb-2">

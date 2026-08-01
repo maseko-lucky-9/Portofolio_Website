@@ -4,7 +4,10 @@ import { render, screen } from "@testing-library/react";
 // Mock the HTTP client to prevent real network requests during tests
 vi.mock("@/lib/http-client", () => ({
   ApiError: class ApiError extends Error {
-    constructor(public status: number, message: string) {
+    constructor(
+      public status: number,
+      message: string,
+    ) {
       super(message);
     }
   },
@@ -28,7 +31,6 @@ vi.mock("@/config/env", () => ({
     useApi: false,
     enableMsw: false,
     enableAnalytics: false,
-    enableCodeExecution: false,
     enableComments: false,
     debug: false,
     mode: "test",

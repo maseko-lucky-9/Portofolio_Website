@@ -1,16 +1,16 @@
 /**
  * React Query Configuration
- * 
+ *
  * Sets up TanStack Query (React Query) with proper defaults
  * and error handling
  */
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { toast } from 'sonner';
-import { ApiError } from '@/lib/http-client';
-import { authService } from '@/services/auth.service';
-import { queryKeys } from './query-keys';
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { toast } from "sonner";
+import { ApiError } from "@/lib/http-client";
+import { authService } from "@/services/auth.service";
+import { queryKeys } from "./query-keys";
 
 export { queryKeys };
 
@@ -40,16 +40,16 @@ const defaultQueryOptions = {
       if (error instanceof ApiError) {
         // Don't show toast for validation errors (handled in form)
         if (!error.isValidationError()) {
-          toast.error(error.message || 'An error occurred');
+          toast.error(error.message || "An error occurred");
         }
 
         // Logout on authentication errors
         if (error.isAuthError()) {
           authService.logout();
-          window.location.href = '/login';
+          window.location.href = "/login";
         }
       } else {
-        toast.error('An unexpected error occurred');
+        toast.error("An unexpected error occurred");
       }
     },
   },

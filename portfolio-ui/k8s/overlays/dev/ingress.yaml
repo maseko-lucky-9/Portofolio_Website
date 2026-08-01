@@ -1,0 +1,37 @@
+# ==============================================
+# Development Ingress - Homelab (Tailscale-only)
+# ==============================================
+# Deliberately NOT a copy of overlays/prod/ingress.yaml. That one carries
+#   nginx.ingress.kubernetes.io/rewrite-target: /
+# with `path: /` and no capture group, which makes ingress-nginx rewrite EVERY
+# request URI to "/". Under that annotation /assets/index-*.js returns
+# index.html as text/html, the SPA never boots, and /api/... never reaches the
+# nginx `location /api/` block inside the pod. Omitted here on purpose.
+#
+# TLS secret name is dev-specific: sharing prod's `homelab-tls` across hosts
+# makes cert-manager generate competing Certificates over one Secret.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: frontend
+  annotations:
+    cert-manager.io/cluster-issuer: homelab-ca
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+spec:
+  ingressClassName: public
+  tls:
+    - secretName: dev-portfolio-tls
+      hosts:
+        - dev.portfolio.homelab
+  rules:
+    - host: dev.portfolio.homelab
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 80

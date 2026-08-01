@@ -25,11 +25,12 @@ spec:
     server: https://kubernetes.default.svc
     namespace: prod
 
+  # FROZEN — this Application syncs `portfolio-api/k8s/base` (database + redis)
+  # into the live `prod` namespace from `main`. The dev overlay is built on that
+  # same base, so with automated sync ON, any base edit made to get the dev
+  # stack working would auto-apply to the production database on promotion.
+  # Automated sync is OFF.
   syncPolicy:
-    automated:
-      prune: false
-      selfHeal: false
-      allowEmpty: false
     syncOptions:
     - CreateNamespace=true
     retry:

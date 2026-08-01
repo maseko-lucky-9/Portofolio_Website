@@ -40,18 +40,41 @@ spec:
     - protocol: TCP
       port: 53
   
-  # Allow access to backend API
+  # Allow access to backend API.
+  # Label is `app: backend-api` (portfolio-api/k8s/base/deployment.yaml) — the
+  # old `app: backend` selector matched nothing, so Calico silently dropped
+  # every frontend->API packet. Same class of typo as the nginx proxy_pass;
+  # fixing only that one leaves the request failing at the CNI instead.
   - to:
     - podSelector:
         matchLabels:
-          app: backend
+          app: backend-api
     ports:
     - protocol: TCP
       port: 3000
   
-  # Allow HTTPS to external services
+  # Allow HTTPS to external services.
+  #
+  # This rule used to read `- to: [{namespaceSelector: {}}]`, which selects every pod
+  # in every namespace INSIDE the cluster and grants nothing at all toward the public
+  # internet — Kubernetes egress off-cluster requires an ipBlock peer. The comment was
+  # aspirational; the effect was that any external call was silently dropped by the
+  # CNI. (Same class of bug as the `app: backend` selector typo noted above.)
+  #
+  # Needed now because `location = /api/chat` in nginx.conf proxies to Cloudflare
+  # Workers AI. Without this, DNS still resolves (kube-system rule above) so nginx
+  # starts fine and then every chat request hangs until proxy_read_timeout.
+  #
+  # RFC1918 and link-local are excluded so this stays an INTERNET egress grant and
+  # does not become a lateral path to other cluster or LAN services.
   - to:
-    - namespaceSelector: {}
+    - ipBlock:
+        cidr: 0.0.0.0/0
+        except:
+        - 10.0.0.0/8
+        - 172.16.0.0/12
+        - 192.168.0.0/16
+        - 169.254.0.0/16
     ports:
     - protocol: TCP
       port: 443
