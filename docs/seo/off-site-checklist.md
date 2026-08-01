@@ -4,8 +4,8 @@ Sequence backlinks low-effort → high-effort. Run weekly during the first month
 
 ## Tier 1 — Owned profiles (do first, all free)
 
-- [ ] GitHub profile README links to `https://thulanimaseko.com/`.
-- [ ] GitHub profile **Website** field set to `https://thulanimaseko.com/`.
+- [ ] GitHub profile README links to `https://thulanimaseko.co.za/`.
+- [ ] GitHub profile **Website** field set to `https://thulanimaseko.co.za/`.
 - [ ] Each public repo's `homepage` field set on relevant projects.
 - [ ] LinkedIn **Personal website** field set.
 - [ ] LinkedIn **Featured** section pins the site.

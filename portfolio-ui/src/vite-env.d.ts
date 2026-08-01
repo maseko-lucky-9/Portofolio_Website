@@ -16,7 +16,6 @@ interface ImportMetaEnv {
 
   // Feature Flags
   readonly VITE_ENABLE_ANALYTICS: string;
-  readonly VITE_ENABLE_CODE_EXECUTION: string;
   readonly VITE_ENABLE_COMMENTS: string;
 
   // Debug Mode

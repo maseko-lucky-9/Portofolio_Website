@@ -139,7 +139,7 @@ function card({ kindLabel, title, byline }) {
                       type: 'div',
                       props: {
                         style: { display: 'flex' },
-                        children: byline ?? 'thulanimaseko.com',
+                        children: byline ?? 'thulanimaseko.co.za',
                       },
                     },
                   ],
@@ -149,7 +149,7 @@ function card({ kindLabel, title, byline }) {
                 type: 'div',
                 props: {
                   style: { display: 'flex', fontSize: 18, letterSpacing: 1.5 },
-                  children: 'thulanimaseko.com',
+                  children: 'thulanimaseko.co.za',
                 },
               },
             ],

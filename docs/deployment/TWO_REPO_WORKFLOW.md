@@ -85,10 +85,11 @@ Per-target values now come from:
   `homelab-cd.yml`.
 
 Production has no backend by design. The contact form detects this (`env.useApi === false`)
-and hands the message to the visitor's mail client instead of dropping it. To give production
-a real endpoint later, onboard a domain to Cloudflare Email Sending and add a
-`POST /api/v1/contact/submit` route to `worker.ts` — `thulanimaseko.com` is not currently
-resolvable, which is why the mailto path exists.
+and hands the message to the visitor's mail client instead of dropping it — that's the actual
+reason the mailto path exists, independent of DNS. To give production a real endpoint later,
+onboard `thulanimaseko.co.za` to Cloudflare Email Sending and add a
+`POST /api/v1/contact/submit` route to `worker.ts`. See `docs/seo/custom-domain-setup.md` for
+the domain's current DNS state.
 
 ## One-time setup
 

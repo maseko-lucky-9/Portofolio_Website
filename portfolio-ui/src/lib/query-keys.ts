@@ -44,11 +44,6 @@ export const queryKeys = {
     overview: () => [...queryKeys.analytics.all, "overview"] as const,
   },
 
-  // Code Execution
-  codeExecution: {
-    languages: () => ["codeExecution", "languages"] as const,
-  },
-
   // Health
   health: {
     check: () => ["health", "check"] as const,

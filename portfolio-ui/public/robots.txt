@@ -1,4 +1,4 @@
-# robots.txt for thulanimaseko.com
+# robots.txt for thulanimaseko.co.za
 # Policy: allow major search engines + named AI engines (with throttle),
 # deny SEO data-aggregation crawlers, defer enforcement to Cloudflare WAF.
 # See ~/.claude/plans/now-create-a-seo-nifty-finch.md track A5.
@@ -172,5 +172,5 @@ Disallow: /api/
 Disallow: /private/
 Disallow: /_well-known/internal/
 
-Sitemap: https://thulanimaseko.com/sitemap.xml
-Host: https://thulanimaseko.com
+Sitemap: https://thulanimaseko.co.za/sitemap.xml
+Host: https://thulanimaseko.co.za

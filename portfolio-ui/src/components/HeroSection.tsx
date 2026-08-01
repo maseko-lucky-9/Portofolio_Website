@@ -224,14 +224,18 @@ export function HeroSection() {
               data-anime-hero="ctas"
               className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start mb-9"
             >
-              <button ref={primaryCtaRef} onClick={scrollToProjects} className="btn-hero-primary">
+              <button
+                ref={primaryCtaRef}
+                onClick={scrollToProjects}
+                className="btn-hero-primary btn-green"
+              >
                 View My Work
                 <ArrowDown className="w-4 h-4" />
               </button>
               <button
                 ref={secondaryCtaRef}
                 onClick={scrollToContact}
-                className="btn-hero-secondary"
+                className="btn-hero-secondary btn-green"
               >
                 Contact Me
               </button>
@@ -255,7 +259,7 @@ export function HeroSection() {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={label}
-                    className="p-3 rounded-xl transition-all focus-visible:ring-2 focus-visible:ring-primary/30"
+                    className="p-3 rounded-xl transition-all"
                     style={{
                       background: "oklch(var(--muted))",
                       border: "1px solid oklch(var(--border))",

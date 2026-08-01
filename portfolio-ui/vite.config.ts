@@ -130,13 +130,6 @@ export default defineConfig(({ mode }) => {
               return 'icons-vendor';
             }
 
-            // Monaco — only used by CodeDemoSection which is lazy-loaded.
-            // Forcing it into its own chunk keeps it deferred even if some
-            // future import accidentally pulls it eagerly.
-            if (id.includes('/@monaco-editor/') || id.includes('/monaco-editor/')) {
-              return 'monaco-vendor';
-            }
-
             return undefined;
           },
         },
