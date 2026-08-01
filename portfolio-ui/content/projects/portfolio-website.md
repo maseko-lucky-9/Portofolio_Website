@@ -87,7 +87,16 @@ Enforced by `size-limit` in CI (`.github/workflows/bundle-size.yml`):
 
 - **Full Vite + Puppeteer prerender of every route** — collides with the R3F home scene (frame-0 black canvas in headless Chromium). Deferred unless the 3D scene becomes optional.
 - **Server-side rendering** — Workers Assets serves prerendered HTML for content pages; the SPA hydrates `/` on the client. No Node SSR server to manage.
-- **Analytics of any kind** — no Plausible, no Google Analytics, no third-party scripts at all. `script-src` in the Worker's CSP is `'self'`-only as a result.
+- **Third-party analytics** — no Google Analytics, no Plausible Cloud, no SaaS tracker. Traffic measurement is self-hosted instead (below).
+- **Cookies and consent banners** — nothing is stored on the visitor's device, so there is nothing to consent to.
+
+## Analytics
+
+This site uses **self-hosted [Umami](https://umami.is)** running on my own Kubernetes cluster, reached over a Cloudflare Tunnel. No cookies, no device storage, no third-party processor: the data is collected by my server, stored in my database, and read by nobody else. Visitor IP addresses are used transiently to derive an approximate country and to hash a session identifier — they are never stored.
+
+The interesting constraint was keeping the collector reachable without exposing the cluster. Everything in the homelab is Tailscale-only behind a default-deny firewall, so the tunnel publishes exactly two paths — `/script.js` and `/api/send` — behind an anchored regex, with no inbound firewall ports opened at all. Umami's dashboard stays on the private network.
+
+The first design routed the beacon through the site's Cloudflare Worker to keep the CSP single-origin. I threw it away: a Worker can't set `CF-Connecting-IP` on a same-zone subrequest, and that IP feeds Umami's session hash — so every visitor would have collapsed into a single session while the country breakdown still looked perfectly healthy. A wrong number that looks right is worse than no number.
 
 ## See also
 

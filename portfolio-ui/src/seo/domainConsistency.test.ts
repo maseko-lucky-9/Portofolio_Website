@@ -22,8 +22,13 @@ import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
-import { SITE_ORIGIN as ROUTES_ORIGIN } from "../../scripts/seo/routes.mjs";
-import { renderPage } from "../../scripts/seo/page-template.mjs";
+import {
+  SITE_ORIGIN as ROUTES_ORIGIN,
+  ANALYTICS_ORIGIN,
+  ANALYTICS_WEBSITE_ID,
+  ANALYTICS_DOMAINS,
+} from "../../scripts/seo/routes.mjs";
+import { renderPage, renderIndex } from "../../scripts/seo/page-template.mjs";
 import { buildBlogPosting } from "./schemaBuilders";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -70,14 +75,102 @@ describe("domain consistency across independent SITE_ORIGIN copies", () => {
     // disambiguation for crawlers.
     expect(indexHtml).toContain(`"@id": "${ROUTES_ORIGIN}/#thulani"`);
   });
+});
 
-  it("ships no third-party analytics", () => {
-    // Plausible was removed 2026-07-31 (never registered, so it recorded
-    // nothing, and Cloud is paid). Asserted rather than merely deleted so a
-    // future copy-paste of the old <head> can't quietly reintroduce a
-    // third-party script — which would also need a CSP change in worker.ts
-    // to work at all, making it easy to add and then wonder why it's silent.
-    expect(indexHtml).not.toContain("plausible.io");
-    expect(indexHtml).not.toContain("data-domain=");
+// The site now ships a deliberate cross-origin script (self-hosted Umami behind
+// a Cloudflare Tunnel), so the old "contains no third-party analytics" assertion
+// would be false by design. The invariant worth guarding replaced it: an external
+// script tag and the CSP that permits it live in two files with no import
+// relationship, and every way of getting that pair wrong fails SILENTLY —
+// the page renders normally and analytics simply never record.
+describe("analytics tags agree with the CSP in worker.ts", () => {
+  const workerSrc = readFileSync(resolve(__dirname, "../worker.ts"), "utf-8");
+
+  /** Pull one directive's value out of the CSP array literal in worker.ts. */
+  const directive = (name: string): string => {
+    const match = workerSrc.match(new RegExp(`"${name} ([^"]*)"`));
+    if (!match) throw new Error(`worker.ts has no ${name} directive`);
+    return match[1];
+  };
+
+  /** Absolute (cross-origin) <script src> origins in a document. */
+  const externalScriptOrigins = (html: string): string[] =>
+    [...html.matchAll(/<script[^>]*\ssrc="(https?:\/\/[^"]+)"/g)].map((m) => new URL(m[1]).origin);
+
+  const generatedPage = renderPage({
+    kind: "blog",
+    slug: "csp-check",
+    title: "t",
+    description: "d",
+    datePublished: "2026-01-01T00:00:00Z",
+    htmlBody: "<p>x</p>",
+  });
+  const generatedIndex = renderIndex("blog", []);
+
+  it.each([
+    ["index.html", () => indexHtml],
+    ["renderPage output", () => generatedPage],
+    ["renderIndex output", () => generatedIndex],
+  ])("every external script origin in %s is allowed by script-src", (_label, getHtml) => {
+    const scriptSrc = directive("script-src");
+    const origins = externalScriptOrigins(getHtml());
+
+    // Also proves the tag is present at all: all three surfaces must carry it,
+    // and dropping one is the classic way coverage goes partial unnoticed.
+    expect(origins).toContain(ANALYTICS_ORIGIN);
+
+    for (const origin of origins) {
+      expect(scriptSrc).toContain(origin);
+    }
+  });
+
+  it("the analytics origin is also in connect-src", () => {
+    // script-src alone loads the tracker but blocks its fetch() to /api/send.
+    // That failure is invisible without opening devtools: the script is there,
+    // the page is fine, and the dashboard just stays at zero forever.
+    expect(directive("connect-src")).toContain(ANALYTICS_ORIGIN);
+  });
+
+  it("the Umami website id has been filled in", () => {
+    // Ships as a placeholder so this test fails until Umami's first-run step is
+    // done (see homelab-infra/apps/umami/README.md). Deploying the placeholder
+    // would make Umami reject every beacon with a 400 that nothing surfaces.
+    expect(ANALYTICS_WEBSITE_ID).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+    );
+  });
+
+  it("every custom domain the Worker serves is in data-domains", () => {
+    // Umami compares data-domains against location.hostname EXACTLY — no
+    // www-stripping, no suffix match. wrangler.toml binds the apex and www as
+    // two independent Custom Domains and nothing redirects between them
+    // (https-redirect.ts only handles http -> https), so a hostname missing
+    // here is a visitor segment that is silently never recorded.
+    //
+    // Parsed from wrangler.toml rather than hardcoded so that adding a third
+    // custom domain fails here instead of quietly going untracked.
+    const wrangler = readFileSync(resolve(__dirname, "../../wrangler.toml"), "utf-8");
+    const customDomains = [
+      ...wrangler.matchAll(
+        /\[\[routes\]\]\s*\npattern\s*=\s*"([^"]+)"[\s\S]*?custom_domain\s*=\s*true/g,
+      ),
+    ].map((m) => m[1]);
+
+    expect(customDomains.length).toBeGreaterThan(0); // guard against a regex that silently matches nothing
+
+    for (const host of customDomains) {
+      expect(ANALYTICS_DOMAINS).toContain(host);
+    }
+  });
+
+  it("index.html's data-domains agrees with routes.mjs", () => {
+    expect(indexHtml).toContain(`data-domains="${ANALYTICS_DOMAINS.join(",")}"`);
+  });
+
+  it("index.html's hand-written website id agrees with routes.mjs", () => {
+    // index.html is not generated by any script, so it carries an independent
+    // copy of the id — the same class of drift this file exists to catch for
+    // SITE_ORIGIN.
+    expect(indexHtml).toContain(`data-website-id="${ANALYTICS_WEBSITE_ID}"`);
   });
 });

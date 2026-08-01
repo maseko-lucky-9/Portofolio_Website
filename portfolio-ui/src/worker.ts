@@ -27,18 +27,30 @@ interface ScheduledController {
   scheduledTime: number;
 }
 
-// No third-party script origins: Plausible was removed 2026-07-31 and fonts
-// are self-hosted via @fontsource, so script-src is 'self'-only. The
-// remaining looseness is 'unsafe-inline', still required by inline
-// bootstrap/JSON-LD in index.html — tighten to nonce-based in Phase 4
-// hardening.
+// The only cross-origin host here is t.thulanimaseko.co.za — a Cloudflare Tunnel
+// onto self-hosted Umami in the homelab cluster. Same apex, own server, own
+// database, no third-party processor and no cookies, so the "no third-party
+// trackers" property still holds; what changed is that it is a second origin
+// rather than a same-origin path.
+//
+// It must appear in BOTH directives: script-src to load /script.js, connect-src
+// for the beacon's fetch() to /api/send. Setting only one fails silently —
+// the page looks fine and nothing is ever recorded.
+//
+// api.indexnow.org was removed at the same time: the only caller is
+// scripts/indexnow-submit.mjs, a Node build script that CSP does not govern, so
+// the directive had been dead since it was added.
+//
+// Fonts are self-hosted via @fontsource. The remaining looseness is
+// 'unsafe-inline', still required by inline bootstrap/JSON-LD in index.html —
+// tighten to nonce-based in Phase 4 hardening.
 const CSP = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline'",
+  "script-src 'self' 'unsafe-inline' https://t.thulanimaseko.co.za",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
-  "connect-src 'self' https://api.indexnow.org",
+  "connect-src 'self' https://t.thulanimaseko.co.za",
   "media-src 'self'",
   "object-src 'none'",
   "frame-ancestors 'none'",

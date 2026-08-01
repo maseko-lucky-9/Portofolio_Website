@@ -74,6 +74,11 @@ Five workloads as of writing:
 | HomeAssistant | Lights, climate, observability |
 | n8n | Workflow automation (RSS scraping, scheduled jobs) |
 | Postgres | Shared DB for the above |
+| Umami | Self-hosted analytics for this portfolio site |
+
+Umami is the one workload the public internet touches, and it is the most interesting one to secure. Everything here is Tailscale-only behind a default-deny firewall, so a visitor's browser cannot reach the cluster — but analytics only work if it can. The answer was a dedicated Cloudflare Tunnel (outbound UDP/443 only, no inbound ports) publishing exactly two paths, `/script.js` and `/api/send`, and nothing else. The dashboard stays on the private network.
+
+The detail worth knowing: `cloudflared` parses its ingress `path` as an *unanchored* Go regex. Writing `path: /api/send` would also have admitted `/x/api/send/y` — and, by extension, a good deal of Umami's `/api` tree. It needs to be `^/(api/send|script\.js)$`, with the dot escaped, and it is worth a negative `curl` test after every change rather than trusting it.
 
 ## What I learned
 

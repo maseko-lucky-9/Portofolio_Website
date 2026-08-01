@@ -26,9 +26,7 @@ const expectedOrigin = baseUrl ? new URL(baseUrl).origin : "";
 test.skip(!baseUrl, "live-domain checks require E2E_BASE_URL");
 
 test.describe("live domain", () => {
-  test("serves the portfolio app, not a registrar placeholder", async ({
-    page,
-  }) => {
+  test("serves the portfolio app, not a registrar placeholder", async ({ page }) => {
     await page.goto("/");
 
     await expect(page.locator("#root")).toBeAttached();
@@ -36,9 +34,7 @@ test.describe("live domain", () => {
 
     // GoDaddy Website Builder's stock tagline. Its presence means DNS is still
     // pointed at the old parked site.
-    await expect(page.locator("body")).not.toContainText(
-      "Elevate Your Business Today",
-    );
+    await expect(page.locator("body")).not.toContainText("Elevate Your Business Today");
 
     await page.screenshot({
       path: `test-results/live-domain-${expectedHost}.png`,
@@ -49,14 +45,10 @@ test.describe("live domain", () => {
   test("canonical and JSON-LD identity use the live host", async ({ page }) => {
     await page.goto("/");
 
-    const canonical = await page
-      .locator('link[rel="canonical"]')
-      .getAttribute("href");
+    const canonical = await page.locator('link[rel="canonical"]').getAttribute("href");
     expect(canonical).toBe(`${expectedOrigin}/`);
 
-    const ogUrl = await page
-      .locator('meta[property="og:url"]')
-      .getAttribute("content");
+    const ogUrl = await page.locator('meta[property="og:url"]').getAttribute("content");
     expect(ogUrl).toBe(`${expectedOrigin}/`);
 
     // The Person @id is the anchor every generated page's JSON-LD references.
@@ -64,10 +56,7 @@ test.describe("live domain", () => {
     // breaks silently — no error, just a broken graph for crawlers. Parsed
     // rather than substring-matched so this survives reformatting of the
     // inline JSON-LD, not just today's exact whitespace.
-    const ld = await page
-      .locator('script[type="application/ld+json"]')
-      .first()
-      .textContent();
+    const ld = await page.locator('script[type="application/ld+json"]').first().textContent();
     const graph = JSON.parse(ld ?? "{}") as {
       "@graph"?: Array<Record<string, unknown>>;
     };
@@ -77,9 +66,7 @@ test.describe("live domain", () => {
 
   test.describe("SEO surfaces carry the right domain", () => {
     for (const path of ["/sitemap.xml", "/rss.xml", "/robots.txt"]) {
-      test(`${path} references the live host and no stale domain`, async ({
-        request,
-      }) => {
+      test(`${path} references the live host and no stale domain`, async ({ request }) => {
         const res = await request.get(path);
         expect(res.status()).toBe(200);
 
@@ -91,9 +78,7 @@ test.describe("live domain", () => {
     }
   });
 
-  test("OG image resolves (domain is baked into the watermark)", async ({
-    request,
-  }) => {
+  test("OG image resolves (domain is baked into the watermark)", async ({ request }) => {
     const res = await request.get("/og/home.png");
     expect(res.status()).toBe(200);
     expect(res.headers()["content-type"]).toContain("image/png");
@@ -102,9 +87,7 @@ test.describe("live domain", () => {
   test("IndexNow key file is served", async ({ request }) => {
     const res = await request.get("/00b81fad70da4ae7acdbfd756d25c510.txt");
     expect(res.status()).toBe(200);
-    expect((await res.text()).trim()).toBe(
-      "00b81fad70da4ae7acdbfd756d25c510",
-    );
+    expect((await res.text()).trim()).toBe("00b81fad70da4ae7acdbfd756d25c510");
   });
 
   test("plain HTTP redirects to HTTPS", async ({ request }) => {
@@ -119,9 +102,7 @@ test.describe("live domain", () => {
     expect(res.headers()["location"]).toContain(`https://${expectedHost}`);
   });
 
-  test("HSTS is present but not preloaded during onboarding", async ({
-    request,
-  }) => {
+  test("HSTS is present but not preloaded during onboarding", async ({ request }) => {
     const res = await request.get("/");
     const hsts = res.headers()["strict-transport-security"];
 
@@ -139,5 +120,34 @@ test.describe("live domain", () => {
     expect(headers["content-security-policy"]).toBeTruthy();
     expect(headers["x-content-type-options"]).toBe("nosniff");
     expect(headers["x-frame-options"]).toBe("DENY");
+  });
+
+  test("CSP directives are actually correct, not merely present", async ({ request }) => {
+    // A truthy check on the header would pass even if script-src had been
+    // broadened to 'unsafe-eval' or a stray CDN — the exact regression this
+    // whole file exists to catch elsewhere. Assert the contents.
+    const res = await request.get("/");
+    const csp = res.headers()["content-security-policy"] ?? "";
+    const directive = (name: string) =>
+      csp
+        .split(";")
+        .map((d) => d.trim())
+        .find((d) => d.startsWith(`${name} `)) ?? "";
+
+    // Self-hosted Umami behind a Cloudflare Tunnel. It must be in BOTH: with
+    // only script-src the tracker loads but its beacon is blocked, and the
+    // dashboard silently stays empty.
+    expect(directive("script-src")).toContain("https://t.thulanimaseko.co.za");
+    expect(directive("connect-src")).toContain("https://t.thulanimaseko.co.za");
+
+    // Nothing else may creep in. These are the whole allow-list.
+    expect(directive("script-src")).toBe(
+      "script-src 'self' 'unsafe-inline' https://t.thulanimaseko.co.za",
+    );
+    expect(directive("connect-src")).toBe("connect-src 'self' https://t.thulanimaseko.co.za");
+
+    expect(directive("object-src")).toBe("object-src 'none'");
+    expect(directive("frame-ancestors")).toBe("frame-ancestors 'none'");
+    expect(csp).not.toContain("unsafe-eval");
   });
 });
