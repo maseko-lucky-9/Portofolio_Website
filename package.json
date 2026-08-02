@@ -18,7 +18,8 @@
     "watch:shared": "npm run watch --workspace=shared",
     "clean": "npm run clean --workspaces --if-present",
     "install:all": "npm install",
-    "postinstall": "npm run build:shared"
+    "postinstall": "npm run build:shared",
+    "test": "npm run test --workspaces --if-present"
   },
   "engines": {
     "node": ">=20.0.0",
