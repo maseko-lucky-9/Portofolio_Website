@@ -20,10 +20,13 @@ const redis = new Redis(config.redis.url);
 // Cache Key Patterns
 // ==========================================
 
+// NOTE: these are this script's OWN namespaces and are mostly not the ones the
+// application reads -- src/config/redis.ts owns those. Detail-page keys are
+// absent on purpose: warming a key the public detail route serves verbatim
+// means any shape mismatch becomes a wrong response body for a full TTL, and
+// this script does not build the object the service caches. See warmupProjects.
 const CACHE_KEYS = {
-  project: (slug: string) => `project:${slug}`,
   projectList: (params: string) => `projects:list:${params}`,
-  article: (slug: string) => `article:${slug}`,
   articleList: (params: string) => `articles:list:${params}`,
   tag: (slug: string) => `tag:${slug}`,
   tagList: () => 'tags:list',
@@ -60,7 +63,10 @@ async function warmupProjects(): Promise<void> {
           id: true,
           firstName: true,
           lastName: true,
-          email: true,
+          // NOT email. The service's own queries deliberately select only
+          // id/name/avatar for a public author, so nothing that reaches a
+          // client should ever carry it -- and this row is cached, which is
+          // one copy too many to be careless with.
         },
       },
       tags: {
@@ -78,12 +84,19 @@ async function warmupProjects(): Promise<void> {
   await redis.setex(listKey, CACHE_TTL.project, JSON.stringify(projects));
   console.log(`   ✅ Cached ${projects.length} projects`);
   
-  // Cache individual projects
-  for (const project of projects) {
-    const key = CACHE_KEYS.project(project.slug);
-    await redis.setex(key, CACHE_TTL.project, JSON.stringify(project));
-  }
-  console.log(`   ✅ Cached individual project pages`);
+  // Detail pages are deliberately NOT warmed.
+  //
+  // cacheKeys.project is the key GET /api/v1/projects/:slug reads, and that
+  // route has no response schema, so whatever sits there is serialized to the
+  // client verbatim. The row selected here is not the object the service
+  // caches: project.service.ts adds contentHtml, readingTime, wordCount and
+  // toc from parseMarkdown, and narrows author/tags. Writing this shape would
+  // make the public detail endpoint serve a body with no rendered HTML, plus
+  // raw join-row fields, for the whole TTL.
+  //
+  // Warming a detail page saves exactly one query on its first request, which
+  // is not worth serving a wrong body for an hour. The first real request
+  // populates it correctly.
   
   // Cache featured projects
   const featured = projects.filter(p => p.featured).slice(0, 3);
@@ -103,7 +116,10 @@ async function warmupArticles(): Promise<void> {
           id: true,
           firstName: true,
           lastName: true,
-          email: true,
+          // NOT email. The service's own queries deliberately select only
+          // id/name/avatar for a public author, so nothing that reaches a
+          // client should ever carry it -- and this row is cached, which is
+          // one copy too many to be careless with.
         },
       },
       tags: {
@@ -121,12 +137,7 @@ async function warmupArticles(): Promise<void> {
   await redis.setex(listKey, CACHE_TTL.article, JSON.stringify(articles));
   console.log(`   ✅ Cached ${articles.length} articles`);
   
-  // Cache individual articles
-  for (const article of articles) {
-    const key = CACHE_KEYS.article(article.slug);
-    await redis.setex(key, CACHE_TTL.article, JSON.stringify(article));
-  }
-  console.log(`   ✅ Cached individual article pages`);
+  // Detail pages are deliberately NOT warmed -- see warmupProjects.
   
   // Cache featured articles
   const featured = articles.filter(a => a.featured).slice(0, 3);

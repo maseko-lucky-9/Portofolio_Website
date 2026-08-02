@@ -1,4 +1,5 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
+import { randomUUID } from 'crypto';
 import jwt, { type SignOptions } from 'jsonwebtoken';
 import { prisma } from '../config/database.js';
 import { config } from '../config/index.js';
@@ -63,8 +64,19 @@ export const generateTokens = (user: {
     expiresIn: config.auth.accessExpiry as SignOptions['expiresIn'],
   });
 
+  // `jwtid` is load-bearing, not decorative. refreshPayload is fully
+  // deterministic ({userId, email, role, type}), and the only other claim
+  // jwt.sign adds is `iat`, which has SECOND granularity. Two refresh tokens
+  // minted for the same user within the same second were therefore byte
+  // identical -- and RefreshToken.token is @unique, so storeRefreshToken()
+  // threw P2002 and the request came back 409 CONFLICT.
+  //
+  // That broke login outright: register() issues a token, so logging in
+  // immediately afterwards (or twice in quick succession) always collided.
+  // Found by tests/e2e/auth.test.ts.
   const refreshToken = jwt.sign(refreshPayload, config.auth.jwtSecret, {
     expiresIn: config.auth.refreshExpiry as SignOptions['expiresIn'],
+    jwtid: randomUUID(),
   });
 
   return { accessToken, refreshToken };

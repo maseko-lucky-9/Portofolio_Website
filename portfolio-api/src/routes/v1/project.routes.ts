@@ -8,6 +8,8 @@ import { projectService } from '../../services/project.service.js';
 import type { PaginatedResponse, ProjectSummary, ProjectDetail } from '@portfolio/shared/types';
 import { paginatedResponse, successResponse } from '../../utils/response.js';
 import {
+  clampLimit,
+  clampPage,
   projectQuerySchema,
   createProjectSchema,
   updateProjectSchema,
@@ -26,7 +28,6 @@ export function projectRoutes(app: FastifyInstance): void {
           properties: {
             page: { type: 'string', default: '1' },
             limit: { type: 'string', default: '10' },
-            status: { type: 'string', enum: ['DRAFT', 'PUBLISHED', 'ARCHIVED'] },
             featured: { type: 'string' },
             tag: { type: 'string' },
             search: { type: 'string' },
@@ -34,23 +35,16 @@ export function projectRoutes(app: FastifyInstance): void {
             sortOrder: { type: 'string', enum: ['asc', 'desc'] },
           },
         },
-        response: {
-          200: {
-            type: 'object',
-            properties: {
-              data: { type: 'array' },
-              meta: { type: 'object' },
-            },
-          },
-        },
       },
     },
     async (request, _reply): Promise<PaginatedResponse<ProjectSummary>> => {
       const query = projectQuerySchema.parse(request.query);
       const result = await projectService.listProjects({
-        page: parseInt(query.page) || 1,
-        limit: parseInt(query.limit) || 10,
-        status: query.status,
+        // Both clamped. page and limit are the two cache-key axes an anonymous
+        // caller controls, and an unbounded page also overflows Prisma's
+        // 32-bit skip. See utils/validation.ts for the bounds.
+        page: clampPage(query.page),
+        limit: clampLimit(query.limit),
         featured: query.featured === 'true' ? true : query.featured === 'false' ? false : undefined,
         tag: query.tag,
         search: query.search,
@@ -90,9 +84,6 @@ export function projectRoutes(app: FastifyInstance): void {
           properties: {
             slug: { type: 'string' },
           },
-        },
-        response: {
-          200: { type: 'object' },
         },
       },
     },
@@ -140,9 +131,6 @@ export function projectRoutes(app: FastifyInstance): void {
             metaDescription: { type: 'string' },
             tagIds: { type: 'array', items: { type: 'string' } },
           },
-        },
-        response: {
-          201: { type: 'object' },
         },
       },
     },
@@ -197,9 +185,6 @@ export function projectRoutes(app: FastifyInstance): void {
             metaDescription: { type: 'string' },
             tagIds: { type: 'array', items: { type: 'string' } },
           },
-        },
-        response: {
-          200: { type: 'object' },
         },
       },
     },

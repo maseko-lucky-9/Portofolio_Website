@@ -6,6 +6,8 @@ import {
 } from '../../middleware/auth.middleware.js';
 import { articleService } from '../../services/article.service.js';
 import {
+  clampLimit,
+  clampPage,
   articleQuerySchema,
   createArticleSchema,
   updateArticleSchema,
@@ -24,7 +26,6 @@ export function articleRoutes(app: FastifyInstance): void {
           properties: {
             page: { type: 'string', default: '1' },
             limit: { type: 'string', default: '10' },
-            status: { type: 'string', enum: ['DRAFT', 'PUBLISHED', 'ARCHIVED'] },
             featured: { type: 'string' },
             tag: { type: 'string' },
             search: { type: 'string' },
@@ -32,23 +33,16 @@ export function articleRoutes(app: FastifyInstance): void {
             sortOrder: { type: 'string', enum: ['asc', 'desc'] },
           },
         },
-        response: {
-          200: {
-            type: 'object',
-            properties: {
-              data: { type: 'array' },
-              meta: { type: 'object' },
-            },
-          },
-        },
       },
     },
     async (request) => {
       const query = articleQuerySchema.parse(request.query);
       const result = await articleService.listArticles({
-        page: parseInt(query.page) || 1,
-        limit: parseInt(query.limit) || 10,
-        status: query.status,
+        // Both clamped. page and limit are the two cache-key axes an anonymous
+        // caller controls, and an unbounded page also overflows Prisma's
+        // 32-bit skip. See utils/validation.ts for the bounds.
+        page: clampPage(query.page),
+        limit: clampLimit(query.limit),
         featured: query.featured === 'true' ? true : query.featured === 'false' ? false : undefined,
         tag: query.tag,
         search: query.search,
@@ -75,9 +69,6 @@ export function articleRoutes(app: FastifyInstance): void {
           type: 'object',
           required: ['slug'],
           properties: { slug: { type: 'string' } },
-        },
-        response: {
-          200: { type: 'object' },
         },
       },
     },
@@ -115,9 +106,6 @@ export function articleRoutes(app: FastifyInstance): void {
             canonicalUrl: { type: 'string' },
             tagIds: { type: 'array', items: { type: 'string' } },
           },
-        },
-        response: {
-          201: { type: 'object' },
         },
       },
     },
@@ -160,9 +148,6 @@ export function articleRoutes(app: FastifyInstance): void {
             canonicalUrl: { type: 'string' },
             tagIds: { type: 'array', items: { type: 'string' } },
           },
-        },
-        response: {
-          200: { type: 'object' },
         },
       },
     },

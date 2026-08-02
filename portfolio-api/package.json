@@ -26,7 +26,8 @@
     "docker:dev": "docker-compose -f docker-compose.dev.yml up -d",
     "docker:prod": "docker-compose up -d",
     "openapi:generate": "tsx scripts/generate-openapi.ts",
-    "load-test": "k6 run tests/load/scenarios.js"
+    "load-test": "k6 run tests/load/scenarios.js",
+    "typecheck:test": "tsc -p tsconfig.test.json"
   },
   "keywords": [
     "portfolio",

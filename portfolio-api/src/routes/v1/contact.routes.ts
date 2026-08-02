@@ -3,6 +3,8 @@ import { authenticate, requireRole } from '../../middleware/auth.middleware.js';
 import { contactService } from '../../services/contact.service.js';
 import { newsletterService } from '../../services/newsletter.service.js';
 import {
+  clampLimit,
+  clampPage,
   contactSchema,
   contactSubmissionsQuerySchema,
   newsletterSchema,
@@ -75,8 +77,11 @@ export function contactRoutes(app: FastifyInstance): void {
     async (request) => {
       const query = contactSubmissionsQuerySchema.parse(request.query);
       const result = await contactService.getSubmissions({
-        page: parseInt(query.page) || 1,
-        limit: parseInt(query.limit) || 20,
+        // Clamped like the public routes. These are admin-only, but an
+        // unbounded limit still overflows Prisma's 32-bit take and an
+        // out-of-range page reaches skip as 1e20 -- both surface as a 500.
+        page: clampPage(query.page),
+        limit: clampLimit(query.limit, 20),
         status: query.status,
       });
       return result;
@@ -223,8 +228,11 @@ export function contactRoutes(app: FastifyInstance): void {
     async (request) => {
       const query = newsletterSubscribersQuerySchema.parse(request.query);
       const result = await newsletterService.getSubscribers({
-        page: parseInt(query.page) || 1,
-        limit: parseInt(query.limit) || 20,
+        // Clamped like the public routes. These are admin-only, but an
+        // unbounded limit still overflows Prisma's 32-bit take and an
+        // out-of-range page reaches skip as 1e20 -- both surface as a 500.
+        page: clampPage(query.page),
+        limit: clampLimit(query.limit, 20),
         active: query.active === 'true' ? true : query.active === 'false' ? false : undefined,
       });
       return result;
