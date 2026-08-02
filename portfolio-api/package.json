@@ -52,7 +52,6 @@
     "@fastify/websocket": "^11.2.0",
     "@portfolio/shared": "file:../shared",
     "@prisma/client": "^5.10.0",
-    "@sentry/node": "^10.69.0",
     "@types/jsonwebtoken": "^9.0.10",
     "bcryptjs": "^2.4.3",
     "bullmq": "^5.81.3",
