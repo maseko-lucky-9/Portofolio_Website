@@ -35,17 +35,27 @@ describe('GET /api/v1/articles', () => {
     expect(body.items.length).toBeGreaterThan(0);
   });
 
-  it('returns populated pagination metadata', async () => {
-    const res = await app.inject({ method: 'GET', url: '/api/v1/articles?page=1&limit=1' });
-    const meta = res.json().meta;
+  it('returns populated pagination metadata that reflects the request', async () => {
+    // Self-contained: both page sizes are requested here, so the cache-key pin
+    // does not depend on a neighbouring test having primed the entry at a
+    // different limit.
+    const wide = await app.inject({ method: 'GET', url: '/api/v1/articles?page=1&limit=10' });
+    const narrow = await app.inject({ method: 'GET', url: '/api/v1/articles?page=1&limit=1' });
 
     // Keys, not truthiness -- {} is truthy and would pass a toBeDefined().
-    expect(Object.keys(meta).length).toBeGreaterThan(0);
-    expect(typeof meta.total).toBe('number');
-    // Pins the cache-key fix: `limit` was absent from the key, so this request
-    // used to receive whatever page size the previous caller asked for.
-    expect(meta.limit).toBe(1);
-    expect(meta.page).toBe(1);
+    expect(Object.keys(wide.json().meta).length).toBeGreaterThan(0);
+    expect(typeof wide.json().meta.total).toBe('number');
+    expect(wide.json().meta.limit).toBe(10);
+    expect(narrow.json().meta.limit).toBe(1);
+  });
+
+  it('honours the limit parameter in the returned page', async () => {
+    // Two articles are published by the seed so exact counts can fail.
+    const one = await app.inject({ method: 'GET', url: '/api/v1/articles?page=1&limit=1' });
+    const many = await app.inject({ method: 'GET', url: '/api/v1/articles?page=1&limit=10' });
+
+    expect(one.json().items.length).toBe(1);
+    expect(many.json().items.length).toBeGreaterThanOrEqual(2);
   });
 
   it('serves a single article by slug with a non-empty body', async () => {

@@ -33,29 +33,40 @@ describe('GET /api/v1/projects', () => {
     expect(body.data.length).toBeGreaterThan(0);
   });
 
-  it('honours the limit parameter', async () => {
-    const res = await app.inject({ method: 'GET', url: '/api/v1/projects?page=1&limit=1' });
+  it('honours the limit parameter in the returned page', async () => {
+    // The seed publishes TWO projects specifically so this can fail. With one
+    // row, `data.length <= 1` holds even if `limit` is ignored entirely, so the
+    // assertion proved nothing. Exact counts at two different page sizes is
+    // what makes it real.
+    const one = await app.inject({ method: 'GET', url: '/api/v1/projects?page=1&limit=1' });
+    const many = await app.inject({ method: 'GET', url: '/api/v1/projects?page=1&limit=10' });
 
-    expect(res.statusCode).toBe(200);
-    expect(res.json().data.length).toBeLessThanOrEqual(1);
+    expect(one.json().data.length).toBe(1);
+    expect(many.json().data.length).toBeGreaterThanOrEqual(2);
   });
 
-  it('returns populated pagination metadata', async () => {
-    // Regression pin. The route used to declare
-    //   response: { 200: { properties: { data: {type:'array'}, meta: {type:'object'} } } }
-    // and fast-json-stringify strips every key an object schema does not name,
-    // so `meta` serialised as {} and no client could paginate. `data` survived
-    // only because an array schema with no `items` is passed through.
+  it('returns populated pagination metadata that reflects the request', async () => {
+    // Two regression pins in one self-contained test.
     //
-    // Asserting the KEYS, not just that meta is truthy: `{}` is truthy, so a
-    // toBeDefined() here would have passed against the broken code.
-    const res = await app.inject({ method: 'GET', url: '/api/v1/projects?page=1&limit=1' });
-    const meta = res.json().meta;
+    // 1. The route used to declare
+    //      response: { 200: { properties: { data: {type:'array'}, meta: {type:'object'} } } }
+    //    and fast-json-stringify strips every key an object schema does not
+    //    name, so `meta` serialised as {}. Asserting KEYS rather than
+    //    truthiness matters: {} is truthy, so toBeDefined() passed pre-fix.
+    //
+    // 2. `limit` was missing from the list cache key, so two requests differing
+    //    only in page size collided. Both page sizes are requested HERE rather
+    //    than relying on an earlier test to prime the cache at a different
+    //    limit -- otherwise deleting or reordering that test would silently
+    //    let the mutant survive.
+    const wide = await app.inject({ method: 'GET', url: '/api/v1/projects?page=1&limit=10' });
+    const narrow = await app.inject({ method: 'GET', url: '/api/v1/projects?page=1&limit=1' });
 
-    expect(Object.keys(meta).length).toBeGreaterThan(0);
-    expect(typeof meta.total).toBe('number');
-    expect(meta.page).toBe(1);
-    expect(meta.limit).toBe(1);
+    expect(Object.keys(wide.json().meta).length).toBeGreaterThan(0);
+    expect(typeof wide.json().meta.total).toBe('number');
+    expect(wide.json().meta.limit).toBe(10);
+    expect(narrow.json().meta.limit).toBe(1);
+    expect(narrow.json().meta.page).toBe(1);
   });
 
   it('returns an empty page rather than an error for a page past the end', async () => {

@@ -8,6 +8,7 @@ import { projectService } from '../../services/project.service.js';
 import type { PaginatedResponse, ProjectSummary, ProjectDetail } from '@portfolio/shared/types';
 import { paginatedResponse, successResponse } from '../../utils/response.js';
 import {
+  MAX_PAGE_SIZE,
   projectQuerySchema,
   createProjectSchema,
   updateProjectSchema,
@@ -26,7 +27,6 @@ export function projectRoutes(app: FastifyInstance): void {
           properties: {
             page: { type: 'string', default: '1' },
             limit: { type: 'string', default: '10' },
-            status: { type: 'string', enum: ['DRAFT', 'PUBLISHED', 'ARCHIVED'] },
             featured: { type: 'string' },
             tag: { type: 'string' },
             search: { type: 'string' },
@@ -40,8 +40,9 @@ export function projectRoutes(app: FastifyInstance): void {
       const query = projectQuerySchema.parse(request.query);
       const result = await projectService.listProjects({
         page: parseInt(query.page) || 1,
-        limit: parseInt(query.limit) || 10,
-        status: query.status,
+        // Clamped: an unbounded limit is both a full-table read and, since limit
+        // joined the list cache key, an unbounded redis key-cardinality axis.
+        limit: Math.min(parseInt(query.limit) || 10, MAX_PAGE_SIZE),
         featured: query.featured === 'true' ? true : query.featured === 'false' ? false : undefined,
         tag: query.tag,
         search: query.search,

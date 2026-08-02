@@ -49,6 +49,18 @@ export default defineConfig({
       NODE_ENV: 'test',
       LOG_LEVEL: 'fatal',
       LOG_PRETTY: 'false',
+
+      // Every app.inject() resolves to the same request.ip, so the WHOLE suite
+      // draws on one rate-limit bucket -- default 100 per 60s. The suite is
+      // already at ~45 requests and will only grow, and exhaustion would not
+      // fail cleanly: several specs assert `>= 400` or "body has no <script>",
+      // both of which a 429 satisfies. That is a false green, which is worse
+      // than a red. Raised here so the limiter never silently shapes results.
+      //
+      // The limiter itself deserves its own spec that sets a low ceiling and
+      // asserts the TOO_MANY_REQUESTS envelope; noted as a follow-up rather
+      // than bolted on here, because it needs its own app instance.
+      RATE_LIMIT_MAX: '100000',
     },
 
     // No coverage block. Coverage is vitest.config.ts's job; merging two v8

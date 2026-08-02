@@ -3,6 +3,21 @@ import { z } from 'zod';
 // Common validation schemas
 
 // Pagination
+/**
+ * Upper bound on a caller-supplied page size for the PUBLIC list routes.
+ *
+ * `limit` is validated only as `/^\d+$/`, so without a ceiling `?limit=1000000`
+ * reaches Prisma as `take: 1000000` and buffers the whole table in memory. That
+ * became sharper once `limit` joined the project/article list cache keys: every
+ * distinct value mints its own redis entry holding a full page, so an unbounded
+ * `limit` is also an unbounded key-cardinality axis on a shared cache -- and
+ * @fastify/rate-limit is backed by that same redis with `skipOnError: true`,
+ * so pressure there fails the limiter open.
+ *
+ * Matches the existing `maxLimit` in getPaginationParams (utils/errors.ts).
+ */
+export const MAX_PAGE_SIZE = 100;
+
 export const paginationSchema = z.object({
   page: z.string().regex(/^\d+$/).default('1'),
   limit: z.string().regex(/^\d+$/).default('10'),

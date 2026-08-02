@@ -69,6 +69,14 @@ jobs:
         working-directory: ${{ env.WORKING_DIRECTORY }}
         run: npx tsc --noEmit
 
+      # tsconfig.json excludes tests/ (so a stray test file can never be emitted
+      # into dist/), which meant the suites had NO type checking at all -- vitest
+      # transpiles via esbuild, which strips types without checking them. This
+      # covers src/ plus all 18 test files.
+      - name: Run TypeScript type check (tests)
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: npm run typecheck:test
+
       - name: Check code formatting
         working-directory: ${{ env.WORKING_DIRECTORY }}
         run: npx prettier --check "{src,tests}/**/*.ts"
@@ -235,9 +243,16 @@ jobs:
       # non-empty dataset, and `db:verify` (below) asserts 1 admin / 5 tags /
       # 1 project / 1 project-tag link, none of which a migrate-only database
       # has. The seed is idempotent, so re-running this step is a no-op.
-      - name: Seed database
+      # Run TWICE on purpose. Idempotence is the seed's headline property and
+      # the reason it replaced a seed.js that opened with 17 deleteMany() calls
+      # -- and `db:seed` is chained from `setup:dev` against a developer's live
+      # local database. A re-added delete, or an `update: {...}` that rotates
+      # the admin password, would otherwise ship green. A non-idempotent seed
+      # fails here on a unique constraint, or leaves duplicate rows that the
+      # db:verify step below catches against its tags 5-50 bound.
+      - name: Seed database (twice, to prove idempotence)
         working-directory: ${{ env.WORKING_DIRECTORY }}
-        run: npm run db:seed
+        run: npm run db:seed && npm run db:seed
         env:
           DATABASE_URL: postgresql://test_user:test_password@localhost:5432/portfolio_test
 

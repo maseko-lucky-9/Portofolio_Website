@@ -6,6 +6,7 @@ import {
 } from '../../middleware/auth.middleware.js';
 import { articleService } from '../../services/article.service.js';
 import {
+  MAX_PAGE_SIZE,
   articleQuerySchema,
   createArticleSchema,
   updateArticleSchema,
@@ -24,7 +25,6 @@ export function articleRoutes(app: FastifyInstance): void {
           properties: {
             page: { type: 'string', default: '1' },
             limit: { type: 'string', default: '10' },
-            status: { type: 'string', enum: ['DRAFT', 'PUBLISHED', 'ARCHIVED'] },
             featured: { type: 'string' },
             tag: { type: 'string' },
             search: { type: 'string' },
@@ -38,8 +38,9 @@ export function articleRoutes(app: FastifyInstance): void {
       const query = articleQuerySchema.parse(request.query);
       const result = await articleService.listArticles({
         page: parseInt(query.page) || 1,
-        limit: parseInt(query.limit) || 10,
-        status: query.status,
+        // Clamped: an unbounded limit is both a full-table read and, since limit
+        // joined the list cache key, an unbounded redis key-cardinality axis.
+        limit: Math.min(parseInt(query.limit) || 10, MAX_PAGE_SIZE),
         featured: query.featured === 'true' ? true : query.featured === 'false' ? false : undefined,
         tag: query.tag,
         search: query.search,

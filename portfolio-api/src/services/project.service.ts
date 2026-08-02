@@ -11,7 +11,6 @@ export class ProjectService {
   async listProjects(options: {
     page: number;
     limit: number;
-    status?: ProjectStatus;
     featured?: boolean;
     category?: string;
     tag?: string;
@@ -22,7 +21,6 @@ export class ProjectService {
     const {
       page,
       limit,
-      status,
       featured,
       category,
       tag,
@@ -40,7 +38,7 @@ export class ProjectService {
     // tests/e2e/projects.test.ts asserting meta.limit reflects ?limit=.
     const cacheKey = cacheKeys.projectList(
       page,
-      JSON.stringify({ limit, status, featured, category, tag, search, sortBy, sortOrder })
+      JSON.stringify({ limit, featured, category, tag, search, sortBy, sortOrder })
     );
 
     // Try cache first
@@ -51,7 +49,20 @@ export class ProjectService {
 
     // Build where clause
     const where = {
-      ...(status && { status }),
+      // PUBLISHED only, and NOT caller-controllable.
+      //
+      // This is the public listing route -- there is no authenticated one. The
+      // `status` filter that used to sit here was honoured straight from the
+      // query string, so `?status=DRAFT` returned unannounced work to anyone
+      // who asked. It was invisible on the article side only because a broken
+      // response schema was discarding the payload; removing that schema is
+      // what exposed it, so the filter is fixed here rather than re-masked.
+      //
+      // If an authenticated listing is ever added, it must NOT simply pass a
+      // status through: cacheKeys.projectList has no privilege dimension, so an
+      // admin's draft-inclusive page would be cached and then served to the
+      // next anonymous caller.
+      status: ProjectStatus.PUBLISHED,
       ...(featured !== undefined && { featured }),
       ...(category && { category }),
       ...(tag && {
@@ -149,8 +160,14 @@ export class ProjectService {
     }
 
     // Fetch from database
-    const project = await prisma.project.findUnique({
-      where: { slug },
+    //
+    // findFirst, not findUnique: the lookup is now (slug + status) and only
+    // `slug` is unique, so findUnique cannot express it. Returning null for a
+    // DRAFT is deliberate -- the route turns that into a 404, which does not
+    // confirm that the slug exists. A 403 would leak exactly the thing being
+    // protected.
+    const project = await prisma.project.findFirst({
+      where: { slug, status: ProjectStatus.PUBLISHED },
       include: {
         tags: {
           select: {

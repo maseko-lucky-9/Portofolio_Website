@@ -49,8 +49,34 @@ const TAGS: Array<{ name: string; slug: string; color: string }> = [
 const PROJECT_SLUG = 'portfolio-website';
 const ARTICLE_SLUG = 'hello-world';
 
+// A SECOND published row of each kind exists so page-size assertions can
+// actually fail. With one row, `data.length <= 1` holds even if `limit` is
+// ignored outright, so the test proves nothing.
+const PROJECT_SLUG_2 = 'api-platform';
+const ARTICLE_SLUG_2 = 'second-post';
+
+// An unpublished row of each kind, so the e2e suite can assert that anonymous
+// callers cannot read DRAFT content. Without a DRAFT fixture the access-control
+// tests would pass against a service with no status filter at all -- which is
+// exactly the regression they exist to catch.
+const DRAFT_PROJECT_SLUG = 'unannounced-project';
+const DRAFT_ARTICLE_SLUG = 'unpublished-post';
+
 async function main(): Promise<void> {
   console.log('\n🌱 Seeding database...\n');
+
+  // The seed takes its target purely from DATABASE_URL, and `db:seed` is chained
+  // from `setup:dev`, so an inherited or mistyped env var is all it takes to
+  // create a dormant ADMIN principal in a real database. It would not be
+  // loginable (the password is random and discarded), but an unowned ADMIN row
+  // is standing attack surface for any future account-takeover bug, and
+  // `update: {}` means no later seed run would ever clean it up.
+  if (process.env.NODE_ENV === 'production' && !process.env.SEED_ADMIN_EMAIL) {
+    throw new Error(
+      'Refusing to seed a default admin into a production environment. ' +
+        'Set SEED_ADMIN_EMAIL explicitly if this is really what you want.'
+    );
+  }
 
   // --- Admin user -----------------------------------------------------------
   const password = process.env.SEED_ADMIN_PASSWORD ?? randomBytes(24).toString('hex');
@@ -148,6 +174,64 @@ async function main(): Promise<void> {
     create: { articleId: article.id, tagId: tags[0].id },
   });
   console.log(`✅ Article tag: ${article.slug} -> ${tags[0].slug}`);
+
+  // --- Second published row of each kind ------------------------------------
+  await prisma.project.upsert({
+    where: { slug: PROJECT_SLUG_2 },
+    update: {},
+    create: {
+      slug: PROJECT_SLUG_2,
+      title: 'API Platform',
+      description: 'A second published project, so page-size assertions can fail.',
+      content: '# API Platform\n\nSeeded project used by the integration suite.',
+      techStack: ['TypeScript', 'Fastify'],
+      status: 'PUBLISHED',
+      publishedAt: new Date(),
+      authorId: admin.id,
+    },
+  });
+  await prisma.article.upsert({
+    where: { slug: ARTICLE_SLUG_2 },
+    update: {},
+    create: {
+      slug: ARTICLE_SLUG_2,
+      title: 'Second Post',
+      content: '# Second Post\n\nSeeded article used by the integration suite.',
+      status: 'PUBLISHED',
+      publishedAt: new Date(),
+      authorId: admin.id,
+    },
+  });
+  console.log('✅ Second published project + article');
+
+  // --- Unpublished fixtures -------------------------------------------------
+  // publishedAt stays null, which is what verify-database.ts:200-211 requires
+  // of anything that is not PUBLISHED.
+  await prisma.project.upsert({
+    where: { slug: DRAFT_PROJECT_SLUG },
+    update: {},
+    create: {
+      slug: DRAFT_PROJECT_SLUG,
+      title: 'Unannounced Project',
+      description: 'DRAFT fixture. Must never be readable by an anonymous caller.',
+      content: '# Unannounced\n\nDRAFT-ONLY-CONTENT-MARKER',
+      client: 'DRAFT-ONLY-CLIENT-MARKER',
+      status: 'DRAFT',
+      authorId: admin.id,
+    },
+  });
+  await prisma.article.upsert({
+    where: { slug: DRAFT_ARTICLE_SLUG },
+    update: {},
+    create: {
+      slug: DRAFT_ARTICLE_SLUG,
+      title: 'Unpublished Post',
+      content: '# Unpublished\n\nDRAFT-ONLY-CONTENT-MARKER',
+      status: 'DRAFT',
+      authorId: admin.id,
+    },
+  });
+  console.log('✅ DRAFT fixtures (project + article)');
 
   console.log('\n🌱 Seed complete.\n');
 }

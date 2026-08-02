@@ -34,6 +34,23 @@ describe('GET /api/v1/health', () => {
     expect(body.success).toBe(true);
   });
 
+  it('applies the global onRequest hooks to routes', async () => {
+    // Pins buildApp()'s registration ORDER, which is otherwise asserted by
+    // nothing: Fastify only applies a hook to routes registered after it, so
+    // swapping registerHooks(app) and registerRoutes(app) in app.ts silently
+    // strips request logging, x-request-id and analytics context from the
+    // entire API -- and every other test in this suite still passes.
+    //
+    // This header is a real discriminator. Fastify's own `requestIdHeader`
+    // option only READS an inbound header; the response header is set solely by
+    // addRequestIdHeader (request.middleware.ts:67-75), which returns early
+    // unless requestLogger has already populated the context map. So a present
+    // header proves both onRequest hooks ran, in order, on this route.
+    const res = await app.inject({ method: 'GET', url: '/api/v1/health' });
+
+    expect(res.headers['x-request-id']).toBeTruthy();
+  });
+
   it('serves the liveness probe without touching either service', async () => {
     // /live is what a k8s livenessProbe hits. It must not depend on postgres or
     // redis, or a transient database blip would get the pod killed and

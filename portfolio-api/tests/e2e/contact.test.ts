@@ -5,13 +5,15 @@ import { startTestApp, uniqueEmail } from './helpers.js';
 // Input validation on the one public write endpoint an unauthenticated stranger
 // can reach.
 //
-// On the rejection cases these assert the status is a 4xx CLIENT error and not
-// a 5xx. That distinction is the whole point: errorHandler currently has no
-// `error.validation` branch, so an ajv-level rejection escapes as a 500 --
-// already spun out as its own follow-up. Asserting the family rather than an
-// exact code means these specs pass now AND keep passing once that fix lands,
-// while still failing loudly if a malformed body ever starts returning 500 or,
-// worse, 201.
+// The rejection cases assert only `>= 400`, which DELIBERATELY admits the 500
+// that these requests return today: errorHandler has no `error.validation`
+// branch, so an ajv-level rejection falls through to the generic 500 path. The
+// range is chosen so these keep passing when that is corrected to 400 -- the
+// invariant they defend is "bad input is rejected, never accepted", not the
+// specific code.
+//
+// The exact current code is pinned once, deliberately, by the characterisation
+// test below. That is the one a fixer has to update.
 
 describe('POST /api/v1/contact', () => {
   let app: FastifyInstance;
@@ -24,7 +26,7 @@ describe('POST /api/v1/contact', () => {
     await app.close();
   });
 
-  it('accepts a well-formed submission', async () => {
+  it('accepts a well-formed submission and returns its id', async () => {
     const res = await app.inject({
       method: 'POST',
       url: '/api/v1/contact/submit',
@@ -36,8 +38,14 @@ describe('POST /api/v1/contact', () => {
       },
     });
 
-    expect(res.statusCode).toBeLessThan(300);
     expect(res.statusCode).toBeGreaterThanOrEqual(200);
+    expect(res.statusCode).toBeLessThan(300);
+    // Asserting the payload, not just the status. This route keeps a response
+    // schema naming { id, message } -- unlike the eight removed elsewhere, that
+    // one is correct because it matches what the handler returns. Pinning `id`
+    // means the suite notices if it ever starts discarding the body the way
+    // the project and article routes did.
+    expect(typeof res.json().id).toBe('string');
   });
 
   it.each([
@@ -93,6 +101,12 @@ describe('POST /api/v1/contact', () => {
       },
     });
 
+    // The status assertion is not decoration. Without it this test passes on a
+    // 429 from the shared rate-limit bucket or a 500 from a dropped connection
+    // -- any error envelope trivially "does not contain <script>", so the test
+    // would report success for a submission that was never processed.
+    expect(res.statusCode).toBeGreaterThanOrEqual(200);
+    expect(res.statusCode).toBeLessThan(300);
     expect(res.body).not.toContain('<script>');
   });
 });
