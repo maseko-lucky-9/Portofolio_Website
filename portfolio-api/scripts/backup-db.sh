@@ -18,7 +18,11 @@ PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 
 # Default values
 ENVIRONMENT="dev"
-BACKUP_DIR="$PROJECT_ROOT/backups"
+# Default OUTSIDE the repository. This used to be "$PROJECT_ROOT/backups", which
+# put full unencrypted pg_dumps -- password hashes, refresh tokens, OAuth tokens,
+# IP addresses -- inside the git working tree, one `git add -A` away from being
+# pushed to GitHub. Override with -d if you want them somewhere else.
+BACKUP_DIR="${BACKUP_DIR:-$HOME/portfolio-backups}"
 RETENTION_DAYS=7
 
 # Print colored message
@@ -88,6 +92,21 @@ echo "Backup Directory: $BACKUP_DIR"
 echo "Retention: $RETENTION_DAYS days"
 print_message "$GREEN" "=============================================="
 echo
+
+# Refuse to write dumps anywhere inside the git working tree, however we got
+# here (default, -d, or an exported BACKUP_DIR). A dump holds password hashes,
+# refresh tokens and OAuth tokens; gitleaks cannot see into a .dump or .sql.gz,
+# so git is the wrong place for one even when .gitignore would cover it.
+if repo_root=$(git -C "$PROJECT_ROOT" rev-parse --show-toplevel 2>/dev/null); then
+    mkdir -p "$BACKUP_DIR"
+    backup_abs=$(cd "$BACKUP_DIR" && pwd -P)
+    repo_abs=$(cd "$repo_root" && pwd -P)
+    if [[ "$backup_abs" == "$repo_abs" || "$backup_abs" == "$repo_abs"/* ]]; then
+        print_message "$RED" "Refusing to write backups inside the repository: $backup_abs"
+        print_message "$YELLOW" "Pass -d with a path outside $repo_abs (default: \$HOME/portfolio-backups)."
+        exit 1
+    fi
+fi
 
 # Create backup directory
 mkdir -p "$BACKUP_DIR"
