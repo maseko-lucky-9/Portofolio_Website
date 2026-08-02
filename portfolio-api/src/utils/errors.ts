@@ -142,11 +142,18 @@ export const getPaginationParams = (
     maxLimit: 100,
   }
 ): PaginationParams => {
-  const page = Math.max(1, parseInt(query.page ?? String(defaults.page), 10));
-  const limit = Math.min(
-    defaults.maxLimit,
-    Math.max(1, parseInt(query.limit ?? String(defaults.limit), 10))
-  );
+  // Math.max(1, NaN) is NaN, not 1 -- so a non-numeric ?page=abc used to flow
+  // straight through as NaN and reach Prisma as `skip: NaN`. Currently latent
+  // (the routes parse with paginationSchema instead and nothing calls this),
+  // but a queued follow-up wires this helper up for its maxLimit clamp, so it
+  // must not be handed over broken.
+  const parsedPage = parseInt(query.page ?? String(defaults.page), 10);
+  const parsedLimit = parseInt(query.limit ?? String(defaults.limit), 10);
+
+  const page = Number.isNaN(parsedPage) ? defaults.page : Math.max(1, parsedPage);
+  const limit = Number.isNaN(parsedLimit)
+    ? defaults.limit
+    : Math.min(defaults.maxLimit, Math.max(1, parsedLimit));
   const sortOrder = query.sortOrder === 'asc' ? 'asc' : 'desc';
 
   return {

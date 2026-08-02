@@ -71,7 +71,7 @@ jobs:
 
       - name: Check code formatting
         working-directory: ${{ env.WORKING_DIRECTORY }}
-        run: npx prettier --check "src/**/*.ts"
+        run: npx prettier --check "{src,tests}/**/*.ts"
 
       # This step had never executed before: ESLint failed ahead of it on every
       # run since 2026-03-17, so the job always stopped first. It needs
@@ -238,7 +238,7 @@ jobs:
           NODE_ENV: test
           DATABASE_URL: postgresql://test_user:test_password@localhost:5432/portfolio_test
           REDIS_URL: redis://localhost:6379
-          JWT_SECRET: test-jwt-secret-key-for-ci
+          JWT_SECRET: test-jwt-secret-key-for-ci-not-a-real-secret
           JWT_ACCESS_EXPIRY: 15m
           JWT_REFRESH_EXPIRY: 7d
 
@@ -375,7 +375,7 @@ jobs:
           PORT: 3000
           DATABASE_URL: postgresql://test_user:test_password@localhost:5432/portfolio_test
           REDIS_URL: redis://localhost:6379
-          JWT_SECRET: test-jwt-secret-key-for-ci
+          JWT_SECRET: test-jwt-secret-key-for-ci-not-a-real-secret
           JWT_ACCESS_EXPIRY: 15m
           JWT_REFRESH_EXPIRY: 7d
           DEMO_MODE: true
@@ -387,7 +387,7 @@ jobs:
 
       - name: Validate OpenAPI schema
         run: |
-          curl -f http://localhost:3000/api/v1/documentation/json > openapi.json
+          curl -f http://localhost:3000/api-docs/json > openapi.json
           echo "OpenAPI schema generated successfully"
 
       - name: Stop API server
