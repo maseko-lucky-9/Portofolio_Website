@@ -152,8 +152,11 @@ export const updateSubmissionStatusSchema = z.object({
 export const newsletterSubscribersQuerySchema = z.object({
   page: z.string().regex(/^\d+$/).default('1'),
   limit: z.string().regex(/^\d+$/).default('20'),
-  // The route's Fastify querystring schema does not declare `active`, but the
-  // handler reads it. Declaring it here makes the real contract explicit.
+  // The handler reads `active`, but the route's Fastify querystring schema
+  // declared `status` (which nothing reads) and omitted `active` entirely.
+  // Because index.ts sets ajv `removeAdditional: 'all'`, an undeclared key is
+  // DELETED before the handler runs -- so this filter never worked. Declaring
+  // it in zod alone cannot fix that; the route schema had to be corrected too.
   active: z.string().optional(),
 });
 

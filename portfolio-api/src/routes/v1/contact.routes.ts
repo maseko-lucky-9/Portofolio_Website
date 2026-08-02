@@ -205,7 +205,17 @@ export function contactRoutes(app: FastifyInstance): void {
           properties: {
             page: { type: 'string', default: '1' },
             limit: { type: 'string', default: '20' },
-            status: { type: 'string' },
+            // `active`, not `status`: the handler below reads `active` and
+            // nothing reads `status`. ajv runs with removeAdditional: 'all'
+            // (src/index.ts), so an undeclared key is deleted before the
+            // handler sees it -- which is why this filter has never worked.
+            //
+            // No `enum` here on purpose. errorHandler has no branch for ajv's
+            // own validation errors, so an ajv rejection currently falls
+            // through to the 500 default -- an enum would turn `?active=maybe`
+            // into a server error. The handler's ternary already treats any
+            // unrecognised value as "no filter".
+            active: { type: 'string' },
           },
         },
       },

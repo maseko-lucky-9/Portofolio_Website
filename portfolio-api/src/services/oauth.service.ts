@@ -1,9 +1,12 @@
 import { z } from 'zod';
 import { prisma } from '../config/database.js';
 import { config } from '../config/index.js';
+import { createLogger } from '../config/logger.js';
 import { ApiError } from '../utils/errors.js';
 import { generateTokens } from '../middleware/auth.middleware.js';
 import { Prisma, Role } from '@prisma/client';
+
+const logger = createLogger('oauth');
 
 // ==========================================
 // Provider wire formats
@@ -20,9 +23,13 @@ import { Prisma, Role } from '@prisma/client';
 // endpoints, so one schema covers both. Success and failure are distinguished
 // by which keys are present, hence everything is optional and the callers
 // branch explicitly.
+// `access_token` is constrained to a non-empty string because it becomes a
+// stored credential. `refresh_token` deliberately is NOT: it is optional and
+// nothing depends on its contents, so rejecting '' would turn a cosmetic
+// provider oddity into a failed login.
 const oauthTokenResponseSchema = z.object({
   access_token: z.string().min(1).optional(),
-  refresh_token: z.string().min(1).optional(),
+  refresh_token: z.string().optional(),
   error: z.string().optional(),
   error_description: z.string().optional(),
 });
@@ -41,12 +48,19 @@ const githubUserSchema = z.object({
   login: z.string().nullable().optional(),
 });
 
+// Parsed element-wise, not as a whole array. z.array() is all-or-nothing, so a
+// single malformed sibling address (no TLD, an IDN domain zod's .email()
+// rejects) would discard an otherwise valid verified primary and lock the user
+// out. `.catch(null)` degrades the bad element instead of the whole list.
 const githubEmailsSchema = z.array(
-  z.object({
-    email: z.string().email(),
-    primary: z.boolean().optional(),
-    verified: z.boolean().optional(),
-  })
+  z
+    .object({
+      email: z.string().email(),
+      primary: z.boolean().optional(),
+      verified: z.boolean().optional(),
+    })
+    .nullable()
+    .catch(null)
 );
 
 // `picture` is cosmetic and unconstrained for the same reason as GitHub's
@@ -78,6 +92,28 @@ export interface OAuthProfile {
 // keeps this a real conversion rather than an assertion that silences the
 // checker without proving anything.
 const toJsonProfile = (profile: OAuthProfile): Prisma.InputJsonObject => ({ ...profile });
+
+/**
+ * Parse a response from an OAuth provider.
+ *
+ * A provider response is NOT client input, so a malformed one must not surface
+ * as a 400 VALIDATION_ERROR: that reports an upstream outage as caller error
+ * (hiding it from any 5xx-based alerting) and echoes the provider's field names
+ * back to whoever called us. Log the detail server-side, return a 503.
+ */
+function parseProviderResponse<T>(schema: z.ZodType<T>, body: unknown, provider: string): T {
+  const result = schema.safeParse(body);
+
+  if (!result.success) {
+    logger.warn(
+      { provider, issues: result.error.issues },
+      'Unexpected response from OAuth provider'
+    );
+    throw ApiError.serviceUnavailable(`${provider} returned an unexpected response`);
+  }
+
+  return result.data;
+}
 
 export class OAuthService {
   /**
@@ -439,7 +475,11 @@ export class OAuthService {
           }),
         });
 
-        const githubData = oauthTokenResponseSchema.parse(await githubResponse.json());
+        const githubData = parseProviderResponse(
+          oauthTokenResponseSchema,
+          await githubResponse.json(),
+          'GitHub'
+        );
 
         if (githubData.error) {
           // error_description is optional in the OAuth 2.0 error response, so
@@ -476,7 +516,11 @@ export class OAuthService {
           }),
         });
 
-        const googleData = oauthTokenResponseSchema.parse(await googleResponse.json());
+        const googleData = parseProviderResponse(
+          oauthTokenResponseSchema,
+          await googleResponse.json(),
+          'Google'
+        );
 
         if (googleData.error) {
           throw ApiError.badRequest(
@@ -512,7 +556,11 @@ export class OAuthService {
           },
         });
 
-        const githubUser = githubUserSchema.parse(await githubUserResponse.json());
+        const githubUser = parseProviderResponse(
+          githubUserSchema,
+          await githubUserResponse.json(),
+          'GitHub'
+        );
 
         // Get primary email
         const githubEmailResponse = await fetch('https://api.github.com/user/emails', {
@@ -523,9 +571,8 @@ export class OAuthService {
         });
 
         // This endpoint returns an OBJECT, not an array, when the token lacks
-        // the user:email scope. safeParse treats that as "no addresses
-        // available" and falls through to the public profile email below,
-        // rather than throwing on what is a recoverable condition.
+        // the user:email scope, so a parse failure means "the address list was
+        // unavailable" rather than "the request is bad".
         const githubEmails = githubEmailsSchema.safeParse(await githubEmailResponse.json());
 
         // Only a verified address is acceptable. handleOAuthCallback looks an
@@ -533,10 +580,16 @@ export class OAuthService {
         // that address, so honouring an unverified one would let anyone who
         // adds a victim's address to their own GitHub account take over the
         // victim's login here.
-        const primaryEmail =
-          (githubEmails.success
-            ? githubEmails.data.find((e) => e.primary && e.verified)?.email
-            : undefined) ?? githubUser.email;
+        //
+        // The two branches are NOT interchangeable, and this must not collapse
+        // into `?? githubUser.email`: falling back when the list WAS readable
+        // but held no verified primary would re-admit the exact unverified
+        // address the filter just rejected. The public profile email is used
+        // only when the list could not be read at all -- GitHub requires an
+        // address to be verified before it can be made public.
+        const primaryEmail = githubEmails.success
+          ? githubEmails.data.find((e) => e?.primary && e?.verified)?.email
+          : githubUser.email;
 
         // Previously this produced `email: undefined` against a declared
         // `email: string`, which then reached prisma.user.create() as a null
@@ -563,7 +616,11 @@ export class OAuthService {
           },
         });
 
-        const googleUser = googleUserSchema.parse(await googleUserResponse.json());
+        const googleUser = parseProviderResponse(
+          googleUserSchema,
+          await googleUserResponse.json(),
+          'Google'
+        );
 
         // Same account-linking exposure as the GitHub branch. Google omits the
         // field on some responses, so reject only an explicit `false`.

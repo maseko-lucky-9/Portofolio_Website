@@ -48,10 +48,17 @@ export const generateTokens = (user: {
 
   // @types/jsonwebtoken types `expiresIn` as `ms.StringValue | number`, a
   // template-literal union that a plain `string` from the env schema is not
-  // assignable to. Asserting to the real option type keeps the value checked
-  // against jsonwebtoken's own contract instead of switching checking off with
-  // `any`. `ms` is a transitive dependency, so index into SignOptions rather
-  // than importing its type directly.
+  // assignable to. `ms` is a transitive dependency, so index into SignOptions
+  // rather than importing its type directly.
+  //
+  // This is still an assertion, and it proves nothing about the value: it only
+  // narrows the escape hatch from `any` (which disables checking on the whole
+  // surrounding expression) to the one option type. JWT_ACCESS_EXPIRY is an
+  // unconstrained z.string() in config/index.ts, so a malformed value such as
+  // '15minutes' makes ms() return undefined and jwt.sign emit a token with NO
+  // exp claim. Constraining the env schema is the real fix and is deliberately
+  // left out of this PR -- config failures process.exit(1) at import, which is
+  // too blunt a change to bundle with a lint sweep.
   const accessToken = jwt.sign(accessPayload, config.auth.jwtSecret, {
     expiresIn: config.auth.accessExpiry as SignOptions['expiresIn'],
   });
