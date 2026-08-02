@@ -104,10 +104,16 @@ export const generateExcerpt = (content: string, maxLength: number = 200): strin
     return plainText;
   }
 
-  // Truncate at word boundary
+  // Truncate at a word boundary -- but only when there IS one. lastIndexOf
+  // returns -1 for content with no space in the first maxLength characters (a
+  // long URL, an unbroken token, CJK text), and substring(0, -1) is '', so this
+  // previously returned the literal string '...' and threw the content away.
+  // article.service.ts persists that as the row's excerpt.
   const truncated = plainText.substring(0, maxLength);
   const lastSpace = truncated.lastIndexOf(' ');
-  return truncated.substring(0, lastSpace) + '...';
+  const body = lastSpace > 0 ? truncated.substring(0, lastSpace) : truncated;
+
+  return `${body}...`;
 };
 
 // Parse markdown with frontmatter

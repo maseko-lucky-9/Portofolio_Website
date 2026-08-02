@@ -22,11 +22,15 @@ adminMerge: true
 # detection fell through to "no test runner -> skip testing" and ship would
 # commit and push having run nothing.
 #
-# Scoped to portfolio-ui ON PURPOSE. The root script delegates to all workspaces,
-# but portfolio-api currently has ZERO test files, so `vitest run` exits 1 with
-# "No test files found" -- which the ship loop would read as a genuine test
-# failure and burn its 5-attempt bugfix budget trying to repair. portfolio-ui's
-# 171 tests are the only real signal in the repo today.
+# Widened in sweep run 6, as the previous note here instructed. portfolio-api
+# now has 112 unit tests in tests/unit/, so `vitest run` no longer exits 1 with
+# "No test files found" and the root script's delegation to every workspace is
+# real signal rather than a guaranteed failure the ship loop would waste its
+# bugfix budget on.
 #
-# CHANGE THIS to "npm test" once portfolio-api has a suite (sweep run 6).
-testCommand: "npm run test --workspace=portfolio-ui"
+# Still NOT the whole story: `npm test` at the root runs each workspace's `test`
+# script, i.e. the UNIT suites. portfolio-api's `test:e2e` is excluded, and not
+# merely because it would need a live postgres and redis -- the config it points
+# at, vitest.e2e.config.ts, has never existed in this repo's history, so the
+# script exits 1 at load. Both the config and the suite are sweep run 7.
+testCommand: "npm test"

@@ -9,10 +9,10 @@
     "start": "node dist/index.js",
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
-    "format": "prettier --write \"src/**/*.ts\"",
+    "format": "prettier --write \"{src,tests}/**/*.ts\"",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "test:e2e": "vitest --config vitest.e2e.config.ts",
+    "test:e2e": "vitest run --config vitest.e2e.config.ts",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:migrate:prod": "prisma migrate deploy",
@@ -74,7 +74,7 @@
     "ua-parser-js": "^1.0.37",
     "zod": "^3.22.4"
   },
-  "//devDependencies": "prettier, typescript, eslint and the @typescript-eslint pair are pinned EXACTLY rather than ranged. No package-lock.json is committed (.gitignore ignores **/package-lock.json) and every CI job across all 7 workflows runs `npm install`, never `npm ci` — so each run resolves ranges fresh and today's green is not reproducible tomorrow. Prettier ships formatting changes in MINOR releases by policy, so a caret on the formatter alone can turn `quality` red with no code change: `^3.2.5` was already resolving to 3.9.5, seven minors ahead. These are pinned to the versions that were resolving when src/ was formatted. Changing any of them means re-running `prettier --write` and re-checking lint in the same PR. @typescript-eslint stays on v6 (which officially supports TypeScript <5.4, so it warns against the pinned 5.9.3) because bumping to v8 changes which rules fire — that belongs to the lint sweep, not here.",
+  "//devDependencies": "prettier, typescript, eslint and the @typescript-eslint pair are pinned EXACTLY rather than ranged. No package-lock.json is committed (.gitignore ignores **/package-lock.json) and every CI job across all 7 workflows runs `npm install`, never `npm ci` — so each run resolves ranges fresh and today's green is not reproducible tomorrow. Prettier ships formatting changes in MINOR releases by policy, so a caret on the formatter alone can turn `quality` red with no code change: `^3.2.5` was already resolving to 3.9.5, seven minors ahead. These are pinned to the versions that were resolving when src/ was formatted. Changing any of them means re-running `prettier --write` and re-checking lint in the same PR. @typescript-eslint stays on v6 (which officially supports TypeScript <5.4, so it warns against the pinned 5.9.3) because bumping to v8 changes which rules fire — that belongs to the lint sweep, not here. vitest and @vitest/coverage-v8 are pinned to the SAME exact version for the same reason and one more: the coverage provider is a separate package that vitest loads at runtime, and a caret on the runner would let `npm install` drift it away from the exactly-pinned provider, which fails at load rather than at assert time. Bump the two together or not at all.",
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20.11.16",
@@ -82,13 +82,14 @@
     "@types/ua-parser-js": "^0.7.39",
     "@typescript-eslint/eslint-plugin": "6.21.0",
     "@typescript-eslint/parser": "6.21.0",
+    "@vitest/coverage-v8": "4.1.10",
     "eslint": "8.57.1",
     "eslint-config-prettier": "9.1.2",
     "eslint-plugin-prettier": "5.5.6",
     "prettier": "3.9.5",
     "tsx": "^4.7.0",
     "typescript": "5.9.3",
-    "vitest": "^4.0.17"
+    "vitest": "4.1.10"
   },
   "engines": {
     "node": ">=20.0.0"
