@@ -71,7 +71,7 @@ export function verifyCsrfToken(sessionId: string, token: string): boolean {
  * 2. Client must include the same token in request header
  * 3. Server verifies both match for state-changing requests
  */
-export async function csrfProtection(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+export async function csrfProtection(request: FastifyRequest, _reply: FastifyReply): Promise<void> {
   const method = request.method;
   const path = request.routeOptions?.url || request.url;
 

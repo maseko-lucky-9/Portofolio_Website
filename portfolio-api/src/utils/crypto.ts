@@ -44,7 +44,6 @@ export const generateVisitorId = (): string => {
 // Simple encryption for sensitive data at rest
 const ALGORITHM = 'aes-256-gcm';
 const IV_LENGTH = 16;
-const TAG_LENGTH = 16;
 
 export const encrypt = (text: string, key: string = config.auth.jwtSecret): string => {
   const keyBuffer = createHash('sha256').update(key).digest();

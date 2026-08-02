@@ -1,5 +1,5 @@
 import { prisma } from '../config/database.js';
-import { hashPassword, verifyPassword, generateToken } from '../utils/crypto.js';
+import { hashPassword, verifyPassword } from '../utils/crypto.js';
 import { generateTokens } from '../middleware/auth.middleware.js';
 import { ApiError } from '../utils/errors.js';
 import { Role } from '@prisma/client';
