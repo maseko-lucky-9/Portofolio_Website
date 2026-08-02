@@ -126,7 +126,7 @@ export class AuthService {
       include: { user: { select: { id: true, email: true, role: true, isActive: true } } },
     });
 
-    if (!stored || stored.revokedAt || stored.expiresAt < new Date()) {
+    if (!stored || stored.revokedAt !== null || stored.expiresAt < new Date()) {
       throw ApiError.unauthorized('Invalid refresh token');
     }
 

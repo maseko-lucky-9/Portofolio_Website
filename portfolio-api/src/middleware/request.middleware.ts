@@ -47,7 +47,7 @@ export const responseLogger = (
   done: () => void
 ): void => {
   const context = requestContextMap.get(request);
-  const duration = Date.now() - (context?.startTime || Date.now());
+  const duration = Date.now() - (context?.startTime ?? Date.now());
 
   logger.info(
     {
