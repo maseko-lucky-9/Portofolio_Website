@@ -54,10 +54,6 @@ const envSchema = z.object({
   IPINFO_TOKEN: z.string().optional(),
   ENABLE_ANALYTICS: z.string().transform((v) => v === 'true').default('true'),
 
-  // Sentry
-  SENTRY_DSN: z.string().optional(),
-  SENTRY_ENVIRONMENT: z.string().default('development'),
-
   // Code Execution
   CODE_EXECUTION_ENABLED: z.string().transform((v) => v === 'true').default('true'),
   CODE_EXECUTION_TIMEOUT_MS: z.string().transform(Number).default('5000'),
@@ -187,12 +183,6 @@ export const config = {
   analytics: {
     ipinfoToken: env.IPINFO_TOKEN,
     enabled: env.ENABLE_ANALYTICS,
-  },
-
-  // Sentry
-  sentry: {
-    dsn: env.SENTRY_DSN,
-    environment: env.SENTRY_ENVIRONMENT,
   },
 
   // Code Execution
