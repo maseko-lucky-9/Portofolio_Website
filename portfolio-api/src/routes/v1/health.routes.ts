@@ -75,7 +75,7 @@ export async function healthRoutes(app: FastifyInstance): Promise<void> {
       return { success: true, data: { ready: true } };
     }
 
-    reply
+    return reply
       .code(503)
       .send({ success: false, error: { code: 'NOT_READY', message: 'Service not ready' } });
   });

@@ -124,7 +124,7 @@ export function setCsrfToken(request: FastifyRequest, reply: FastifyReply): stri
   storeCsrfToken(sessionId, token);
 
   // Set cookie
-  reply.cookie(securityConfig.csrf.cookieName, token, {
+  void reply.cookie(securityConfig.csrf.cookieName, token, {
     httpOnly: false, // Must be readable by client
     secure: securityConfig.cookie.secure,
     sameSite: securityConfig.cookie.sameSite,

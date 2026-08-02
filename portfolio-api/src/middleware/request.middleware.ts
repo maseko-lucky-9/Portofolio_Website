@@ -70,7 +70,7 @@ export const addRequestIdHeader = async (
 ): Promise<void> => {
   const context = requestContextMap.get(request);
   if (context?.requestId) {
-    reply.header('x-request-id', context.requestId);
+    void reply.header('x-request-id', context.requestId);
   }
 };
 
@@ -81,15 +81,15 @@ export const setCacheHeaders = (maxAge: number, isPrivate: boolean = false) => {
       ? `private, max-age=${maxAge}`
       : `public, max-age=${maxAge}, s-maxage=${maxAge}`;
 
-    reply.header('Cache-Control', cacheControl);
+    void reply.header('Cache-Control', cacheControl);
   };
 };
 
 // No cache headers
 export const noCache = async (_request: FastifyRequest, reply: FastifyReply): Promise<void> => {
-  reply.header('Cache-Control', 'no-store, no-cache, must-revalidate');
-  reply.header('Pragma', 'no-cache');
-  reply.header('Expires', '0');
+  void reply.header('Cache-Control', 'no-store, no-cache, must-revalidate');
+  void reply.header('Pragma', 'no-cache');
+  void reply.header('Expires', '0');
 };
 
 // Demo mode header (shows cache status)
@@ -99,5 +99,5 @@ export const demoCacheHeader = async (
 ): Promise<void> => {
   // This would be set by cache middleware
   const cacheStatus = (request as FastifyRequest & { cacheStatus?: string }).cacheStatus || 'MISS';
-  reply.header('X-Cache-Status', cacheStatus);
+  void reply.header('X-Cache-Status', cacheStatus);
 };
