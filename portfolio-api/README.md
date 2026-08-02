@@ -266,7 +266,6 @@ See `.env.example` for a complete list of environment variables.
 
 **Optional:**
 - `IPINFO_TOKEN` - For geo-location analytics
-- `SENTRY_DSN` - For error tracking
 - `SMTP_*` - For email notifications
 
 ## 📈 Performance
