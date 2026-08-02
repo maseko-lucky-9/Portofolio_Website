@@ -10,7 +10,7 @@ import {
 } from '../../utils/validation.js';
 import { createAuditLog } from '../../middleware/audit.middleware.js';
 
-export async function authRoutes(app: FastifyInstance): Promise<void> {
+export function authRoutes(app: FastifyInstance): void {
   // Register
   app.post(
     '/register',

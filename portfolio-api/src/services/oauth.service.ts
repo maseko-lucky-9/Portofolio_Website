@@ -250,7 +250,10 @@ export class OAuthService {
       select: { passwordHash: true },
     });
 
-    const hasOtherAuth = user && user.passwordHash && user.passwordHash !== '';
+    // Equivalent to the previous `user && user.passwordHash && user.passwordHash !== ''`:
+    // passwordHash is a non-null String in the schema, so the `!== ''` arm was already
+    // redundant behind the truthiness check. Only used as a boolean below.
+    const hasOtherAuth = Boolean(user?.passwordHash);
 
     const otherOAuthProviders = await prisma.oAuthProvider.count({
       where: {

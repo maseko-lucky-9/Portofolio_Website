@@ -71,7 +71,7 @@ export function verifyCsrfToken(sessionId: string, token: string): boolean {
  * 2. Client must include the same token in request header
  * 3. Server verifies both match for state-changing requests
  */
-export async function csrfProtection(request: FastifyRequest, _reply: FastifyReply): Promise<void> {
+export function csrfProtection(request: FastifyRequest, _reply: FastifyReply): void {
   const method = request.method;
   const path = request.routeOptions?.url || request.url;
 
@@ -139,10 +139,7 @@ export function setCsrfToken(request: FastifyRequest, reply: FastifyReply): stri
  * Get CSRF token endpoint
  * Clients can call this to get a fresh token
  */
-export async function getCsrfToken(
-  request: FastifyRequest,
-  reply: FastifyReply
-): Promise<{ token: string }> {
+export function getCsrfToken(request: FastifyRequest, reply: FastifyReply): { token: string } {
   const token = setCsrfToken(request, reply);
   return { token };
 }

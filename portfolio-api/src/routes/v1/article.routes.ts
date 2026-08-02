@@ -2,7 +2,7 @@ import { FastifyInstance } from 'fastify';
 import { authenticate, requireRole } from '../../middleware/auth.middleware.js';
 import { articleService } from '../../services/article.service.js';
 
-export async function articleRoutes(app: FastifyInstance): Promise<void> {
+export function articleRoutes(app: FastifyInstance): void {
   // List articles
   app.get(
     '/',

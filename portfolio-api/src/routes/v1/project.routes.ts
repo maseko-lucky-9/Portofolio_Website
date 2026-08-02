@@ -9,7 +9,7 @@ import type {
 } from '@portfolio/shared/types';
 import { paginatedResponse, successResponse } from '../../utils/response.js';
 
-export async function projectRoutes(app: FastifyInstance): Promise<void> {
+export function projectRoutes(app: FastifyInstance): void {
   // List projects (public)
   app.get(
     '/',

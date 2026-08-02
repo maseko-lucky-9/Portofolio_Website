@@ -3,7 +3,7 @@ import { checkDatabaseHealth } from '../../config/database.js';
 import { redis } from '../../config/redis.js';
 import { getRealtimeVisitors } from '../../middleware/analytics.middleware.js';
 
-export async function healthRoutes(app: FastifyInstance): Promise<void> {
+export function healthRoutes(app: FastifyInstance): void {
   // Basic health check
   app.get('/', async () => {
     const [dbHealthy, redisHealthy] = await Promise.all([
@@ -81,7 +81,7 @@ export async function healthRoutes(app: FastifyInstance): Promise<void> {
   });
 
   // Liveness probe
-  app.get('/live', async () => {
+  app.get('/live', () => {
     return { success: true, data: { alive: true } };
   });
 }

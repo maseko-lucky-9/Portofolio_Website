@@ -23,7 +23,7 @@ setInterval(
   5 * 60 * 1000
 );
 
-export default async function oauthRoutes(fastify: FastifyInstance) {
+export default function oauthRoutes(fastify: FastifyInstance): void {
   /**
    * Initiate OAuth flow
    * GET /auth/oauth/:provider
