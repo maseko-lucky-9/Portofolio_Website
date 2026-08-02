@@ -231,6 +231,16 @@ jobs:
         env:
           DATABASE_URL: postgresql://test_user:test_password@localhost:5432/portfolio_test
 
+      # Seeds BEFORE the e2e run, not after: the pagination spec needs a known
+      # non-empty dataset, and `db:verify` (below) asserts 1 admin / 5 tags /
+      # 1 project / 1 project-tag link, none of which a migrate-only database
+      # has. The seed is idempotent, so re-running this step is a no-op.
+      - name: Seed database
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: npm run db:seed
+        env:
+          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/portfolio_test
+
       - name: Run integration tests
         working-directory: ${{ env.WORKING_DIRECTORY }}
         run: npm run test:e2e

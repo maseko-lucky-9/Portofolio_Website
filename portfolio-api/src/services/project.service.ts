@@ -32,9 +32,15 @@ export class ProjectService {
     } = options;
 
     // Build cache key
+    //
+    // `limit` MUST be part of the key. It was omitted, so every page-1 request
+    // with the same filters shared one entry regardless of page size: whoever
+    // asked first decided how many items everyone else got, and the returned
+    // meta.limit contradicted the caller's own query string. Caught by
+    // tests/e2e/projects.test.ts asserting meta.limit reflects ?limit=.
     const cacheKey = cacheKeys.projectList(
       page,
-      JSON.stringify({ status, featured, category, tag, search, sortBy, sortOrder })
+      JSON.stringify({ limit, status, featured, category, tag, search, sortBy, sortOrder })
     );
 
     // Try cache first

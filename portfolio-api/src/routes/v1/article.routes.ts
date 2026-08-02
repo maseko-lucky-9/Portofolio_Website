@@ -32,15 +32,6 @@ export function articleRoutes(app: FastifyInstance): void {
             sortOrder: { type: 'string', enum: ['asc', 'desc'] },
           },
         },
-        response: {
-          200: {
-            type: 'object',
-            properties: {
-              data: { type: 'array' },
-              meta: { type: 'object' },
-            },
-          },
-        },
       },
     },
     async (request) => {
@@ -75,9 +66,6 @@ export function articleRoutes(app: FastifyInstance): void {
           type: 'object',
           required: ['slug'],
           properties: { slug: { type: 'string' } },
-        },
-        response: {
-          200: { type: 'object' },
         },
       },
     },
@@ -115,9 +103,6 @@ export function articleRoutes(app: FastifyInstance): void {
             canonicalUrl: { type: 'string' },
             tagIds: { type: 'array', items: { type: 'string' } },
           },
-        },
-        response: {
-          201: { type: 'object' },
         },
       },
     },
@@ -160,9 +145,6 @@ export function articleRoutes(app: FastifyInstance): void {
             canonicalUrl: { type: 'string' },
             tagIds: { type: 'array', items: { type: 'string' } },
           },
-        },
-        response: {
-          200: { type: 'object' },
         },
       },
     },

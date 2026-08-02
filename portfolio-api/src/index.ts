@@ -1,186 +1,20 @@
-import Fastify from 'fastify';
-import fastifyCors from '@fastify/cors';
-import fastifyHelmet from '@fastify/helmet';
-import fastifyRateLimit from '@fastify/rate-limit';
-import fastifyMultipart from '@fastify/multipart';
-import fastifyStatic from '@fastify/static';
-import fastifySensible from '@fastify/sensible';
-import fastifySwagger from '@fastify/swagger';
-import fastifySwaggerUi from '@fastify/swagger-ui';
-import cookie from '@fastify/cookie';
+import { FastifyInstance } from 'fastify';
 import { config } from './config/index.js';
 import { logger } from './config/logger.js';
 import { connectDatabase } from './config/database.js';
 import { redis } from './config/redis.js';
-import { errorHandler, notFoundHandler } from './middleware/error.middleware.js';
-import {
-  requestLogger,
-  responseLogger,
-  addRequestIdHeader,
-} from './middleware/request.middleware.js';
-import { analyticsMiddleware } from './middleware/analytics.middleware.js';
-import { registerRoutes } from './routes/index.js';
-import path from 'path';
+import { buildApp } from './app.js';
 
-// Create Fastify app
-const app = Fastify({
-  logger: false, // We use Pino directly
-  trustProxy: true,
-  requestIdHeader: 'x-request-id',
-  requestIdLogLabel: 'reqId',
-  disableRequestLogging: true,
-  ajv: {
-    customOptions: {
-      removeAdditional: 'all',
-      coerceTypes: true,
-      useDefaults: true,
-    },
-  },
-});
-
-// Error handler
-app.setErrorHandler(errorHandler);
-
-// Not found handler
-app.setNotFoundHandler(notFoundHandler);
-
-// Plugins
-async function registerPlugins(): Promise<void> {
-  // Sensible (adds useful utilities)
-  await app.register(fastifySensible);
-
-  // Helmet for security headers
-  await app.register(fastifyHelmet, {
-    global: true,
-    contentSecurityPolicy: config.isProduction
-      ? undefined
-      : {
-          directives: {
-            defaultSrc: ["'self'"],
-            styleSrc: ["'self'", "'unsafe-inline'"],
-            scriptSrc: ["'self'", "'unsafe-inline'"],
-            imgSrc: ["'self'", 'data:', 'https:'],
-          },
-        },
-  });
-
-  // CORS - using centralized security config
-  const { securityConfig } = await import('./config/security.js');
-  await app.register(fastifyCors, securityConfig.cors);
-
-  // Cookie support for OAuth
-  await app.register(cookie, {
-    secret: config.oauth.stateSecret,
-    parseOptions: {},
-  });
-
-  // Rate limiting
-  await app.register(fastifyRateLimit, {
-    global: true,
-    max: config.rateLimit.max,
-    timeWindow: config.rateLimit.windowMs,
-    cache: 10000,
-    redis,
-    nameSpace: 'rl:',
-    skipOnError: true,
-    keyGenerator: (request) => {
-      return (request.headers['x-forwarded-for'] as string) || request.ip;
-    },
-    errorResponseBuilder: () => {
-      return {
-        success: false,
-        error: {
-          code: 'TOO_MANY_REQUESTS',
-          message: 'Too many requests, please try again later',
-        },
-      };
-    },
-  });
-
-  // Multipart (file uploads)
-  await app.register(fastifyMultipart, {
-    limits: {
-      fileSize: 10 * 1024 * 1024, // 10MB
-      files: 5,
-    },
-  });
-
-  // Static files (for uploaded content)
-  await app.register(fastifyStatic, {
-    root: path.join(__dirname, '../uploads'),
-    prefix: '/uploads/',
-  });
-
-  // Swagger documentation
-  await app.register(fastifySwagger, {
-    openapi: {
-      info: {
-        title: 'Portfolio API',
-        description: 'Backend API for developer portfolio website',
-        version: '1.0.0',
-        contact: {
-          email: config.admin.email,
-        },
-      },
-      servers: [
-        {
-          url: config.appUrl,
-          description: config.nodeEnv,
-        },
-      ],
-      components: {
-        securitySchemes: {
-          bearerAuth: {
-            type: 'http',
-            scheme: 'bearer',
-            bearerFormat: 'JWT',
-          },
-          apiKey: {
-            type: 'apiKey',
-            name: 'x-api-key',
-            in: 'header',
-          },
-        },
-      },
-      tags: [
-        { name: 'auth', description: 'Authentication endpoints' },
-        { name: 'projects', description: 'Project management' },
-        { name: 'articles', description: 'Blog articles' },
-        { name: 'tags', description: 'Content tags' },
-        { name: 'contact', description: 'Contact and engagement' },
-        { name: 'analytics', description: 'Analytics and tracking' },
-        { name: 'admin', description: 'Admin operations' },
-        { name: 'health', description: 'Health and status' },
-      ],
-    },
-  });
-
-  // Swagger UI
-  await app.register(fastifySwaggerUi, {
-    routePrefix: '/api-docs',
-    uiConfig: {
-      docExpansion: 'list',
-      deepLinking: true,
-    },
-    staticCSP: true,
-  });
-}
-
-// Global hooks
-function registerHooks(): void {
-  // Request logging
-  app.addHook('onRequest', requestLogger);
-  app.addHook('onRequest', addRequestIdHeader);
-
-  // Analytics tracking
-  app.addHook('onRequest', analyticsMiddleware);
-
-  // Response logging
-  app.addHook('onResponse', responseLogger);
-}
+// Process entrypoint. Everything that wires the app itself lives in app.ts --
+// what stays here is the part a test must NOT run: connecting the database,
+// binding a listener, and installing process-wide signal handlers.
 
 // Graceful shutdown
-function setupGracefulShutdown(): void {
+//
+// Deliberately not part of buildApp(): this registers process-level listeners,
+// and the e2e suite builds an app per file. Registering these there would leak
+// a handler set per built app and trip Node's max-listeners warning.
+function setupGracefulShutdown(app: FastifyInstance): void {
   const signals: NodeJS.Signals[] = ['SIGTERM', 'SIGINT'];
 
   const shutdown = async (signal: NodeJS.Signals): Promise<void> => {
@@ -220,24 +54,17 @@ function setupGracefulShutdown(): void {
 // Start server
 async function start(): Promise<void> {
   try {
-    // Connect to database
+    // Connect to database FIRST, before anything binds a port -- an unreachable
+    // database should fail the boot, not surface as 500s on a live listener.
     await connectDatabase();
     logger.info('Database connection established');
 
-    // Register plugins
-    await registerPlugins();
-    logger.info('Plugins registered');
-
-    // Register hooks
-    registerHooks();
-    logger.info('Hooks registered');
-
-    // Register routes
-    await registerRoutes(app);
-    logger.info('Routes registered');
+    // Build the app (plugins, hooks, routes)
+    const app = await buildApp();
+    logger.info('App built: plugins, hooks and routes registered');
 
     // Setup graceful shutdown
-    setupGracefulShutdown();
+    setupGracefulShutdown(app);
 
     // Start listening
     await app.listen({
@@ -267,5 +94,3 @@ async function start(): Promise<void> {
 // body in a try/catch that logs and process.exit(1)s, so it cannot reject in
 // practice -- a .catch() here would be unreachable code pretending to be a safety net.
 void start();
-
-export default app;

@@ -34,15 +34,6 @@ export function projectRoutes(app: FastifyInstance): void {
             sortOrder: { type: 'string', enum: ['asc', 'desc'] },
           },
         },
-        response: {
-          200: {
-            type: 'object',
-            properties: {
-              data: { type: 'array' },
-              meta: { type: 'object' },
-            },
-          },
-        },
       },
     },
     async (request, _reply): Promise<PaginatedResponse<ProjectSummary>> => {
@@ -91,9 +82,6 @@ export function projectRoutes(app: FastifyInstance): void {
             slug: { type: 'string' },
           },
         },
-        response: {
-          200: { type: 'object' },
-        },
       },
     },
     async (request, _reply) => {
@@ -140,9 +128,6 @@ export function projectRoutes(app: FastifyInstance): void {
             metaDescription: { type: 'string' },
             tagIds: { type: 'array', items: { type: 'string' } },
           },
-        },
-        response: {
-          201: { type: 'object' },
         },
       },
     },
@@ -197,9 +182,6 @@ export function projectRoutes(app: FastifyInstance): void {
             metaDescription: { type: 'string' },
             tagIds: { type: 'array', items: { type: 'string' } },
           },
-        },
-        response: {
-          200: { type: 'object' },
         },
       },
     },

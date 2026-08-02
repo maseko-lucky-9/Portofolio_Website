@@ -218,10 +218,29 @@ async function verifyDataValidation(): Promise<void> {
 async function verifyQueryPerformance(): Promise<void> {
   console.log('\n⚡ Verifying Query Performance\n');
   
+  // Overridable so a noisy CI runner can be given headroom without deleting the
+  // checks. Defaults are the original 50/200/300.
+  //
+  // No warm-up query is issued before these: verifyRowCounts() has already run
+  // six count() queries by this point, so the connection and pool are warm and
+  // an extra query would measure nothing.
+  const threshold = (name: string, fallback: number): number => {
+    const raw = process.env[`DB_VERIFY_THRESHOLD_${name}`];
+    if (!raw) return fallback;
+    const parsed = Number(raw);
+    // Reject NaN and non-positive values rather than letting them through --
+    // `Number('') === 0` would make every perf check fail with no explanation.
+    if (!Number.isFinite(parsed) || parsed <= 0) {
+      console.warn(`   ⚠️  Ignoring DB_VERIFY_THRESHOLD_${name}="${raw}" (not a positive number)`);
+      return fallback;
+    }
+    return parsed;
+  };
+
   const thresholds = {
-    simple: 50,    // 50ms
-    complex: 200,  // 200ms
-    join: 300,     // 300ms
+    simple: threshold('SIMPLE', 50),
+    complex: threshold('COMPLEX', 200),
+    join: threshold('JOIN', 300),
   };
   
   // Test 1: Simple query - Find project by slug

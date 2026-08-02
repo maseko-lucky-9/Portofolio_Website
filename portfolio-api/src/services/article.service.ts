@@ -30,9 +30,13 @@ export class ArticleService {
     } = options;
 
     // Build cache key
+    //
+    // `limit` MUST be part of the key -- same defect as project.service.ts:
+    // without it, two requests differing only in page size collide and the
+    // second silently receives the first one's page.
     const cacheKey = cacheKeys.articleList(
       page,
-      JSON.stringify({ status, featured, tag, search, sortBy, sortOrder })
+      JSON.stringify({ limit, status, featured, tag, search, sortBy, sortOrder })
     );
 
     // Try cache first

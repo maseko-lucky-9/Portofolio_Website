@@ -13,7 +13,14 @@ export default defineConfig({
     //
     // This deliberately diverges from portfolio-ui, which colocates under src/
     // -- it is a Vite app and emits no tsc build.
-    include: ['tests/**/*.test.ts'],
+    //
+    // Scoped to tests/unit/ and NOT tests/**: the e2e suite lives in tests/e2e/
+    // and needs a live postgres and redis. The `test` job in backend-ci.yml has
+    // no `services:` block, so collecting an e2e spec here would fail the unit
+    // job -- and `build` and `api-contract` are both needs-gated behind it, so
+    // one stray glob takes three green jobs red. Do not widen this back to
+    // tests/**; add a directory alongside instead.
+    include: ['tests/unit/**/*.test.ts'],
 
     // config/index.ts calls process.exit(1) at IMPORT TIME when env validation
     // fails, so any test that transitively reaches it would kill the run before
