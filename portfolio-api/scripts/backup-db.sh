@@ -18,15 +18,10 @@ PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 
 # Default values
 ENVIRONMENT="dev"
-# Default OUTSIDE the repository. This used to be "$PROJECT_ROOT/backups", which
-# put full unencrypted pg_dumps -- password hashes, refresh tokens, OAuth tokens,
-# IP addresses -- inside the git working tree, one `git add -A` away from being
-# pushed to GitHub. Override with -d if you want them somewhere else.
-# ${HOME:?} rather than $HOME: this script is `set -e` only, with no `nounset`, so
-# an unset HOME would silently resolve to "/portfolio-backups" -- harmless as a
-# normal user (mkdir fails), but under sudo/systemd it succeeds and scatters
-# database dumps across the filesystem root.
-BACKUP_DIR="${BACKUP_DIR:-${HOME:?HOME is unset; pass -d with an explicit backup directory}/portfolio-backups}"
+# Honour an exported BACKUP_DIR, but leave the fallback unresolved until after
+# argument parsing -- see resolve below. Resolving it here would abort on an
+# unset HOME before `-d` had even been read.
+BACKUP_DIR="${BACKUP_DIR:-}"
 RETENTION_DAYS=7
 
 # Print colored message
@@ -84,6 +79,23 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
+
+# Resolve the default backup directory AFTER parsing, so `-d` is honoured even
+# when HOME is unset -- otherwise the error below would tell you to pass -d while
+# aborting before -d could be read.
+#
+# The default lives OUTSIDE the repository. It used to be "$PROJECT_ROOT/backups",
+# which put full unencrypted pg_dumps -- password hashes, refresh tokens, OAuth
+# tokens, IP addresses -- inside the git working tree, one `git add -A` away from
+# being pushed to GitHub.
+#
+# ${HOME:?} rather than $HOME because this script is `set -e` only, with no
+# `nounset`: an unset HOME would otherwise silently resolve to "/portfolio-backups",
+# which fails safe as a normal user (mkdir denied) but under sudo or systemd
+# succeeds and scatters database dumps across the filesystem root.
+if [[ -z "$BACKUP_DIR" ]]; then
+    BACKUP_DIR="${HOME:?HOME is unset; pass -d with an explicit backup directory}/portfolio-backups"
+fi
 
 # Validate environment
 if [[ ! "$ENVIRONMENT" =~ ^(dev|staging|prod)$ ]]; then
