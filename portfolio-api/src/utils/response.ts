@@ -122,6 +122,6 @@ export function isValidApiResponse<T>(value: unknown): value is ApiResponse<T> {
     typeof value === 'object' &&
     value !== null &&
     'data' in value &&
-    (!('meta' in value) || typeof (value as any).meta === 'object')
+    (!('meta' in value) || typeof (value as { meta?: unknown }).meta === 'object')
   );
 }

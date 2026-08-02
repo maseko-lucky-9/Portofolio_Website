@@ -1,6 +1,15 @@
 import { FastifyInstance } from 'fastify';
-import { authenticate, requireRole } from '../../middleware/auth.middleware.js';
+import {
+  authenticate,
+  requireRole,
+  type AuthenticatedRequest,
+} from '../../middleware/auth.middleware.js';
 import { articleService } from '../../services/article.service.js';
+import {
+  articleQuerySchema,
+  createArticleSchema,
+  updateArticleSchema,
+} from '../../utils/validation.js';
 
 export function articleRoutes(app: FastifyInstance): void {
   // List articles
@@ -35,7 +44,7 @@ export function articleRoutes(app: FastifyInstance): void {
       },
     },
     async (request) => {
-      const query = request.query as any;
+      const query = articleQuerySchema.parse(request.query);
       const result = await articleService.listArticles({
         page: parseInt(query.page) || 1,
         limit: parseInt(query.limit) || 10,
@@ -43,8 +52,13 @@ export function articleRoutes(app: FastifyInstance): void {
         featured: query.featured === 'true' ? true : query.featured === 'false' ? false : undefined,
         tag: query.tag,
         search: query.search,
+        // `||`, not `??`: `?sortBy=` parses to '', which would reach Prisma as
+        // an empty orderBy key. Permitted by the `ignorePrimitives.string`
+        // option on prefer-nullish-coalescing.
         sortBy: query.sortBy || 'createdAt',
-        sortOrder: query.sortOrder || 'desc',
+        // paginationSchema defaults this to 'desc', so the old `|| 'desc'` is
+        // now unreachable.
+        sortOrder: query.sortOrder,
       });
       return result;
     }
@@ -108,8 +122,8 @@ export function articleRoutes(app: FastifyInstance): void {
       },
     },
     async (request, reply) => {
-      const data = request.body as any;
-      const user = (request as any).user;
+      const data = createArticleSchema.parse(request.body);
+      const { user } = request as AuthenticatedRequest;
       const article = await articleService.createArticle(data, user.id);
       return reply.code(201).send(article);
     }
@@ -154,7 +168,7 @@ export function articleRoutes(app: FastifyInstance): void {
     },
     async (request) => {
       const { id } = request.params as { id: string };
-      const data = request.body as any;
+      const data = updateArticleSchema.parse(request.body);
       const article = await articleService.updateArticle(id, data);
       return article;
     }

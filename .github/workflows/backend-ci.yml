@@ -73,8 +73,17 @@ jobs:
         working-directory: ${{ env.WORKING_DIRECTORY }}
         run: npx prettier --check "src/**/*.ts"
 
+      # This step had never executed before: ESLint failed ahead of it on every
+      # run since 2026-03-17, so the job always stopped first. It needs
+      # DATABASE_URL only because schema.prisma declares `url = env("DATABASE_URL")`
+      # and prisma parses the datasource block before validating -- it does NOT
+      # connect, and this job has no postgres service. Hence a credential-free
+      # placeholder rather than a copy of the test DSN the jobs with a real
+      # service container use.
       - name: Validate Prisma Schema
         working-directory: ${{ env.WORKING_DIRECTORY }}
+        env:
+          DATABASE_URL: postgresql://localhost:5432/schema_validation_only
         run: npx prisma validate
 
   # ==============================================

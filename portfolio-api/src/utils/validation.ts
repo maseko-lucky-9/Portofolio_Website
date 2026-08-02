@@ -129,6 +129,37 @@ export const contactSchema = z.object({
   message: z.string().min(10).max(5000),
 });
 
+// Admin listing queries for contact + newsletter.
+//
+// Declared standalone rather than merged with paginationSchema on purpose:
+// these routes default `limit` to 20, and merging would silently substitute
+// paginationSchema's 10.
+export const contactSubmissionsQuerySchema = z.object({
+  page: z.string().regex(/^\d+$/).default('1'),
+  limit: z.string().regex(/^\d+$/).default('20'),
+  // Mirrors the ContactStatus enum in prisma/schema.prisma. contact.service.ts
+  // casts this straight to ContactStatus, so an unconstrained string reaches
+  // Prisma and fails the enum check as a 500; constraining it here makes that
+  // cast true and turns a bad value into a 400.
+  status: z.enum(['NEW', 'READ', 'REPLIED', 'ARCHIVED', 'SPAM']).optional(),
+});
+
+export const updateSubmissionStatusSchema = z.object({
+  status: z.enum(['NEW', 'READ', 'REPLIED', 'ARCHIVED', 'SPAM']),
+  notes: z.string().max(5000).optional(),
+});
+
+export const newsletterSubscribersQuerySchema = z.object({
+  page: z.string().regex(/^\d+$/).default('1'),
+  limit: z.string().regex(/^\d+$/).default('20'),
+  // The handler reads `active`, but the route's Fastify querystring schema
+  // declared `status` (which nothing reads) and omitted `active` entirely.
+  // Because index.ts sets ajv `removeAdditional: 'all'`, an undeclared key is
+  // DELETED before the handler runs -- so this filter never worked. Declaring
+  // it in zod alone cannot fix that; the route schema had to be corrected too.
+  active: z.string().optional(),
+});
+
 // Newsletter schemas
 export const newsletterSchema = z.object({
   email: z.string().email('Invalid email address'),
