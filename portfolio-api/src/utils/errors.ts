@@ -152,15 +152,18 @@ export const getPaginationParams = (
 
   // Number.isSafeInteger, not !Number.isNaN: '99999999999999999999' parses to
   // 1e20, which is not NaN and would reach Prisma as `skip: 1e20`.
-  const page = Number.isSafeInteger(parsedPage) ? Math.max(1, parsedPage) : defaults.page;
-
-  // The maxLimit clamp wraps BOTH branches. Putting it only on the parsed side
-  // would let a caller-supplied `defaults.limit` above `maxLimit` through
-  // unclamped on the fallback path -- harmless with the built-in defaults
-  // (10 < 100), which is exactly why it would go unnoticed.
+  // Both clamps wrap BOTH branches. Applying them only on the parsed side
+  // would let a caller-supplied `defaults` through unchecked on the fallback
+  // path -- harmless with the built-in defaults (page 1, limit 10, maxLimit
+  // 100), which is exactly why it would go unnoticed. `defaults.limit` of 0
+  // reaches paginate() as a divisor and yields totalPages: Infinity.
+  //
+  // The invariants this function owes its callers, on every path:
+  //   1 <= page,  1 <= limit <= maxLimit,  both safe integers.
+  const page = Math.max(1, Number.isSafeInteger(parsedPage) ? parsedPage : defaults.page);
   const limit = Math.min(
     defaults.maxLimit,
-    Number.isSafeInteger(parsedLimit) ? Math.max(1, parsedLimit) : defaults.limit
+    Math.max(1, Number.isSafeInteger(parsedLimit) ? parsedLimit : defaults.limit)
   );
   const sortOrder = query.sortOrder === 'asc' ? 'asc' : 'desc';
 

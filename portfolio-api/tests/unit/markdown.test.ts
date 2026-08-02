@@ -49,8 +49,12 @@ describe('generateExcerpt', () => {
   });
 
   it('drops fenced code blocks entirely', () => {
+    // Asserted exactly, not with not.toContain: the inline-code regex that runs
+    // next would strip the block body on its own, so a containment check
+    // survives deleting the fence regex and leaves four stray backticks in a
+    // persisted excerpt.
     const excerpt = generateExcerpt('Intro text.\n\n```js\nconst secret = 1;\n```\n\nOutro.');
-    expect(excerpt).not.toContain('const secret');
+    expect(excerpt).toBe('Intro text. Outro.');
   });
 
   it('returns an empty string for empty input rather than an ellipsis', () => {
@@ -121,6 +125,21 @@ describe('parseMarkdown', () => {
 
     expect(parsed.frontmatter).toMatchObject({ title: 'Hello' });
     expect(parsed.html).not.toContain('title: Hello');
+  });
+
+  it('prefers an explicit frontmatter excerpt over the generated one', () => {
+    // article.service.ts persists whichever this returns, so an author's
+    // explicit excerpt being silently replaced is a visible content bug.
+    const parsed = parseMarkdown(
+      '---\nexcerpt: A hand-written summary\n---\n\nSome body text entirely unlike the summary.'
+    );
+
+    expect(parsed.excerpt).toBe('A hand-written summary');
+  });
+
+  it('generates an excerpt when frontmatter does not supply one', () => {
+    const parsed = parseMarkdown('---\ntitle: T\n---\n\nSome body text.');
+    expect(parsed.excerpt).toBe('Some body text.');
   });
 
   it('survives empty input', () => {

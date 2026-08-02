@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import Fastify from 'fastify';
-import type { InjectPayload, LightMyRequestResponse } from 'light-my-request';
+import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { errorHandler, validate, notFoundHandler } from '../../src/middleware/error.middleware.js';
 import { ApiError } from '../../src/utils/errors.js';
@@ -9,6 +9,12 @@ import { ApiError } from '../../src/utils/errors.js';
 // cannot be injected until Phase 7 extracts a buildApp() factory. These tests
 // register the REAL errorHandler and the REAL validate() on a locally
 // constructed instance, which is enough to pin the response contract.
+
+// Derived from fastify's own inject() rather than imported from
+// light-my-request: that package is only a hoisted transitive of fastify and is
+// declared in no package.json here, so importing it directly would break the
+// day npm stops hoisting it or fastify stops depending on it.
+type InjectResponse = Awaited<ReturnType<FastifyInstance['inject']>>;
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -124,8 +130,8 @@ describe('validate() preHandler vs inline schema.parse()', () => {
   // changed its error contract. Phase 5 verified it with a throwaway probe;
   // this makes it permanent.
   async function bothPaths(
-    payload: InjectPayload
-  ): Promise<{ viaPreHandler: LightMyRequestResponse; viaInline: LightMyRequestResponse }> {
+    payload: Record<string, unknown>
+  ): Promise<{ viaPreHandler: InjectResponse; viaInline: InjectResponse }> {
     const app = buildTestApp();
     app.post('/via-prehandler', { preHandler: [validate(loginSchema)] }, () => ({ ok: true }));
     app.post('/via-inline', (request) => {

@@ -129,6 +129,28 @@ describe('getPaginationParams', () => {
     expect(Number.isNaN(getPaginationParams({ page: 'abc' }).page)).toBe(false);
   });
 
+  it('rejects a value past MAX_SAFE_INTEGER, which is not NaN', () => {
+    // '99999999999999999999' parses to 1e20 -- a number, so a !Number.isNaN
+    // guard lets it through and Prisma receives skip: 1e20. Only an
+    // isSafeInteger check catches it.
+    expect(getPaginationParams({ page: '99999999999999999999' }).page).toBe(1);
+    expect(getPaginationParams({ limit: '99999999999999999999' }).limit).toBe(10);
+  });
+
+  it('honours maxLimit and the floor even on the fallback branch', () => {
+    // The clamps have to wrap the DEFAULTS too, not just the parsed value.
+    // With the built-in defaults (limit 10 < maxLimit 100) a one-sided clamp is
+    // indistinguishable, so this passes a caller-supplied defaults object --
+    // the only shape that can tell the two apart.
+    const overLimit = { page: 1, limit: 500, maxLimit: 100 };
+    expect(getPaginationParams({ limit: 'abc' }, overLimit).limit).toBe(100);
+
+    const underFloor = { page: 0, limit: 0, maxLimit: 100 };
+    // limit 0 would reach paginate() as a divisor and give totalPages: Infinity.
+    expect(getPaginationParams({ limit: 'abc' }, underFloor).limit).toBe(1);
+    expect(getPaginationParams({ page: 'abc' }, underFloor).page).toBe(1);
+  });
+
   it('only accepts asc for sortOrder and defaults everything else to desc', () => {
     expect(getPaginationParams({ sortOrder: 'asc' }).sortOrder).toBe('asc');
     expect(getPaginationParams({ sortOrder: 'ASC' }).sortOrder).toBe('desc');
