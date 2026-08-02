@@ -28,6 +28,7 @@
     "test:e2e:ui": "playwright test --ui",
     "size": "size-limit"
   },
+  "//size-limit": "react-vendor was re-baselined 60 -> 78 KB on the React 18 -> 19 migration. Measured: 58.97 KB gzip on React 18.3.1 vs 73.58 KB on React 19.2.8 -- a deliberate +14.6 KB framework cost, NOT drift. The headroom above 73.58 is intentionally small so genuine regressions still trip the gate. If this budget is exceeded again, investigate rather than raise it.",
   "size-limit": [
     {
       "name": "main JS (app code)",
@@ -38,7 +39,7 @@
     {
       "name": "react-vendor (eager)",
       "path": "dist/assets/react-vendor-*.js",
-      "limit": "60 KB",
+      "limit": "78 KB",
       "gzip": true
     },
     {
@@ -104,10 +105,10 @@
     "input-otp": "^1.4.2",
     "lenis": "^1.3.23",
     "lucide-react": "^0.462.0",
-    "next-themes": "^0.3.0",
-    "react": "^18.3.1",
+    "next-themes": "^0.4.6",
+    "react": "^19.2.8",
     "react-day-picker": "^8.10.1",
-    "react-dom": "^18.3.1",
+    "react-dom": "^19.2.8",
     "react-hook-form": "^7.61.1",
     "react-resizable-panels": "^2.1.9",
     "react-router-dom": "^7.18.2",
@@ -133,8 +134,8 @@
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
     "@types/node": "^22.16.5",
-    "@types/react": "^18.3.23",
-    "@types/react-dom": "^18.3.7",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
     "@vitejs/plugin-react-swc": "^3.11.0",
     "autoprefixer": "^10.4.21",
     "eslint": "^9.32.0",

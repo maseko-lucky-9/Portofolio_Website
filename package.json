@@ -37,9 +37,9 @@
   "devDependencies": {
     "@tailwindcss/container-queries": "^0.1.1"
   },
-  "//overrides": "React runtime is 18.3.x. @testing-library/react allows @types/react ^18||^19 and npm hoisted 19 to this root, giving two React type identities and 6 bogus TS2786 'cannot be used as a JSX component' errors. Pin downward to 18.x. NOTE: frontend-ci.yml also runs a nested `npm install` inside portfolio-ui, where these root overrides do NOT apply — that case is covered independently because portfolio-ui/package.json declares @types/react ^18.3.23 itself. Keep both in step.",
+  "//overrides": "React runtime is 19.2.x. These overrides force a SINGLE @types/react identity across the tree: without them npm can hoist a second copy (@testing-library/react accepts ^18||^19), and two React type identities produce bogus TS2786 'cannot be used as a JSX component' and ReactNode-not-assignable-to-ReactNode errors even when the code is correct. NOTE: frontend-ci.yml also runs a nested `npm install` inside portfolio-ui, where these root overrides do NOT apply — that case is covered independently because portfolio-ui/package.json declares the same versions itself. Keep both in step.",
   "overrides": {
-    "@types/react": "^18.3.23",
-    "@types/react-dom": "^18.3.7"
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4"
   }
 }
