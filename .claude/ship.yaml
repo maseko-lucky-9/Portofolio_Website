@@ -29,6 +29,8 @@ adminMerge: true
 # bugfix budget on.
 #
 # Still NOT the whole story: `npm test` at the root runs each workspace's `test`
-# script, which is the UNIT suite only. portfolio-api's `test:e2e` needs a live
-# postgres and redis and is deliberately excluded -- that is sweep run 7.
+# script, i.e. the UNIT suites. portfolio-api's `test:e2e` is excluded, and not
+# merely because it would need a live postgres and redis -- the config it points
+# at, vitest.e2e.config.ts, has never existed in this repo's history, so the
+# script exits 1 at load. Both the config and the suite are sweep run 7.
 testCommand: "npm test"

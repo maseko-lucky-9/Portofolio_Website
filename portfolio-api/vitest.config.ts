@@ -40,6 +40,14 @@ export default defineConfig({
 
     coverage: {
       provider: 'v8',
+      // v8 instruments only modules the tests actually import, so without
+      // these two the report covers 11 of 34 source files and the percentage
+      // is roughly 3x the truth -- and it would DROP as soon as someone tested
+      // a new file, which is the opposite of what a coverage trend should do.
+      // Safe to enable because no threshold is configured, so an honest lower
+      // number cannot turn the build red.
+      all: true,
+      include: ['src/**/*.ts'],
       // `json` is REQUIRED, not decorative: the codecov step in backend-ci.yml
       // uploads ./portfolio-api/coverage/coverage-final.json, which only the
       // json reporter emits. portfolio-ui declares ["text", "lcov"] and would

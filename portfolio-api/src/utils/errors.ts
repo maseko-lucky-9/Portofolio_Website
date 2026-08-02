@@ -150,10 +150,18 @@ export const getPaginationParams = (
   const parsedPage = parseInt(query.page ?? String(defaults.page), 10);
   const parsedLimit = parseInt(query.limit ?? String(defaults.limit), 10);
 
-  const page = Number.isNaN(parsedPage) ? defaults.page : Math.max(1, parsedPage);
-  const limit = Number.isNaN(parsedLimit)
-    ? defaults.limit
-    : Math.min(defaults.maxLimit, Math.max(1, parsedLimit));
+  // Number.isSafeInteger, not !Number.isNaN: '99999999999999999999' parses to
+  // 1e20, which is not NaN and would reach Prisma as `skip: 1e20`.
+  const page = Number.isSafeInteger(parsedPage) ? Math.max(1, parsedPage) : defaults.page;
+
+  // The maxLimit clamp wraps BOTH branches. Putting it only on the parsed side
+  // would let a caller-supplied `defaults.limit` above `maxLimit` through
+  // unclamped on the fallback path -- harmless with the built-in defaults
+  // (10 < 100), which is exactly why it would go unnoticed.
+  const limit = Math.min(
+    defaults.maxLimit,
+    Number.isSafeInteger(parsedLimit) ? Math.max(1, parsedLimit) : defaults.limit
+  );
   const sortOrder = query.sortOrder === 'asc' ? 'asc' : 'desc';
 
   return {

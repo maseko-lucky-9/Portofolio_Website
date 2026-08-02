@@ -10,11 +10,14 @@ import {
   getPermissionDescription,
 } from '../../src/config/permissions.js';
 
-// This module currently has ZERO importers -- nothing in src/ consumes it. The
-// tests are deliberately limited to invariants rather than behaviour detail:
-// they are cheap, they are pure, and they are the assertions that would matter
-// on the day someone wires this up to a route guard. Anything more would be
-// codifying the behaviour of code nobody calls.
+// This module is consumed via a DYNAMIC import -- auth.middleware.ts:188 does
+// `await import('../config/permissions.js')` inside requirePermission(), which
+// a static grep for `from '...'` misses. requirePermission is exported but not
+// yet mounted on any route, so the path is dormant rather than hot.
+//
+// The tests are limited to invariants rather than behaviour detail: they are
+// cheap, pure, and they are the assertions that matter on the day someone
+// mounts that guard.
 
 describe('role/permission invariants', () => {
   it('ADMIN holds every permission in the enum', () => {

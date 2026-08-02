@@ -54,6 +54,15 @@ describe('errorResponse', () => {
     });
   });
 
+  it('omits details for a FALSY-but-defined details value', () => {
+    // The case that distinguishes the truthiness spread from the
+    // `!== undefined` variant -- see the equivalent-mutant note in
+    // error.middleware.test.ts.
+    const res = errorResponse(new ApiError(400, 'Nope', 'BAD_REQUEST', null));
+    expect(res.error).toEqual({ code: 'BAD_REQUEST', message: 'Nope' });
+    expect(Object.keys(res.error ?? {})).not.toContain('details');
+  });
+
   it('includes details when present', () => {
     const res = errorResponse(ApiError.conflict('Taken', { field: 'email' }));
     expect(res.error?.details).toEqual({ field: 'email' });
@@ -92,8 +101,11 @@ describe('paginate', () => {
   });
 
   it('passes items through untouched', () => {
+    // toEqual, not toBe: whether paginate returns the caller's array instance
+    // or a copy is an implementation detail nothing depends on, and pinning it
+    // would fail a harmless defensive-copy refactor.
     const items = [{ id: 'a' }, { id: 'b' }];
-    expect(paginate(items, 2, { page: 1, limit: 10 }).items).toBe(items);
+    expect(paginate(items, 2, { page: 1, limit: 10 }).items).toEqual(items);
   });
 });
 

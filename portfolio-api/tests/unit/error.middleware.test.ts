@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import Fastify from 'fastify';
+import type { InjectPayload, LightMyRequestResponse } from 'light-my-request';
 import { z } from 'zod';
 import { errorHandler, validate, notFoundHandler } from '../../src/middleware/error.middleware.js';
 import { ApiError } from '../../src/utils/errors.js';
@@ -39,10 +40,6 @@ describe('errorHandler', () => {
   });
 
   it('OMITS details entirely when the ApiError carries none', async () => {
-    // Regression pin for the Phase 4 TS2698 fix. The spread is
-    // `...(error.details ? { details: error.details } : {})`. The tempting
-    // `error.details !== undefined` variant would start emitting
-    // `details: null` for a null details value, changing the response shape.
     const app = buildTestApp();
     app.get('/boom', () => {
       throw ApiError.notFound('Widget');
@@ -54,6 +51,29 @@ describe('errorHandler', () => {
     expect(res.json()).toEqual({
       success: false,
       error: { code: 'NOT_FOUND', message: 'Widget not found' },
+    });
+    expect(Object.keys(res.json().error)).not.toContain('details');
+    await app.close();
+  });
+
+  it('OMITS details for a FALSY-but-defined details value', async () => {
+    // Regression pin for the Phase 4 TS2698 fix, and the case that makes the
+    // pin real. The spread is `...(error.details ? { details } : {})`. The
+    // tempting `error.details !== undefined` variant is an EQUIVALENT mutant
+    // against `details: undefined` -- both omit the key -- so the test above
+    // cannot detect it. A null details value is what separates them: the
+    // truthiness form still omits, the !== undefined form emits
+    // `details: null` and changes the response shape.
+    const app = buildTestApp();
+    app.get('/boom', () => {
+      throw new ApiError(400, 'Nope', 'BAD_REQUEST', null);
+    });
+
+    const res = await app.inject({ method: 'GET', url: '/boom' });
+
+    expect(res.json()).toEqual({
+      success: false,
+      error: { code: 'BAD_REQUEST', message: 'Nope' },
     });
     expect(Object.keys(res.json().error)).not.toContain('details');
     await app.close();
@@ -103,7 +123,9 @@ describe('validate() preHandler vs inline schema.parse()', () => {
   // two paths ever diverge, every route converted in that phase silently
   // changed its error contract. Phase 5 verified it with a throwaway probe;
   // this makes it permanent.
-  async function bothPaths(payload: unknown) {
+  async function bothPaths(
+    payload: InjectPayload
+  ): Promise<{ viaPreHandler: LightMyRequestResponse; viaInline: LightMyRequestResponse }> {
     const app = buildTestApp();
     app.post('/via-prehandler', { preHandler: [validate(loginSchema)] }, () => ({ ok: true }));
     app.post('/via-inline', (request) => {

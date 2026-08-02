@@ -13,10 +13,21 @@ import { ApiError } from '../../src/utils/errors.js';
 // No database: PrismaClient is constructed at module scope but connects lazily,
 // and nothing in this path issues a query.
 
-/** Stub global.fetch with a url-fragment -> body map. */
+/**
+ * Stub global.fetch with a url-fragment -> body map.
+ *
+ * Fragments are matched LONGEST FIRST, not in declaration order. 'api.github.com/user'
+ * is a strict prefix of 'api.github.com/user/emails', so an insertion-order match
+ * would hand the profile object to the emails request the moment someone reordered
+ * the map -- and that failure is silent, because safeParse just rejects the
+ * non-array and the code falls through to the public-email path. In a file whose
+ * whole job is pinning an account-takeover fix, that is not a risk worth carrying.
+ */
 function stubFetch(routes: Record<string, unknown>): void {
+  const byLength = Object.entries(routes).sort((a, b) => b[0].length - a[0].length);
+
   vi.stubGlobal('fetch', (url: string) => {
-    for (const [fragment, body] of Object.entries(routes)) {
+    for (const [fragment, body] of byLength) {
       if (String(url).includes(fragment)) {
         return Promise.resolve({ ok: true, json: () => Promise.resolve(body) });
       }
