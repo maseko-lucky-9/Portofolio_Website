@@ -27,14 +27,14 @@ const renderer = new marked.Renderer();
 renderer.code = function (code: string, language?: string): string {
   const lang = language || 'text';
   const grammar = Prism.languages[lang] || Prism.languages['text'];
-  
+
   let highlighted: string;
   try {
     highlighted = grammar ? Prism.highlight(code, grammar, lang) : code;
   } catch {
     highlighted = code;
   }
-  
+
   return `<pre class="language-${lang}"><code class="language-${lang}">${highlighted}</code></pre>`;
 };
 

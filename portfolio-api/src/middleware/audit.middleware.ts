@@ -44,7 +44,7 @@ export const createAuditLog = async (
 ): Promise<void> => {
   try {
     const user = (request as AuthenticatedRequest).user;
-    
+
     await prisma.auditLog.create({
       data: {
         action,
@@ -82,7 +82,11 @@ export const auditMiddleware = (action: AuditAction, entity: AuditEntity) => {
 
       if (id) {
         // Store entity ID for post-response audit logging
-        (request as FastifyRequest & { auditContext: { action: AuditAction; entity: AuditEntity; entityId: string } }).auditContext = {
+        (
+          request as FastifyRequest & {
+            auditContext: { action: AuditAction; entity: AuditEntity; entityId: string };
+          }
+        ).auditContext = {
           action,
           entity,
           entityId: id,

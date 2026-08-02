@@ -6,11 +6,7 @@ import { createLogger } from '../config/logger.js';
 const logger = createLogger('error-handler');
 
 // Global error handler
-export const errorHandler = (
-  error: Error,
-  _request: FastifyRequest,
-  reply: FastifyReply
-): void => {
+export const errorHandler = (error: Error, _request: FastifyRequest, reply: FastifyReply): void => {
   // Log the error
   logger.error({ error, stack: error.stack }, 'Request error');
 
@@ -48,7 +44,7 @@ export const errorHandler = (
   // Handle Prisma errors
   if (error.constructor.name === 'PrismaClientKnownRequestError') {
     const prismaError = error as unknown as { code: string; meta?: { target?: string[] } };
-    
+
     switch (prismaError.code) {
       case 'P2002': // Unique constraint violation
         reply.status(409).send({
@@ -99,11 +95,12 @@ export const errorHandler = (
 // Validation middleware factory
 export const validate = <T>(schema: ZodSchema<T>, source: 'body' | 'query' | 'params' = 'body') => {
   return async (request: FastifyRequest, _reply: FastifyReply): Promise<void> => {
-    const data = source === 'body' ? request.body : source === 'query' ? request.query : request.params;
-    
+    const data =
+      source === 'body' ? request.body : source === 'query' ? request.query : request.params;
+
     try {
       const validated = schema.parse(data);
-      
+
       // Attach validated data back to request
       if (source === 'body') {
         request.body = validated;

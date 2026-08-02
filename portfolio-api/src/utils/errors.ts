@@ -136,7 +136,11 @@ export const paginate = <T>(
 
 export const getPaginationParams = (
   query: { page?: string; limit?: string; sortBy?: string; sortOrder?: string },
-  defaults: { page: number; limit: number; maxLimit: number } = { page: 1, limit: 10, maxLimit: 100 }
+  defaults: { page: number; limit: number; maxLimit: number } = {
+    page: 1,
+    limit: 10,
+    maxLimit: 100,
+  }
 ): PaginationParams => {
   const page = Math.max(1, parseInt(query.page ?? String(defaults.page), 10));
   const limit = Math.min(

@@ -15,10 +15,7 @@ import type {
 // Success Response Helpers
 // ==========================================
 
-export function successResponse<T>(
-  data: T,
-  meta?: Partial<ResponseMeta>
-): ApiResponse<T> {
+export function successResponse<T>(data: T, meta?: Partial<ResponseMeta>): ApiResponse<T> {
   return {
     data,
     meta: {

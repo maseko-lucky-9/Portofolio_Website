@@ -40,11 +40,7 @@ export enum Permission {
  * Defines which permissions each role has
  */
 export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
-  VIEWER: [
-    Permission.CONTENT_READ,
-    Permission.ANALYTICS_VIEW,
-    Permission.SETTINGS_READ,
-  ],
+  VIEWER: [Permission.CONTENT_READ, Permission.ANALYTICS_VIEW, Permission.SETTINGS_READ],
   EDITOR: [
     Permission.CONTENT_READ,
     Permission.CONTENT_CREATE,
