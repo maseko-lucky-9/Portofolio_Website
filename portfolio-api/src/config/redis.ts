@@ -39,11 +39,7 @@ export const cache = {
   /**
    * Get cached value or compute and cache it
    */
-  async getOrSet<T>(
-    key: string,
-    fn: () => Promise<T>,
-    ttlSeconds: number = 3600
-  ): Promise<T> {
+  async getOrSet<T>(key: string, fn: () => Promise<T>, ttlSeconds: number = 3600): Promise<T> {
     const cached = await redis.get(key);
     if (cached) {
       logger.debug({ key }, 'Cache hit');

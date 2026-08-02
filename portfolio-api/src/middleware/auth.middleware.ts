@@ -24,7 +24,11 @@ export interface AuthenticatedRequest extends FastifyRequest {
 }
 
 // Generate tokens
-export const generateTokens = (user: { id: string; email: string; role: Role }): {
+export const generateTokens = (user: {
+  id: string;
+  email: string;
+  role: Role;
+}): {
   accessToken: string;
   refreshToken: string;
 } => {
@@ -178,7 +182,7 @@ export const requirePermission = (...permissions: string[]) => {
 
     // Check if user has required permissions
     const hasRequiredPermission = permissions.some((perm) =>
-      userPermissions.map(p => p.toString()).includes(perm)
+      userPermissions.map((p) => p.toString()).includes(perm)
     );
 
     if (!hasRequiredPermission) {

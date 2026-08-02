@@ -6,11 +6,14 @@ import { ContactStatus } from '@prisma/client';
 
 export class ContactService {
   // Submit contact form
-  async submitContact(data: ContactInput, metadata?: {
-    ip?: string;
-    userAgent?: string;
-    referer?: string;
-  }): Promise<unknown> {
+  async submitContact(
+    data: ContactInput,
+    metadata?: {
+      ip?: string;
+      userAgent?: string;
+      referer?: string;
+    }
+  ): Promise<unknown> {
     // Check for duplicate submissions in last 5 minutes
     const recentSubmission = await prisma.contactSubmission.findFirst({
       where: {

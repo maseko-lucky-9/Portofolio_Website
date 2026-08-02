@@ -98,10 +98,7 @@ export class NewsletterService {
   async unsubscribe(token: string): Promise<unknown> {
     const subscriber = await prisma.newsletterSubscriber.findFirst({
       where: {
-        OR: [
-          { confirmToken: token },
-          { unsubscribeToken: token },
-        ],
+        OR: [{ confirmToken: token }, { unsubscribeToken: token }],
       },
     });
 

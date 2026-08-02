@@ -18,7 +18,10 @@ PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 
 # Default values
 ENVIRONMENT="dev"
-BACKUP_DIR="$PROJECT_ROOT/backups"
+# Honour an exported BACKUP_DIR, but leave the fallback unresolved until after
+# argument parsing -- see resolve below. Resolving it here would abort on an
+# unset HOME before `-d` had even been read.
+BACKUP_DIR="${BACKUP_DIR:-}"
 RETENTION_DAYS=7
 
 # Print colored message
@@ -37,13 +40,16 @@ Create database backup.
 
 Options:
     -e, --environment     Target environment (dev/staging/prod)
-    -d, --directory       Backup directory (default: ./backups)
+    -d, --directory       Backup directory (default: \$HOME/portfolio-backups)
+                          Must be outside the repository -- dumps contain
+                          password hashes and OAuth tokens. Also settable via
+                          the BACKUP_DIR environment variable.
     -r, --retention       Retention days (default: 7)
     -h, --help            Show this help message
 
 Examples:
     $0 -e prod
-    $0 -e staging -d /backups -r 30
+    $0 -e staging -d /var/backups/portfolio -r 30
 
 EOF
     exit 1
@@ -74,6 +80,23 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+# Resolve the default backup directory AFTER parsing, so `-d` is honoured even
+# when HOME is unset -- otherwise the error below would tell you to pass -d while
+# aborting before -d could be read.
+#
+# The default lives OUTSIDE the repository. It used to be "$PROJECT_ROOT/backups",
+# which put full unencrypted pg_dumps -- password hashes, refresh tokens, OAuth
+# tokens, IP addresses -- inside the git working tree, one `git add -A` away from
+# being pushed to GitHub.
+#
+# ${HOME:?} rather than $HOME because this script is `set -e` only, with no
+# `nounset`: an unset HOME would otherwise silently resolve to "/portfolio-backups",
+# which fails safe as a normal user (mkdir denied) but under sudo or systemd
+# succeeds and scatters database dumps across the filesystem root.
+if [[ -z "$BACKUP_DIR" ]]; then
+    BACKUP_DIR="${HOME:?HOME is unset; pass -d with an explicit backup directory}/portfolio-backups"
+fi
+
 # Validate environment
 if [[ ! "$ENVIRONMENT" =~ ^(dev|staging|prod)$ ]]; then
     print_message "$RED" "Error: Invalid environment"
@@ -88,6 +111,21 @@ echo "Backup Directory: $BACKUP_DIR"
 echo "Retention: $RETENTION_DAYS days"
 print_message "$GREEN" "=============================================="
 echo
+
+# Refuse to write dumps anywhere inside the git working tree, however we got
+# here (default, -d, or an exported BACKUP_DIR). A dump holds password hashes,
+# refresh tokens and OAuth tokens; gitleaks cannot see into a .dump or .sql.gz,
+# so git is the wrong place for one even when .gitignore would cover it.
+if repo_root=$(git -C "$PROJECT_ROOT" rev-parse --show-toplevel 2>/dev/null); then
+    mkdir -p "$BACKUP_DIR"
+    backup_abs=$(cd "$BACKUP_DIR" && pwd -P)
+    repo_abs=$(cd "$repo_root" && pwd -P)
+    if [[ "$backup_abs" == "$repo_abs" || "$backup_abs" == "$repo_abs"/* ]]; then
+        print_message "$RED" "Refusing to write backups inside the repository: $backup_abs"
+        print_message "$YELLOW" "Pass -d with a path outside $repo_abs (default: \$HOME/portfolio-backups)."
+        exit 1
+    fi
+fi
 
 # Create backup directory
 mkdir -p "$BACKUP_DIR"

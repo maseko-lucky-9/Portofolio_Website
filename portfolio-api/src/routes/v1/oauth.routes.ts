@@ -9,16 +9,19 @@ import crypto from 'crypto';
 const oauthStates = new Map<string, { provider: OAuthProvider; createdAt: number }>();
 
 // Clean up old states every 5 minutes
-setInterval(() => {
-  const now = Date.now();
-  const fiveMinutes = 5 * 60 * 1000;
-  
-  for (const [state, data] of oauthStates.entries()) {
-    if (now - data.createdAt > fiveMinutes) {
-      oauthStates.delete(state);
+setInterval(
+  () => {
+    const now = Date.now();
+    const fiveMinutes = 5 * 60 * 1000;
+
+    for (const [state, data] of oauthStates.entries()) {
+      if (now - data.createdAt > fiveMinutes) {
+        oauthStates.delete(state);
+      }
     }
-  }
-}, 5 * 60 * 1000);
+  },
+  5 * 60 * 1000
+);
 
 export default async function oauthRoutes(fastify: FastifyInstance) {
   /**
@@ -100,10 +103,7 @@ export default async function oauthRoutes(fastify: FastifyInstance) {
 
     try {
       // Exchange code for access token
-      const { accessToken, refreshToken } = await oauthService.exchangeCodeForToken(
-        provider,
-        code
-      );
+      const { accessToken, refreshToken } = await oauthService.exchangeCodeForToken(provider, code);
 
       // Get user profile from OAuth provider
       const profile = await oauthService.getOAuthProfile(provider, accessToken);
@@ -136,7 +136,7 @@ export default async function oauthRoutes(fastify: FastifyInstance) {
       // Redirect to frontend
       const frontendUrl = config.cors.origin;
       const redirectPath = result.isNewUser ? '/welcome' : '/dashboard';
-      
+
       reply.redirect(`${frontendUrl}${redirectPath}`);
     } catch (error) {
       fastify.log.error({ err: error }, 'OAuth callback error');
@@ -174,22 +174,13 @@ export default async function oauthRoutes(fastify: FastifyInstance) {
       oauthStates.delete(state);
 
       // Exchange code for access token
-      const { accessToken, refreshToken } = await oauthService.exchangeCodeForToken(
-        provider,
-        code
-      );
+      const { accessToken, refreshToken } = await oauthService.exchangeCodeForToken(provider, code);
 
       // Get user profile from OAuth provider
       const profile = await oauthService.getOAuthProfile(provider, accessToken);
 
       // Link OAuth provider to authenticated user
-      await oauthService.linkOAuthProvider(
-        user.id,
-        provider,
-        profile,
-        accessToken,
-        refreshToken
-      );
+      await oauthService.linkOAuthProvider(user.id, provider, profile, accessToken, refreshToken);
 
       reply.send({
         success: true,

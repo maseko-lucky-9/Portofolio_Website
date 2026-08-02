@@ -49,7 +49,9 @@ const getOrCreateIds = (request: FastifyRequest): { sessionId: string; visitorId
 };
 
 // Parse user agent
-const parseUserAgent = (ua: string): {
+const parseUserAgent = (
+  ua: string
+): {
   browser: string;
   browserVersion: string;
   os: string;

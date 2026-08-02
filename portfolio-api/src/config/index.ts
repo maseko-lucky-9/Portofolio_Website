@@ -36,7 +36,10 @@ const envSchema = z.object({
 
   // CORS
   CORS_ORIGIN: z.string().default('http://localhost:3001'),
-  CORS_CREDENTIALS: z.string().transform((v) => v === 'true').default('true'),
+  CORS_CREDENTIALS: z
+    .string()
+    .transform((v) => v === 'true')
+    .default('true'),
 
   // Rate Limiting
   RATE_LIMIT_MAX: z.string().transform(Number).default('100'),
@@ -45,17 +48,26 @@ const envSchema = z.object({
   // Email
   SMTP_HOST: z.string().optional(),
   SMTP_PORT: z.string().transform(Number).optional(),
-  SMTP_SECURE: z.string().transform((v) => v === 'true').optional(),
+  SMTP_SECURE: z
+    .string()
+    .transform((v) => v === 'true')
+    .optional(),
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
   EMAIL_FROM: z.string().default('Portfolio <noreply@portfolio.dev>'),
 
   // Analytics
   IPINFO_TOKEN: z.string().optional(),
-  ENABLE_ANALYTICS: z.string().transform((v) => v === 'true').default('true'),
+  ENABLE_ANALYTICS: z
+    .string()
+    .transform((v) => v === 'true')
+    .default('true'),
 
   // Code Execution
-  CODE_EXECUTION_ENABLED: z.string().transform((v) => v === 'true').default('true'),
+  CODE_EXECUTION_ENABLED: z
+    .string()
+    .transform((v) => v === 'true')
+    .default('true'),
   CODE_EXECUTION_TIMEOUT_MS: z.string().transform(Number).default('5000'),
   CODE_EXECUTION_MEMORY_MB: z.string().transform(Number).default('128'),
   CODE_EXECUTION_DOCKER_IMAGE: z.string().default('node:20-alpine'),
@@ -69,7 +81,10 @@ const envSchema = z.object({
   GITHUB_CLIENT_SECRET: z.string().optional(),
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),
-  OAUTH_STATE_SECRET: z.string().min(32).default('0000000000000000000000000000000000000000000000000000000000000000'),
+  OAUTH_STATE_SECRET: z
+    .string()
+    .min(32)
+    .default('0000000000000000000000000000000000000000000000000000000000000000'),
 
   // Cache TTL
   CACHE_TTL_PROJECTS: z.string().transform(Number).default('3600'),
@@ -77,14 +92,29 @@ const envSchema = z.object({
   CACHE_TTL_ANALYTICS: z.string().transform(Number).default('300'),
 
   // Feature Flags
-  ENABLE_WEBSOCKETS: z.string().transform((v) => v === 'true').default('true'),
-  ENABLE_CODE_EXECUTION: z.string().transform((v) => v === 'true').default('true'),
-  ENABLE_NEWSLETTER: z.string().transform((v) => v === 'true').default('true'),
-  DEMO_MODE: z.string().transform((v) => v === 'true').default('false'),
+  ENABLE_WEBSOCKETS: z
+    .string()
+    .transform((v) => v === 'true')
+    .default('true'),
+  ENABLE_CODE_EXECUTION: z
+    .string()
+    .transform((v) => v === 'true')
+    .default('true'),
+  ENABLE_NEWSLETTER: z
+    .string()
+    .transform((v) => v === 'true')
+    .default('true'),
+  DEMO_MODE: z
+    .string()
+    .transform((v) => v === 'true')
+    .default('false'),
 
   // Logging
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
-  LOG_PRETTY: z.string().transform((v) => v === 'true').default('true'),
+  LOG_PRETTY: z
+    .string()
+    .transform((v) => v === 'true')
+    .default('true'),
 });
 
 // Parse and validate environment

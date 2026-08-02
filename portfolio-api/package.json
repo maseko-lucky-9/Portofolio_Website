@@ -74,19 +74,20 @@
     "ua-parser-js": "^1.0.37",
     "zod": "^3.22.4"
   },
+  "//devDependencies": "prettier, typescript, eslint and the @typescript-eslint pair are pinned EXACTLY rather than ranged. No package-lock.json is committed (.gitignore ignores **/package-lock.json) and every CI job across all 7 workflows runs `npm install`, never `npm ci` — so each run resolves ranges fresh and today's green is not reproducible tomorrow. Prettier ships formatting changes in MINOR releases by policy, so a caret on the formatter alone can turn `quality` red with no code change: `^3.2.5` was already resolving to 3.9.5, seven minors ahead. These are pinned to the versions that were resolving when src/ was formatted. Changing any of them means re-running `prettier --write` and re-checking lint in the same PR. @typescript-eslint stays on v6 (which officially supports TypeScript <5.4, so it warns against the pinned 5.9.3) because bumping to v8 changes which rules fire — that belongs to the lint sweep, not here.",
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20.11.16",
     "@types/prismjs": "^1.26.3",
     "@types/ua-parser-js": "^0.7.39",
-    "@typescript-eslint/eslint-plugin": "^6.21.0",
-    "@typescript-eslint/parser": "^6.21.0",
-    "eslint": "^8.56.0",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-prettier": "^5.1.3",
-    "prettier": "^3.2.5",
+    "@typescript-eslint/eslint-plugin": "6.21.0",
+    "@typescript-eslint/parser": "6.21.0",
+    "eslint": "8.57.1",
+    "eslint-config-prettier": "9.1.2",
+    "eslint-plugin-prettier": "5.5.6",
+    "prettier": "3.9.5",
     "tsx": "^4.7.0",
-    "typescript": "^5.3.3",
+    "typescript": "5.9.3",
     "vitest": "^4.0.17"
   },
   "engines": {

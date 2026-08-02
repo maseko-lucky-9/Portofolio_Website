@@ -6,6 +6,10 @@ export async function analyticsRoutes(app: FastifyInstance): Promise<void> {
     const visitors = await getRealtimeVisitors();
     return { success: true, data: { visitors } };
   });
-  
-  app.post('/track', async () => ({ success: true, data: {}, message: 'Track event - implementation in progress' }));
+
+  app.post('/track', async () => ({
+    success: true,
+    data: {},
+    message: 'Track event - implementation in progress',
+  }));
 }

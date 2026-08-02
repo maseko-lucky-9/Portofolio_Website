@@ -18,7 +18,16 @@ export class ArticleService {
     sortBy?: string;
     sortOrder?: 'asc' | 'desc';
   }): Promise<PaginatedResult<unknown>> {
-    const { page, limit, status, featured, tag, search, sortBy = 'createdAt', sortOrder = 'desc' } = options;
+    const {
+      page,
+      limit,
+      status,
+      featured,
+      tag,
+      search,
+      sortBy = 'createdAt',
+      sortOrder = 'desc',
+    } = options;
 
     // Build cache key
     const cacheKey = cacheKeys.articleList(
@@ -115,10 +124,12 @@ export class ArticleService {
     if (cached) {
       if (trackView) {
         // Increment views in background
-        prisma.article.update({
-          where: { slug },
-          data: { views: { increment: 1 } },
-        }).catch(() => {});
+        prisma.article
+          .update({
+            where: { slug },
+            data: { views: { increment: 1 } },
+          })
+          .catch(() => {});
       }
       return cached;
     }
