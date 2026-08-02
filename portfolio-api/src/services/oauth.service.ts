@@ -575,6 +575,26 @@ export class OAuthService {
         // unavailable" rather than "the request is bad".
         const githubEmails = githubEmailsSchema.safeParse(await githubEmailResponse.json());
 
+        if (githubEmails.success) {
+          const degraded = githubEmails.data.filter((e) => e === null).length;
+
+          if (degraded > 0) {
+            logger.warn(
+              { provider: 'GitHub', degraded, total: githubEmails.data.length },
+              'Unparseable entries in GitHub email list'
+            );
+          }
+
+          // One bad entry is one odd address. EVERY entry degrading means the
+          // element shape changed, which is an upstream fault -- and falling
+          // through to the 400 below would tell every user during a total
+          // GitHub outage to go verify an address they have already verified.
+          // Same treatment parseProviderResponse gives a failed body parse.
+          if (degraded > 0 && degraded === githubEmails.data.length) {
+            throw ApiError.serviceUnavailable('GitHub returned an unexpected response');
+          }
+        }
+
         // Only a verified address is acceptable. handleOAuthCallback looks an
         // incoming profile up by email and links it to any existing user with
         // that address, so honouring an unverified one would let anyone who
@@ -622,10 +642,14 @@ export class OAuthService {
           'Google'
         );
 
-        // Same account-linking exposure as the GitHub branch. Google omits the
-        // field on some responses, so reject only an explicit `false`.
-        if (googleUser.verified_email === false) {
-          throw ApiError.badRequest('Google returned an unverified email address');
+        // Same account-linking exposure as the GitHub branch, and now failing
+        // closed the same way: a MISSING flag is not evidence of verification.
+        // The v2 userinfo endpoint always sends `verified_email` for the
+        // `email` scope, but the OIDC endpoint spells it `email_verified` -- so
+        // an endpoint migration would silently start admitting unverified
+        // addresses if this only rejected an explicit `false`.
+        if (googleUser.verified_email !== true) {
+          throw ApiError.badRequest('Google did not confirm the email address is verified');
         }
 
         return {
