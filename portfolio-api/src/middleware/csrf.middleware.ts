@@ -71,7 +71,15 @@ export function verifyCsrfToken(sessionId: string, token: string): boolean {
  * 2. Client must include the same token in request header
  * 3. Server verifies both match for state-changing requests
  */
-export function csrfProtection(request: FastifyRequest, _reply: FastifyReply): void {
+// MUST stay async even though it awaits nothing. Fastify's hook runner
+// (fastify/lib/hooks.js) advances the chain only when a hook returns a thenable or calls
+// the `done` callback it passes as the third argument. Unlike avvio, which falls back to
+// `done()` for plugins of arity < 3, hooks have no such fallback -- so a synchronous
+// arity-2 hook returning undefined never advances and the request hangs until it times
+// out. The throw path still answers 403, so the failure is invisible on rejected requests
+// and only stalls the traffic this hook is meant to wave through.
+// eslint-disable-next-line @typescript-eslint/require-await
+export async function csrfProtection(request: FastifyRequest, _reply: FastifyReply): Promise<void> {
   const method = request.method;
   const path = request.routeOptions?.url || request.url;
 
