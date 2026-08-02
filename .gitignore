@@ -93,3 +93,10 @@ ruvector.db
 *.rvf
 *.rvf.lock
 agentdb.*
+
+# Local docker-compose port-remap overlay. Encodes THIS machine's port
+# conflicts with unrelated projects (personal-finance-analyzer holds
+# 5432/6379/3000, trading-bot holds 8080) — a fact about one laptop, not about
+# this repo. Committing it would bake another project's port claims into
+# shared config.
+docker-compose.ports.yml
