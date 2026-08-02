@@ -10,7 +10,7 @@ import {
 } from '../../utils/validation.js';
 import { createAuditLog } from '../../middleware/audit.middleware.js';
 
-export async function authRoutes(app: FastifyInstance): Promise<void> {
+export function authRoutes(app: FastifyInstance): void {
   // Register
   app.post(
     '/register',
@@ -38,7 +38,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
 
       await createAuditLog(request, 'CREATE', 'User', result.user.id);
 
-      reply.code(201).send({
+      return reply.code(201).send({
         success: true,
         data: result,
       });
@@ -68,7 +68,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
 
       await createAuditLog(request, 'LOGIN', 'User', result.user.id);
 
-      reply.send({
+      return reply.send({
         success: true,
         data: result,
       });
@@ -96,7 +96,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
       const { refreshToken } = request.body as { refreshToken: string };
       const tokens = await authService.refreshToken(refreshToken);
 
-      reply.send({
+      return reply.send({
         success: true,
         data: tokens,
       });
@@ -125,7 +125,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
         (request as unknown as AuthenticatedRequest).user.id
       );
 
-      reply.send({
+      return reply.send({
         success: true,
         data: { message: 'Logged out successfully' },
       });
@@ -147,7 +147,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
       const user = (request as unknown as AuthenticatedRequest).user;
       const profile = await authService.getProfile(user.id);
 
-      reply.send({
+      return reply.send({
         success: true,
         data: profile,
       });
@@ -183,7 +183,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
 
       await createAuditLog(request, 'UPDATE', 'User', user.id, undefined, updated);
 
-      reply.send({
+      return reply.send({
         success: true,
         data: updated,
       });
@@ -220,7 +220,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
 
       await createAuditLog(request, 'PASSWORD_CHANGE', 'User', user.id);
 
-      reply.send({
+      return reply.send({
         success: true,
         data: { message: 'Password changed successfully' },
       });

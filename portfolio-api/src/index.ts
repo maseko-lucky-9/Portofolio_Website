@@ -183,19 +183,27 @@ function registerHooks(): void {
 function setupGracefulShutdown(): void {
   const signals: NodeJS.Signals[] = ['SIGTERM', 'SIGINT'];
 
-  signals.forEach((signal) => {
-    process.on(signal, async () => {
-      logger.info(`Received ${signal}, starting graceful shutdown`);
+  const shutdown = async (signal: NodeJS.Signals): Promise<void> => {
+    logger.info(`Received ${signal}, starting graceful shutdown`);
 
-      try {
-        await app.close();
-        await redis.quit();
-        logger.info('Server closed successfully');
-        process.exit(0);
-      } catch (error) {
-        logger.error({ error }, 'Error during shutdown');
-        process.exit(1);
-      }
+    try {
+      await app.close();
+      await redis.quit();
+      logger.info('Server closed successfully');
+      process.exit(0);
+    } catch (error) {
+      logger.error({ error }, 'Error during shutdown');
+      process.exit(1);
+    }
+  };
+
+  signals.forEach((signal) => {
+    // process.on expects a void-returning listener. Handing it an async function
+    // means any rejection escaping `shutdown` is swallowed by the event emitter
+    // instead of surfacing. Calling it here and marking the promise `void` keeps
+    // the listener synchronous and makes the fire-and-forget deliberate.
+    process.on(signal, () => {
+      void shutdown(signal);
     });
   });
 
@@ -255,7 +263,9 @@ async function start(): Promise<void> {
   }
 }
 
-// Start the server
-start();
+// Start the server. `void` rather than a .catch(): start() already wraps its whole
+// body in a try/catch that logs and process.exit(1)s, so it cannot reject in
+// practice -- a .catch() here would be unreachable code pretending to be a safety net.
+void start();
 
 export default app;

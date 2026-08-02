@@ -1,4 +1,3 @@
-import { FastifyRequest, FastifyReply } from 'fastify';
 import { prisma } from '../config/database.js';
 import { config } from '../config/index.js';
 import { ApiError } from '../utils/errors.js';
@@ -251,7 +250,10 @@ export class OAuthService {
       select: { passwordHash: true },
     });
 
-    const hasOtherAuth = user && user.passwordHash && user.passwordHash !== '';
+    // Equivalent to the previous `user && user.passwordHash && user.passwordHash !== ''`:
+    // passwordHash is a non-null String in the schema, so the `!== ''` arm was already
+    // redundant behind the truthiness check. Only used as a boolean below.
+    const hasOtherAuth = Boolean(user?.passwordHash);
 
     const otherOAuthProviders = await prisma.oAuthProvider.count({
       where: {
@@ -321,7 +323,7 @@ export class OAuthService {
     const redirectUri = this.getRedirectUri(provider);
 
     switch (provider) {
-      case 'github':
+      case 'github': {
         const githubParams = new URLSearchParams({
           client_id: config.oauth.github.clientId,
           redirect_uri: redirectUri,
@@ -329,8 +331,9 @@ export class OAuthService {
           state,
         });
         return `https://github.com/login/oauth/authorize?${githubParams.toString()}`;
+      }
 
-      case 'google':
+      case 'google': {
         const googleParams = new URLSearchParams({
           client_id: config.oauth.google.clientId,
           redirect_uri: redirectUri,
@@ -341,6 +344,7 @@ export class OAuthService {
           prompt: 'consent',
         });
         return `https://accounts.google.com/o/oauth2/v2/auth?${googleParams.toString()}`;
+      }
 
       default:
         throw ApiError.badRequest('Unsupported OAuth provider');
@@ -357,7 +361,7 @@ export class OAuthService {
     const redirectUri = this.getRedirectUri(provider);
 
     switch (provider) {
-      case 'github':
+      case 'github': {
         const githubResponse = await fetch('https://github.com/login/oauth/access_token', {
           method: 'POST',
           headers: {
@@ -382,8 +386,9 @@ export class OAuthService {
           accessToken: githubData.access_token,
           refreshToken: githubData.refresh_token,
         };
+      }
 
-      case 'google':
+      case 'google': {
         const googleResponse = await fetch('https://oauth2.googleapis.com/token', {
           method: 'POST',
           headers: {
@@ -408,6 +413,7 @@ export class OAuthService {
           accessToken: googleData.access_token,
           refreshToken: googleData.refresh_token,
         };
+      }
 
       default:
         throw ApiError.badRequest('Unsupported OAuth provider');
@@ -419,7 +425,7 @@ export class OAuthService {
    */
   async getOAuthProfile(provider: OAuthProvider, accessToken: string): Promise<OAuthProfile> {
     switch (provider) {
-      case 'github':
+      case 'github': {
         const githubUserResponse = await fetch('https://api.github.com/user', {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -447,8 +453,9 @@ export class OAuthService {
           avatarUrl: githubUser.avatar_url,
           username: githubUser.login,
         };
+      }
 
-      case 'google':
+      case 'google': {
         const googleUserResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -463,6 +470,7 @@ export class OAuthService {
           name: googleUser.name,
           avatarUrl: googleUser.picture,
         };
+      }
 
       default:
         throw ApiError.badRequest('Unsupported OAuth provider');

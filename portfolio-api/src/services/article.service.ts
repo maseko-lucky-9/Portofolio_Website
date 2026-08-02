@@ -2,7 +2,7 @@ import { prisma } from '../config/database.js';
 import { cache, cacheKeys } from '../config/redis.js';
 import { config } from '../config/index.js';
 import { ApiError, PaginatedResult, paginate } from '../utils/errors.js';
-import { parseMarkdown, getReadingTime, getWordCount } from '../utils/markdown.js';
+import { parseMarkdown } from '../utils/markdown.js';
 import { ArticleStatus } from '@prisma/client';
 import { CreateArticleInput, UpdateArticleInput } from '../utils/validation.js';
 

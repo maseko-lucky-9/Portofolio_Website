@@ -63,7 +63,7 @@ function buildPageUrl(baseUrl: string | URL, page: number): string {
   } catch (error) {
     // Fallback if URL parsing fails
     const separator = baseUrl.toString().includes('?') ? '&' : '?';
-    return `${baseUrl}${separator}page=${page}`;
+    return `${baseUrl.toString()}${separator}page=${page}`;
   }
 }
 

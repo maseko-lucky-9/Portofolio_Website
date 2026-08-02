@@ -9,7 +9,7 @@ import type {
 } from '@portfolio/shared/types';
 import { paginatedResponse, successResponse } from '../../utils/response.js';
 
-export async function projectRoutes(app: FastifyInstance): Promise<void> {
+export function projectRoutes(app: FastifyInstance): void {
   // List projects (public)
   app.get(
     '/',
@@ -41,7 +41,7 @@ export async function projectRoutes(app: FastifyInstance): Promise<void> {
         },
       },
     },
-    async (request, reply): Promise<PaginatedResponse<ProjectSummary>> => {
+    async (request, _reply): Promise<PaginatedResponse<ProjectSummary>> => {
       const query = request.query as QueryParams;
       const result = await projectService.listProjects({
         page: parseInt(query.page?.toString() || '1'),
@@ -53,8 +53,8 @@ export async function projectRoutes(app: FastifyInstance): Promise<void> {
             : (query.featured as any) === 'false'
               ? false
               : undefined,
-        tag: query.tag as string | undefined,
-        search: query.search as string | undefined,
+        tag: query.tag,
+        search: query.search,
         sortBy: (query.sortBy as string) || 'createdAt',
         sortOrder: (query.sortOrder as 'asc' | 'desc') || 'desc',
       });
@@ -94,7 +94,7 @@ export async function projectRoutes(app: FastifyInstance): Promise<void> {
         },
       },
     },
-    async (request, reply) => {
+    async (request, _reply) => {
       const { slug } = request.params as { slug: string };
       const project = await projectService.getProjectBySlug(slug);
       return successResponse<ProjectDetail>(project as ProjectDetail);

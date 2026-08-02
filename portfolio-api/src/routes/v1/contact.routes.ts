@@ -3,7 +3,7 @@ import { authenticate, requireRole } from '../../middleware/auth.middleware.js';
 import { contactService } from '../../services/contact.service.js';
 import { newsletterService } from '../../services/newsletter.service.js';
 
-export async function contactRoutes(app: FastifyInstance): Promise<void> {
+export function contactRoutes(app: FastifyInstance): void {
   // Submit contact form
   app.post(
     '/submit',
@@ -232,7 +232,7 @@ export async function contactRoutes(app: FastifyInstance): Promise<void> {
   );
 
   // Get availability status
-  app.get('/availability', async () => {
+  app.get('/availability', () => {
     // TODO: Implement real availability checking from database
     return {
       isAvailable: true,

@@ -22,7 +22,15 @@
     "@typescript-eslint/explicit-function-return-type": "warn",
     "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
     "@typescript-eslint/no-explicit-any": "warn",
-    "@typescript-eslint/prefer-nullish-coalescing": "error",
+    // ignorePrimitives.string is deliberate, not a way to dodge the rule. 30 of the 34
+    // sites this rule flagged are `envVar || 'default'` or `parsedField || ''`, where an
+    // empty string genuinely means "absent" and falling back is the intended behaviour.
+    // Converting those to `??` would introduce real bugs -- `parseInt(count ?? '0', 10)`
+    // yields NaN when Redis returns "", and `result.browser.name ?? 'Unknown'` would store
+    // an empty string instead of "Unknown". The rule stays fully active for numbers,
+    // booleans and objects, which is where the accidental-`||` bugs actually live: it
+    // caught all four of them here, including a `limit: 0` pagination bug.
+    "@typescript-eslint/prefer-nullish-coalescing": ["error", { "ignorePrimitives": { "string": true } }],
     "@typescript-eslint/prefer-optional-chain": "error",
     "no-console": ["warn", { "allow": ["warn", "error"] }]
   },

@@ -7,12 +7,12 @@ const logger = createLogger('redis');
 // Create Redis client
 export const redis = new Redis(config.redis.url, {
   maxRetriesPerRequest: 3,
-  retryStrategy(times) {
+  retryStrategy(times: number): number {
     const delay = Math.min(times * 50, 2000);
     logger.warn({ times, delay }, 'Redis connection retry');
     return delay;
   },
-  reconnectOnError(err) {
+  reconnectOnError(err: Error): boolean {
     const targetErrors = ['READONLY', 'ECONNRESET', 'ETIMEDOUT'];
     return targetErrors.some((e) => err.message.includes(e));
   },
@@ -109,16 +109,16 @@ export const cache = {
 
 // Cache key generators
 export const cacheKeys = {
-  project: (slug: string) => `project:${slug}`,
-  projectList: (page: number, filters: string) => `projects:list:${page}:${filters}`,
-  article: (slug: string) => `article:${slug}`,
-  articleList: (page: number, filters: string) => `articles:list:${page}:${filters}`,
-  analytics: (type: string, date: string) => `analytics:${type}:${date}`,
-  settings: (key: string) => `settings:${key}`,
-  availability: () => 'availability',
-  rateLimit: (ip: string, endpoint: string) => `ratelimit:${ip}:${endpoint}`,
-  session: (id: string) => `session:${id}`,
-  codeExecution: (hash: string) => `code:${hash}`,
+  project: (slug: string): string => `project:${slug}`,
+  projectList: (page: number, filters: string): string => `projects:list:${page}:${filters}`,
+  article: (slug: string): string => `article:${slug}`,
+  articleList: (page: number, filters: string): string => `articles:list:${page}:${filters}`,
+  analytics: (type: string, date: string): string => `analytics:${type}:${date}`,
+  settings: (key: string): string => `settings:${key}`,
+  availability: (): string => 'availability',
+  rateLimit: (ip: string, endpoint: string): string => `ratelimit:${ip}:${endpoint}`,
+  session: (id: string): string => `session:${id}`,
+  codeExecution: (hash: string): string => `code:${hash}`,
 };
 
 export default redis;

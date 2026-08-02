@@ -3,14 +3,14 @@ import type { ErrorCode } from '@portfolio/shared/types';
 // Custom API Error class
 export class ApiError extends Error {
   public readonly statusCode: number;
-  public readonly code: ErrorCode | string;
+  public readonly code: ErrorCode;
   public readonly details?: unknown;
   public readonly isOperational: boolean;
 
   constructor(
     statusCode: number,
     message: string,
-    code: ErrorCode | string = 'INTERNAL_ERROR',
+    code: ErrorCode = 'INTERNAL_ERROR',
     details?: unknown,
     isOperational: boolean = true
   ) {
