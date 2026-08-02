@@ -19,13 +19,19 @@ export default defineConfig({
     // down with it (both are needs-gated behind it).
     include: ['tests/e2e/**/*.test.ts'],
 
-    // Every spec shares ONE database. The default worker pool would run files
-    // in parallel and let one spec's writes land in the middle of another's
-    // reads. singleFork serialises them. Correct trade at this suite size --
-    // revisit only if the job gets slow, and then by giving each file its own
-    // schema rather than by removing this.
+    // Every spec shares ONE database and ONE redis, so files must not run
+    // concurrently: an admin spec that unpublishes a project while another
+    // file is reading the project list produces a failure that has nothing to
+    // do with the code under test.
+    //
+    // This MUST be `fileParallelism`, not `poolOptions.forks.singleFork`.
+    // Vitest 4 removed poolOptions and silently ignores it -- it only prints a
+    // DEPRECATED line and carries on running files in parallel, so the
+    // serialisation this config claimed was never in effect. The observable
+    // check is wall-clock: with parallelism the run finishes in less time than
+    // the summed per-file test time; serialised, it takes longer than either.
     pool: 'forks',
-    poolOptions: { forks: { singleFork: true } },
+    fileParallelism: false,
 
     // Clears this app's cached reads before the suite. The services cache list
     // responses in redis, so without this a second local run can be served a

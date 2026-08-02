@@ -78,15 +78,22 @@ describe('admin write routes', () => {
       await prisma.articleTag.deleteMany({ where: { article: { slug: { startsWith: PREFIX } } } });
       await prisma.project.deleteMany({ where: { slug: { startsWith: PREFIX } } });
       await prisma.article.deleteMany({ where: { slug: { startsWith: PREFIX } } });
+
       // The two accounts this file created, including the promoted ADMIN --
       // leaving a loginable admin behind would be worse than the rows.
-      await prisma.refreshToken.deleteMany({
-        where: { user: { email: { in: [viewerEmail, adminEmail] } } },
-      });
-      await prisma.user.deleteMany({ where: { email: { in: [viewerEmail, adminEmail] } } });
+      //
+      // Guarded because afterAll still runs when beforeAll THREW: the emails
+      // would be undefined and Prisma would reject `email: { in: [undefined] }`,
+      // replacing the real setup error with a confusing one.
+      const emails = [viewerEmail, adminEmail].filter(Boolean);
+      if (emails.length > 0) {
+        await prisma.refreshToken.deleteMany({ where: { user: { email: { in: emails } } } });
+        await prisma.user.deleteMany({ where: { email: { in: emails } } });
+      }
     } finally {
       await prisma.$disconnect();
-      await app.close();
+      // Likewise: if startTestApp() threw, there is no app to close.
+      if (app) await app.close();
     }
   });
 

@@ -20,10 +20,18 @@ const redis = new Redis(config.redis.url);
 // Cache Key Patterns
 // ==========================================
 
+// The detail-key generators MUST match src/config/redis.ts. They are duplicated
+// here rather than imported because this script is standalone, and that
+// duplication has already drifted once: when the app's detail keys were bumped
+// to `project:v2:` this table still wrote `project:`, so the warm-up populated
+// a namespace nothing reads WHILE its own `project:*` cleanup deleted the live
+// entries -- a warm-up that was really a cache flush.
+//
+// If you change cacheKeys.project or cacheKeys.article, change these too.
 const CACHE_KEYS = {
-  project: (slug: string) => `project:${slug}`,
+  project: (slug: string) => `project:v2:${slug}`,
   projectList: (params: string) => `projects:list:${params}`,
-  article: (slug: string) => `article:${slug}`,
+  article: (slug: string) => `article:v2:${slug}`,
   articleList: (params: string) => `articles:list:${params}`,
   tag: (slug: string) => `tag:${slug}`,
   tagList: () => 'tags:list',

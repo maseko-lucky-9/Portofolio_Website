@@ -155,16 +155,21 @@ export class ProjectService {
       // payload under its key made the public endpoint answer 200 with the
       // draft body.
       //
-      // Three ways an unpublished payload gets here, none hypothetical:
-      //   1. entries written by the previous code, which cached drafts (the
-      //      v2 namespace bump in redis.ts closes that one on deploy);
-      //   2. an admin unpublishing a row while a read is in flight, so the
-      //      invalidation runs before this request's cache.set writes the
-      //      pre-unpublish snapshot back;
-      //   3. delPattern('projects:*') failing, which leaves the DB DRAFT and
-      //      the cache PUBLISHED.
-      // A re-check at the point of use covers all three; chasing every writer
-      // does not.
+      // What this DOES catch: any entry whose stored payload is itself marked
+      // unpublished -- which is what the previous code cached, because it read
+      // with findUnique and no status predicate. Those entries survive a
+      // deploy (one-hour TTL), which is why the v2 namespace bump in redis.ts
+      // exists alongside this.
+      //
+      // What it does NOT catch, stated plainly so nobody reads this as more
+      // than it is: an entry cached WHILE the row was still published and only
+      // unpublished afterwards. Its payload says PUBLISHED, so this check
+      // passes it. That window is closed by invalidation
+      // (cache.del(cacheKeys.project(slug)) in updateProject/deleteProject),
+      // not here -- and if that del is skipped or fails, the stale PUBLISHED
+      // snapshot is served for the remainder of the TTL. Narrowing it further
+      // needs a second delayed invalidation or a shorter detail TTL; both are
+      // real work and neither belongs in this change.
       if ((cached as { status?: string }).status === ProjectStatus.PUBLISHED) {
         if (trackView) {
           // Increment views in background

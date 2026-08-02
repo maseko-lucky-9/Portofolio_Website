@@ -1,4 +1,16 @@
 import Redis from 'ioredis';
+import dotenv from 'dotenv';
+
+// The specs resolve their database through src/config/index.ts, which calls
+// dotenv.config() at import. This file is loaded by vitest OUTSIDE that module
+// graph, so without loading .env here too the guard below would evaluate a
+// different (empty) environment than the one the specs actually connect with --
+// it would abort on a machine where the suite is perfectly well configured,
+// and, worse, it would never inspect the value that is really used.
+//
+// dotenv does not overwrite an already-set variable, so an explicit export
+// still wins, exactly as it does for the app.
+dotenv.config();
 
 /**
  * Clear the app's cached reads once, before the e2e suite runs.
@@ -33,10 +45,10 @@ const NAMESPACES = [
  * This suite is not read-only and this guard is not paranoia. It registers
  * users, promotes one of them to ADMIN with a direct prisma call, creates and
  * deletes project rows, and the seed it depends on writes DRAFT fixtures. The
- * target comes entirely from DATABASE_URL -- and src/config/index.ts calls
- * dotenv.config() at import, which does NOT override an already-set variable
- * but DOES supply one when the shell has none. So running `npm run test:e2e`
- * with nothing exported silently uses whatever .env points at.
+ * target comes entirely from DATABASE_URL, and .env supplies it whenever the
+ * shell does not -- so `npm run test:e2e` with nothing exported runs against
+ * whatever .env points at, which on a developer machine is usually their real
+ * development database.
  *
  * One guard here covers every spec, rather than each file re-implementing it.
  * Set E2E_ALLOW_ANY_DATABASE=1 to override deliberately.
@@ -59,15 +71,24 @@ function assertDisposableDatabase(): void {
     throw new Error('e2e: DATABASE_URL is not a parseable URL.');
   }
 
-  const localHost = ['localhost', '127.0.0.1', '::1', 'postgres', 'db'].includes(host);
-  const testName = /(^|[_-])(test|e2e)([_-]|$)/i.test(name);
-
-  if (!localHost && !testName) {
+  // The database NAME is the discriminator, deliberately -- not the host.
+  //
+  // "it's only localhost" is not a safety property: a developer's primary
+  // development database usually lives there, and .env points at exactly that
+  // (portfolio_db). Accepting any local host would let `npm run test:e2e` with
+  // no exported variable promote an account to ADMIN and delete rows in the
+  // database they actually work in.
+  //
+  // Both real callers already satisfy this: CI uses portfolio_test, and the
+  // documented local setup uses a dedicated *_e2e database. The cost is one
+  // explicit export; the alternative is a suite that can quietly eat your work.
+  if (!/(^|[_-])(test|e2e)([_-]|$)/i.test(name)) {
     throw new Error(
-      `e2e: refusing to run against database "${name}" on host "${host}". ` +
-        'This suite writes, promotes a user to ADMIN and deletes rows. Point ' +
-        'DATABASE_URL at a local or *_test database, or set ' +
-        'E2E_ALLOW_ANY_DATABASE=1 if you really mean it.'
+      `e2e: refusing to run against database "${name}" (host "${host}"). ` +
+        'This suite registers users, promotes one to ADMIN and deletes rows, ' +
+        'so it only runs against a database whose name marks it disposable ' +
+        '(e.g. portfolio_test, portfolio_e2e). Export DATABASE_URL at such a ' +
+        'database, or set E2E_ALLOW_ANY_DATABASE=1 to override deliberately.'
     );
   }
 }
