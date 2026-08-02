@@ -62,6 +62,15 @@ const ARTICLE_SLUG_2 = 'second-post';
 const DRAFT_PROJECT_SLUG = 'unannounced-project';
 const DRAFT_ARTICLE_SLUG = 'unpublished-post';
 
+// ARCHIVED fixtures matter at least as much as DRAFT ones: deleteProject and
+// deleteArticle are SOFT deletes that just set status = ARCHIVED, so ARCHIVED
+// is how retracted content actually exists in production. Without these rows,
+// relaxing the filter to `status: { not: 'DRAFT' }` -- a natural-looking
+// refactor -- would pass every access-control test while re-exposing
+// everything an admin has ever deleted.
+const ARCHIVED_PROJECT_SLUG = 'retracted-project';
+const ARCHIVED_ARTICLE_SLUG = 'retracted-post';
+
 async function main(): Promise<void> {
   console.log('\n🌱 Seeding database...\n');
 
@@ -214,8 +223,8 @@ async function main(): Promise<void> {
       slug: DRAFT_PROJECT_SLUG,
       title: 'Unannounced Project',
       description: 'DRAFT fixture. Must never be readable by an anonymous caller.',
-      content: '# Unannounced\n\nDRAFT-ONLY-CONTENT-MARKER',
-      client: 'DRAFT-ONLY-CLIENT-MARKER',
+      content: '# Unannounced\n\nUNPUBLISHED-ONLY-CONTENT-MARKER',
+      client: 'UNPUBLISHED-ONLY-CLIENT-MARKER',
       status: 'DRAFT',
       authorId: admin.id,
     },
@@ -226,12 +235,38 @@ async function main(): Promise<void> {
     create: {
       slug: DRAFT_ARTICLE_SLUG,
       title: 'Unpublished Post',
-      content: '# Unpublished\n\nDRAFT-ONLY-CONTENT-MARKER',
+      content: '# Unpublished\n\nUNPUBLISHED-ONLY-CONTENT-MARKER',
       status: 'DRAFT',
       authorId: admin.id,
     },
   });
   console.log('✅ DRAFT fixtures (project + article)');
+
+  await prisma.project.upsert({
+    where: { slug: ARCHIVED_PROJECT_SLUG },
+    update: {},
+    create: {
+      slug: ARCHIVED_PROJECT_SLUG,
+      title: 'Retracted Project',
+      description: 'ARCHIVED fixture. Must never be readable by an anonymous caller.',
+      content: '# Retracted\n\nUNPUBLISHED-ONLY-CONTENT-MARKER',
+      status: 'ARCHIVED',
+      archivedAt: new Date(),
+      authorId: admin.id,
+    },
+  });
+  await prisma.article.upsert({
+    where: { slug: ARCHIVED_ARTICLE_SLUG },
+    update: {},
+    create: {
+      slug: ARCHIVED_ARTICLE_SLUG,
+      title: 'Retracted Post',
+      content: '# Retracted\n\nUNPUBLISHED-ONLY-CONTENT-MARKER',
+      status: 'ARCHIVED',
+      authorId: admin.id,
+    },
+  });
+  console.log('✅ ARCHIVED fixtures (project + article)');
 
   console.log('\n🌱 Seed complete.\n');
 }

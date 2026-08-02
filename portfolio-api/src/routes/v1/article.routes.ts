@@ -6,7 +6,8 @@ import {
 } from '../../middleware/auth.middleware.js';
 import { articleService } from '../../services/article.service.js';
 import {
-  MAX_PAGE_SIZE,
+  clampLimit,
+  clampPage,
   articleQuerySchema,
   createArticleSchema,
   updateArticleSchema,
@@ -37,10 +38,11 @@ export function articleRoutes(app: FastifyInstance): void {
     async (request) => {
       const query = articleQuerySchema.parse(request.query);
       const result = await articleService.listArticles({
-        page: parseInt(query.page) || 1,
-        // Clamped: an unbounded limit is both a full-table read and, since limit
-        // joined the list cache key, an unbounded redis key-cardinality axis.
-        limit: Math.min(parseInt(query.limit) || 10, MAX_PAGE_SIZE),
+        // Both clamped. page and limit are the two cache-key axes an anonymous
+        // caller controls, and an unbounded page also overflows Prisma's
+        // 32-bit skip. See utils/validation.ts for the bounds.
+        page: clampPage(query.page),
+        limit: clampLimit(query.limit),
         featured: query.featured === 'true' ? true : query.featured === 'false' ? false : undefined,
         tag: query.tag,
         search: query.search,

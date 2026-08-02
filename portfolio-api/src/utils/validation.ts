@@ -18,6 +18,41 @@ import { z } from 'zod';
  */
 export const MAX_PAGE_SIZE = 100;
 
+/**
+ * Upper bound on the page number.
+ *
+ * `skip: (page - 1) * limit` is handed to Prisma, whose Int is 32-bit, so
+ * `?page=1000000000` overflows and raises a PrismaClientValidationError --
+ * which errorHandler has no branch for, making it a 500 on a public endpoint.
+ * `?page=99999999999999999999` parses to 1e20 and is worse, which is why the
+ * clamp below tests isSafeInteger rather than just taking a min.
+ *
+ * `page` is also the FIRST component of the list cache key, so leaving it
+ * unbounded would keep the key-cardinality hole open even with MAX_PAGE_SIZE
+ * in place. 10_000 pages x 100 per page is far past anything this dataset will
+ * hold, so the bound costs nothing real.
+ */
+export const MAX_PAGE = 10_000;
+
+/**
+ * Parse a page-number query parameter into a bounded, safe integer.
+ * Anything unusable falls back to page 1 rather than reaching Prisma as NaN.
+ */
+export function clampPage(raw: string | undefined): number {
+  const parsed = parseInt(raw ?? '', 10);
+  if (!Number.isSafeInteger(parsed) || parsed < 1) return 1;
+  return Math.min(parsed, MAX_PAGE);
+}
+
+/**
+ * Parse a page-size query parameter into a bounded, safe integer.
+ */
+export function clampLimit(raw: string | undefined, fallback = 10): number {
+  const parsed = parseInt(raw ?? '', 10);
+  if (!Number.isSafeInteger(parsed) || parsed < 1) return fallback;
+  return Math.min(parsed, MAX_PAGE_SIZE);
+}
+
 export const paginationSchema = z.object({
   page: z.string().regex(/^\d+$/).default('1'),
   limit: z.string().regex(/^\d+$/).default('10'),
@@ -68,7 +103,11 @@ export const createProjectSchema = z.object({
 export const updateProjectSchema = createProjectSchema.partial();
 
 export const projectFiltersSchema = z.object({
-  status: z.enum(['DRAFT', 'PUBLISHED', 'ARCHIVED']).optional(),
+  // No `status` here on purpose. These are the PUBLIC filter schemas, and the
+  // services now hard-code PUBLISHED. Leaving an optional status would read as
+  // a supported public filter and invite someone to re-plumb it into the where
+  // clause -- which is exactly the leak this change closed. An authenticated
+  // listing needs its own schema AND a privilege dimension on the cache key.
   featured: z.string().optional(),
   category: z.string().optional(),
   tag: z.string().optional(),
@@ -104,7 +143,7 @@ export const createArticleSchema = z.object({
 export const updateArticleSchema = createArticleSchema.partial();
 
 export const articleFiltersSchema = z.object({
-  status: z.enum(['DRAFT', 'PUBLISHED', 'ARCHIVED']).optional(),
+  // No `status` -- see projectFiltersSchema.
   featured: z.string().optional(),
   tag: z.string().optional(),
   search: z.string().optional(),

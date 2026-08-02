@@ -109,9 +109,21 @@ export const cache = {
 
 // Cache key generators
 export const cacheKeys = {
-  project: (slug: string): string => `project:${slug}`,
+  // The `v2` on the detail keys is a deliberate namespace bump, not decoration.
+  //
+  // Until this change, getProjectBySlug/getArticleBySlug were
+  // `findUnique({ where: { slug } })` with no status predicate and cached
+  // whatever they found -- including DRAFT and ARCHIVED rows. Those entries
+  // live in redis with a one-hour TTL and are NOT removed by a deploy, so
+  // without a new namespace the first request after this ships could still be
+  // served an unpublished payload straight from the old key.
+  //
+  // The status re-check in the services is the real fix, since it also covers
+  // entries written after the deploy; this just makes the carry-over window
+  // zero instead of one TTL.
+  project: (slug: string): string => `project:v2:${slug}`,
   projectList: (page: number, filters: string): string => `projects:list:${page}:${filters}`,
-  article: (slug: string): string => `article:${slug}`,
+  article: (slug: string): string => `article:v2:${slug}`,
   articleList: (page: number, filters: string): string => `articles:list:${page}:${filters}`,
   analytics: (type: string, date: string): string => `analytics:${type}:${date}`,
   settings: (key: string): string => `settings:${key}`,

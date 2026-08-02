@@ -60,7 +60,12 @@ async function warmupProjects(): Promise<void> {
           id: true,
           firstName: true,
           lastName: true,
-          email: true,
+          // NOT email. This payload is written straight into the same redis key
+          // the public detail route reads (cacheKeys.project/article), and the
+          // service's own query deliberately selects only id/name/avatar. It
+          // was masked while a broken response schema discarded the body; now
+          // that the body is serialized, warming the cache would publish the
+          // author's email address on a public endpoint.
         },
       },
       tags: {
@@ -103,7 +108,12 @@ async function warmupArticles(): Promise<void> {
           id: true,
           firstName: true,
           lastName: true,
-          email: true,
+          // NOT email. This payload is written straight into the same redis key
+          // the public detail route reads (cacheKeys.project/article), and the
+          // service's own query deliberately selects only id/name/avatar. It
+          // was masked while a broken response schema discarded the body; now
+          // that the body is serialized, warming the cache would publish the
+          // author's email address on a public endpoint.
         },
       },
       tags: {

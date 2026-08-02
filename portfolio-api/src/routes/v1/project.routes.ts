@@ -8,7 +8,8 @@ import { projectService } from '../../services/project.service.js';
 import type { PaginatedResponse, ProjectSummary, ProjectDetail } from '@portfolio/shared/types';
 import { paginatedResponse, successResponse } from '../../utils/response.js';
 import {
-  MAX_PAGE_SIZE,
+  clampLimit,
+  clampPage,
   projectQuerySchema,
   createProjectSchema,
   updateProjectSchema,
@@ -39,10 +40,11 @@ export function projectRoutes(app: FastifyInstance): void {
     async (request, _reply): Promise<PaginatedResponse<ProjectSummary>> => {
       const query = projectQuerySchema.parse(request.query);
       const result = await projectService.listProjects({
-        page: parseInt(query.page) || 1,
-        // Clamped: an unbounded limit is both a full-table read and, since limit
-        // joined the list cache key, an unbounded redis key-cardinality axis.
-        limit: Math.min(parseInt(query.limit) || 10, MAX_PAGE_SIZE),
+        // Both clamped. page and limit are the two cache-key axes an anonymous
+        // caller controls, and an unbounded page also overflows Prisma's
+        // 32-bit skip. See utils/validation.ts for the bounds.
+        page: clampPage(query.page),
+        limit: clampLimit(query.limit),
         featured: query.featured === 'true' ? true : query.featured === 'false' ? false : undefined,
         tag: query.tag,
         search: query.search,

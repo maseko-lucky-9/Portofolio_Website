@@ -65,9 +65,21 @@ describe('query schemas built by merging paginationSchema', () => {
     expect(projectQuerySchema.parse({}).sortOrder).toBe('desc');
   });
 
+  it('does not surface a caller-supplied status on the PUBLIC query schemas', () => {
+    // These schemas used to carry `status: z.enum([...]).optional()`, and the
+    // routes passed it straight into the Prisma where clause, so ?status=DRAFT
+    // returned unpublished content to anyone. Both the field and the plumbing
+    // are gone; zod strips the unknown key, so nothing downstream can read it
+    // back even if a route re-declares it in its Fastify querystring schema.
+    const article = articleQuerySchema.parse({ status: 'DRAFT' }) as Record<string, unknown>;
+    const project = projectQuerySchema.parse({ status: 'DRAFT' }) as Record<string, unknown>;
+
+    expect(article).not.toHaveProperty('status');
+    expect(project).not.toHaveProperty('status');
+  });
+
   it('leaves optional filters undefined rather than defaulting them', () => {
     const q = articleQuerySchema.parse({});
-    expect(q.status).toBeUndefined();
     expect(q.tag).toBeUndefined();
     expect(q.search).toBeUndefined();
     // sortBy stays undefined, which is why the routes keep `|| 'createdAt'`

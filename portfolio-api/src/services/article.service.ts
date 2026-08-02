@@ -128,16 +128,23 @@ export class ArticleService {
     const cacheKey = cacheKeys.article(slug);
     const cached = await cache.get(cacheKey);
     if (cached) {
-      if (trackView) {
-        // Increment views in background
-        prisma.article
-          .update({
-            where: { slug },
-            data: { views: { increment: 1 } },
-          })
-          .catch(() => {});
+      // Access control is re-checked here because this branch returns before
+      // the status-filtered findFirst below -- see the fuller note in
+      // project.service.ts. A cached entry is data, not an authorisation.
+      if ((cached as { status?: string }).status === ArticleStatus.PUBLISHED) {
+        if (trackView) {
+          // Increment views in background
+          prisma.article
+            .update({
+              where: { slug },
+              data: { views: { increment: 1 } },
+            })
+            .catch(() => {});
+        }
+        return cached;
       }
-      return cached;
+
+      await cache.del(cacheKey);
     }
 
     // Fetch from database

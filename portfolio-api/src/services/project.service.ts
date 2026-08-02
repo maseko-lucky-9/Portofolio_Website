@@ -147,16 +147,40 @@ export class ProjectService {
     const cacheKey = cacheKeys.project(slug);
     const cached = await cache.get(cacheKey);
     if (cached) {
-      if (trackView) {
-        // Increment views in background
-        prisma.project
-          .update({
-            where: { slug },
-            data: { views: { increment: 1 } },
-          })
-          .catch(() => {});
+      // The cache is NOT authoritative for an access-control decision.
+      //
+      // This branch returns BEFORE the findFirst below, so without this check
+      // the status filter is bypassed entirely whenever an entry exists --
+      // proven with a slug that had no database row at all: planting a DRAFT
+      // payload under its key made the public endpoint answer 200 with the
+      // draft body.
+      //
+      // Three ways an unpublished payload gets here, none hypothetical:
+      //   1. entries written by the previous code, which cached drafts (the
+      //      v2 namespace bump in redis.ts closes that one on deploy);
+      //   2. an admin unpublishing a row while a read is in flight, so the
+      //      invalidation runs before this request's cache.set writes the
+      //      pre-unpublish snapshot back;
+      //   3. delPattern('projects:*') failing, which leaves the DB DRAFT and
+      //      the cache PUBLISHED.
+      // A re-check at the point of use covers all three; chasing every writer
+      // does not.
+      if ((cached as { status?: string }).status === ProjectStatus.PUBLISHED) {
+        if (trackView) {
+          // Increment views in background
+          prisma.project
+            .update({
+              where: { slug },
+              data: { views: { increment: 1 } },
+            })
+            .catch(() => {});
+        }
+        return cached;
       }
-      return cached;
+
+      // Self-heal rather than merely ignore, so one bad entry does not force a
+      // database read on every subsequent request for the whole TTL.
+      await cache.del(cacheKey);
     }
 
     // Fetch from database
