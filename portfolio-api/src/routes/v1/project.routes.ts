@@ -1,13 +1,17 @@
 import { FastifyInstance } from 'fastify';
-import { authenticate, requireRole } from '../../middleware/auth.middleware.js';
+import {
+  authenticate,
+  requireRole,
+  type AuthenticatedRequest,
+} from '../../middleware/auth.middleware.js';
 import { projectService } from '../../services/project.service.js';
-import type {
-  PaginatedResponse,
-  ProjectSummary,
-  ProjectDetail,
-  QueryParams,
-} from '@portfolio/shared/types';
+import type { PaginatedResponse, ProjectSummary, ProjectDetail } from '@portfolio/shared/types';
 import { paginatedResponse, successResponse } from '../../utils/response.js';
+import {
+  projectQuerySchema,
+  createProjectSchema,
+  updateProjectSchema,
+} from '../../utils/validation.js';
 
 export function projectRoutes(app: FastifyInstance): void {
   // List projects (public)
@@ -42,21 +46,19 @@ export function projectRoutes(app: FastifyInstance): void {
       },
     },
     async (request, _reply): Promise<PaginatedResponse<ProjectSummary>> => {
-      const query = request.query as QueryParams;
+      const query = projectQuerySchema.parse(request.query);
       const result = await projectService.listProjects({
-        page: parseInt(query.page?.toString() || '1'),
-        limit: parseInt(query.limit?.toString() || '10'),
-        status: query.status as any,
-        featured:
-          (query.featured as any) === 'true'
-            ? true
-            : (query.featured as any) === 'false'
-              ? false
-              : undefined,
+        page: parseInt(query.page) || 1,
+        limit: parseInt(query.limit) || 10,
+        status: query.status,
+        featured: query.featured === 'true' ? true : query.featured === 'false' ? false : undefined,
         tag: query.tag,
         search: query.search,
-        sortBy: (query.sortBy as string) || 'createdAt',
-        sortOrder: (query.sortOrder as 'asc' | 'desc') || 'desc',
+        // `||`, not `??`, for the same reason as article.routes.ts: `?sortBy=`
+        // parses to '' and would reach Prisma as an empty orderBy key.
+        sortBy: query.sortBy || 'createdAt',
+        // paginationSchema supplies the 'desc' default.
+        sortOrder: query.sortOrder,
       });
 
       const baseUrl = `${request.protocol}://${request.headers.host || request.hostname}/api/v1/projects`;
@@ -145,8 +147,11 @@ export function projectRoutes(app: FastifyInstance): void {
       },
     },
     async (request, reply) => {
-      const data = request.body as any;
-      const project = await projectService.createProject(data, (request as any).user?.id || '');
+      const data = createProjectSchema.parse(request.body);
+      // The `authenticate` preHandler guarantees `user`; the previous `|| ''`
+      // fallback would only have sent an empty authorId into a foreign key.
+      const { user } = request as AuthenticatedRequest;
+      const project = await projectService.createProject(data, user.id);
       return reply.code(201).send(project);
     }
   );
@@ -200,7 +205,7 @@ export function projectRoutes(app: FastifyInstance): void {
     },
     async (request) => {
       const { id } = request.params as { id: string };
-      const data = request.body as any;
+      const data = updateProjectSchema.parse(request.body);
       const project = await projectService.updateProject(id, data);
       return project;
     }

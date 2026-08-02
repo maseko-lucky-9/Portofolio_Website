@@ -2,6 +2,13 @@ import { FastifyInstance } from 'fastify';
 import { authenticate, requireRole } from '../../middleware/auth.middleware.js';
 import { contactService } from '../../services/contact.service.js';
 import { newsletterService } from '../../services/newsletter.service.js';
+import {
+  contactSchema,
+  contactSubmissionsQuerySchema,
+  newsletterSchema,
+  newsletterSubscribersQuerySchema,
+  updateSubmissionStatusSchema,
+} from '../../utils/validation.js';
 
 export function contactRoutes(app: FastifyInstance): void {
   // Submit contact form
@@ -35,7 +42,7 @@ export function contactRoutes(app: FastifyInstance): void {
       },
     },
     async (request) => {
-      const data = request.body as any;
+      const data = contactSchema.parse(request.body);
       const metadata = {
         ip: request.ip,
         userAgent: request.headers['user-agent'],
@@ -66,7 +73,7 @@ export function contactRoutes(app: FastifyInstance): void {
       },
     },
     async (request) => {
-      const query = request.query as any;
+      const query = contactSubmissionsQuerySchema.parse(request.query);
       const result = await contactService.getSubmissions({
         page: parseInt(query.page) || 1,
         limit: parseInt(query.limit) || 20,
@@ -102,7 +109,7 @@ export function contactRoutes(app: FastifyInstance): void {
     },
     async (request) => {
       const { id } = request.params as { id: string };
-      const { status, notes } = request.body as any;
+      const { status, notes } = updateSubmissionStatusSchema.parse(request.body);
       const result = await contactService.updateSubmissionStatus(id, status, notes);
       return result;
     }
@@ -136,7 +143,7 @@ export function contactRoutes(app: FastifyInstance): void {
       },
     },
     async (request) => {
-      const data = request.body as any;
+      const data = newsletterSchema.parse(request.body);
       const result = await newsletterService.subscribe(data);
       return result;
     }
@@ -204,7 +211,7 @@ export function contactRoutes(app: FastifyInstance): void {
       },
     },
     async (request) => {
-      const query = request.query as any;
+      const query = newsletterSubscribersQuerySchema.parse(request.query);
       const result = await newsletterService.getSubscribers({
         page: parseInt(query.page) || 1,
         limit: parseInt(query.limit) || 20,

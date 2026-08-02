@@ -1,8 +1,63 @@
+import { z } from 'zod';
 import { prisma } from '../config/database.js';
 import { config } from '../config/index.js';
 import { ApiError } from '../utils/errors.js';
 import { generateTokens } from '../middleware/auth.middleware.js';
-import { Role } from '@prisma/client';
+import { Prisma, Role } from '@prisma/client';
+
+// ==========================================
+// Provider wire formats
+// ==========================================
+// These describe what GitHub and Google send us, not what this API accepts, so
+// they live here rather than in utils/validation.ts.
+//
+// Deliberately non-strict: zod strips unknown keys, so a provider adding a
+// field cannot break login. Fields are required only where the code below
+// actually depends on the value -- everything the response returns beyond that
+// is the provider's business.
+
+// GitHub and Google return the same four fields we care about from their token
+// endpoints, so one schema covers both. Success and failure are distinguished
+// by which keys are present, hence everything is optional and the callers
+// branch explicitly.
+const oauthTokenResponseSchema = z.object({
+  access_token: z.string().min(1).optional(),
+  refresh_token: z.string().min(1).optional(),
+  error: z.string().optional(),
+  error_description: z.string().optional(),
+});
+
+// GitHub sends `id` as a number; the caller stringifies it.
+// `email` is null when the user keeps their address private.
+//
+// `avatar_url` is deliberately NOT constrained with .url(): it is cosmetic, and
+// a provider changing its shape must not be able to fail an otherwise valid
+// login. `email` is constrained, because it becomes the account identity.
+const githubUserSchema = z.object({
+  id: z.union([z.number(), z.string()]),
+  email: z.string().email().nullable().optional(),
+  name: z.string().nullable().optional(),
+  avatar_url: z.string().nullable().optional(),
+  login: z.string().nullable().optional(),
+});
+
+const githubEmailsSchema = z.array(
+  z.object({
+    email: z.string().email(),
+    primary: z.boolean().optional(),
+    verified: z.boolean().optional(),
+  })
+);
+
+// `picture` is cosmetic and unconstrained for the same reason as GitHub's
+// avatar_url above.
+const googleUserSchema = z.object({
+  id: z.string().min(1),
+  email: z.string().email(),
+  verified_email: z.boolean().optional(),
+  name: z.string().nullable().optional(),
+  picture: z.string().nullable().optional(),
+});
 
 // OAuth provider types
 export type OAuthProvider = 'github' | 'google';
@@ -15,6 +70,14 @@ export interface OAuthProfile {
   avatarUrl?: string;
   username?: string;
 }
+
+// The `profile` column is Json. OAuthProfile is an interface, and TypeScript
+// does not give interfaces an implicit index signature, so it is not directly
+// assignable to Prisma.InputJsonObject even though its shape is valid JSON.
+// Spreading into an object literal yields an anonymous type that is -- which
+// keeps this a real conversion rather than an assertion that silences the
+// checker without proving anything.
+const toJsonProfile = (profile: OAuthProfile): Prisma.InputJsonObject => ({ ...profile });
 
 export class OAuthService {
   /**
@@ -77,7 +140,7 @@ export class OAuthService {
           accessToken,
           refreshToken,
           email: profile.email,
-          profile: profile as any,
+          profile: toJsonProfile(profile),
           updatedAt: new Date(),
         },
       });
@@ -115,7 +178,7 @@ export class OAuthService {
             email: profile.email,
             accessToken,
             refreshToken,
-            profile: profile as any,
+            profile: toJsonProfile(profile),
           },
         });
 
@@ -147,7 +210,7 @@ export class OAuthService {
                 email: profile.email,
                 accessToken,
                 refreshToken,
-                profile: profile as any,
+                profile: toJsonProfile(profile),
               },
             },
           },
@@ -224,7 +287,7 @@ export class OAuthService {
         email: profile.email,
         accessToken,
         refreshToken,
-        profile: profile as any,
+        profile: toJsonProfile(profile),
       },
     });
   }
@@ -376,10 +439,20 @@ export class OAuthService {
           }),
         });
 
-        const githubData = (await githubResponse.json()) as any;
+        const githubData = oauthTokenResponseSchema.parse(await githubResponse.json());
 
         if (githubData.error) {
-          throw ApiError.badRequest(`GitHub OAuth error: ${githubData.error_description}`);
+          // error_description is optional in the OAuth 2.0 error response, so
+          // fall back to the error code rather than interpolating `undefined`.
+          throw ApiError.badRequest(
+            `GitHub OAuth error: ${githubData.error_description ?? githubData.error}`
+          );
+        }
+
+        // A response carrying neither `error` nor `access_token` previously
+        // stored `undefined` as the account's access token.
+        if (!githubData.access_token) {
+          throw ApiError.badRequest('GitHub OAuth error: response contained no access token');
         }
 
         return {
@@ -403,10 +476,16 @@ export class OAuthService {
           }),
         });
 
-        const googleData = (await googleResponse.json()) as any;
+        const googleData = oauthTokenResponseSchema.parse(await googleResponse.json());
 
         if (googleData.error) {
-          throw ApiError.badRequest(`Google OAuth error: ${googleData.error_description}`);
+          throw ApiError.badRequest(
+            `Google OAuth error: ${googleData.error_description ?? googleData.error}`
+          );
+        }
+
+        if (!googleData.access_token) {
+          throw ApiError.badRequest('Google OAuth error: response contained no access token');
         }
 
         return {
@@ -433,7 +512,7 @@ export class OAuthService {
           },
         });
 
-        const githubUser = (await githubUserResponse.json()) as any;
+        const githubUser = githubUserSchema.parse(await githubUserResponse.json());
 
         // Get primary email
         const githubEmailResponse = await fetch('https://api.github.com/user/emails', {
@@ -443,15 +522,37 @@ export class OAuthService {
           },
         });
 
-        const githubEmails = (await githubEmailResponse.json()) as any[];
-        const primaryEmail = githubEmails.find((e: any) => e.primary)?.email || githubUser.email;
+        // This endpoint returns an OBJECT, not an array, when the token lacks
+        // the user:email scope. safeParse treats that as "no addresses
+        // available" and falls through to the public profile email below,
+        // rather than throwing on what is a recoverable condition.
+        const githubEmails = githubEmailsSchema.safeParse(await githubEmailResponse.json());
+
+        // Only a verified address is acceptable. handleOAuthCallback looks an
+        // incoming profile up by email and links it to any existing user with
+        // that address, so honouring an unverified one would let anyone who
+        // adds a victim's address to their own GitHub account take over the
+        // victim's login here.
+        const primaryEmail =
+          (githubEmails.success
+            ? githubEmails.data.find((e) => e.primary && e.verified)?.email
+            : undefined) ?? githubUser.email;
+
+        // Previously this produced `email: undefined` against a declared
+        // `email: string`, which then reached prisma.user.create() as a null
+        // value for a non-null unique column.
+        if (!primaryEmail) {
+          throw ApiError.badRequest(
+            'GitHub returned no verified email address. Grant the user:email scope, or verify an address on your GitHub account.'
+          );
+        }
 
         return {
           id: String(githubUser.id),
           email: primaryEmail,
-          name: githubUser.name,
-          avatarUrl: githubUser.avatar_url,
-          username: githubUser.login,
+          name: githubUser.name ?? undefined,
+          avatarUrl: githubUser.avatar_url ?? undefined,
+          username: githubUser.login ?? undefined,
         };
       }
 
@@ -462,13 +563,19 @@ export class OAuthService {
           },
         });
 
-        const googleUser = (await googleUserResponse.json()) as any;
+        const googleUser = googleUserSchema.parse(await googleUserResponse.json());
+
+        // Same account-linking exposure as the GitHub branch. Google omits the
+        // field on some responses, so reject only an explicit `false`.
+        if (googleUser.verified_email === false) {
+          throw ApiError.badRequest('Google returned an unverified email address');
+        }
 
         return {
           id: googleUser.id,
           email: googleUser.email,
-          name: googleUser.name,
-          avatarUrl: googleUser.picture,
+          name: googleUser.name ?? undefined,
+          avatarUrl: googleUser.picture ?? undefined,
         };
       }
 

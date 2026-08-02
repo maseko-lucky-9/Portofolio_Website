@@ -1,5 +1,5 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
-import jwt from 'jsonwebtoken';
+import jwt, { type SignOptions } from 'jsonwebtoken';
 import { prisma } from '../config/database.js';
 import { config } from '../config/index.js';
 import { ApiError } from '../utils/errors.js';
@@ -46,12 +46,18 @@ export const generateTokens = (user: {
     type: 'refresh',
   };
 
+  // @types/jsonwebtoken types `expiresIn` as `ms.StringValue | number`, a
+  // template-literal union that a plain `string` from the env schema is not
+  // assignable to. Asserting to the real option type keeps the value checked
+  // against jsonwebtoken's own contract instead of switching checking off with
+  // `any`. `ms` is a transitive dependency, so index into SignOptions rather
+  // than importing its type directly.
   const accessToken = jwt.sign(accessPayload, config.auth.jwtSecret, {
-    expiresIn: config.auth.accessExpiry as any,
+    expiresIn: config.auth.accessExpiry as SignOptions['expiresIn'],
   });
 
   const refreshToken = jwt.sign(refreshPayload, config.auth.jwtSecret, {
-    expiresIn: config.auth.refreshExpiry as any,
+    expiresIn: config.auth.refreshExpiry as SignOptions['expiresIn'],
   });
 
   return { accessToken, refreshToken };
