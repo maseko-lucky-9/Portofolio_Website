@@ -44,7 +44,7 @@ export const createAuditLog = async (
 ): Promise<void> => {
   try {
     const user = (request as AuthenticatedRequest).user;
-    
+
     await prisma.auditLog.create({
       data: {
         action,
@@ -82,7 +82,11 @@ export const auditMiddleware = (action: AuditAction, entity: AuditEntity) => {
 
       if (id) {
         // Store entity ID for post-response audit logging
-        (request as FastifyRequest & { auditContext: { action: AuditAction; entity: AuditEntity; entityId: string } }).auditContext = {
+        (
+          request as FastifyRequest & {
+            auditContext: { action: AuditAction; entity: AuditEntity; entityId: string };
+          }
+        ).auditContext = {
           action,
           entity,
           entityId: id,
@@ -151,8 +155,12 @@ export const getAuditLogs = async (options: {
     prisma.auditLog.findMany({
       where,
       orderBy: { createdAt: 'desc' },
+      // `limit: 0` must mean "unset, use the default", not "return nothing": `??` would
+      // pass take: 0 to Prisma and silently return an empty page.
+      // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
       take: options.limit || 50,
-      skip: options.offset || 0,
+      // `??` here: offset 0 and offset undefined both resolve to 0, so it is equivalent.
+      skip: options.offset ?? 0,
       include: {
         user: {
           select: { email: true },

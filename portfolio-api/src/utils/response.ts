@@ -15,10 +15,7 @@ import type {
 // Success Response Helpers
 // ==========================================
 
-export function successResponse<T>(
-  data: T,
-  meta?: Partial<ResponseMeta>
-): ApiResponse<T> {
+export function successResponse<T>(data: T, meta?: Partial<ResponseMeta>): ApiResponse<T> {
   return {
     data,
     meta: {
@@ -66,7 +63,7 @@ function buildPageUrl(baseUrl: string | URL, page: number): string {
   } catch (error) {
     // Fallback if URL parsing fails
     const separator = baseUrl.toString().includes('?') ? '&' : '?';
-    return `${baseUrl}${separator}page=${page}`;
+    return `${baseUrl.toString()}${separator}page=${page}`;
   }
 }
 
@@ -125,6 +122,6 @@ export function isValidApiResponse<T>(value: unknown): value is ApiResponse<T> {
     typeof value === 'object' &&
     value !== null &&
     'data' in value &&
-    (!('meta' in value) || typeof (value as any).meta === 'object')
+    (!('meta' in value) || typeof (value as { meta?: unknown }).meta === 'object')
   );
 }

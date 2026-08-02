@@ -51,6 +51,16 @@ jobs:
         working-directory: ${{ env.WORKING_DIRECTORY }}
         run: npm install
 
+      # MUST run before ESLint and tsc, not after. Both are type-aware: without a
+      # generated client every Prisma type resolves to `any`, which inflated
+      # no-unsafe-* from 119 to 583 and made this job report 763 problems where
+      # the real count is 126. tsc was mis-ordered the same way and would fail
+      # with five TS2305 "has no exported member" errors -- never observed,
+      # because ESLint failed first and the job stopped.
+      - name: Generate Prisma Client
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: npm run db:generate
+
       - name: Run ESLint
         working-directory: ${{ env.WORKING_DIRECTORY }}
         run: npm run lint
@@ -59,16 +69,29 @@ jobs:
         working-directory: ${{ env.WORKING_DIRECTORY }}
         run: npx tsc --noEmit
 
+      # tsconfig.json excludes tests/ (so a stray test file can never be emitted
+      # into dist/), which meant the suites had NO type checking at all -- vitest
+      # transpiles via esbuild, which strips types without checking them. This
+      # covers src/ plus all 18 test files.
+      - name: Run TypeScript type check (tests)
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: npm run typecheck:test
+
       - name: Check code formatting
         working-directory: ${{ env.WORKING_DIRECTORY }}
-        run: npx prettier --check "src/**/*.ts"
+        run: npx prettier --check "{src,tests}/**/*.ts"
 
-      - name: Generate Prisma Client
-        working-directory: ${{ env.WORKING_DIRECTORY }}
-        run: npm run db:generate
-
+      # This step had never executed before: ESLint failed ahead of it on every
+      # run since 2026-03-17, so the job always stopped first. It needs
+      # DATABASE_URL only because schema.prisma declares `url = env("DATABASE_URL")`
+      # and prisma parses the datasource block before validating -- it does NOT
+      # connect, and this job has no postgres service. Hence a credential-free
+      # placeholder rather than a copy of the test DSN the jobs with a real
+      # service container use.
       - name: Validate Prisma Schema
         working-directory: ${{ env.WORKING_DIRECTORY }}
+        env:
+          DATABASE_URL: postgresql://localhost:5432/schema_validation_only
         run: npx prisma validate
 
   # ==============================================
@@ -216,6 +239,23 @@ jobs:
         env:
           DATABASE_URL: postgresql://test_user:test_password@localhost:5432/portfolio_test
 
+      # Seeds BEFORE the e2e run, not after: the pagination spec needs a known
+      # non-empty dataset, and `db:verify` (below) asserts 1 admin / 5 tags /
+      # 1 project / 1 project-tag link, none of which a migrate-only database
+      # has. The seed is idempotent, so re-running this step is a no-op.
+      # Run TWICE on purpose. Idempotence is the seed's headline property and
+      # the reason it replaced a seed.js that opened with 17 deleteMany() calls
+      # -- and `db:seed` is chained from `setup:dev` against a developer's live
+      # local database. A re-added delete, or an `update: {...}` that rotates
+      # the admin password, would otherwise ship green. A non-idempotent seed
+      # fails here on a unique constraint, or leaves duplicate rows that the
+      # db:verify step below catches against its tags 5-50 bound.
+      - name: Seed database (twice, to prove idempotence)
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: npm run db:seed && npm run db:seed
+        env:
+          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/portfolio_test
+
       - name: Run integration tests
         working-directory: ${{ env.WORKING_DIRECTORY }}
         run: npm run test:e2e
@@ -223,7 +263,7 @@ jobs:
           NODE_ENV: test
           DATABASE_URL: postgresql://test_user:test_password@localhost:5432/portfolio_test
           REDIS_URL: redis://localhost:6379
-          JWT_SECRET: test-jwt-secret-key-for-ci
+          JWT_SECRET: test-jwt-secret-key-for-ci-not-a-real-secret
           JWT_ACCESS_EXPIRY: 15m
           JWT_REFRESH_EXPIRY: 7d
 
@@ -360,7 +400,7 @@ jobs:
           PORT: 3000
           DATABASE_URL: postgresql://test_user:test_password@localhost:5432/portfolio_test
           REDIS_URL: redis://localhost:6379
-          JWT_SECRET: test-jwt-secret-key-for-ci
+          JWT_SECRET: test-jwt-secret-key-for-ci-not-a-real-secret
           JWT_ACCESS_EXPIRY: 15m
           JWT_REFRESH_EXPIRY: 7d
           DEMO_MODE: true
@@ -372,7 +412,7 @@ jobs:
 
       - name: Validate OpenAPI schema
         run: |
-          curl -f http://localhost:3000/api/v1/documentation/json > openapi.json
+          curl -f http://localhost:3000/api-docs/json > openapi.json
           echo "OpenAPI schema generated successfully"
 
       - name: Stop API server

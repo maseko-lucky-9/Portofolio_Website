@@ -3,12 +3,15 @@ import { checkDatabaseHealth } from '../../config/database.js';
 import { redis } from '../../config/redis.js';
 import { getRealtimeVisitors } from '../../middleware/analytics.middleware.js';
 
-export async function healthRoutes(app: FastifyInstance): Promise<void> {
+export function healthRoutes(app: FastifyInstance): void {
   // Basic health check
   app.get('/', async () => {
     const [dbHealthy, redisHealthy] = await Promise.all([
       checkDatabaseHealth(),
-      redis.ping().then(() => true).catch(() => false),
+      redis
+        .ping()
+        .then(() => true)
+        .catch(() => false),
     ]);
 
     const healthy = dbHealthy && redisHealthy;
@@ -29,10 +32,13 @@ export async function healthRoutes(app: FastifyInstance): Promise<void> {
   // Detailed health check
   app.get('/detailed', async () => {
     const startTime = Date.now();
-    
+
     const [dbHealthy, redisHealthy, realtimeVisitors] = await Promise.all([
       checkDatabaseHealth(),
-      redis.ping().then(() => true).catch(() => false),
+      redis
+        .ping()
+        .then(() => true)
+        .catch(() => false),
       getRealtimeVisitors(),
     ]);
 
@@ -64,16 +70,18 @@ export async function healthRoutes(app: FastifyInstance): Promise<void> {
   // Readiness probe
   app.get('/ready', async (_request, reply) => {
     const healthy = await checkDatabaseHealth();
-    
+
     if (healthy) {
       return { success: true, data: { ready: true } };
     }
-    
-    reply.code(503).send({ success: false, error: { code: 'NOT_READY', message: 'Service not ready' } });
+
+    return reply
+      .code(503)
+      .send({ success: false, error: { code: 'NOT_READY', message: 'Service not ready' } });
   });
 
   // Liveness probe
-  app.get('/live', async () => {
+  app.get('/live', () => {
     return { success: true, data: { alive: true } };
   });
 }

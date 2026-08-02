@@ -11,7 +11,6 @@ export class ProjectService {
   async listProjects(options: {
     page: number;
     limit: number;
-    status?: ProjectStatus;
     featured?: boolean;
     category?: string;
     tag?: string;
@@ -19,12 +18,27 @@ export class ProjectService {
     sortBy?: string;
     sortOrder?: 'asc' | 'desc';
   }): Promise<PaginatedResult<unknown>> {
-    const { page, limit, status, featured, category, tag, search, sortBy = 'createdAt', sortOrder = 'desc' } = options;
+    const {
+      page,
+      limit,
+      featured,
+      category,
+      tag,
+      search,
+      sortBy = 'createdAt',
+      sortOrder = 'desc',
+    } = options;
 
     // Build cache key
+    //
+    // `limit` MUST be part of the key. It was omitted, so every page-1 request
+    // with the same filters shared one entry regardless of page size: whoever
+    // asked first decided how many items everyone else got, and the returned
+    // meta.limit contradicted the caller's own query string. Caught by
+    // tests/e2e/projects.test.ts asserting meta.limit reflects ?limit=.
     const cacheKey = cacheKeys.projectList(
       page,
-      JSON.stringify({ status, featured, category, tag, search, sortBy, sortOrder })
+      JSON.stringify({ limit, featured, category, tag, search, sortBy, sortOrder })
     );
 
     // Try cache first
@@ -35,7 +49,20 @@ export class ProjectService {
 
     // Build where clause
     const where = {
-      ...(status && { status }),
+      // PUBLISHED only, and NOT caller-controllable.
+      //
+      // This is the public listing route -- there is no authenticated one. The
+      // `status` filter that used to sit here was honoured straight from the
+      // query string, so `?status=DRAFT` returned unannounced work to anyone
+      // who asked. It was invisible on the article side only because a broken
+      // response schema was discarding the payload; removing that schema is
+      // what exposed it, so the filter is fixed here rather than re-masked.
+      //
+      // If an authenticated listing is ever added, it must NOT simply pass a
+      // status through: cacheKeys.projectList has no privilege dimension, so an
+      // admin's draft-inclusive page would be cached and then served to the
+      // next anonymous caller.
+      status: ProjectStatus.PUBLISHED,
       ...(featured !== undefined && { featured }),
       ...(category && { category }),
       ...(tag && {
@@ -120,19 +147,56 @@ export class ProjectService {
     const cacheKey = cacheKeys.project(slug);
     const cached = await cache.get(cacheKey);
     if (cached) {
-      if (trackView) {
-        // Increment views in background
-        prisma.project.update({
-          where: { slug },
-          data: { views: { increment: 1 } },
-        }).catch(() => {});
+      // The cache is NOT authoritative for an access-control decision.
+      //
+      // This branch returns BEFORE the findFirst below, so without this check
+      // the status filter is bypassed entirely whenever an entry exists --
+      // proven with a slug that had no database row at all: planting a DRAFT
+      // payload under its key made the public endpoint answer 200 with the
+      // draft body.
+      //
+      // What this DOES catch: any entry whose stored payload is itself marked
+      // unpublished -- which is what the previous code cached, because it read
+      // with findUnique and no status predicate. Those entries survive a
+      // deploy (one-hour TTL), which is why the v2 namespace bump in redis.ts
+      // exists alongside this.
+      //
+      // What it does NOT catch, stated plainly so nobody reads this as more
+      // than it is: an entry cached WHILE the row was still published and only
+      // unpublished afterwards. Its payload says PUBLISHED, so this check
+      // passes it. That window is closed by invalidation
+      // (cache.del(cacheKeys.project(slug)) in updateProject/deleteProject),
+      // not here -- and if that del is skipped or fails, the stale PUBLISHED
+      // snapshot is served for the remainder of the TTL. Narrowing it further
+      // needs a second delayed invalidation or a shorter detail TTL; both are
+      // real work and neither belongs in this change.
+      if ((cached as { status?: string }).status === ProjectStatus.PUBLISHED) {
+        if (trackView) {
+          // Increment views in background
+          prisma.project
+            .update({
+              where: { slug },
+              data: { views: { increment: 1 } },
+            })
+            .catch(() => {});
+        }
+        return cached;
       }
-      return cached;
+
+      // Self-heal rather than merely ignore, so one bad entry does not force a
+      // database read on every subsequent request for the whole TTL.
+      await cache.del(cacheKey);
     }
 
     // Fetch from database
-    const project = await prisma.project.findUnique({
-      where: { slug },
+    //
+    // findFirst, not findUnique: the lookup is now (slug + status) and only
+    // `slug` is unique, so findUnique cannot express it. Returning null for a
+    // DRAFT is deliberate -- the route turns that into a 404, which does not
+    // confirm that the slug exists. A 403 would leak exactly the thing being
+    // protected.
+    const project = await prisma.project.findFirst({
+      where: { slug, status: ProjectStatus.PUBLISHED },
       include: {
         tags: {
           select: {

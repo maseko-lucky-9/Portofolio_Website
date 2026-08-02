@@ -3,6 +3,56 @@ import { z } from 'zod';
 // Common validation schemas
 
 // Pagination
+/**
+ * Upper bound on a caller-supplied page size for the PUBLIC list routes.
+ *
+ * `limit` is validated only as `/^\d+$/`, so without a ceiling `?limit=1000000`
+ * reaches Prisma as `take: 1000000` and buffers the whole table in memory. That
+ * became sharper once `limit` joined the project/article list cache keys: every
+ * distinct value mints its own redis entry holding a full page, so an unbounded
+ * `limit` is also an unbounded key-cardinality axis on a shared cache -- and
+ * @fastify/rate-limit is backed by that same redis with `skipOnError: true`,
+ * so pressure there fails the limiter open.
+ *
+ * Matches the existing `maxLimit` in getPaginationParams (utils/errors.ts).
+ */
+export const MAX_PAGE_SIZE = 100;
+
+/**
+ * Upper bound on the page number.
+ *
+ * `skip: (page - 1) * limit` is handed to Prisma, whose Int is 32-bit, so
+ * `?page=1000000000` overflows and raises a PrismaClientValidationError --
+ * which errorHandler has no branch for, making it a 500 on a public endpoint.
+ * `?page=99999999999999999999` parses to 1e20 and is worse, which is why the
+ * clamp below tests isSafeInteger rather than just taking a min.
+ *
+ * `page` is also the FIRST component of the list cache key, so leaving it
+ * unbounded would keep the key-cardinality hole open even with MAX_PAGE_SIZE
+ * in place. 10_000 pages x 100 per page is far past anything this dataset will
+ * hold, so the bound costs nothing real.
+ */
+export const MAX_PAGE = 10_000;
+
+/**
+ * Parse a page-number query parameter into a bounded, safe integer.
+ * Anything unusable falls back to page 1 rather than reaching Prisma as NaN.
+ */
+export function clampPage(raw: string | undefined): number {
+  const parsed = parseInt(raw ?? '', 10);
+  if (!Number.isSafeInteger(parsed) || parsed < 1) return 1;
+  return Math.min(parsed, MAX_PAGE);
+}
+
+/**
+ * Parse a page-size query parameter into a bounded, safe integer.
+ */
+export function clampLimit(raw: string | undefined, fallback = 10): number {
+  const parsed = parseInt(raw ?? '', 10);
+  if (!Number.isSafeInteger(parsed) || parsed < 1) return fallback;
+  return Math.min(parsed, MAX_PAGE_SIZE);
+}
+
 export const paginationSchema = z.object({
   page: z.string().regex(/^\d+$/).default('1'),
   limit: z.string().regex(/^\d+$/).default('10'),
@@ -53,7 +103,11 @@ export const createProjectSchema = z.object({
 export const updateProjectSchema = createProjectSchema.partial();
 
 export const projectFiltersSchema = z.object({
-  status: z.enum(['DRAFT', 'PUBLISHED', 'ARCHIVED']).optional(),
+  // No `status` here on purpose. These are the PUBLIC filter schemas, and the
+  // services now hard-code PUBLISHED. Leaving an optional status would read as
+  // a supported public filter and invite someone to re-plumb it into the where
+  // clause -- which is exactly the leak this change closed. An authenticated
+  // listing needs its own schema AND a privilege dimension on the cache key.
   featured: z.string().optional(),
   category: z.string().optional(),
   tag: z.string().optional(),
@@ -89,7 +143,7 @@ export const createArticleSchema = z.object({
 export const updateArticleSchema = createArticleSchema.partial();
 
 export const articleFiltersSchema = z.object({
-  status: z.enum(['DRAFT', 'PUBLISHED', 'ARCHIVED']).optional(),
+  // No `status` -- see projectFiltersSchema.
   featured: z.string().optional(),
   tag: z.string().optional(),
   search: z.string().optional(),
@@ -127,6 +181,37 @@ export const contactSchema = z.object({
   phone: z.string().max(50).optional(),
   subject: z.string().max(300).optional(),
   message: z.string().min(10).max(5000),
+});
+
+// Admin listing queries for contact + newsletter.
+//
+// Declared standalone rather than merged with paginationSchema on purpose:
+// these routes default `limit` to 20, and merging would silently substitute
+// paginationSchema's 10.
+export const contactSubmissionsQuerySchema = z.object({
+  page: z.string().regex(/^\d+$/).default('1'),
+  limit: z.string().regex(/^\d+$/).default('20'),
+  // Mirrors the ContactStatus enum in prisma/schema.prisma. contact.service.ts
+  // casts this straight to ContactStatus, so an unconstrained string reaches
+  // Prisma and fails the enum check as a 500; constraining it here makes that
+  // cast true and turns a bad value into a 400.
+  status: z.enum(['NEW', 'READ', 'REPLIED', 'ARCHIVED', 'SPAM']).optional(),
+});
+
+export const updateSubmissionStatusSchema = z.object({
+  status: z.enum(['NEW', 'READ', 'REPLIED', 'ARCHIVED', 'SPAM']),
+  notes: z.string().max(5000).optional(),
+});
+
+export const newsletterSubscribersQuerySchema = z.object({
+  page: z.string().regex(/^\d+$/).default('1'),
+  limit: z.string().regex(/^\d+$/).default('20'),
+  // The handler reads `active`, but the route's Fastify querystring schema
+  // declared `status` (which nothing reads) and omitted `active` entirely.
+  // Because index.ts sets ajv `removeAdditional: 'all'`, an undeclared key is
+  // DELETED before the handler runs -- so this filter never worked. Declaring
+  // it in zod alone cannot fix that; the route schema had to be corrected too.
+  active: z.string().optional(),
 });
 
 // Newsletter schemas

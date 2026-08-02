@@ -1,0 +1,32 @@
+{
+  // Type-checking config for the test suites, which the build config cannot
+  // cover: tsconfig.json has `rootDir: "./src"` and `exclude: ["tests", ...]`
+  // precisely so a stray tests/**/*.ts can never be emitted into dist/.
+  //
+  // Without this file, tests/ got NO static analysis at all -- vitest transpiles
+  // via esbuild, which strips types without checking them, and eslint's
+  // type-aware rules need the file to belong to a project. A wrong generic, an
+  // unawaited promise in a beforeAll, or a floating inject() produced no
+  // diagnostic and surfaced only if the failing line happened to run.
+  //
+  // noEmit, so this can never produce build output.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "rootDir": ".",
+    "declaration": false,
+    "declarationMap": false
+  },
+  // The vitest.*.config.ts files are deliberately NOT included. Both use
+  // options vitest accepts at runtime but that the installed config types do
+  // not describe (`coverage.all`, `poolOptions`), so including them would fail
+  // this check over a types-lag issue in files that demonstrably work.
+  //
+  // Scope note: this wires TYPE-CHECKING for tests/ only. Widening `lint` to
+  // cover tests/ is a separate change -- it surfaces 68 pre-existing errors in
+  // the unit suites written in sweep 6 (overwhelmingly `no-unsafe-member-access`
+  // on the `any` that res.json() returns), which is its own diff, not a
+  // drive-by on this one.
+  "include": ["src/**/*", "tests/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

@@ -12,7 +12,7 @@ import { config } from '../config/index.js';
 
 export async function registerRoutes(app: FastifyInstance): Promise<void> {
   // Root endpoint
-  app.get('/', async () => ({
+  app.get('/', () => ({
     success: true,
     data: {
       name: config.appName,

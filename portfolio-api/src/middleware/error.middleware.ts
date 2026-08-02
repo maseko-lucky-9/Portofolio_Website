@@ -6,22 +6,18 @@ import { createLogger } from '../config/logger.js';
 const logger = createLogger('error-handler');
 
 // Global error handler
-export const errorHandler = (
-  error: Error,
-  _request: FastifyRequest,
-  reply: FastifyReply
-): void => {
+export const errorHandler = (error: Error, _request: FastifyRequest, reply: FastifyReply): void => {
   // Log the error
   logger.error({ error, stack: error.stack }, 'Request error');
 
   // Handle ApiError
   if (error instanceof ApiError) {
-    reply.status(error.statusCode).send({
+    void reply.status(error.statusCode).send({
       success: false,
       error: {
         code: error.code,
         message: error.message,
-        ...(error.details && { details: error.details }),
+        ...(error.details ? { details: error.details } : {}),
       },
     });
     return;
@@ -34,7 +30,7 @@ export const errorHandler = (
       message: e.message,
     }));
 
-    reply.status(400).send({
+    void reply.status(400).send({
       success: false,
       error: {
         code: 'VALIDATION_ERROR',
@@ -48,10 +44,10 @@ export const errorHandler = (
   // Handle Prisma errors
   if (error.constructor.name === 'PrismaClientKnownRequestError') {
     const prismaError = error as unknown as { code: string; meta?: { target?: string[] } };
-    
+
     switch (prismaError.code) {
       case 'P2002': // Unique constraint violation
-        reply.status(409).send({
+        void reply.status(409).send({
           success: false,
           error: {
             code: 'CONFLICT',
@@ -61,7 +57,7 @@ export const errorHandler = (
         });
         return;
       case 'P2025': // Record not found
-        reply.status(404).send({
+        void reply.status(404).send({
           success: false,
           error: {
             code: 'NOT_FOUND',
@@ -76,7 +72,7 @@ export const errorHandler = (
 
   // Handle JWT errors
   if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
-    reply.status(401).send({
+    void reply.status(401).send({
       success: false,
       error: {
         code: 'UNAUTHORIZED',
@@ -87,7 +83,7 @@ export const errorHandler = (
   }
 
   // Default 500 error
-  reply.status(500).send({
+  void reply.status(500).send({
     success: false,
     error: {
       code: 'INTERNAL_ERROR',
@@ -99,11 +95,12 @@ export const errorHandler = (
 // Validation middleware factory
 export const validate = <T>(schema: ZodSchema<T>, source: 'body' | 'query' | 'params' = 'body') => {
   return async (request: FastifyRequest, _reply: FastifyReply): Promise<void> => {
-    const data = source === 'body' ? request.body : source === 'query' ? request.query : request.params;
-    
+    const data =
+      source === 'body' ? request.body : source === 'query' ? request.query : request.params;
+
     try {
       const validated = schema.parse(data);
-      
+
       // Attach validated data back to request
       if (source === 'body') {
         request.body = validated;
@@ -128,7 +125,7 @@ export const validate = <T>(schema: ZodSchema<T>, source: 'body' | 'query' | 'pa
 
 // Not found handler
 export const notFoundHandler = (_request: FastifyRequest, reply: FastifyReply): void => {
-  reply.status(404).send({
+  void reply.status(404).send({
     success: false,
     error: {
       code: 'NOT_FOUND',

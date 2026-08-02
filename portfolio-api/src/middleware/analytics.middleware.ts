@@ -1,4 +1,5 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
+import { z } from 'zod';
 import UAParser from 'ua-parser-js';
 import { prisma } from '../config/database.js';
 import { redis } from '../config/redis.js';
@@ -8,6 +9,22 @@ import { generateSessionId, generateVisitorId } from '../utils/crypto.js';
 import { EventType, Prisma } from '@prisma/client';
 
 const logger = createLogger('analytics');
+
+// What getGeoFromIp stores in Redis and returns: all three fields always set.
+const geoSchema = z.object({
+  country: z.string(),
+  region: z.string(),
+  city: z.string(),
+});
+
+// What ipinfo.io actually sends. Every field is optional -- the API omits
+// `city` and `region` for some IP ranges, which the caller already defaults to
+// 'Unknown'.
+const ipinfoResponseSchema = z.object({
+  country: z.string().optional(),
+  region: z.string().optional(),
+  city: z.string().optional(),
+});
 
 // Analytics context attached to request
 export interface AnalyticsContext {
@@ -49,7 +66,9 @@ const getOrCreateIds = (request: FastifyRequest): { sessionId: string; visitorId
 };
 
 // Parse user agent
-const parseUserAgent = (ua: string): {
+const parseUserAgent = (
+  ua: string
+): {
   browser: string;
   browserVersion: string;
   os: string;
@@ -140,7 +159,23 @@ export const getGeoFromIp = async (
   const cacheKey = `geo:${ip}`;
   const cached = await redis.get(cacheKey);
   if (cached) {
-    return JSON.parse(cached);
+    // Redis hands back a string this process wrote days ago -- or that some
+    // other writer did. Treat anything that does not round-trip as a cache
+    // miss and fall through to the live lookup, rather than letting a poisoned
+    // or legacy entry throw inside analytics middleware.
+    let raw: unknown = null;
+    try {
+      raw = JSON.parse(cached) as unknown;
+    } catch {
+      // fall through to the live lookup
+    }
+
+    const parsed = geoSchema.safeParse(raw);
+    if (parsed.success) {
+      return parsed.data;
+    }
+
+    logger.warn({ ip }, 'Discarding unparseable cached geo entry');
   }
 
   try {
@@ -149,8 +184,10 @@ export const getGeoFromIp = async (
       return null;
     }
 
-    const data = (await response.json()) as { country: string; region: string; city: string };
+    const data = ipinfoResponseSchema.parse(await response.json());
     const geo = {
+      // `||`, not `??`: ipinfo returns '' as well as omitting the key, and an
+      // empty string is not a usable region name.
       country: data.country || 'Unknown',
       region: data.region || 'Unknown',
       city: data.city || 'Unknown',

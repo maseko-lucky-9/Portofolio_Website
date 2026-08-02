@@ -2,7 +2,7 @@ import { prisma } from '../config/database.js';
 import { cache, cacheKeys } from '../config/redis.js';
 import { config } from '../config/index.js';
 import { ApiError, PaginatedResult, paginate } from '../utils/errors.js';
-import { parseMarkdown, getReadingTime, getWordCount } from '../utils/markdown.js';
+import { parseMarkdown } from '../utils/markdown.js';
 import { ArticleStatus } from '@prisma/client';
 import { CreateArticleInput, UpdateArticleInput } from '../utils/validation.js';
 
@@ -11,19 +11,30 @@ export class ArticleService {
   async listArticles(options: {
     page: number;
     limit: number;
-    status?: ArticleStatus;
     featured?: boolean;
     tag?: string;
     search?: string;
     sortBy?: string;
     sortOrder?: 'asc' | 'desc';
   }): Promise<PaginatedResult<unknown>> {
-    const { page, limit, status, featured, tag, search, sortBy = 'createdAt', sortOrder = 'desc' } = options;
+    const {
+      page,
+      limit,
+      featured,
+      tag,
+      search,
+      sortBy = 'createdAt',
+      sortOrder = 'desc',
+    } = options;
 
     // Build cache key
+    //
+    // `limit` MUST be part of the key -- same defect as project.service.ts:
+    // without it, two requests differing only in page size collide and the
+    // second silently receives the first one's page.
     const cacheKey = cacheKeys.articleList(
       page,
-      JSON.stringify({ status, featured, tag, search, sortBy, sortOrder })
+      JSON.stringify({ limit, featured, tag, search, sortBy, sortOrder })
     );
 
     // Try cache first
@@ -34,7 +45,11 @@ export class ArticleService {
 
     // Build where clause
     const where = {
-      ...(status && { status }),
+      // PUBLISHED only, and NOT caller-controllable -- see the matching note in
+      // project.service.ts. Until the response-schema fix in this change, this
+      // endpoint returned `{"meta":{}}` for every request, which is the only
+      // reason the missing filter never showed up as a leak.
+      status: ArticleStatus.PUBLISHED,
       ...(featured !== undefined && { featured }),
       ...(tag && {
         tags: {
@@ -113,19 +128,32 @@ export class ArticleService {
     const cacheKey = cacheKeys.article(slug);
     const cached = await cache.get(cacheKey);
     if (cached) {
-      if (trackView) {
-        // Increment views in background
-        prisma.article.update({
-          where: { slug },
-          data: { views: { increment: 1 } },
-        }).catch(() => {});
+      // Access control is re-checked here because this branch returns before
+      // the status-filtered findFirst below -- see the fuller note in
+      // project.service.ts. A cached entry is data, not an authorisation.
+      if ((cached as { status?: string }).status === ArticleStatus.PUBLISHED) {
+        if (trackView) {
+          // Increment views in background
+          prisma.article
+            .update({
+              where: { slug },
+              data: { views: { increment: 1 } },
+            })
+            .catch(() => {});
+        }
+        return cached;
       }
-      return cached;
+
+      await cache.del(cacheKey);
     }
 
     // Fetch from database
-    const article = await prisma.article.findUnique({
-      where: { slug },
+    //
+    // findFirst, not findUnique: the lookup is now (slug + status) and only
+    // `slug` is unique. A DRAFT yields null and the route answers 404, which
+    // does not confirm the slug exists.
+    const article = await prisma.article.findFirst({
+      where: { slug, status: ArticleStatus.PUBLISHED },
       include: {
         tags: {
           select: {

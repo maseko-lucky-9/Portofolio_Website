@@ -1,5 +1,6 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
-import jwt from 'jsonwebtoken';
+import { randomUUID } from 'crypto';
+import jwt, { type SignOptions } from 'jsonwebtoken';
 import { prisma } from '../config/database.js';
 import { config } from '../config/index.js';
 import { ApiError } from '../utils/errors.js';
@@ -24,7 +25,11 @@ export interface AuthenticatedRequest extends FastifyRequest {
 }
 
 // Generate tokens
-export const generateTokens = (user: { id: string; email: string; role: Role }): {
+export const generateTokens = (user: {
+  id: string;
+  email: string;
+  role: Role;
+}): {
   accessToken: string;
   refreshToken: string;
 } => {
@@ -42,12 +47,36 @@ export const generateTokens = (user: { id: string; email: string; role: Role }):
     type: 'refresh',
   };
 
+  // @types/jsonwebtoken types `expiresIn` as `ms.StringValue | number`, a
+  // template-literal union that a plain `string` from the env schema is not
+  // assignable to. `ms` is a transitive dependency, so index into SignOptions
+  // rather than importing its type directly.
+  //
+  // This is still an assertion, and it proves nothing about the value: it only
+  // narrows the escape hatch from `any` (which disables checking on the whole
+  // surrounding expression) to the one option type. JWT_ACCESS_EXPIRY is an
+  // unconstrained z.string() in config/index.ts, so a malformed value such as
+  // '15minutes' makes ms() return undefined and jwt.sign emit a token with NO
+  // exp claim. Constraining the env schema is the real fix and is deliberately
+  // left out of this PR -- config failures process.exit(1) at import, which is
+  // too blunt a change to bundle with a lint sweep.
   const accessToken = jwt.sign(accessPayload, config.auth.jwtSecret, {
-    expiresIn: config.auth.accessExpiry as any,
+    expiresIn: config.auth.accessExpiry as SignOptions['expiresIn'],
   });
 
+  // `jwtid` is load-bearing, not decorative. refreshPayload is fully
+  // deterministic ({userId, email, role, type}), and the only other claim
+  // jwt.sign adds is `iat`, which has SECOND granularity. Two refresh tokens
+  // minted for the same user within the same second were therefore byte
+  // identical -- and RefreshToken.token is @unique, so storeRefreshToken()
+  // threw P2002 and the request came back 409 CONFLICT.
+  //
+  // That broke login outright: register() issues a token, so logging in
+  // immediately afterwards (or twice in quick succession) always collided.
+  // Found by tests/e2e/auth.test.ts.
   const refreshToken = jwt.sign(refreshPayload, config.auth.jwtSecret, {
-    expiresIn: config.auth.refreshExpiry as any,
+    expiresIn: config.auth.refreshExpiry as SignOptions['expiresIn'],
+    jwtid: randomUUID(),
   });
 
   return { accessToken, refreshToken };
@@ -178,7 +207,7 @@ export const requirePermission = (...permissions: string[]) => {
 
     // Check if user has required permissions
     const hasRequiredPermission = permissions.some((perm) =>
-      userPermissions.map(p => p.toString()).includes(perm)
+      userPermissions.map((p) => p.toString()).includes(perm)
     );
 
     if (!hasRequiredPermission) {

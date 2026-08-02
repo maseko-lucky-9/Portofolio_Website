@@ -9,18 +9,21 @@ import crypto from 'crypto';
 const oauthStates = new Map<string, { provider: OAuthProvider; createdAt: number }>();
 
 // Clean up old states every 5 minutes
-setInterval(() => {
-  const now = Date.now();
-  const fiveMinutes = 5 * 60 * 1000;
-  
-  for (const [state, data] of oauthStates.entries()) {
-    if (now - data.createdAt > fiveMinutes) {
-      oauthStates.delete(state);
-    }
-  }
-}, 5 * 60 * 1000);
+setInterval(
+  () => {
+    const now = Date.now();
+    const fiveMinutes = 5 * 60 * 1000;
 
-export default async function oauthRoutes(fastify: FastifyInstance) {
+    for (const [state, data] of oauthStates.entries()) {
+      if (now - data.createdAt > fiveMinutes) {
+        oauthStates.delete(state);
+      }
+    }
+  },
+  5 * 60 * 1000
+);
+
+export default function oauthRoutes(fastify: FastifyInstance): void {
   /**
    * Initiate OAuth flow
    * GET /auth/oauth/:provider
@@ -57,7 +60,7 @@ export default async function oauthRoutes(fastify: FastifyInstance) {
     const authUrl = oauthService.getAuthorizationUrl(provider, state);
 
     // Redirect to OAuth provider
-    reply.redirect(authUrl);
+    return reply.redirect(authUrl);
   });
 
   /**
@@ -100,10 +103,7 @@ export default async function oauthRoutes(fastify: FastifyInstance) {
 
     try {
       // Exchange code for access token
-      const { accessToken, refreshToken } = await oauthService.exchangeCodeForToken(
-        provider,
-        code
-      );
+      const { accessToken, refreshToken } = await oauthService.exchangeCodeForToken(provider, code);
 
       // Get user profile from OAuth provider
       const profile = await oauthService.getOAuthProfile(provider, accessToken);
@@ -117,7 +117,7 @@ export default async function oauthRoutes(fastify: FastifyInstance) {
       );
 
       // Set cookies
-      reply.cookie('accessToken', result.accessToken, {
+      void reply.cookie('accessToken', result.accessToken, {
         httpOnly: true,
         secure: config.isProduction,
         sameSite: 'lax',
@@ -125,7 +125,7 @@ export default async function oauthRoutes(fastify: FastifyInstance) {
         maxAge: 15 * 60, // 15 minutes
       });
 
-      reply.cookie('refreshToken', result.refreshToken, {
+      void reply.cookie('refreshToken', result.refreshToken, {
         httpOnly: true,
         secure: config.isProduction,
         sameSite: 'lax',
@@ -136,8 +136,8 @@ export default async function oauthRoutes(fastify: FastifyInstance) {
       // Redirect to frontend
       const frontendUrl = config.cors.origin;
       const redirectPath = result.isNewUser ? '/welcome' : '/dashboard';
-      
-      reply.redirect(`${frontendUrl}${redirectPath}`);
+
+      return reply.redirect(`${frontendUrl}${redirectPath}`);
     } catch (error) {
       fastify.log.error({ err: error }, 'OAuth callback error');
       const frontendUrl = config.cors.origin;
@@ -174,24 +174,15 @@ export default async function oauthRoutes(fastify: FastifyInstance) {
       oauthStates.delete(state);
 
       // Exchange code for access token
-      const { accessToken, refreshToken } = await oauthService.exchangeCodeForToken(
-        provider,
-        code
-      );
+      const { accessToken, refreshToken } = await oauthService.exchangeCodeForToken(provider, code);
 
       // Get user profile from OAuth provider
       const profile = await oauthService.getOAuthProfile(provider, accessToken);
 
       // Link OAuth provider to authenticated user
-      await oauthService.linkOAuthProvider(
-        user.id,
-        provider,
-        profile,
-        accessToken,
-        refreshToken
-      );
+      await oauthService.linkOAuthProvider(user.id, provider, profile, accessToken, refreshToken);
 
-      reply.send({
+      return reply.send({
         success: true,
         message: `${provider} account linked successfully`,
       });
@@ -218,7 +209,7 @@ export default async function oauthRoutes(fastify: FastifyInstance) {
 
       await oauthService.unlinkOAuthProvider(user.id, provider as OAuthProvider);
 
-      reply.send({
+      return reply.send({
         success: true,
         message: `${provider} account unlinked successfully`,
       });
@@ -237,7 +228,7 @@ export default async function oauthRoutes(fastify: FastifyInstance) {
 
       const providers = await oauthService.getUserOAuthProviders(user.id);
 
-      reply.send({
+      return reply.send({
         providers,
       });
     }

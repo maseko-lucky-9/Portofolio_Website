@@ -7,12 +7,12 @@ const logger = createLogger('redis');
 // Create Redis client
 export const redis = new Redis(config.redis.url, {
   maxRetriesPerRequest: 3,
-  retryStrategy(times) {
+  retryStrategy(times: number): number {
     const delay = Math.min(times * 50, 2000);
     logger.warn({ times, delay }, 'Redis connection retry');
     return delay;
   },
-  reconnectOnError(err) {
+  reconnectOnError(err: Error): boolean {
     const targetErrors = ['READONLY', 'ECONNRESET', 'ETIMEDOUT'];
     return targetErrors.some((e) => err.message.includes(e));
   },
@@ -39,11 +39,7 @@ export const cache = {
   /**
    * Get cached value or compute and cache it
    */
-  async getOrSet<T>(
-    key: string,
-    fn: () => Promise<T>,
-    ttlSeconds: number = 3600
-  ): Promise<T> {
+  async getOrSet<T>(key: string, fn: () => Promise<T>, ttlSeconds: number = 3600): Promise<T> {
     const cached = await redis.get(key);
     if (cached) {
       logger.debug({ key }, 'Cache hit');
@@ -113,16 +109,28 @@ export const cache = {
 
 // Cache key generators
 export const cacheKeys = {
-  project: (slug: string) => `project:${slug}`,
-  projectList: (page: number, filters: string) => `projects:list:${page}:${filters}`,
-  article: (slug: string) => `article:${slug}`,
-  articleList: (page: number, filters: string) => `articles:list:${page}:${filters}`,
-  analytics: (type: string, date: string) => `analytics:${type}:${date}`,
-  settings: (key: string) => `settings:${key}`,
-  availability: () => 'availability',
-  rateLimit: (ip: string, endpoint: string) => `ratelimit:${ip}:${endpoint}`,
-  session: (id: string) => `session:${id}`,
-  codeExecution: (hash: string) => `code:${hash}`,
+  // The `v2` on the detail keys is a deliberate namespace bump, not decoration.
+  //
+  // Until this change, getProjectBySlug/getArticleBySlug were
+  // `findUnique({ where: { slug } })` with no status predicate and cached
+  // whatever they found -- including DRAFT and ARCHIVED rows. Those entries
+  // live in redis with a one-hour TTL and are NOT removed by a deploy, so
+  // without a new namespace the first request after this ships could still be
+  // served an unpublished payload straight from the old key.
+  //
+  // The status re-check in the services is the real fix, since it also covers
+  // entries written after the deploy; this just makes the carry-over window
+  // zero instead of one TTL.
+  project: (slug: string): string => `project:v2:${slug}`,
+  projectList: (page: number, filters: string): string => `projects:list:${page}:${filters}`,
+  article: (slug: string): string => `article:v2:${slug}`,
+  articleList: (page: number, filters: string): string => `articles:list:${page}:${filters}`,
+  analytics: (type: string, date: string): string => `analytics:${type}:${date}`,
+  settings: (key: string): string => `settings:${key}`,
+  availability: (): string => 'availability',
+  rateLimit: (ip: string, endpoint: string): string => `ratelimit:${ip}:${endpoint}`,
+  session: (id: string): string => `session:${id}`,
+  codeExecution: (hash: string): string => `code:${hash}`,
 };
 
 export default redis;

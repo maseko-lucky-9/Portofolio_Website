@@ -22,7 +22,7 @@ export const generateApiKey = (): { key: string; prefix: string; hash: string } 
   const secret = randomBytes(24).toString('hex');
   const key = `pk_${prefix}_${secret}`;
   const hash = createHash('sha256').update(key).digest('hex');
-  
+
   return { key, prefix: `pk_${prefix}`, hash };
 };
 
@@ -44,34 +44,33 @@ export const generateVisitorId = (): string => {
 // Simple encryption for sensitive data at rest
 const ALGORITHM = 'aes-256-gcm';
 const IV_LENGTH = 16;
-const TAG_LENGTH = 16;
 
 export const encrypt = (text: string, key: string = config.auth.jwtSecret): string => {
   const keyBuffer = createHash('sha256').update(key).digest();
   const iv = randomBytes(IV_LENGTH);
   const cipher = createCipheriv(ALGORITHM, keyBuffer, iv);
-  
+
   let encrypted = cipher.update(text, 'utf8', 'hex');
   encrypted += cipher.final('hex');
-  
+
   const authTag = cipher.getAuthTag();
-  
+
   return `${iv.toString('hex')}:${authTag.toString('hex')}:${encrypted}`;
 };
 
 export const decrypt = (encryptedText: string, key: string = config.auth.jwtSecret): string => {
   const keyBuffer = createHash('sha256').update(key).digest();
   const [ivHex, authTagHex, encrypted] = encryptedText.split(':');
-  
+
   const iv = Buffer.from(ivHex, 'hex');
   const authTag = Buffer.from(authTagHex, 'hex');
   const decipher = createDecipheriv(ALGORITHM, keyBuffer, iv);
-  
+
   decipher.setAuthTag(authTag);
-  
+
   let decrypted = decipher.update(encrypted, 'hex', 'utf8');
   decrypted += decipher.final('utf8');
-  
+
   return decrypted;
 };
 
@@ -80,11 +79,11 @@ export const generateSecureCode = (length: number = 6): string => {
   const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   let code = '';
   const bytes = randomBytes(length);
-  
+
   for (let i = 0; i < length; i++) {
     code += chars[bytes[i] % chars.length];
   }
-  
+
   return code;
 };
 

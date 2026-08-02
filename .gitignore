@@ -93,3 +93,21 @@ ruvector.db
 *.rvf
 *.rvf.lock
 agentdb.*
+
+# Local docker-compose port-remap overlay. Encodes THIS machine's port
+# conflicts with unrelated projects (personal-finance-analyzer holds
+# 5432/6379/3000, trading-bot holds 8080) — a fact about one laptop, not about
+# this repo. Committing it would bake another project's port claims into
+# shared config.
+docker-compose.ports.yml
+
+# Database dumps. backup-db.sh previously could not run at all (its shebang was
+# CRLF, so Linux rejected it); fixing that made it live, and its documented
+# invocation `./scripts/backup-db.sh -e prod` writes a full unencrypted pg_dump
+# containing password hashes, refresh tokens, OAuth tokens and IP addresses.
+# gitleaks cannot backstop this -- .dump and .sql.gz are compressed binary and
+# bcrypt hashes match no secret rule. Deliberately NOT ignoring bare *.sql:
+# prisma/migrations/**/migration.sql is tracked and must stay tracked.
+backups/
+*.sql.gz
+*.dump

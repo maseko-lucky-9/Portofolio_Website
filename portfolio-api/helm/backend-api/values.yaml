@@ -235,7 +235,6 @@ secrets:
   smtpPass: ""
   
   # Monitoring (optional)
-  sentryDsn: ""
   ipinfoToken: ""
 
 # Database migrations
