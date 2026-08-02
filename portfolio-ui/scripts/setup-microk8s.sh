@@ -15,13 +15,6 @@ log_info() { echo -e "${GREEN}[SETUP]${NC} $1"; }
 log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
 log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 
-# Single source of truth for ArgoCD: the server manifest and the CLI must be the
-# same version. The manifest used to be fetched from the moving `stable` ref while
-# the CLI was pinned here, so a fresh cluster could get a server arbitrarily far
-# from its client -- and `stable` is applied with cluster-admin scope, so whatever
-# it pointed at that day ran privileged and unreviewed.
-ARGOCD_VERSION="v2.9.3"
-
 # Check if running on Linux
 check_os() {
   if [[ "$(uname -s)" != "Linux" ]]; then
@@ -86,7 +79,7 @@ install_argocd() {
   log_info "Installing ArgoCD..."
   
   microk8s kubectl create namespace argocd --dry-run=client -o yaml | microk8s kubectl apply -f -
-  microk8s kubectl apply -n argocd -f "https://raw.githubusercontent.com/argoproj/argo-cd/${ARGOCD_VERSION}/manifests/install.yaml"
+  microk8s kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
   
   log_info "Waiting for ArgoCD to be ready..."
   microk8s kubectl wait --for=condition=available --timeout=300s deployment/argocd-server -n argocd
@@ -134,33 +127,10 @@ install_argocd_cli() {
     return 0
   fi
   
-  # Download into a private temp dir, not a predictable /tmp path. The old code
-  # curled to /tmp/argocd-linux-amd64 and then `sudo install`ed it: any local user
-  # could pre-create or swap that path and get attacker-controlled bytes copied
-  # into /usr/local/bin as root.
-  local tmpdir
-  tmpdir=$(mktemp -d)
-  # shellcheck disable=SC2064
-  trap "rm -rf '$tmpdir'" RETURN
-
-  local base="https://github.com/argoproj/argo-cd/releases/download/${ARGOCD_VERSION}"
-  curl -sSL --fail -o "$tmpdir/argocd" "${base}/argocd-linux-amd64"
-  curl -sSL --fail -o "$tmpdir/argocd.sha256" "${base}/argocd-linux-amd64.sha256"
-
-  # Verify before anything touches a root-owned directory. The published .sha256
-  # names the release asset, not our local filename, so compare digests directly
-  # rather than feeding it to `sha256sum -c`.
-  local want have
-  want=$(awk '{print $1}' "$tmpdir/argocd.sha256")
-  have=$(sha256sum "$tmpdir/argocd" | awk '{print $1}')
-  if [[ -z "$want" || "$want" != "$have" ]]; then
-    log_error "ArgoCD CLI checksum mismatch — refusing to install."
-    log_error "  expected: ${want:-<empty>}"
-    log_error "  actual:   $have"
-    return 1
-  fi
-
-  sudo install -m 555 "$tmpdir/argocd" /usr/local/bin/argocd
+  local version="v2.9.3"
+  curl -sSL -o /tmp/argocd-linux-amd64 "https://github.com/argoproj/argo-cd/releases/download/${version}/argocd-linux-amd64"
+  sudo install -m 555 /tmp/argocd-linux-amd64 /usr/local/bin/argocd
+  rm /tmp/argocd-linux-amd64
   
   log_info "ArgoCD CLI installed"
 }

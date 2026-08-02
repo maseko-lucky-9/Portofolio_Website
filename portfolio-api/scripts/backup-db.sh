@@ -22,7 +22,11 @@ ENVIRONMENT="dev"
 # put full unencrypted pg_dumps -- password hashes, refresh tokens, OAuth tokens,
 # IP addresses -- inside the git working tree, one `git add -A` away from being
 # pushed to GitHub. Override with -d if you want them somewhere else.
-BACKUP_DIR="${BACKUP_DIR:-$HOME/portfolio-backups}"
+# ${HOME:?} rather than $HOME: this script is `set -e` only, with no `nounset`, so
+# an unset HOME would silently resolve to "/portfolio-backups" -- harmless as a
+# normal user (mkdir fails), but under sudo/systemd it succeeds and scatters
+# database dumps across the filesystem root.
+BACKUP_DIR="${BACKUP_DIR:-${HOME:?HOME is unset; pass -d with an explicit backup directory}/portfolio-backups}"
 RETENTION_DAYS=7
 
 # Print colored message
@@ -41,13 +45,16 @@ Create database backup.
 
 Options:
     -e, --environment     Target environment (dev/staging/prod)
-    -d, --directory       Backup directory (default: ./backups)
+    -d, --directory       Backup directory (default: \$HOME/portfolio-backups)
+                          Must be outside the repository -- dumps contain
+                          password hashes and OAuth tokens. Also settable via
+                          the BACKUP_DIR environment variable.
     -r, --retention       Retention days (default: 7)
     -h, --help            Show this help message
 
 Examples:
     $0 -e prod
-    $0 -e staging -d /backups -r 30
+    $0 -e staging -d /var/backups/portfolio -r 30
 
 EOF
     exit 1
