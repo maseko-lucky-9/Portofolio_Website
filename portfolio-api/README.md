@@ -189,9 +189,21 @@ npm test
 # Run tests with coverage
 npm run test:coverage
 
-# Run E2E tests
+# Run E2E tests (needs a live postgres + redis, and a DISPOSABLE database)
+createdb portfolio_e2e
+export DATABASE_URL="postgresql://localhost:5432/portfolio_e2e"
+export REDIS_URL="redis://localhost:6379"
+export JWT_SECRET="local-e2e-secret-at-least-32-characters"
+npm run db:migrate:prod && npm run db:seed
 npm run test:e2e
 \`\`\`
+
+> **The E2E suite refuses to run against a database whose name does not look
+> disposable.** It registers users, promotes one to ADMIN, and deletes rows, so
+> it only accepts a name matching `test` or `e2e` (CI uses `portfolio_test`).
+> Without an explicit `DATABASE_URL` it would otherwise pick up `.env`, which
+> points at your real development database. Override with
+> `E2E_ALLOW_ANY_DATABASE=1` only if you are certain.
 
 ## 🏗️ Project Structure
 

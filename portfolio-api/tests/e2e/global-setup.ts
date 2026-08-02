@@ -10,6 +10,15 @@ import dotenv from 'dotenv';
 //
 // dotenv does not overwrite an already-set variable, so an explicit export
 // still wins, exactly as it does for the app.
+//
+// Captured BEFORE dotenv runs, deliberately. This is the escape hatch for a
+// guard whose whole job is to stop the suite promoting an account to ADMIN and
+// deleting rows in a live database. Reading it after dotenv would let it be
+// parked permanently in a .env file, silently disabling the guard for every
+// future run -- including after DATABASE_URL later changes to point somewhere
+// that matters. An override this consequential should have to be typed.
+const ALLOW_ANY_DATABASE = process.env.E2E_ALLOW_ANY_DATABASE === '1';
+
 dotenv.config();
 
 /**
@@ -54,7 +63,7 @@ const NAMESPACES = [
  * Set E2E_ALLOW_ANY_DATABASE=1 to override deliberately.
  */
 function assertDisposableDatabase(): void {
-  if (process.env.E2E_ALLOW_ANY_DATABASE === '1') return;
+  if (ALLOW_ANY_DATABASE) return;
 
   const url = process.env.DATABASE_URL;
   if (!url) {
