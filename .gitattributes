@@ -1,0 +1,25 @@
+# Line endings are normalized to LF in the repository and on checkout.
+#
+# Before this file existed, 191 tracked files were committed with CRLF, which cost
+# portfolio-api 5,725 ESLint errors (`prettier/prettier`: Delete ␍) and left every
+# shell script with a broken shebang. `.prettierrc` already declares
+# "endOfLine": "lf", so prettier and git agree.
+*                text=auto eol=lf
+
+# Shell scripts are stated explicitly rather than left to the default above.
+# This is the case where getting it wrong is functional, not cosmetic: a CRLF
+# shebang fails on Linux with `bad interpreter: /bin/bash^M`.
+*.sh             text eol=lf
+
+# Binary formats. `* text=auto` would very likely classify these correctly on its
+# own; an explicit guard is the difference between "probably fine" and "cannot be
+# corrupted by a future renormalization".
+*.png            binary
+*.jpg            binary
+*.jpeg           binary
+*.webp           binary
+*.avif           binary
+*.ico            binary
+*.pdf            binary
+*.woff           binary
+*.woff2          binary
