@@ -1,7 +1,7 @@
 # Custom domain wiring — thulanimaseko.co.za → Worker
 
-The site's canonical references (`index.html`, JSON-LD, Plausible) all
-point at `https://thulanimaseko.co.za/`, but the Worker currently only
+The site's canonical references (`index.html`, JSON-LD, `scripts/seo/routes.mjs`)
+all point at `https://thulanimaseko.co.za/`, but the Worker currently only
 serves from `thulani-portfolio.masekotlg.workers.dev`.
 
 **Registrar:** GoDaddy, permanently. Cloudflare Registrar does not support
@@ -96,17 +96,39 @@ Cloudflare's "Edit Cloudflare Workers" template: it bundles account-wide
 `Workers KV:Edit`, granting write access to the `KB` namespace that holds the CV
 and screening brief.
 
-## Step 7 — Analytics: none, deliberately
+## Step 7 — Analytics: self-hosted Umami
 
-There is nothing to do here. Plausible was removed on 2026-07-31 — the site had
-never been registered against a Plausible account, so it recorded nothing, and
-Plausible Cloud is a paid subscription that wasn't worth carrying for a personal
-portfolio.
+Plausible was removed on 2026-07-31 (never registered against an account, so it
+recorded nothing, and Cloud is paid). It was replaced on 2026-08-01 by **Umami
+self-hosted on the homelab cluster**, reached over a dedicated Cloudflare Tunnel
+at `t.thulanimaseko.co.za`. No cookies, no third-party processor, data retained
+indefinitely in our own Postgres.
 
-The site now ships **no third-party scripts at all**, which is why the Worker's
-CSP `script-src` is `'self'`-only. Re-adding any analytics means touching three
-places plus the CSP — see the comment in `portfolio-ui/index.html` where the tag
-used to be.
+Setup lives in the other repo — `homelab-infra/apps/umami/README.md` — and must
+be done **first**: the tunnel has to answer before the site PR merges, or every
+visitor's browser logs a failed script load.
+
+On this side there are four touch points, and missing any one of them fails
+silently:
+
+| Where | What |
+| --- | --- |
+| `portfolio-ui/scripts/seo/routes.mjs` | `ANALYTICS_ORIGIN`, `ANALYTICS_WEBSITE_ID`, `analyticsTags()` — feeds all generated pages |
+| `portfolio-ui/index.html` | hand-written copy of the tags (this file is not generated) |
+| `portfolio-ui/src/worker.ts` | the origin in **both** `script-src` and `connect-src` |
+| `lighthouserc.json` | `blockedUrlPatterns`, so LHCI does not depend on homelab uptime |
+
+`src/seo/domainConsistency.test.ts` enforces the first three against each other,
+including that the website id is a real UUID rather than the shipped placeholder.
+
+DNS: the tunnel's `cloudflared tunnel route dns` creates a proxied CNAME for
+`t.thulanimaseko.co.za`. That is one level deep, so Cloudflare's free Universal
+SSL wildcard (`*.thulanimaseko.co.za`) covers it — see the HSTS note in
+`worker.ts` for why depth matters here.
+
+⚠️ Also add a **WAF Rate Limiting Rule** scoped to that hostname (Step 8). The
+ingest endpoint is an unauthenticated public write, and the free plan allows
+exactly one such rule for the whole zone.
 
 ## Step 8 — WAF rules (last)
 

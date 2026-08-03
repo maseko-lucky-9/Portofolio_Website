@@ -5,6 +5,11 @@
 //
 // Keep this lean: every byte added ships on every blog/answers page.
 
+// Analytics tags are imported rather than re-declared: unlike SITE_ORIGIN below,
+// there is no reason for a third independent copy, and a drifted website-id fails
+// silently (Umami 400s the beacon and nothing on the page reacts).
+import { analyticsTags } from './routes.mjs';
+
 const SITE_ORIGIN = 'https://thulanimaseko.co.za';
 
 // Schema builders re-implemented here as plain JS (src/seo/schemaBuilders.ts
@@ -254,6 +259,7 @@ export function renderPage(args) {
 
     <style>${INLINE_CSS}</style>
 
+    ${analyticsTags()}
   </head>
   <body>
     <header class="site">
@@ -344,6 +350,8 @@ export function renderIndex(kind, posts) {
       main.article ul li a:hover { color: var(--accent); }
       main.article ul li p { margin: 6px 0 0; color: var(--muted); }
     </style>
+
+    ${analyticsTags()}
   </head>
   <body>
     <header class="site">

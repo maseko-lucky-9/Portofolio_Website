@@ -154,18 +154,37 @@
     }
     </script>
 
-    <!-- No analytics. Plausible was removed 2026-07-31: the site was never
-         registered against a Plausible account, so it recorded nothing, and
-         Plausible Cloud is a paid subscription that was not worth carrying
-         for a personal portfolio. Removing it also drops the last
-         third-party origin from the CSP (see src/worker.ts) and one blocking
-         DNS lookup per visit.
+    <!-- Analytics — self-hosted Umami on the homelab, reached over a Cloudflare
+         Tunnel. First-party in the sense that matters: own domain, own server,
+         own database, no third-party processor, no cookies, no consent banner.
+         (Plausible was removed 2026-07-31 — never registered, so it recorded
+         nothing, and Cloud is paid.)
 
-         If analytics are wanted later, the useful signal is referrer data —
-         which channel a recruiter arrived from. Re-adding means: the script
-         tag here, the same tag in scripts/seo/page-template.mjs (twice, for
-         generated pages), and the third-party origin back in worker.ts's CSP
-         script-src + connect-src. -->
+         This is a hand-written FOURTH copy of the tag: index.html is not
+         produced by any script. The generated /blog, /answers and /projects
+         pages get theirs from analyticsTags() in scripts/seo/routes.mjs.
+         domainConsistency.test.ts cross-checks the two.
+
+         `data-domains` makes the tracker no-op anywhere except the live site,
+         so dev, preview and Lighthouse runs never pollute the data.
+
+         Both origins below are already permitted by the CSP in src/worker.ts —
+         change one without the other and the browser silently refuses to load
+         the tracker or to send the beacon.
+
+         No integrity="sha384-..." on the tracker deliberately: this is not a
+         third-party CDN but our own Umami instance, and its script.js is
+         rewritten by the container's `update-tracker` step on every boot and
+         every version bump. A pinned SRI hash would break analytics silently on
+         the next upgrade, trading a real availability failure for a threat we
+         already control the server for. -->
+    <script
+      defer
+      src="https://t.thulanimaseko.co.za/script.js"
+      data-website-id="ed688935-e9e1-4bb3-ac52-b3eb8d09d7c4"
+      data-domains="thulanimaseko.co.za,www.thulanimaseko.co.za"
+    ></script>
+    <script type="module" src="/outbound.js"></script>
 
     <!-- Fonts are self-hosted via @fontsource (see src/index.css).
          Google Fonts CDN links removed to eliminate third-party round-trip

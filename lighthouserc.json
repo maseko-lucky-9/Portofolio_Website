@@ -16,6 +16,7 @@
       "settings": {
         "preset": "desktop",
         "throttlingMethod": "simulate",
+        "blockedUrlPatterns": ["https://t.thulanimaseko.co.za/**"],
         "onlyCategories": [
           "performance",
           "accessibility",
