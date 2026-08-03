@@ -45,7 +45,7 @@ export const ANALYTICS_ORIGIN = "https://t.thulanimaseko.co.za";
 // domainConsistency.test.ts asserts this is a real UUID, so CI stays red until
 // the value is filled in. Shipping the placeholder would make Umami reject every
 // beacon with a 400 that nothing on the site surfaces.
-export const ANALYTICS_WEBSITE_ID = "SET_ME_AFTER_UMAMI_FIRST_RUN";
+export const ANALYTICS_WEBSITE_ID = "ed688935-e9e1-4bb3-ac52-b3eb8d09d7c4";
 
 // Hostnames the tracker is allowed to report from. Umami compares this list
 // against `location.hostname` exactly — no www-stripping, no suffix matching.
