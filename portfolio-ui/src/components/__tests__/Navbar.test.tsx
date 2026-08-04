@@ -58,4 +58,19 @@ describe("Navbar", () => {
     // At least the theme toggle button and mobile menu button should exist
     expect(buttons.length).toBeGreaterThanOrEqual(2);
   });
+
+  it("keeps the mobile drawer out of document flow", () => {
+    renderNavbar();
+    // In normal flow this ~366px drawer is part of the fixed header's box,
+    // making the header 438px tall on a phone (52% of a 390x844 screen, 77% at
+    // 320px) — its blurred scrim buries every section title and its
+    // pointer-events swallow taps across the top half of the page.
+    // jsdom has no layout engine, so the class contract is the only thing
+    // assertable here; e2e/mobile-layout.spec.ts asserts the real height.
+    // Queried by test id, not role: both <nav>s expose the navigation role and
+    // the closed drawer is aria-hidden, so a role query returns the desktop nav.
+    const drawer = screen.getByTestId("mobile-drawer");
+    expect(drawer.className).toContain("absolute");
+    expect(drawer.className).toContain("top-full");
+  });
 });

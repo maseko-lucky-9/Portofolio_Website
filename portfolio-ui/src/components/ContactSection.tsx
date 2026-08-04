@@ -238,7 +238,11 @@ export function ContactSection() {
       ref={rootRef}
       id="contact"
       aria-labelledby="contact-heading"
-      className="py-20 section-mesh"
+      // overflow-hidden matches Skills/Services/Experience. Without it the
+      // reveal animation's initial translateX(20px) on a full-width card
+      // pushes 4px past the viewport on WebKit before the reveal fires —
+      // enough for a real horizontal scroll on iOS Safari.
+      className="py-20 section-mesh overflow-hidden"
     >
       <div className="section-container">
         {/* Section Header */}
@@ -317,7 +321,7 @@ export function ContactSection() {
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label={label}
-                        className="social-link w-10 h-10"
+                        className="social-link w-11 h-11 md:w-10 md:h-10"
                       >
                         <Icon className="w-5 h-5" />
                       </a>

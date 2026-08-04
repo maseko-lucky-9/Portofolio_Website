@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { EASE_FN, useReducedMotion } from "@/lib/motion";
 import { useAnime } from "@/lib/use-anime";
+import { scrollToSection as scrollTo } from "@/lib/scroll-to-section";
 
 const navLinks = [
   { href: "#about", label: "About" },
@@ -40,7 +41,7 @@ export function Navbar() {
   }, []);
 
   const scrollToSection = (href: string) => {
-    document.querySelector(href)?.scrollIntoView({ behavior: "smooth" });
+    scrollTo(href);
     setIsMobileMenuOpen(false);
   };
 
@@ -186,7 +187,7 @@ export function Navbar() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="relative rounded-xl w-9 h-9"
+                className="relative rounded-xl w-11 h-11 md:w-9 md:h-9"
                 aria-label="Toggle theme"
               >
                 <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
@@ -209,7 +210,7 @@ export function Navbar() {
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden rounded-xl w-9 h-9 relative"
+            className="md:hidden rounded-xl w-11 h-11 relative"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
             aria-expanded={isMobileMenuOpen}
@@ -239,14 +240,22 @@ export function Navbar() {
 
       {/* Mobile navigation drawer — always rendered; opacity + pointer-events
           gated by isMobileMenuOpen so screen-readers and tab-focus skip it
-          when closed. */}
+          when closed.
+
+          MUST stay absolutely positioned. In normal flow this 366px drawer is
+          part of the fixed header's box, making the header 438px tall on every
+          phone — half the screen — with its blurred scrim burying section
+          titles and its pointer-events swallowing every tap in the top half.
+          `md:hidden` makes these classes inert at >=768px, so desktop is
+          unaffected. */}
       <nav
         ref={drawerRef}
+        data-testid="mobile-drawer"
         aria-hidden={!isMobileMenuOpen}
-        className="md:hidden"
+        className="md:hidden absolute inset-x-0 top-full"
         style={{
           transformOrigin: "top center",
-          maxHeight: "90vh",
+          maxHeight: "calc(100svh - 6rem)",
           overflowY: "auto",
           opacity: 0,
           pointerEvents: isMobileMenuOpen ? "auto" : "none",

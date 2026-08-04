@@ -3,6 +3,7 @@ import { CheckCircle2, ArrowRight, Server, Cloud } from "lucide-react";
 import { AnimatedBrackets } from "@/components/icons/animated";
 
 import { revealOnScroll, useAnime } from "@/lib/use-anime";
+import { scrollToSection } from "@/lib/scroll-to-section";
 
 interface Service {
   id: string;
@@ -132,7 +133,7 @@ export function ServicesSection() {
               <article
                 key={service.id}
                 data-anime
-                className={`relative rounded-2xl border bg-card p-8 flex flex-col gap-6 transition-all duration-300 hover:-translate-y-1.5 ${service.accent}`}
+                className={`relative rounded-2xl border bg-card p-6 md:p-8 flex flex-col gap-6 transition-all duration-300 hover:-translate-y-1.5 ${service.accent}`}
                 style={{
                   boxShadow: "var(--shadow-md)",
                   borderColor: "oklch(var(--border))",
@@ -207,7 +208,7 @@ export function ServicesSection() {
             className="btn-hero-secondary btn-green inline-flex items-center gap-2"
             onClick={(e) => {
               e.preventDefault();
-              document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
+              scrollToSection("#contact");
             }}
           >
             Get in touch

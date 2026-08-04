@@ -12,7 +12,10 @@ test.describe("Navigation", () => {
 
   test("navbar links scroll to correct sections", async ({ page }) => {
     // Desktop nav (hidden md:flex) is display:none on mobile. Clicking hidden
-    // buttons is a no-op. This behaviour is covered by the mobile menu test.
+    // buttons is a no-op. The mobile equivalent — tapping a drawer link and
+    // asserting the page actually scrolls to the target — lives in
+    // mobile-layout.spec.ts. (The "mobile menu opens" test below only checks
+    // that the link text is visible; it never clicks one.)
     // Vacuous pass on mobile viewports.
     const vp = page.viewportSize();
     if (!vp || vp.width < 768) return;

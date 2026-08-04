@@ -4,6 +4,7 @@ import { ArrowDown, Github, Linkedin, Twitter } from "lucide-react";
 import { personalData } from "@/data/personal";
 import { DURATION, EASE_FN, useMagnetic, useReducedMotion } from "@/lib/motion";
 import { useAnime } from "@/lib/use-anime";
+import { scrollToSection } from "@/lib/scroll-to-section";
 
 export function HeroSection() {
   const prefersReducedMotion = useReducedMotion();
@@ -20,11 +21,11 @@ export function HeroSection() {
   const secondaryCtaRef = useMagnetic<HTMLButtonElement>(5);
 
   const scrollToProjects = () => {
-    document.querySelector("#projects")?.scrollIntoView({ behavior: "smooth" });
+    scrollToSection("#projects");
   };
 
   const scrollToContact = () => {
-    document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" });
+    scrollToSection("#contact");
   };
 
   // Hide the scroll indicator once the user has scrolled past ~200 px.
@@ -149,7 +150,7 @@ export function HeroSection() {
       ref={heroRef}
       id="about"
       aria-labelledby="hero-heading"
-      className={`relative min-h-screen flex items-center justify-center overflow-hidden${
+      className={`relative min-h-svh flex items-center justify-center overflow-hidden${
         heroInView ? "" : " hero-paused"
       }`}
       style={{ background: "var(--gradient-hero)" }}

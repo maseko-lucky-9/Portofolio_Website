@@ -135,7 +135,9 @@ export function SectionBridge({ caption, id }: SectionBridgeProps) {
       ref={rootRef}
       aria-hidden="true"
       data-section-bridge={id}
-      className="relative w-full h-24 md:h-32 overflow-visible select-none"
+      // h-8 below sm: the 1200x100 viewBox scales to 0.3125 at 375px, so the
+      // graphic only ever paints ~31px tall — h-24 left 65px of dead space.
+      className="relative w-full h-8 sm:h-24 md:h-32 overflow-visible select-none"
     >
       {/* SVG bridge graphic — viewBox lets it stretch fluidly. */}
       <svg
