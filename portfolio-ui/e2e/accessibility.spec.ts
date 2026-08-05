@@ -41,12 +41,18 @@ test.describe("Accessibility", () => {
     // #contact is inside a React.lazy + Suspense boundary — wait for it.
     await page.locator("#contact").waitFor({ state: "attached", timeout: 15000 });
 
+    // The anchor id lives on Index.tsx's LazySection wrapper (it must exist
+    // before the section mounts); the labelled landmark is the <section>
+    // inside it. Asserting on the wrapper would only ever read null.
     const sections = ["skills", "projects", "contact"];
 
     for (const id of sections) {
-      const section = page.locator(`#${id}`);
+      const section = page.locator(`#${id} section`).first();
+      await expect(section, `Section #${id} did not mount`).toBeAttached();
       const labelledBy = await section.getAttribute("aria-labelledby");
       expect(labelledBy, `Section #${id} missing aria-labelledby`).toBeTruthy();
+      // The label target must actually exist, or the association is dead.
+      await expect(page.locator(`#${labelledBy}`)).toBeAttached();
     }
   });
 
@@ -68,7 +74,10 @@ test.describe("Accessibility", () => {
   });
 
   test("social links have aria-labels", async ({ page }) => {
-    const socialLabels = ["GitHub", "LinkedIn", "Twitter"];
+    // github + linkedin are the required pair; twitter is optional and
+    // currently empty (personalData.social.twitter === ""), so the component
+    // renders no link for it — asserting on it here only tested the fixture.
+    const socialLabels = ["GitHub", "LinkedIn"];
 
     for (const label of socialLabels) {
       const links = page.getByLabel(label);

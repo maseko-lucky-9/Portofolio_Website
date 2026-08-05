@@ -182,7 +182,8 @@ export function ProjectsSection() {
   return (
     <section
       ref={rootRef}
-      id="projects"
+      // No id — the LazySection wrapper in Index.tsx owns `#projects`; see the
+      // note in SkillsSection.
       aria-labelledby="projects-heading"
       className="py-20 section-mesh"
     >

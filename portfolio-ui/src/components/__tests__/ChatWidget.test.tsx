@@ -5,10 +5,86 @@
  * `busy` instead of leaving the bulb lit forever.
  */
 import { render, screen, fireEvent, act } from "@testing-library/react";
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { describe, it, expect, afterEach, vi } from "vitest";
 import { ChatWidget } from "@/components/ChatWidget";
 
 const LAUNCHER_NAME = /Ask about Thulani's experience/i;
+
+/** One SSE frame in the shape the Worker streams. */
+function sseFrame(text: string): Uint8Array {
+  return new TextEncoder().encode(`data: ${JSON.stringify({ response: text })}\n`);
+}
+
+/**
+ * A reader whose chunks are released one at a time by the test, so a stream
+ * can be held open across arbitrary amounts of fake time.
+ *
+ * Critically it honours the fetch AbortSignal — a pending read REJECTS when
+ * the watchdog fires, exactly as a real body stream does. Without that wiring
+ * an abort is invisible to the mock and every watchdog assertion passes
+ * whether the production code arms the timer or not.
+ */
+function controlledStream() {
+  type Result = { value?: Uint8Array; done: boolean };
+  const queued: Result[] = [];
+  let waiting: { resolve: (r: Result) => void; reject: (e: unknown) => void } | null = null;
+  let aborted = false;
+
+  const emit = (r: Result) => {
+    if (waiting) {
+      waiting.resolve(r);
+      waiting = null;
+    } else {
+      queued.push(r);
+    }
+  };
+
+  return {
+    attach(signal: AbortSignal) {
+      signal.addEventListener("abort", () => {
+        aborted = true;
+        const err = new DOMException("Aborted", "AbortError");
+        if (waiting) {
+          waiting.reject(err);
+          waiting = null;
+        }
+      });
+    },
+    read: () =>
+      new Promise<Result>((resolve, reject) => {
+        if (aborted) return reject(new DOMException("Aborted", "AbortError"));
+        const next = queued.shift();
+        if (next) resolve(next);
+        else waiting = { resolve, reject };
+      }),
+    push: (text: string) => emit({ value: sseFrame(text), done: false }),
+    finish: () => emit({ done: true }),
+  };
+}
+
+/** Stubs fetch to return an ok response backed by `stream`, signal wired. */
+function stubFetch(stream: ReturnType<typeof controlledStream>) {
+  vi.stubGlobal("fetch", (_url: string, init?: RequestInit) => {
+    if (init?.signal) stream.attach(init.signal);
+    return Promise.resolve({
+      ok: true,
+      body: { getReader: () => ({ read: stream.read }) },
+    } as unknown as Response);
+  });
+}
+
+/** Sends the first canned suggestion — no typing required. */
+async function ask() {
+  fireEvent.click(screen.getByRole("button", { name: LAUNCHER_NAME }));
+  await act(async () => {
+    fireEvent.click(screen.getByRole("button", { name: /Kubernetes background/i }));
+  });
+}
+
+const avatarEl = () =>
+  screen
+    .getByRole("button", { name: LAUNCHER_NAME })
+    .querySelector("[data-avatar-state]") as HTMLElement;
 
 describe("ChatWidget", () => {
   afterEach(() => {
@@ -58,16 +134,8 @@ describe("ChatWidget", () => {
     );
 
     render(<ChatWidget />);
-    fireEvent.click(screen.getByRole("button", { name: LAUNCHER_NAME }));
-    // Fire a canned suggestion — no typing needed.
-    await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: /Kubernetes background/i }));
-    });
+    await ask();
 
-    const avatarEl = () =>
-      screen
-        .getByRole("button", { name: LAUNCHER_NAME })
-        .querySelector("[data-avatar-state]") as HTMLElement;
     expect(avatarEl().getAttribute("data-glow")).toBe("true");
     expect(screen.getByText(/Thinking…/)).toBeInTheDocument();
 
@@ -78,5 +146,55 @@ describe("ChatWidget", () => {
     expect(screen.getByText(/Couldn't reach the assistant/i)).toBeInTheDocument();
     expect(avatarEl().getAttribute("data-glow")).toBe("false");
     expect(screen.queryByText(/Thinking…/)).toBeNull();
+    // A failure must never read as success: the bounce is reserved for
+    // replies that actually landed.
+    expect(avatarEl().getAttribute("data-avatar-state")).not.toBe("celebrating");
+  });
+
+  it("does not abort a slow stream that keeps sending — the watchdog re-arms per chunk", async () => {
+    vi.useFakeTimers();
+    const stream = controlledStream();
+    stubFetch(stream);
+
+    render(<ChatWidget />);
+    await ask();
+
+    // Three gaps of 20s: each is under the 25s idle timeout on its own, but
+    // they total 60s. Only a watchdog that re-arms on every chunk survives —
+    // arm-once-before-fetch would have aborted during the first gap.
+    for (const part of ["Kubernetes ", "platform ", "experience."]) {
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(20_000);
+      });
+      expect(screen.queryByText(/Couldn't reach the assistant/i)).toBeNull();
+      await act(async () => {
+        stream.push(part);
+      });
+    }
+
+    await act(async () => {
+      stream.finish();
+    });
+
+    expect(screen.getByText("Kubernetes platform experience.")).toBeInTheDocument();
+    expect(screen.queryByText(/Couldn't reach the assistant/i)).toBeNull();
+    expect(avatarEl().getAttribute("data-glow")).toBe("false");
+  });
+
+  it("celebrates when a reply lands", async () => {
+    vi.useFakeTimers();
+    const stream = controlledStream();
+    stubFetch(stream);
+
+    render(<ChatWidget />);
+    await ask();
+
+    await act(async () => {
+      stream.push("Yes — 8 years of it.");
+      stream.finish();
+    });
+
+    expect(screen.getByText("Yes — 8 years of it.")).toBeInTheDocument();
+    expect(avatarEl().getAttribute("data-avatar-state")).toBe("celebrating");
   });
 });

@@ -53,13 +53,16 @@ test.describe("Navigation - Mobile", () => {
   test("mobile menu opens and shows links", async ({ page }) => {
     await page.goto("/");
 
-    // Mobile hamburger menu should be visible
-    const menuButton = page.locator("header button").last();
-    await menuButton.click();
+    // Address the hamburger and the drawer by their own hooks. Positional
+    // selectors used to work and quietly stopped: `header button` last is now
+    // a drawer link, and `nav` last is the FOOTER's nav, so the assertions
+    // were querying the wrong elements rather than testing the drawer.
+    await page.getByRole("button", { name: "Open menu" }).click();
 
-    // Nav links should be visible in mobile menu
-    await expect(page.locator("nav").last().getByText("Skills")).toBeVisible();
-    await expect(page.locator("nav").last().getByText("Projects")).toBeVisible();
-    await expect(page.locator("nav").last().getByText("Contact")).toBeVisible();
+    const drawer = page.getByTestId("mobile-drawer");
+    await expect(drawer).toHaveAttribute("aria-hidden", "false");
+    for (const label of ["Skills", "Projects", "Contact"]) {
+      await expect(drawer.getByRole("button", { name: label, exact: true })).toBeVisible();
+    }
   });
 });

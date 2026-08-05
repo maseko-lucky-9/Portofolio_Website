@@ -102,7 +102,8 @@ export function BlogSection() {
   return (
     <section
       ref={rootRef}
-      id="blog"
+      // No id — the LazySection wrapper in Index.tsx owns `#blog`; see the
+      // note in SkillsSection.
       aria-labelledby="blog-heading"
       className="py-20 section-mesh"
       style={{ background: "oklch(var(--muted) / var(--opacity-soft))" }}

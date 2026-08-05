@@ -236,7 +236,8 @@ export function ContactSection() {
   return (
     <section
       ref={rootRef}
-      id="contact"
+      // No id — the LazySection wrapper in Index.tsx owns `#contact`; see the
+      // note in SkillsSection.
       aria-labelledby="contact-heading"
       // overflow-hidden matches Skills/Services/Experience. Without it the
       // reveal animation's initial translateX(20px) on a full-width card

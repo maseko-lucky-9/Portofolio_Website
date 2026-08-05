@@ -83,6 +83,30 @@ describe("ChatAvatar", () => {
     expect(avatar().getAttribute("data-avatar-state")).toBe("awake");
   });
 
+  it("does not sleep under prefers-reduced-motion — the lid is a 400ms animation", () => {
+    // setup.ts stubs matchMedia to always-false, so the `reduced` branch is
+    // otherwise unreachable in this suite. useReducedMotion reads matchMedia
+    // per render, so overriding it here is enough — no module mock needed.
+    const real = window.matchMedia;
+    window.matchMedia = ((query: string) =>
+      ({
+        matches: query.includes("prefers-reduced-motion"),
+        media: query,
+        addEventListener: () => {},
+        removeEventListener: () => {},
+      }) as unknown as MediaQueryList) as typeof window.matchMedia;
+
+    try {
+      renderAvatar();
+      act(() => {
+        vi.advanceTimersByTime(SLEEP_AFTER_MS * 2);
+      });
+      expect(avatar().getAttribute("data-avatar-state")).toBe("awake");
+    } finally {
+      window.matchMedia = real;
+    }
+  });
+
   it("never sleeps while the panel is open or a reply is streaming", () => {
     const { rerender } = renderAvatar({ open: true });
     act(() => {
