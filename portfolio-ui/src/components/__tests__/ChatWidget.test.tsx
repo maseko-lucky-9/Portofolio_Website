@@ -197,6 +197,13 @@ describe("ChatWidget", () => {
     // the widget; the reader loop and 25s timer must not outlive it.
     unmount();
     expect(stream.isAborted).toBe(true);
+    // Only the abort is asserted. The cleanup's clearTimeout is not separately
+    // observable: anime.js's engine keeps its own fake timers alive past
+    // unmount (measured 2 remaining, self-clearing), so getTimerCount() can't
+    // isolate the watchdog — and "count decreased" passes even without the
+    // clearTimeout, since React drops the avatar's timers regardless. A stray
+    // watchdog would only call abort() on an already-aborted controller, so
+    // there is no behaviour left to pin.
   });
 
   it("celebrates when a reply lands", async () => {

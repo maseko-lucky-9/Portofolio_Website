@@ -153,7 +153,10 @@ export function ChatWidget() {
         setErr(`Couldn't reach the assistant. Email ${personalData.email}.`);
       } finally {
         clearTimeout(watchdog);
-        inFlight.current = null;
+        // Only clear our own record. The `busy` guard stops overlapping sends
+        // today, but if one ever slips through, an older send finishing must
+        // not wipe a newer one's controller and disarm its unmount cleanup.
+        if (inFlight.current?.ac === ac) inFlight.current = null;
         setLive("");
         setBusy(false);
       }

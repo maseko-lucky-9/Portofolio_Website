@@ -246,9 +246,11 @@ export function ChatAvatar({ open, responding, celebrateKey }: ChatAvatarProps) 
         alternate: true,
         ease: "inOut(2)",
       });
-      // Drop the inline opacity ourselves rather than waiting for
-      // scope.revert(), which runs a passive effect later — long enough to
-      // flash the last pulse value after `responding` goes false.
+      // Clear the inline opacity here rather than relying on scope.revert()'s
+      // internal bookkeeping to do it for us. (It would: anime treats opacity
+      // as a CSS property, so revert removes the same inline style at the same
+      // synchronous point. Being explicit keeps the pulse's cleanup readable
+      // where the pulse is written, and survives a change of animated property.)
       return () => {
         halo.style.opacity = "";
       };

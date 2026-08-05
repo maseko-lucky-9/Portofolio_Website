@@ -31,6 +31,7 @@ test.describe("Hero Section", () => {
     await expect(metrics.getByText("20+", { exact: true })).toBeVisible();
     await expect(metrics.getByText("Projects", { exact: true })).toBeVisible();
     await expect(metrics.getByText("8+ Years", { exact: true })).toBeVisible();
+    await expect(metrics.getByText("3", { exact: true })).toBeVisible();
     await expect(metrics.getByText("Certifications", { exact: true })).toBeVisible();
   });
 
