@@ -84,6 +84,39 @@ test.describe("mobile layout", () => {
     expect(m.scroll, "overflow after full-page mount").toBeLessThanOrEqual(m.client + 1);
   });
 
+  // The bridge collapses to h-8 on mobile to reclaim ~65px of dead space, which
+  // put its caption straight on top of the bracket graphic (caption band y8-21
+  // vs graphic ~y16 at 375px). Same shape of regression as the header bug: a
+  // Tailwind class silently reintroducing a broken layout.
+  test("section bridge caption never overlaps its graphic", async ({ page, isMobile }) => {
+    await page.goto("/");
+    const boxes = await page.evaluate(() => {
+      const bridge = document.querySelector("[data-section-bridge]");
+      if (!bridge) return null;
+      const root = bridge.getBoundingClientRect();
+      const captionEl = bridge.querySelector("[data-bridge='caption']");
+      if (!captionEl || getComputedStyle(captionEl).display === "none") {
+        return { captionHidden: true, overlap: false };
+      }
+      const cap = captionEl.getBoundingClientRect();
+      const paths = [...bridge.querySelectorAll("svg path")].map((p) => p.getBoundingClientRect());
+      if (!paths.length) return { captionHidden: false, overlap: false };
+      const gTop = Math.min(...paths.map((r) => r.top));
+      const gBottom = Math.max(...paths.map((r) => r.bottom));
+      return {
+        captionHidden: false,
+        overlap: !(cap.bottom < gTop || cap.top > gBottom),
+        containerHeight: Math.round(root.height),
+      };
+    });
+
+    expect(boxes, "expected a section bridge on the page").not.toBeNull();
+    expect(boxes!.overlap, "caption is drawn on top of the bracket graphic").toBe(false);
+    // Below sm the container is only 32px tall — there is no room for both, so
+    // the caption must be hidden rather than merely nudged.
+    if (isMobile) expect(boxes!.captionHidden).toBe(true);
+  });
+
   // The prerendered content pages are a separate pipeline from the SPA above —
   // remark-gfm emits bare <table> markup into page-template.mjs, which had no
   // table CSS at all. Three shipped pages carry real tables; this checks the
