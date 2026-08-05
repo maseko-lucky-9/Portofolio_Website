@@ -72,6 +72,7 @@ test.describe("Accessibility", () => {
       "projects-heading",
       "experience-heading",
       "services-heading",
+      "case-studies-heading",
       "blog-heading",
       "contact-heading",
     ]) {
