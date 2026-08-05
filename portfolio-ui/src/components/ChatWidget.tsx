@@ -129,8 +129,11 @@ export function ChatWidget() {
         aria-expanded={open}
         aria-controls="chat-panel"
         aria-label="Ask about Thulani's experience"
-        className="fixed bottom-6 right-6 z-[70] w-14 h-14 rounded-full bg-primary text-primary-foreground flex items-center justify-center"
+        className="fixed right-6 z-[70] w-14 h-14 rounded-full bg-primary text-primary-foreground flex items-center justify-center"
         style={{
+          // Keeps the launcher clear of the home indicator. Inline rather than
+          // `bottom-6` so the safe-area inset can be added to it.
+          bottom: "calc(1.5rem + env(safe-area-inset-bottom))",
           boxShadow: "var(--shadow-lg)",
           transition: "transform var(--duration-fast) var(--ease-spring)",
         }}
@@ -169,7 +172,7 @@ export function ChatWidget() {
                 launcherRef.current?.focus();
               }}
               aria-label="Close chat"
-              className="text-muted-foreground"
+              className="inline-flex items-center justify-center w-11 h-11 -mr-3 text-muted-foreground"
             >
               <X size={18} />
             </button>
@@ -266,7 +269,13 @@ export function ChatWidget() {
               }}
               className="min-h-0 h-10 py-2 resize-none"
             />
-            <Button type="submit" size="icon" disabled={busy || !draft.trim()} aria-label="Send">
+            <Button
+              type="submit"
+              size="icon"
+              disabled={busy || !draft.trim()}
+              aria-label="Send"
+              className="shrink-0 w-11 h-11 md:w-10 md:h-10"
+            >
               <Send size={16} />
             </Button>
           </form>

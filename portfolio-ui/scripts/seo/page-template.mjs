@@ -118,7 +118,7 @@ const INLINE_CSS = `
   body { margin: 0; background: var(--bg); color: var(--fg); font: 17px/1.65 var(--font-body); }
   header.site, footer.site { font-family: var(--font-sans); }
   header.site { position: sticky; top: 0; backdrop-filter: blur(8px); background: color-mix(in srgb, var(--bg) 86%, transparent);
-    border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; justify-content: space-between; align-items: center; }
+    border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
   header.site a { color: var(--fg); text-decoration: none; font-weight: 600; }
   header.site nav { display: flex; gap: 24px; font-size: 14px; }
   header.site nav a { color: var(--muted); font-weight: 500; }
@@ -140,6 +140,12 @@ const INLINE_CSS = `
   pre { font: 14px/1.55 var(--font-mono); background: color-mix(in srgb, var(--fg) 4%, transparent); border: 1px solid var(--border);
     padding: 16px 20px; border-radius: 6px; overflow-x: auto; margin: 0 0 24px; }
   pre code { background: none; padding: 0; border-radius: 0; }
+  /* remark-gfm emits real tables (see content/answers, content/projects). display:block makes
+     the table its own horizontal scroll container, so a wide table scrolls instead of blowing
+     out the page on a 375px screen — no wrapper element needed in the markdown pipeline. */
+  table { display: block; width: 100%; overflow-x: auto; border-collapse: collapse; font-size: 15px; margin: 0 0 24px; }
+  th, td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; white-space: nowrap; }
+  th { font-weight: 600; }
   blockquote { border-left: 3px solid var(--accent); margin: 0 0 24px; padding: 4px 0 4px 20px; color: var(--muted); font-style: italic; }
   hr { border: 0; border-top: 1px solid var(--border); margin: 48px 0; }
   dl dt { font-weight: 600; margin-top: 16px; }
@@ -152,6 +158,9 @@ const INLINE_CSS = `
     main.article { padding: 40px 20px; }
     h1 { font-size: 32px; }
     h2 { font-size: 22px; }
+    /* Brand + 4 nav links need ~367px of min-content against 375px available. */
+    header.site { padding: 12px 16px; }
+    header.site nav { gap: 14px; }
   }
 `.replace(/\s+/g, ' ').trim();
 

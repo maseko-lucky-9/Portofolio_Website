@@ -247,6 +247,10 @@
 
   html {
     scroll-behavior: smooth;
+    /* The fixed header is 72px at rest / 56px scrolled. Without this, every
+       anchor target lands underneath it. Covers scrollIntoView(), fragment
+       navigation and the skip link alike — no per-call-site JS offset math. */
+    scroll-padding-top: 5rem;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
@@ -401,6 +405,16 @@
     color: oklch(var(--primary-foreground));
     transform: scale(1.06);
     box-shadow: var(--shadow-sm);
+  }
+
+  /* The project filter chips are the only interactive .tech-badge; every other
+     usage is a decorative <span>. px-3 py-1 text-xs is a 26px tap target, well
+     under the 44px minimum on touch — scoped by element so the spans are
+     untouched. */
+  @media (max-width: 767px) {
+    button.tech-badge {
+      min-height: 44px;
+    }
   }
 
   /* ── Social link (token-driven; replaces inline onMouseEnter/Leave) ── */

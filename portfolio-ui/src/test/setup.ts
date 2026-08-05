@@ -30,6 +30,10 @@ class MockResizeObserver {
 
 globalThis.ResizeObserver = MockResizeObserver as unknown as typeof ResizeObserver;
 
+// jsdom does not implement scrollIntoView at all — it throws rather than
+// no-opping, so any component that scrolls on click blows up under test.
+Element.prototype.scrollIntoView = function scrollIntoView() {};
+
 // Polyfill localStorage / sessionStorage for jsdom — recent jsdom releases
 // expose these as host objects whose methods are non-callable in some
 // configurations. ThemeContext + AuthContext call getItem/setItem at module

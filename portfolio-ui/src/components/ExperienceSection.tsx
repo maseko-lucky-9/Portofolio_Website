@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type PointerEvent,
+} from "react";
 import { Building2, Calendar, MapPin } from "lucide-react";
 import { experiences, type Experience } from "@/data/experience";
 import { useReducedMotion } from "@/lib/motion";
@@ -53,6 +60,25 @@ function ExperienceRow({
       }
     },
     [onToggle],
+  );
+
+  // Hover-to-open must not fire for touch. A tap synthesises pointerenter
+  // before click, so onOpen would expand the card and onToggle would collapse
+  // it again in the same tap — the first tap appeared to do nothing.
+  // Keyed off pointerType rather than a media query so hybrid devices
+  // (touchscreen laptops) still get hover from an actual mouse.
+  const handlePointerEnter = useCallback(
+    (e: PointerEvent<HTMLDivElement>) => {
+      if (e.pointerType === "mouse") onOpen();
+    },
+    [onOpen],
+  );
+
+  const handlePointerLeave = useCallback(
+    (e: PointerEvent<HTMLDivElement>) => {
+      if (e.pointerType === "mouse") onScheduleClose();
+    },
+    [onScheduleClose],
   );
 
   const expandedPanel = (
@@ -113,8 +139,8 @@ function ExperienceRow({
           aria-expanded={isOpen}
           aria-controls={detailsId}
           aria-label={`${exp.role} at ${exp.company}, ${exp.startDate} to ${exp.endDate}. ${isOpen ? "Collapse" : "Expand"} details.`}
-          onMouseEnter={onOpen}
-          onMouseLeave={onScheduleClose}
+          onPointerEnter={handlePointerEnter}
+          onPointerLeave={handlePointerLeave}
           onFocus={onCancelClose}
           onBlur={onScheduleClose}
           onClick={onToggle}

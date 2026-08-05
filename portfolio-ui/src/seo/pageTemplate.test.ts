@@ -88,6 +88,15 @@ describe("renderPage — blog kind", () => {
     });
     expect(malicious).toContain("&lt;script&gt;alert(1)&lt;/script&gt;");
   });
+
+  it("styles markdown tables so they scroll instead of overflowing", () => {
+    // remark-gfm emits real <table>s (content/answers, content/projects) into a
+    // template that had no table CSS at all — a wide table blew out the page on
+    // a 375px screen. Tripwire only: this proves the rule ships, not that a
+    // rendered table scrolls (jsdom has no layout engine).
+    expect(html).toMatch(/table\s*\{[^}]*display:\s*block/);
+    expect(html).toMatch(/table\s*\{[^}]*overflow-x:\s*auto/);
+  });
 });
 
 describe("renderPage — answers kind", () => {

@@ -118,14 +118,17 @@ export function CaseStudiesSection() {
                   borderColor: "oklch(var(--border))",
                 }}
               >
-                <div className="p-8">
-                  {/* Header row */}
-                  <div className="flex items-start justify-between gap-4 mb-6">
-                    <div className="flex items-center gap-4">
+                <div className="p-6 md:p-8">
+                  {/* Header row — stacks below sm. Wrapping doesn't help here:
+                      the icon+title group's min-content is only ~169px, so the
+                      badge never wraps and the title stays squeezed to ~120px.
+                      min-w-0 lets long titles break instead of overflowing. */}
+                  <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4 mb-6">
+                    <div className="flex items-center gap-4 min-w-0">
                       <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500/20 to-indigo-500/20 shrink-0">
                         <Icon className="w-6 h-6 text-foreground" aria-hidden="true" />
                       </div>
-                      <div>
+                      <div className="min-w-0">
                         <span className="text-xs font-semibold uppercase tracking-[0.15em] text-primary">
                           {cs.label}
                         </span>

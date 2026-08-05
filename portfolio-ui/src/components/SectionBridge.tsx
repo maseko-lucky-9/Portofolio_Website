@@ -135,7 +135,9 @@ export function SectionBridge({ caption, id }: SectionBridgeProps) {
       ref={rootRef}
       aria-hidden="true"
       data-section-bridge={id}
-      className="relative w-full h-24 md:h-32 overflow-visible select-none"
+      // h-8 below sm: the 1200x100 viewBox scales to 0.3125 at 375px, so the
+      // graphic only ever paints ~31px tall — h-24 left 65px of dead space.
+      className="relative w-full h-8 sm:h-24 md:h-32 overflow-visible select-none"
     >
       {/* SVG bridge graphic — viewBox lets it stretch fluidly. */}
       <svg
@@ -211,7 +213,11 @@ export function SectionBridge({ caption, id }: SectionBridgeProps) {
       {caption && (
         <div
           data-bridge="caption"
-          className="absolute inset-x-0 bottom-2 md:bottom-3 text-center pointer-events-none"
+          // Hidden below sm: the container is h-8 there, and the caption's
+          // band (y 8-21) would sit right on top of the bracket graphic
+          // (y ~16). The section heading immediately below already names the
+          // same thing, so this is redundant wayfinding at 10px on a phone.
+          className="hidden sm:block absolute inset-x-0 bottom-2 md:bottom-3 text-center pointer-events-none"
           style={captionStartStyle}
         >
           <span className="text-[10px] font-mono uppercase tracking-[0.25em] text-muted-foreground/70">

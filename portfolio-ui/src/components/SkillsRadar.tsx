@@ -37,6 +37,14 @@ const CENTER = SIZE / 2;
 const RADIUS = 120;
 const LABEL_OFFSET = 18; // distance from outer ring to label baseline
 
+// Axis labels sit at CENTER + RADIUS + LABEL_OFFSET = 298 and are drawn with
+// textAnchor="start", so they run past SIZE and get clipped by SkillsSection's
+// overflow-hidden (the SVG's own overflow-visible can't escape an ancestor
+// clip). Widening the *viewBox* — not SIZE/CENTER/RADIUS, which the polar math
+// depends on — brings the label band inside. Stays centred on CENTER.
+const VIEW_PAD = 60;
+const VIEW_BOX = `${-VIEW_PAD} 0 ${SIZE + VIEW_PAD * 2} ${SIZE}`;
+
 /** Polar → cartesian for an angle (radians from north, clockwise) and a
  * radius. SVG y-axis goes down, so we subtract cos(theta). */
 function polarToXY(angleRad: number, r: number) {
@@ -95,7 +103,7 @@ export function SkillsRadar({ data, color = "oklch(var(--primary))" }: SkillsRad
   return (
     <svg
       ref={svgRef}
-      viewBox={`0 0 ${SIZE} ${SIZE}`}
+      viewBox={VIEW_BOX}
       width="100%"
       height="100%"
       role="img"
@@ -177,7 +185,7 @@ export function SkillsRadar({ data, color = "oklch(var(--primary))" }: SkillsRad
             textAnchor={anchor}
             dominantBaseline="middle"
             fill="oklch(var(--muted-foreground))"
-            style={{ fontSize: "11px" }}
+            style={{ fontSize: "13px" }}
           >
             {skill}
           </text>

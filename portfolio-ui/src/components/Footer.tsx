@@ -1,6 +1,7 @@
 import { Github, Linkedin, Twitter } from "lucide-react";
 import { personalData } from "@/data/personal";
 import { Logo } from "@/components/ui/Logo";
+import { scrollToSection as scrollTo } from "@/lib/scroll-to-section";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -25,7 +26,7 @@ export function Footer() {
   ];
 
   const scrollToSection = (href: string) => {
-    document.querySelector(href)?.scrollIntoView({ behavior: "smooth" });
+    scrollTo(href);
   };
 
   return (
@@ -39,7 +40,9 @@ export function Footer() {
         }}
       />
 
-      <div className="section-container !py-14">
+      {/* Extra bottom gutter on mobile so the fixed chat launcher (56px + 24px
+          inset + safe-area) doesn't land on the copyright line. */}
+      <div className="section-container !py-14 !pb-32 md:!pb-14">
         <div className="grid md:grid-cols-3 gap-8 items-center mb-10">
           {/* Brand */}
           <div className="text-center md:text-left">
@@ -65,7 +68,7 @@ export function Footer() {
               <button
                 key={link.href}
                 onClick={() => scrollToSection(link.href)}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
+                className="inline-flex items-center py-3 md:py-0 text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
               >
                 {link.label}
               </button>
@@ -88,7 +91,7 @@ export function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={label}
-                  className="social-link w-9 h-9"
+                  className="social-link w-11 h-11 md:w-9 md:h-9"
                 >
                   <Icon className="w-4 h-4" />
                 </a>
@@ -106,7 +109,7 @@ export function Footer() {
               key={link.href}
               href={link.href}
               {...(link.external ? { rel: "alternate" } : {})}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
+              className="inline-flex items-center py-3 md:py-0 text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
             >
               {link.label}
             </a>

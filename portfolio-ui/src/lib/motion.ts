@@ -200,7 +200,10 @@ function hasNoMotionParam(): boolean {
 /** Returns true on coarse-pointer (touch) devices. SSR-safe. */
 function hasCoarsePointer(): boolean {
   if (typeof window === "undefined") return false;
-  return window.matchMedia?.("(pointer: coarse)").matches ?? false;
+  // Both `?.` are load-bearing. Guarding only the call leaves `.matches` to
+  // throw on the undefined it short-circuits to, and `?? false` cannot catch a
+  // throw — so the fallback would be dead code. Same fix as scroll-to-section.ts.
+  return window.matchMedia?.("(pointer: coarse)")?.matches ?? false;
 }
 
 /**
