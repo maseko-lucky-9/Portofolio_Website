@@ -17,9 +17,7 @@ import { test, expect } from "@playwright/test";
 test.describe("mobile layout", () => {
   test("header does not reserve drawer height on load", async ({ page }) => {
     await page.goto("/");
-    const height = await page
-      .locator("header")
-      .evaluate((el) => el.getBoundingClientRect().height);
+    const height = await page.locator("header").evaluate((el) => el.getBoundingClientRect().height);
 
     // 438px before the fix; 72px at rest / 56px scrolled after.
     expect(height).toBeLessThan(100);
@@ -38,9 +36,7 @@ test.describe("mobile layout", () => {
     await expect(drawer.getByText("Services")).toBeVisible();
 
     // The bug's signature: header height was IDENTICAL open vs closed.
-    const height = await page
-      .locator("header")
-      .evaluate((el) => el.getBoundingClientRect().height);
+    const height = await page.locator("header").evaluate((el) => el.getBoundingClientRect().height);
     expect(height).toBeLessThan(100);
 
     // ...and the card floats below the bar rather than inflating it.

@@ -213,7 +213,11 @@ export function SectionBridge({ caption, id }: SectionBridgeProps) {
       {caption && (
         <div
           data-bridge="caption"
-          className="absolute inset-x-0 bottom-2 md:bottom-3 text-center pointer-events-none"
+          // Hidden below sm: the container is h-8 there, and the caption's
+          // band (y 8-21) would sit right on top of the bracket graphic
+          // (y ~16). The section heading immediately below already names the
+          // same thing, so this is redundant wayfinding at 10px on a phone.
+          className="hidden sm:block absolute inset-x-0 bottom-2 md:bottom-3 text-center pointer-events-none"
           style={captionStartStyle}
         >
           <span className="text-[10px] font-mono uppercase tracking-[0.25em] text-muted-foreground/70">

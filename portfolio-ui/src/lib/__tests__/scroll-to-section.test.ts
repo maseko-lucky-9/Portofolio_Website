@@ -71,8 +71,7 @@ describe("scrollToSection", () => {
     function elementDrifting(tops: number[]) {
       const el = document.createElement("div");
       let i = 0;
-      el.getBoundingClientRect = () =>
-        ({ top: tops[Math.min(i++, tops.length - 1)] }) as DOMRect;
+      el.getBoundingClientRect = () => ({ top: tops[Math.min(i++, tops.length - 1)] }) as DOMRect;
       el.scrollIntoView = vi.fn();
       return el;
     }
@@ -104,9 +103,53 @@ describe("scrollToSection", () => {
       vi.advanceTimersByTime(5000);
 
       // 1 initial jump + at most MAX_SETTLE_TRIES (20) corrections.
-      expect((el.scrollIntoView as ReturnType<typeof vi.fn>).mock.calls.length)
-        .toBeLessThanOrEqual(21);
+      expect((el.scrollIntoView as ReturnType<typeof vi.fn>).mock.calls.length).toBeLessThanOrEqual(
+        21,
+      );
       expect(vi.getTimerCount()).toBe(0);
+    });
+
+    it("stops correcting once the user scrolls themselves", () => {
+      const el = elementDrifting([80, 900]); // would keep correcting forever
+      scrollToSection(el);
+      expect(el.scrollIntoView).toHaveBeenCalledTimes(1);
+
+      // User takes over. Correcting under their finger would fight them.
+      window.dispatchEvent(new Event("touchstart"));
+      vi.advanceTimersByTime(5000);
+
+      expect(el.scrollIntoView).toHaveBeenCalledTimes(1);
+      expect(vi.getTimerCount()).toBe(0);
+    });
+
+    it("a second navigation supersedes the first loop", () => {
+      const first = elementDrifting([80, 900]);
+      scrollToSection(first);
+      const second = elementDrifting([80, 900]);
+      scrollToSection(second);
+
+      const firstCalls = (first.scrollIntoView as ReturnType<typeof vi.fn>).mock.calls.length;
+      vi.advanceTimersByTime(5000);
+
+      // The superseded loop must not drag the view back to its own target.
+      expect(first.scrollIntoView).toHaveBeenCalledTimes(firstCalls);
+      expect((second.scrollIntoView as ReturnType<typeof vi.fn>).mock.calls.length).toBeGreaterThan(
+        1,
+      );
+      expect(vi.getTimerCount()).toBe(0);
+    });
+
+    it("a smooth-path navigation also supersedes a running loop", () => {
+      const first = elementDrifting([80, 900]);
+      scrollToSection(first);
+      const firstCalls = (first.scrollIntoView as ReturnType<typeof vi.fn>).mock.calls.length;
+
+      stubMedia({ "(pointer: coarse)": false, "(prefers-reduced-motion: reduce)": false });
+      const second = elementDrifting([80]);
+      scrollToSection(second);
+
+      vi.advanceTimersByTime(5000);
+      expect(first.scrollIntoView).toHaveBeenCalledTimes(firstCalls);
     });
 
     it("schedules no follow-up at all on the smooth path", () => {
