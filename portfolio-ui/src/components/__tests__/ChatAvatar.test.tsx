@@ -83,6 +83,22 @@ describe("ChatAvatar", () => {
     expect(avatar().getAttribute("data-avatar-state")).toBe("awake");
   });
 
+  it("bounces on a node React does not style, so hover-rotate is never clobbered", () => {
+    // anime.js caches an element's parsed transform on first animate() and
+    // rebuilds the whole string from that cache each frame, so sharing a node
+    // with React's hover-rotate left the launcher stuck at rotate(4deg) after
+    // a celebrate. The two writers must stay on separate elements.
+    renderAvatar({ celebrateKey: 1 });
+    const wrapper = avatar();
+    const bounceTarget = wrapper.querySelector("span");
+
+    expect(bounceTarget, "expected a dedicated bounce node inside the wrapper").not.toBeNull();
+    expect(bounceTarget).not.toBe(wrapper);
+    // The wrapper is React's: it carries the hover transition, not the bounce.
+    expect(wrapper.style.transition).toContain("transform");
+    expect(bounceTarget!.style.transition).toBe("");
+  });
+
   it("does not sleep under prefers-reduced-motion — the lid is a 400ms animation", () => {
     // setup.ts stubs matchMedia to always-false, so the `reduced` branch is
     // otherwise unreachable in this suite. useReducedMotion reads matchMedia

@@ -45,6 +45,20 @@ export function ChatWidget() {
   const launcherRef = useRef<HTMLButtonElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const logRef = useRef<HTMLDivElement>(null);
+  // In-flight stream, so unmount can tear it down. App.tsx has a catch-all
+  // route, so navigating away mid-reply would otherwise leave the reader loop
+  // and a 25s timer running against a dead component.
+  const inFlight = useRef<{ ac: AbortController; timer?: ReturnType<typeof setTimeout> } | null>(
+    null,
+  );
+
+  useEffect(
+    () => () => {
+      inFlight.current?.ac.abort();
+      clearTimeout(inFlight.current?.timer);
+    },
+    [],
+  );
 
   // Escape closes and returns focus to the launcher. No focus trap — the panel is
   // intentionally non-modal, so tabbing out to the page is correct behaviour.
@@ -79,9 +93,11 @@ export function ChatWidget() {
 
       const ac = new AbortController();
       let watchdog: ReturnType<typeof setTimeout> | undefined;
+      inFlight.current = { ac };
       const arm = () => {
         clearTimeout(watchdog);
         watchdog = setTimeout(() => ac.abort(), STREAM_IDLE_TIMEOUT_MS);
+        inFlight.current = { ac, timer: watchdog };
       };
 
       try {
@@ -137,6 +153,7 @@ export function ChatWidget() {
         setErr(`Couldn't reach the assistant. Email ${personalData.email}.`);
       } finally {
         clearTimeout(watchdog);
+        inFlight.current = null;
         setLive("");
         setBusy(false);
       }

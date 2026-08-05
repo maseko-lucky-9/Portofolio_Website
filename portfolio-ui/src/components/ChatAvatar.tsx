@@ -44,6 +44,13 @@ const BLINK_JITTER_MS = 4_000;
 
 export function ChatAvatar({ open, responding, celebrateKey }: ChatAvatarProps) {
   const wrapperRef = useRef<HTMLSpanElement>(null);
+  // Separate node for the bounce: anime.js caches an element's parsed
+  // transform components on first animate() and rebuilds the whole transform
+  // string from that cache every frame, so it would overwrite React's
+  // hover-rotate on the wrapper — and leave the last cached rotate behind on
+  // revert, sticking the launcher at 4deg. One writer per node, same reason
+  // gaze / hover / blink each sit on their own element below.
+  const bounceRef = useRef<HTMLSpanElement>(null);
   const gazeRef = useRef<SVGGElement>(null);
   const blinkRef = useRef<SVGGElement>(null);
   const bulbHaloRef = useRef<SVGCircleElement>(null);
@@ -85,7 +92,10 @@ export function ChatAvatar({ open, responding, celebrateKey }: ChatAvatarProps) 
       timer = setTimeout(() => setSleeping(true), SLEEP_AFTER_MS);
     };
     rearm();
-    const evs = ["pointermove", "pointerdown", "keydown", "touchstart", "scroll"] as const;
+    // No "scroll": Lenis keeps window.scrollY in sync every rAF frame, so it
+    // fires at ~60Hz for a whole gesture and would re-arm the timer each
+    // frame. The pointer/key/touch events already mean real engagement.
+    const evs = ["pointermove", "pointerdown", "keydown", "touchstart"] as const;
     for (const e of evs) window.addEventListener(e, rearm, { passive: true });
     return () => {
       clearTimeout(timer);
@@ -214,7 +224,7 @@ export function ChatAvatar({ open, responding, celebrateKey }: ChatAvatarProps) 
     wrapperRef,
     (scope) => {
       if (scope.matches.reducedMotion || !celebrating) return;
-      const el = wrapperRef.current;
+      const el = bounceRef.current;
       if (!el) return;
       animate(el, { translateY: [0, -7, 0, -3, 0], duration: 600, ease: "out(2)" });
     },
@@ -236,6 +246,12 @@ export function ChatAvatar({ open, responding, celebrateKey }: ChatAvatarProps) 
         alternate: true,
         ease: "inOut(2)",
       });
+      // Drop the inline opacity ourselves rather than waiting for
+      // scope.revert(), which runs a passive effect later — long enough to
+      // flash the last pulse value after `responding` goes false.
+      return () => {
+        halo.style.opacity = "";
+      };
     },
     [responding],
   );
@@ -257,168 +273,173 @@ export function ChatAvatar({ open, responding, celebrateKey }: ChatAvatarProps) 
         willChange: "transform",
       }}
     >
-      <svg
-        viewBox="0 0 100 100"
-        className="block w-full h-full"
-        focusable="false"
-        aria-hidden="true"
-      >
-        <defs>
-          <radialGradient id="bot-bg" cx="50%" cy="42%" r="65%">
-            <stop offset="0%" stopColor="#131d38" />
-            <stop offset="100%" stopColor="#0a1122" />
-          </radialGradient>
-          <linearGradient id="bot-shell" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#f5f9ff" />
-            <stop offset="55%" stopColor="#dbe6fa" />
-            <stop offset="100%" stopColor="#aebfe4" />
-          </linearGradient>
-          <linearGradient id="bot-shell-lower" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#e4edfc" />
-            <stop offset="100%" stopColor="#9fb2da" />
-          </linearGradient>
-          <radialGradient id="bot-visor" cx="50%" cy="38%" r="75%">
-            <stop offset="0%" stopColor="#182444" />
-            <stop offset="100%" stopColor="#0b1226" />
-          </radialGradient>
-          <radialGradient id="bot-eye-halo">
-            <stop offset="0%" stopColor="oklch(var(--primary-glow))" stopOpacity="0.75" />
-            <stop offset="100%" stopColor="oklch(var(--primary-glow))" stopOpacity="0" />
-          </radialGradient>
-          <radialGradient id="bot-bulb-halo">
-            <stop offset="0%" stopColor="oklch(var(--primary-glow))" stopOpacity="0.9" />
-            <stop offset="100%" stopColor="oklch(var(--primary-glow))" stopOpacity="0" />
-          </radialGradient>
-          <clipPath id="bot-circle">
-            <circle cx="50" cy="50" r="50" />
-          </clipPath>
-          <clipPath id="bot-visor-clip">
-            <rect x="27.5" y="27" width="45" height="33" rx="15" />
-          </clipPath>
-        </defs>
+      {/* anime.js owns this node's transform exclusively (the bounce); React
+          owns the wrapper's (the hover tilt). The close badge sits outside so
+          it stays put while the robot hops. */}
+      <span ref={bounceRef} className="block w-full h-full">
+        <svg
+          viewBox="0 0 100 100"
+          className="block w-full h-full"
+          focusable="false"
+          aria-hidden="true"
+        >
+          <defs>
+            <radialGradient id="bot-bg" cx="50%" cy="42%" r="65%">
+              <stop offset="0%" stopColor="#131d38" />
+              <stop offset="100%" stopColor="#0a1122" />
+            </radialGradient>
+            <linearGradient id="bot-shell" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#f5f9ff" />
+              <stop offset="55%" stopColor="#dbe6fa" />
+              <stop offset="100%" stopColor="#aebfe4" />
+            </linearGradient>
+            <linearGradient id="bot-shell-lower" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#e4edfc" />
+              <stop offset="100%" stopColor="#9fb2da" />
+            </linearGradient>
+            <radialGradient id="bot-visor" cx="50%" cy="38%" r="75%">
+              <stop offset="0%" stopColor="#182444" />
+              <stop offset="100%" stopColor="#0b1226" />
+            </radialGradient>
+            <radialGradient id="bot-eye-halo">
+              <stop offset="0%" stopColor="oklch(var(--primary-glow))" stopOpacity="0.75" />
+              <stop offset="100%" stopColor="oklch(var(--primary-glow))" stopOpacity="0" />
+            </radialGradient>
+            <radialGradient id="bot-bulb-halo">
+              <stop offset="0%" stopColor="oklch(var(--primary-glow))" stopOpacity="0.9" />
+              <stop offset="100%" stopColor="oklch(var(--primary-glow))" stopOpacity="0" />
+            </radialGradient>
+            <clipPath id="bot-circle">
+              <circle cx="50" cy="50" r="50" />
+            </clipPath>
+            <clipPath id="bot-visor-clip">
+              <rect x="27.5" y="27" width="45" height="33" rx="15" />
+            </clipPath>
+          </defs>
 
-        <g clipPath="url(#bot-circle)">
-          {/* Backdrop — dark navy like the reference render, with a floor glow. */}
-          <circle cx="50" cy="50" r="50" fill="url(#bot-bg)" />
-          <ellipse
-            cx="50"
-            cy="96"
-            rx="34"
-            ry="12"
-            fill="oklch(var(--primary-glow))"
-            opacity="0.16"
-          />
+          <g clipPath="url(#bot-circle)">
+            {/* Backdrop — dark navy like the reference render, with a floor glow. */}
+            <circle cx="50" cy="50" r="50" fill="url(#bot-bg)" />
+            <ellipse
+              cx="50"
+              cy="96"
+              rx="34"
+              ry="12"
+              fill="oklch(var(--primary-glow))"
+              opacity="0.16"
+            />
 
-          {/* Antenna */}
-          <rect x="48.9" y="12.5" width="2.2" height="10" rx="1.1" fill="#8fa3cf" />
-          <circle
-            ref={bulbHaloRef}
-            cx="50"
-            cy="10.2"
-            r="8"
-            fill="url(#bot-bulb-halo)"
-            opacity={responding ? 0.85 : 0}
-          />
-          <circle
-            cx="50"
-            cy="10.2"
-            r="3.3"
-            fill="oklch(var(--primary-glow))"
-            opacity={responding ? 1 : 0.35}
-            style={{ transition: "opacity 200ms ease-out" }}
-          />
+            {/* Antenna */}
+            <rect x="48.9" y="12.5" width="2.2" height="10" rx="1.1" fill="#8fa3cf" />
+            <circle
+              ref={bulbHaloRef}
+              cx="50"
+              cy="10.2"
+              r="8"
+              fill="url(#bot-bulb-halo)"
+              opacity={responding ? 0.85 : 0}
+            />
+            <circle
+              cx="50"
+              cy="10.2"
+              r="3.3"
+              fill="oklch(var(--primary-glow))"
+              opacity={responding ? 1 : 0.35}
+              style={{ transition: "opacity 200ms ease-out" }}
+            />
 
-          {/* Ear pods */}
-          <rect x="15.5" y="36" width="6.5" height="15" rx="3.2" fill="#93a7cc" />
-          <rect x="78" y="36" width="6.5" height="15" rx="3.2" fill="#93a7cc" />
+            {/* Ear pods */}
+            <rect x="15.5" y="36" width="6.5" height="15" rx="3.2" fill="#93a7cc" />
+            <rect x="78" y="36" width="6.5" height="15" rx="3.2" fill="#93a7cc" />
 
-          {/* Head shell + specular highlight */}
-          <rect x="21" y="20.5" width="58" height="46.5" rx="23" fill="url(#bot-shell)" />
-          <ellipse cx="36" cy="27.5" rx="11" ry="4.4" fill="#ffffff" opacity="0.55" />
+            {/* Head shell + specular highlight */}
+            <rect x="21" y="20.5" width="58" height="46.5" rx="23" fill="url(#bot-shell)" />
+            <ellipse cx="36" cy="27.5" rx="11" ry="4.4" fill="#ffffff" opacity="0.55" />
 
-          {/* Visor */}
-          <rect
-            x="27.5"
-            y="27"
-            width="45"
-            height="33"
-            rx="15"
-            fill="url(#bot-visor)"
-            stroke="oklch(var(--primary) / 0.35)"
-            strokeWidth="0.8"
-          />
+            {/* Visor */}
+            <rect
+              x="27.5"
+              y="27"
+              width="45"
+              height="33"
+              rx="15"
+              fill="url(#bot-visor)"
+              stroke="oklch(var(--primary) / 0.35)"
+              strokeWidth="0.8"
+            />
 
-          {/* Eyes + smile — gaze group (JS lerp) > hover-scale (React) > blink (anime) */}
-          <g ref={gazeRef}>
-            <g
-              style={{
-                transform: interactive && hovered ? "scale(1.12)" : undefined,
-                transformBox: "fill-box",
-                transformOrigin: "center",
-                transition: "transform 150ms ease-out",
-              }}
-            >
-              <g ref={blinkRef} style={{ transformBox: "fill-box", transformOrigin: "center" }}>
-                <ellipse cx="41.5" cy="41" rx="6.5" ry="7.5" fill="url(#bot-eye-halo)" />
-                <ellipse cx="58.5" cy="41" rx="6.5" ry="7.5" fill="url(#bot-eye-halo)" />
-                <ellipse cx="41.5" cy="41" rx="3.3" ry="4.5" fill="oklch(var(--primary-glow))" />
-                <ellipse cx="58.5" cy="41" rx="3.3" ry="4.5" fill="oklch(var(--primary-glow))" />
+            {/* Eyes + smile — gaze group (JS lerp) > hover-scale (React) > blink (anime) */}
+            <g ref={gazeRef}>
+              <g
+                style={{
+                  transform: interactive && hovered ? "scale(1.12)" : undefined,
+                  transformBox: "fill-box",
+                  transformOrigin: "center",
+                  transition: "transform 150ms ease-out",
+                }}
+              >
+                <g ref={blinkRef} style={{ transformBox: "fill-box", transformOrigin: "center" }}>
+                  <ellipse cx="41.5" cy="41" rx="6.5" ry="7.5" fill="url(#bot-eye-halo)" />
+                  <ellipse cx="58.5" cy="41" rx="6.5" ry="7.5" fill="url(#bot-eye-halo)" />
+                  <ellipse cx="41.5" cy="41" rx="3.3" ry="4.5" fill="oklch(var(--primary-glow))" />
+                  <ellipse cx="58.5" cy="41" rx="3.3" ry="4.5" fill="oklch(var(--primary-glow))" />
+                </g>
               </g>
             </g>
-          </g>
-          <path
-            d="M43.5 51 Q50 55.5 56.5 51"
-            stroke="oklch(var(--primary-glow))"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            fill="none"
-            opacity="0.9"
-          />
+            <path
+              d="M43.5 51 Q50 55.5 56.5 51"
+              stroke="oklch(var(--primary-glow))"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              fill="none"
+              opacity="0.9"
+            />
 
-          {/* Sleep lid — slides down over the visor; closed-eye arcs ride on it. */}
-          <g clipPath="url(#bot-visor-clip)">
-            <g
-              style={{
-                transform: sleeping ? "translateY(0px)" : "translateY(-34px)",
-                transition: "transform 400ms var(--ease-spring)",
-              }}
-            >
-              <rect x="27.5" y="27" width="45" height="33" fill="#101b36" />
-              <path
-                d="M38 42 Q41.5 45 45 42"
-                stroke="oklch(var(--primary) / 0.55)"
-                strokeWidth="1.4"
-                strokeLinecap="round"
-                fill="none"
-              />
-              <path
-                d="M55 42 Q58.5 45 62 42"
-                stroke="oklch(var(--primary) / 0.55)"
-                strokeWidth="1.4"
-                strokeLinecap="round"
-                fill="none"
-              />
+            {/* Sleep lid — slides down over the visor; closed-eye arcs ride on it. */}
+            <g clipPath="url(#bot-visor-clip)">
+              <g
+                style={{
+                  transform: sleeping ? "translateY(0px)" : "translateY(-34px)",
+                  transition: "transform 400ms var(--ease-spring)",
+                }}
+              >
+                <rect x="27.5" y="27" width="45" height="33" fill="#101b36" />
+                <path
+                  d="M38 42 Q41.5 45 45 42"
+                  stroke="oklch(var(--primary) / 0.55)"
+                  strokeWidth="1.4"
+                  strokeLinecap="round"
+                  fill="none"
+                />
+                <path
+                  d="M55 42 Q58.5 45 62 42"
+                  stroke="oklch(var(--primary) / 0.55)"
+                  strokeWidth="1.4"
+                  strokeLinecap="round"
+                  fill="none"
+                />
+              </g>
             </g>
-          </g>
 
-          {/* Torso hint + glowing chat-bubble emblem (clipped by the circle) */}
-          <rect x="29" y="71" width="42" height="30" rx="15" fill="url(#bot-shell-lower)" />
-          <rect
-            x="41"
-            y="76"
-            width="18"
-            height="13"
-            rx="4.5"
-            fill="#0e1730"
-            stroke="oklch(var(--primary-glow))"
-            strokeWidth="1"
-            opacity="0.95"
-          />
-          <circle cx="46.5" cy="82.5" r="1.3" fill="oklch(var(--primary-glow))" />
-          <circle cx="50" cy="82.5" r="1.3" fill="oklch(var(--primary-glow))" />
-          <circle cx="53.5" cy="82.5" r="1.3" fill="oklch(var(--primary-glow))" />
-        </g>
-      </svg>
+            {/* Torso hint + glowing chat-bubble emblem (clipped by the circle) */}
+            <rect x="29" y="71" width="42" height="30" rx="15" fill="url(#bot-shell-lower)" />
+            <rect
+              x="41"
+              y="76"
+              width="18"
+              height="13"
+              rx="4.5"
+              fill="#0e1730"
+              stroke="oklch(var(--primary-glow))"
+              strokeWidth="1"
+              opacity="0.95"
+            />
+            <circle cx="46.5" cy="82.5" r="1.3" fill="oklch(var(--primary-glow))" />
+            <circle cx="50" cy="82.5" r="1.3" fill="oklch(var(--primary-glow))" />
+            <circle cx="53.5" cy="82.5" r="1.3" fill="oklch(var(--primary-glow))" />
+          </g>
+        </svg>
+      </span>
 
       {open && (
         <span
