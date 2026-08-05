@@ -87,6 +87,25 @@ test.describe("mobile layout", () => {
     m = await measure();
     expect(m.scroll, "overflow after full-page mount").toBeLessThanOrEqual(m.client + 1);
   });
+
+  // The prerendered content pages are a separate pipeline from the SPA above —
+  // remark-gfm emits bare <table> markup into page-template.mjs, which had no
+  // table CSS at all. Three shipped pages carry real tables; this checks the
+  // widest one actually scrolls instead of blowing out the page.
+  test("prerendered pages with tables do not overflow", async ({ page }) => {
+    // Trailing slash matters: without it the preview server falls back to the
+    // SPA index and you silently assert against the React app instead.
+    const res = await page.goto("/answers/argocd-vs-flux-2026/");
+    test.skip(!res || res.status() >= 400, "static page not present in this build");
+
+    const m = await page.evaluate(() => ({
+      scroll: document.documentElement.scrollWidth,
+      client: document.documentElement.clientWidth,
+      tables: document.querySelectorAll("table").length,
+    }));
+    expect(m.tables, "expected a real table on this page").toBeGreaterThan(0);
+    expect(m.scroll).toBeLessThanOrEqual(m.client + 1);
+  });
 });
 
 test.describe("mobile anchor navigation", () => {
@@ -111,19 +130,30 @@ test.describe("mobile anchor navigation", () => {
 
     await page.getByRole("button", { name: /open menu/i }).click();
     await page.getByTestId("mobile-drawer").getByText("Services").click();
-    await page.waitForTimeout(900);
-
     // .first() because id="services" is duplicated: Index.tsx's LazySection
     // wrapper <div> and ServicesSection's own <section> both carry it, which
     // trips Playwright strict mode. The wrapper is the outer one and the
     // scroll target, so .first() is the correct element either way.
-    const top = await page
-      .locator("#services")
-      .first()
-      .evaluate((el) => el.getBoundingClientRect().top);
-    // Before: the target drifted ~4,000px as lazy sections expanded mid-scroll.
-    // After: lands at scroll-padding-top (5rem = 80px), give or take.
-    expect(top).toBeGreaterThan(20);
-    expect(top).toBeLessThan(140);
+    //
+    // Expected landing is scroll-padding-top (5rem = 80px). Before the fix the
+    // target drifted ~4,000px as lazy sections expanded mid-scroll.
+    const landed = () =>
+      page
+        .locator("#services")
+        .first()
+        .evaluate((el) => {
+          const top = el.getBoundingClientRect().top;
+          return top > 20 && top < 140;
+        });
+
+    // Poll rather than sleep: the settle loop's own ceiling is
+    // MAX_SETTLE_TRIES(20) x SETTLE_INTERVAL_MS(50) = 1000ms, so any fixed wait
+    // near that races CI contention or a cold chunk cache.
+    await expect.poll(landed, { timeout: 8000 }).toBe(true);
+
+    // ...and it has to *stay* there. Converging and then drifting back out once
+    // the settle loop's budget expires would be the same bug wearing a hat.
+    await page.waitForTimeout(1500);
+    expect(await landed(), "target drifted back out after settling").toBe(true);
   });
 });
