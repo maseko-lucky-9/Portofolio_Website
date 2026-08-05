@@ -59,6 +59,9 @@ function controlledStream() {
       }),
     push: (text: string) => emit({ value: sseFrame(text), done: false }),
     finish: () => emit({ done: true }),
+    get isAborted() {
+      return aborted;
+    },
   };
 }
 
@@ -179,6 +182,21 @@ describe("ChatWidget", () => {
     expect(screen.getByText("Kubernetes platform experience.")).toBeInTheDocument();
     expect(screen.queryByText(/Couldn't reach the assistant/i)).toBeNull();
     expect(avatarEl().getAttribute("data-glow")).toBe("false");
+  });
+
+  it("aborts an in-flight stream on unmount", async () => {
+    vi.useFakeTimers();
+    const stream = controlledStream();
+    stubFetch(stream);
+
+    const { unmount } = render(<ChatWidget />);
+    await ask();
+    expect(stream.isAborted).toBe(false);
+
+    // App.tsx has a catch-all route, so navigating away mid-reply unmounts
+    // the widget; the reader loop and 25s timer must not outlive it.
+    unmount();
+    expect(stream.isAborted).toBe(true);
   });
 
   it("celebrates when a reply lands", async () => {

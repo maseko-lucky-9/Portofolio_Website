@@ -6,7 +6,19 @@
  */
 import { render, screen, act } from "@testing-library/react";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { animate } from "animejs";
 import { ChatAvatar, SLEEP_AFTER_MS, CELEBRATE_MS } from "@/components/ChatAvatar";
+
+// Real anime.js, but with `animate` wrapped so tests can see WHICH element
+// each animation targets — the only way to prove the bounce and React's
+// hover-rotate stay on separate nodes.
+vi.mock("animejs", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("animejs")>();
+  return { ...actual, animate: vi.fn(actual.animate) };
+});
+
+const animateMock = vi.mocked(animate);
+const animatedTargets = () => animateMock.mock.calls.map((c) => c[0]);
 
 const avatar = () =>
   screen.getByTestId("chat-avatar-wrapper-probe").firstElementChild as HTMLElement;
@@ -22,6 +34,7 @@ function renderAvatar(props: Partial<React.ComponentProps<typeof ChatAvatar>> = 
 describe("ChatAvatar", () => {
   beforeEach(() => {
     vi.useFakeTimers();
+    animateMock.mockClear();
   });
   afterEach(() => {
     vi.useRealTimers();
@@ -83,20 +96,30 @@ describe("ChatAvatar", () => {
     expect(avatar().getAttribute("data-avatar-state")).toBe("awake");
   });
 
-  it("bounces on a node React does not style, so hover-rotate is never clobbered", () => {
+  it("never animates the wrapper React styles — the bounce gets its own node", () => {
     // anime.js caches an element's parsed transform on first animate() and
-    // rebuilds the whole string from that cache each frame, so sharing a node
-    // with React's hover-rotate left the launcher stuck at rotate(4deg) after
-    // a celebrate. The two writers must stay on separate elements.
-    renderAvatar({ celebrateKey: 1 });
+    // rebuilds the whole string from that cache each frame, so pointing the
+    // bounce at the wrapper (which React styles for the hover tilt) left the
+    // launcher stuck at rotate(4deg) after a reply landed.
+    //
+    // Assert the actual target passed to animate(), not the DOM shape: an
+    // earlier version of this test only checked that a nested <span> existed,
+    // and stayed green when the bounce was pointed back at the wrapper.
+    const { rerender } = renderAvatar();
     const wrapper = avatar();
-    const bounceTarget = wrapper.querySelector("span");
 
-    expect(bounceTarget, "expected a dedicated bounce node inside the wrapper").not.toBeNull();
-    expect(bounceTarget).not.toBe(wrapper);
-    // The wrapper is React's: it carries the hover transition, not the bounce.
-    expect(wrapper.style.transition).toContain("transform");
-    expect(bounceTarget!.style.transition).toBe("");
+    rerender(
+      <div data-testid="chat-avatar-wrapper-probe">
+        <ChatAvatar open={false} responding={false} celebrateKey={1} />
+      </div>,
+    );
+
+    const targets = animatedTargets();
+    expect(targets.length, "celebrate should have animated something").toBeGreaterThan(0);
+    expect(targets, "the bounce must not touch React's node").not.toContain(wrapper);
+
+    const bounceNode = wrapper.querySelector("span");
+    expect(targets).toContain(bounceNode);
   });
 
   it("does not sleep under prefers-reduced-motion — the lid is a 400ms animation", () => {

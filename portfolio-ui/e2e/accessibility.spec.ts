@@ -56,6 +56,41 @@ test.describe("Accessibility", () => {
     }
   });
 
+  test("no element id appears twice", async ({ page }) => {
+    // Every lazy section used to carry its id twice — once on Index.tsx's
+    // anchor wrapper, once on the <section> — which made `#id` resolve to the
+    // wrapper and hid the landmark's aria-labelledby. Strict-mode violations
+    // in unrelated specs were the only signal, and a past contributor silenced
+    // one with `.first()` rather than removing the duplicate, so the bug
+    // survived. This names the invariant instead of relying on that side effect.
+    // Wait for every lazy section to actually mount — each is its own chunk,
+    // and an unmounted section is one that cannot contribute a duplicate id,
+    // which would make this pass vacuously. The heading ids only exist once
+    // the real component has rendered.
+    for (const heading of [
+      "skills-heading",
+      "projects-heading",
+      "experience-heading",
+      "services-heading",
+      "blog-heading",
+      "contact-heading",
+    ]) {
+      await page.locator(`#${heading}`).waitFor({ state: "attached", timeout: 20000 });
+    }
+
+    const duplicates = await page.evaluate(() => {
+      const seen = new Set<string>();
+      const dupes = new Set<string>();
+      for (const el of document.querySelectorAll("[id]")) {
+        if (seen.has(el.id)) dupes.add(el.id);
+        seen.add(el.id);
+      }
+      return [...dupes];
+    });
+
+    expect(duplicates, `duplicate ids: ${duplicates.join(", ")}`).toEqual([]);
+  });
+
   test("interactive elements are focusable", async ({ page }) => {
     // Desktop nav buttons are hidden (display:none) on mobile — programmatic
     // focus on hidden elements is undefined behaviour. Vacuous pass on mobile.
