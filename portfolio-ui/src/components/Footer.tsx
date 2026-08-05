@@ -40,9 +40,9 @@ export function Footer() {
         }}
       />
 
-      {/* Extra bottom gutter on mobile so the fixed chat launcher (56px + 24px
+      {/* Extra bottom gutter on mobile so the fixed chat launcher (64px + 24px
           inset + safe-area) doesn't land on the copyright line. */}
-      <div className="section-container !py-14 !pb-32 md:!pb-14">
+      <div className="section-container !py-14 !pb-36 md:!pb-14">
         <div className="grid md:grid-cols-3 gap-8 items-center mb-10">
           {/* Brand */}
           <div className="text-center md:text-left">

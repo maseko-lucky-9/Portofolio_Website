@@ -9,15 +9,22 @@
  * modal={false} and then fighting FocusScope for behaviour a <div> gives for free.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
-import { MessageSquare, Send, X } from "lucide-react";
+import { Send, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { ChatAvatar } from "@/components/ChatAvatar";
 import { personalData } from "@/data/personal";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
 const MAX_CHARS = 500;
 const MAX_HISTORY = 6;
+
+// A hung stream (Worker or proxy holding the connection open without bytes)
+// would otherwise leave `busy` true forever — reader.read() never resolves and
+// the finally never runs. The timer re-arms on every received chunk, so long
+// answers can stream indefinitely; only silence trips it.
+const STREAM_IDLE_TIMEOUT_MS = 25_000;
 
 const SUGGESTIONS = [
   "What's his Kubernetes background?",
@@ -32,6 +39,8 @@ export function ChatWidget() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const [draft, setDraft] = useState("");
+  // Bumped only when a reply lands successfully — drives the avatar's bounce.
+  const [celebrateKey, setCelebrateKey] = useState(0);
 
   const launcherRef = useRef<HTMLButtonElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -68,11 +77,20 @@ export function ChatWidget() {
       setLive("");
       setBusy(true);
 
+      const ac = new AbortController();
+      let watchdog: ReturnType<typeof setTimeout> | undefined;
+      const arm = () => {
+        clearTimeout(watchdog);
+        watchdog = setTimeout(() => ac.abort(), STREAM_IDLE_TIMEOUT_MS);
+      };
+
       try {
+        arm();
         const res = await fetch("/api/chat", {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ messages: next.slice(-MAX_HISTORY) }),
+          signal: ac.signal,
         });
 
         if (!res.ok || !res.body) {
@@ -88,6 +106,7 @@ export function ChatWidget() {
 
         for (;;) {
           const { value, done } = await reader.read();
+          arm();
           if (done) break;
           buf += dec.decode(value, { stream: true });
           const lines = buf.split("\n");
@@ -108,11 +127,16 @@ export function ChatWidget() {
           }
         }
 
-        if (out) setMsgs((m) => [...m, { role: "assistant", content: out }]);
-        else setErr(`The assistant stopped early. Email ${personalData.email}.`);
+        if (out) {
+          setMsgs((m) => [...m, { role: "assistant", content: out }]);
+          setCelebrateKey((k) => k + 1);
+        } else {
+          setErr(`The assistant stopped early. Email ${personalData.email}.`);
+        }
       } catch {
         setErr(`Couldn't reach the assistant. Email ${personalData.email}.`);
       } finally {
+        clearTimeout(watchdog);
         setLive("");
         setBusy(false);
       }
@@ -129,7 +153,7 @@ export function ChatWidget() {
         aria-expanded={open}
         aria-controls="chat-panel"
         aria-label="Ask about Thulani's experience"
-        className="fixed right-6 z-[70] w-14 h-14 rounded-full bg-primary text-primary-foreground flex items-center justify-center"
+        className="fixed right-6 z-[70] w-16 h-16 md:w-20 md:h-20 rounded-full bg-primary text-primary-foreground flex items-center justify-center"
         style={{
           // Keeps the launcher clear of the home indicator. Inline rather than
           // `bottom-6` so the safe-area inset can be added to it.
@@ -138,7 +162,10 @@ export function ChatWidget() {
           transition: "transform var(--duration-fast) var(--ease-spring)",
         }}
       >
-        {open ? <X size={22} /> : <MessageSquare size={22} />}
+        {/* The avatar stays visible while the panel is open — replies stream in
+            the open state, and the antenna bulb must be visible then. Close
+            affordance moves to the corner badge + the panel header button. */}
+        <ChatAvatar open={open} responding={busy} celebrateKey={celebrateKey} />
       </button>
 
       {open && (
@@ -146,7 +173,7 @@ export function ChatWidget() {
           id="chat-panel"
           role="dialog"
           aria-label="Ask about Thulani's experience"
-          className="glass-card fixed z-[70] flex flex-col overflow-hidden right-0 bottom-0 sm:right-6 sm:bottom-24"
+          className="glass-card fixed z-[70] flex flex-col overflow-hidden right-0 bottom-0 sm:right-6 sm:bottom-24 md:bottom-28"
           style={{
             // min() rather than a sm: breakpoint utility: one inline value covers
             // full-bleed mobile and a 380 px desktop panel, and costs zero CSS bytes
