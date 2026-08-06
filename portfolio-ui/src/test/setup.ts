@@ -34,6 +34,10 @@ globalThis.ResizeObserver = MockResizeObserver as unknown as typeof ResizeObserv
 // no-opping, so any component that scrolls on click blows up under test.
 Element.prototype.scrollIntoView = function scrollIntoView() {};
 
+// Same story for element-level scrollTo (ChatWidget pins its log to the
+// bottom on every streamed token).
+Element.prototype.scrollTo = function scrollTo() {} as Element["scrollTo"];
+
 // Polyfill localStorage / sessionStorage for jsdom — recent jsdom releases
 // expose these as host objects whose methods are non-callable in some
 // configurations. ThemeContext + AuthContext call getItem/setItem at module

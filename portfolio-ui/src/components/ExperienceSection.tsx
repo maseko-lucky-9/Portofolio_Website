@@ -300,7 +300,8 @@ export function ExperienceSection() {
   return (
     <section
       ref={rootRef}
-      id="experience"
+      // No id — the LazySection wrapper in Index.tsx owns `#experience`; see
+      // the note in SkillsSection.
       aria-labelledby="experience-heading"
       className="relative py-20 md:py-28 overflow-hidden"
     >

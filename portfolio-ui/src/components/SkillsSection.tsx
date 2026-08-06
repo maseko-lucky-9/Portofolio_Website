@@ -147,7 +147,12 @@ export function SkillsSection() {
   return (
     <section
       ref={rootRef}
-      id="skills"
+      // No id: the LazySection wrapper in Index.tsx owns `#skills` as the
+      // anchor target, because it exists before this section mounts and
+      // survives the Suspense fallback. Carrying it here too would put two
+      // elements with the same id in the document — invalid HTML, and `#skills`
+      // would resolve to the wrapper, hiding this landmark's label from
+      // tooling. The heading association below is what matters here.
       aria-labelledby="skills-heading"
       className="py-20 md:py-28 relative overflow-hidden"
       style={{ background: "oklch(var(--muted) / var(--opacity-soft))" }}

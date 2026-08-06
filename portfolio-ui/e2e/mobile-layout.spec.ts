@@ -159,21 +159,16 @@ test.describe("mobile anchor navigation", () => {
 
     await page.getByRole("button", { name: /open menu/i }).click();
     await page.getByTestId("mobile-drawer").getByText("Services").click();
-    // .first() because id="services" is duplicated: Index.tsx's LazySection
-    // wrapper <div> and ServicesSection's own <section> both carry it, which
-    // trips Playwright strict mode. The wrapper is the outer one and the
-    // scroll target, so .first() is the correct element either way.
+    // Exactly one #services exists at any moment: LazySection's placeholder
+    // holds the anchor id until ServicesSection mounts and takes it over.
     //
     // Expected landing is scroll-padding-top (5rem = 80px). Before the fix the
     // target drifted ~4,000px as lazy sections expanded mid-scroll.
     const landed = () =>
-      page
-        .locator("#services")
-        .first()
-        .evaluate((el) => {
-          const top = el.getBoundingClientRect().top;
-          return top > 20 && top < 140;
-        });
+      page.locator("#services").evaluate((el) => {
+        const top = el.getBoundingClientRect().top;
+        return top > 20 && top < 140;
+      });
 
     // Poll rather than sleep: the settle loop's own ceiling is
     // MAX_SETTLE_TRIES(20) x SETTLE_INTERVAL_MS(50) = 1000ms, so any fixed wait

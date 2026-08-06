@@ -24,9 +24,15 @@ test.describe("Hero Section", () => {
   });
 
   test("metric cards display values", async ({ page }) => {
-    await expect(page.getByText("20+")).toBeVisible();
-    await expect(page.getByText("8+ Years", { exact: true })).toBeVisible();
-    await expect(page.getByText("10+")).toBeVisible();
+    // Mirrors personalData.metrics. The third slot used to be `clients: "10+"`
+    // and is now `certifications: "3"` — see the rationale comment in
+    // src/data/personal.ts; assert the labels so a value edit fails loudly here.
+    const metrics = page.locator('[data-anime-hero="metrics"]');
+    await expect(metrics.getByText("20+", { exact: true })).toBeVisible();
+    await expect(metrics.getByText("Projects", { exact: true })).toBeVisible();
+    await expect(metrics.getByText("8+ Years", { exact: true })).toBeVisible();
+    await expect(metrics.getByText("3", { exact: true })).toBeVisible();
+    await expect(metrics.getByText("Certifications", { exact: true })).toBeVisible();
   });
 
   test("social links are present", async ({ page }) => {

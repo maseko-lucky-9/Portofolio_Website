@@ -96,7 +96,8 @@ export function ServicesSection() {
   return (
     <section
       ref={rootRef}
-      id="services"
+      // No id — the LazySection wrapper in Index.tsx owns `#services`; see the
+      // note in SkillsSection.
       aria-labelledby="services-heading"
       className="py-20 md:py-28 relative overflow-hidden"
       style={{ background: "oklch(var(--muted) / 0.3)" }}
