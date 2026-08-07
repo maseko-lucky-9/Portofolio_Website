@@ -51,7 +51,10 @@ spec:
   - group: autoscaling
     kind: HorizontalPodAutoscaler
     jsonPointers:
-    - /spec/minReplicas
+    # /spec/minReplicas is NOT ignored. It is a static spec field the HPA never
+    # rewrites at runtime, so ignoring it only meant git could not govern the
+    # replica floor — hpa-patch.yaml said one thing and the live HPA kept
+    # another, with no drift ever reported. /spec/maxReplicas stays ignored.
     - /spec/maxReplicas
   # Secret ignoreDifferences removed — ESO manages prod-backend-secrets
   - kind: NetworkPolicy

@@ -8,7 +8,9 @@ kind: Deployment
 metadata:
   name: backend-api
 spec:
-  replicas: 3
+  # Initial value only — the HPA owns replicas at runtime and ArgoCD ignores
+  # /spec/replicas for this app.
+  replicas: 1
   template:
     spec:
       containers:
@@ -16,7 +18,10 @@ spec:
         resources:
           requests:
             memory: "256Mi"
-            cpu: "200m"
+            # 50m, down from 200m: measured usage across all three prod replicas
+            # was 1-4m each. 50m still leaves >12x headroom, and keeps HPA
+            # utilisation (usage/request) far below the 60% scale-out target.
+            cpu: "50m"
           limits:
             memory: "512Mi"
             cpu: "500m"

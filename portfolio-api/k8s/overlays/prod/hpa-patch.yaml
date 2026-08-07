@@ -3,12 +3,19 @@
 # Increased scaling limits for production
 # ==============================================
 
+# minReplicas is 1, not 3. The cluster is a single node with 4 CPUs, so three
+# replicas buy no availability — one node is one failure domain — while their
+# requests reserved 600m (15% of the node) to sit at 1% utilisation. That
+# reservation pushed the node to 99% of allocatable CPU and left CronJobs
+# unschedulable: the nightly postgres-backup sat Pending for 8h. Burst capacity
+# is unchanged; the HPA still scales out to 15 on real load.
+
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: backend-api
 spec:
-  minReplicas: 3
+  minReplicas: 1
   maxReplicas: 15
   metrics:
   - type: Resource
