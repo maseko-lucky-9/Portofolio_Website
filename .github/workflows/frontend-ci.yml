@@ -25,7 +25,7 @@ on:
     branches: [main, homelab]
 
 env:
-  NODE_VERSION: '20.x'
+  NODE_VERSION: '22.x'
   WORKING_DIRECTORY: ./portfolio-ui
 
 jobs:
@@ -287,6 +287,71 @@ jobs:
           temporaryPublicStorage: true
 
   # ==============================================
+  # Job 6: End-to-End Tests
+  # ==============================================
+  # Added 2026-08-15. The suite existed since long before that but ran nowhere,
+  # so 10+ specs rotted silently and were only found by hand on 2026-08-06 (see
+  # docs/decisions/006-chat-launcher-svg-avatar.md). An unrun test is not a test.
+  #
+  # Two browsers are required, not one. playwright.config.ts declares a
+  # "chromium" project (Desktop Chrome) and a "mobile" project that spreads
+  # devices["iPhone 13"] -- and that descriptor carries
+  # defaultBrowserType: "webkit", so half the matrix runs on WebKit, not
+  # Chromium. Installing only chromium passes locally on any machine that has
+  # webkit lying around from an earlier `playwright install` and then fails in
+  # CI with "Executable doesn't exist at .../webkit-2336/pw_run.sh".
+  # Verified by pointing PLAYWRIGHT_BROWSERS_PATH at an empty directory and
+  # running --project=mobile: it asks for webkit.
+  #
+  # playwright.config.ts owns the server: its `webServer` block builds and
+  # previews on :5173 with VITE_USE_API=false and VITE_DISABLE_WEBGL=true
+  # (headless Chromium has no GPU — a real WebGL context throws and unmounts the
+  # React tree). Do not start a server here; that block would race it.
+  #
+  # e2e/live-domain.spec.ts self-skips without E2E_BASE_URL, so CI never sends
+  # traffic to the production domain.
+  e2e:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    needs: [quality]
+    # A hung preview server would otherwise sit at GitHub's 6-hour default.
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: '**/package.json'
+
+      - name: Install root dependencies
+        run: npm install
+
+      - name: Install frontend dependencies
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: npm install
+
+      - name: Install Playwright browsers
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: npx playwright install --with-deps chromium webkit
+
+      - name: Run Playwright tests
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: npm run test:e2e
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: portfolio-ui/playwright-report
+          retention-days: 7
+
+  # ==============================================
   # Summary Job
   # ==============================================
   # REQUIRED status check on main. Two rules govern this job; breaking either
@@ -302,7 +367,7 @@ jobs:
   ci-success:
     name: CI Success
     runs-on: ubuntu-latest
-    needs: [quality, security, build, bundle-size, lighthouse]
+    needs: [quality, security, build, bundle-size, lighthouse, e2e]
     if: always()
 
     steps:

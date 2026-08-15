@@ -111,3 +111,18 @@ docker-compose.ports.yml
 backups/
 *.sql.gz
 *.dump
+
+# playwright-cli session snapshots
+.playwright-cli/
+
+# Dev screenshots dropped at the repo root by ad-hoc browser runs. 8.7MB of them
+# were tracked and referenced by nothing -- no README embed, no doc, no code.
+# Root-anchored (`/`) on purpose: portfolio-ui/public/ ships real icons and
+# og images, and docs/design-research/ holds committed design references.
+# A bare `*.png` would silently untrack all of those.
+/*.png
+
+# The cloudflared binary. A 38MB darwin build was committed at the root and used
+# by nothing -- docs/ correctly tells you to curl the linux .deb onto the homelab
+# node instead (Auto Run Docs/ultraplan-2.md:24).
+/cloudflared

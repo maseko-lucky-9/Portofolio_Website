@@ -35,7 +35,7 @@ on:
           - prod
 
 env:
-  NODE_VERSION: '20.x'
+  NODE_VERSION: '22.x'
   WORKING_DIRECTORY: ./portfolio-api
 
 jobs:
@@ -45,7 +45,22 @@ jobs:
   validate-schema:
     name: Validate Prisma Schema
     runs-on: ubuntu-latest
-    
+
+    # Set for the WHOLE job, not one step: validate, format and generate all
+    # parse the datasource block, and schema.prisma:11 reads
+    # `url = env("DATABASE_URL")` at parse time. With the variable absent,
+    # Prisma's get-config aborts with P1012 ("Environment variable not found")
+    # before doing any real work -- which is why this job failed on every run,
+    # on main included, since 2026-08-02. Nothing here was ever broken except
+    # the missing variable.
+    #
+    # It is set but never connected to: a syntactically valid, deliberately
+    # unroutable placeholder with no credentials and no real host. Scoping it
+    # to the job rather than one step stops the same P1012 resurfacing from
+    # the next Prisma command someone adds.
+    env:
+      DATABASE_URL: postgresql://localhost:5432/validate_only
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
