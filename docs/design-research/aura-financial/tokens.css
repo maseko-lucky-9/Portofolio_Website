@@ -1,0 +1,164 @@
+/* Aura Financial - design tokens
+ * Derived from https://aura-financial-paid.aura.build/ for internal design reference.
+ * Single-theme dark: the source has zero prefers-color-scheme rules and no dark: variants,
+ * so there is deliberately no .dark block here.
+ * Note: the page background is a Unicorn Studio WebGL canvas, not CSS - see DESIGN.md S10.
+ */
+:root {
+
+  /* color */
+  --color-surface-page: #030303;
+  --color-surface-raised: #050505;
+  --color-surface-panel: #080808;
+  --color-surface-inset: #0a0a0a;
+  --color-surface-elevated: #151515;
+  --color-surface-brand-panel: #0F110E;
+  --color-veil-01: rgba(255,255,255,0.02);
+  --color-veil-02: rgba(255,255,255,0.03);
+  --color-veil-03: rgba(255,255,255,0.04);
+  --color-veil-04: rgba(255,255,255,0.05);
+  --color-veil-05: rgba(255,255,255,0.06);
+  --color-veil-06: rgba(255,255,255,0.10);
+  --color-veil-07: rgba(255,255,255,0.20);
+  --color-ink-100: rgb(255, 255, 255);
+  --color-ink-90: rgba(255,255,255,0.9);
+  --color-ink-80: rgba(255,255,255,0.8);
+  --color-ink-70: rgba(255,255,255,0.7);
+  --color-ink-60: rgba(255,255,255,0.6);
+  --color-ink-50: rgba(255,255,255,0.5);
+  --color-ink-40: rgba(255,255,255,0.4);
+  --color-ink-30: rgba(255,255,255,0.3);
+  --color-ink-20: rgba(255,255,255,0.2);
+  --color-ink-on-light: #030303;
+  --color-accent: #38BDF8;
+  --color-accent-deep: #0ea5e9;
+  --color-accent-90: rgba(56,189,248,0.9);
+  --color-accent-60: rgba(56,189,248,0.6);
+  --color-accent-30: rgba(56,189,248,0.3);
+  --color-accent-20: rgba(56,189,248,0.2);
+  --color-accent-10: rgba(56,189,248,0.1);
+  --color-accent-05: rgba(56,189,248,0.05);
+  --color-border-section: rgba(255,255,255,0.05);
+  --color-border-component: rgba(255,255,255,0.1);
+  --color-border-hover: rgba(255,255,255,0.2);
+  --color-border-accent: rgba(56,189,248,0.3);
+
+  /* font */
+  --font-sans: Inter, sans-serif;
+  --font-serif: Newsreader, serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+
+  /* text */
+  --text-2xs: 10px;
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-lg: 18px;
+  --text-xl: 20px;
+  --text-2xl: 24px;
+  --text-3xl: 30px;
+  --text-4xl: 36px;
+  --text-5xl: 48px;
+  --text-6xl: 60px;
+  --text-7xl: 72px;
+
+  /* weight */
+  --weight-light: 300;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+
+  /* leading */
+  --leading-solid: 1.0;
+  --leading-display: 1.1;
+  --leading-tight: 1.2;
+  --leading-snug: 1.333;
+  --leading-ui: 1.429;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+
+  /* tracking */
+  --tracking-tight: -0.025em;
+  --tracking-normal: 0em;
+  --tracking-wide: 0.025em;
+  --tracking-wider: 0.05em;
+  --tracking-widest: 0.1em;
+  --tracking-mono-label: 0.2em;
+
+  /* space */
+  --space-0-5: 2px;
+  --space-1: 4px;
+  --space-1-5: 6px;
+  --space-2: 8px;
+  --space-2-5: 10px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+  --space-32: 128px;
+
+  /* radius */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-2xl: 32px;
+  --radius-full: 9999px;
+
+  /* blur */
+  --blur-sm: 4px;
+  --blur-md: 12px;
+  --blur-lg: 24px;
+  --blur-xl: 64px;
+
+  /* duration */
+  --duration-micro: 150ms;
+  --duration-component: 300ms;
+  --duration-card: 500ms;
+  --duration-slow: 700ms;
+  --duration-image: 1000ms;
+
+  /* ease */
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-expressive: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+
+  /* layout */
+  --layout-container: 1280px;
+  --layout-gutter-sm: 24px;
+  --layout-gutter-lg: 48px;
+  --layout-measure-xs: 384px;
+  --layout-measure-sm: 448px;
+  --layout-measure-md: 576px;
+  --layout-measure-lg: 672px;
+  --layout-measure-xl: 768px;
+  --layout-measure-2xl: 1024px;
+  --layout-section-y: 128px;
+
+  /* z */
+  --z-background: -10;
+  --z-grid: 0;
+  --z-content: 10;
+  --z-overlay: 20;
+  --z-nav: 50;
+
+  /* shadow */
+  --shadow-nav: 0 2.8px 2.2px rgba(0,0,0,0.034), 0 6.7px 5.3px rgba(0,0,0,0.048), 0 12.5px 10px rgba(0,0,0,0.06), 0 22.3px 17.9px rgba(0,0,0,0.072), 0 41.8px 33.4px rgba(0,0,0,0.086), 0 100px 80px rgba(0,0,0,0.12);
+  --shadow-button-hover: 0 4px 20px rgba(0,0,0,0.5);
+  --shadow-cta-ring: inset 0 0 0 1px #1a1818;
+  --shadow-accent-glow: inset 0 -1ex 2rem 4px #0ea5e9;
+  --shadow-text-glow: 0 0 25px rgba(56,189,248,0.4);
+
+  /* breakpoint */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+}

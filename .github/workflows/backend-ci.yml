@@ -20,7 +20,7 @@ on:
       - '.github/workflows/backend-ci.yml'
 
 env:
-  NODE_VERSION: '20.x'
+  NODE_VERSION: '22.x'
   WORKING_DIRECTORY: ./portfolio-api
 
 jobs:
