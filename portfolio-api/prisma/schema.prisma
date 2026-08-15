@@ -16,25 +16,25 @@ datasource db {
 // ===========================================
 
 model User {
-  id           String   @id @default(uuid())
-  email        String   @unique
-  passwordHash String   @map("password_hash")
-  firstName    String?  @map("first_name")
-  lastName     String?  @map("last_name")
-  role         Role     @default(VIEWER)
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String    @map("password_hash")
+  firstName    String?   @map("first_name")
+  lastName     String?   @map("last_name")
+  role         Role      @default(VIEWER)
   avatar       String?
   bio          String?
-  isActive     Boolean  @default(true) @map("is_active")
+  isActive     Boolean   @default(true) @map("is_active")
   lastLoginAt  DateTime? @map("last_login_at")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
 
   // Relations
-  refreshTokens RefreshToken[]
-  apiKeys       ApiKey[]
-  articles      Article[]
-  projects      Project[]
-  auditLogs     AuditLog[]
+  refreshTokens  RefreshToken[]
+  apiKeys        ApiKey[]
+  articles       Article[]
+  projects       Project[]
+  auditLogs      AuditLog[]
   oauthProviders OAuthProvider[]
 
   @@map("users")
@@ -47,11 +47,11 @@ enum Role {
 }
 
 model RefreshToken {
-  id        String   @id @default(uuid())
-  token     String   @unique
-  userId    String   @map("user_id")
-  expiresAt DateTime @map("expires_at")
-  createdAt DateTime @default(now()) @map("created_at")
+  id        String    @id @default(uuid())
+  token     String    @unique
+  userId    String    @map("user_id")
+  expiresAt DateTime  @map("expires_at")
+  createdAt DateTime  @default(now()) @map("created_at")
   revokedAt DateTime? @map("revoked_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -82,17 +82,17 @@ model ApiKey {
 model OAuthProvider {
   id           String   @id @default(uuid())
   userId       String   @map("user_id")
-  provider     String   // github, google
+  provider     String // github, google
   providerId   String   @map("provider_id")
   email        String?
   accessToken  String?  @map("access_token")
   refreshToken String?  @map("refresh_token")
-  profile      Json?    // Store provider profile data
+  profile      Json? // Store provider profile data
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
-  
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   @@unique([provider, providerId])
   @@index([userId])
   @@map("oauth_providers")
@@ -103,54 +103,54 @@ model OAuthProvider {
 // ===========================================
 
 model Project {
-  id          String   @id @default(uuid())
-  slug        String   @unique
+  id          String  @id @default(uuid())
+  slug        String  @unique
   title       String
   subtitle    String?
-  description String   @db.Text
-  content     String   @db.Text // Markdown content
-  excerpt     String?  @db.Text
-  
+  description String  @db.Text
+  content     String  @db.Text // Markdown content
+  excerpt     String? @db.Text
+
   // Technical details
-  techStack   String[] @map("tech_stack")
-  category    String?
-  client      String?
-  year        Int?
-  duration    String?  // e.g., "3 months"
-  
+  techStack String[] @map("tech_stack")
+  category  String?
+  client    String?
+  year      Int?
+  duration  String? // e.g., "3 months"
+
   // Links
-  githubUrl   String?  @map("github_url")
-  liveUrl     String?  @map("live_url")
-  demoUrl     String?  @map("demo_url")
-  
+  githubUrl String? @map("github_url")
+  liveUrl   String? @map("live_url")
+  demoUrl   String? @map("demo_url")
+
   // Media
-  thumbnail   String?
-  images      String[] @default([])
-  videoUrl    String?  @map("video_url")
-  
+  thumbnail String?
+  images    String[] @default([])
+  videoUrl  String?  @map("video_url")
+
   // Metrics & Display
-  featured    Boolean  @default(false)
-  sortOrder   Int      @default(0) @map("sort_order")
-  views       Int      @default(0)
-  likes       Int      @default(0)
-  
+  featured  Boolean @default(false)
+  sortOrder Int     @default(0) @map("sort_order")
+  views     Int     @default(0)
+  likes     Int     @default(0)
+
   // Status
   status      ProjectStatus @default(DRAFT)
   publishedAt DateTime?     @map("published_at")
   archivedAt  DateTime?     @map("archived_at")
-  
+
   // Meta
   metaTitle       String? @map("meta_title")
   metaDescription String? @map("meta_description")
-  
+
   // Relations
-  authorId    String   @map("author_id")
-  author      User     @relation(fields: [authorId], references: [id])
-  tags        ProjectTag[]
-  analytics   AnalyticsEvent[]
-  
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  authorId  String           @map("author_id")
+  author    User             @relation(fields: [authorId], references: [id])
+  tags      ProjectTag[]
+  analytics AnalyticsEvent[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@index([slug])
   @@index([status])
@@ -165,12 +165,12 @@ enum ProjectStatus {
 }
 
 model ProjectTag {
-  id        String   @id @default(uuid())
-  projectId String   @map("project_id")
-  tagId     String   @map("tag_id")
+  id        String @id @default(uuid())
+  projectId String @map("project_id")
+  tagId     String @map("tag_id")
 
-  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  tag       Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  tag     Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
   @@unique([projectId, tagId])
   @@map("project_tags")
@@ -181,43 +181,43 @@ model ProjectTag {
 // ===========================================
 
 model Article {
-  id          String   @id @default(uuid())
-  slug        String   @unique
-  title       String
-  subtitle    String?
-  content     String   @db.Text // Markdown content
-  excerpt     String?  @db.Text
-  
+  id       String  @id @default(uuid())
+  slug     String  @unique
+  title    String
+  subtitle String?
+  content  String  @db.Text // Markdown content
+  excerpt  String? @db.Text
+
   // Reading
-  readingTime Int      @default(0) @map("reading_time") // in minutes
-  wordCount   Int      @default(0) @map("word_count")
-  
+  readingTime Int @default(0) @map("reading_time") // in minutes
+  wordCount   Int @default(0) @map("word_count")
+
   // Media
-  coverImage  String?  @map("cover_image")
-  
+  coverImage String? @map("cover_image")
+
   // Display
-  featured    Boolean  @default(false)
-  sortOrder   Int      @default(0) @map("sort_order")
-  views       Int      @default(0)
-  likes       Int      @default(0)
-  
+  featured  Boolean @default(false)
+  sortOrder Int     @default(0) @map("sort_order")
+  views     Int     @default(0)
+  likes     Int     @default(0)
+
   // Status
   status      ArticleStatus @default(DRAFT)
   publishedAt DateTime?     @map("published_at")
-  
+
   // SEO
   metaTitle       String? @map("meta_title")
   metaDescription String? @map("meta_description")
   canonicalUrl    String? @map("canonical_url")
-  
+
   // Relations
-  authorId    String   @map("author_id")
-  author      User     @relation(fields: [authorId], references: [id])
-  tags        ArticleTag[]
-  analytics   AnalyticsEvent[]
-  
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  authorId  String           @map("author_id")
+  author    User             @relation(fields: [authorId], references: [id])
+  tags      ArticleTag[]
+  analytics AnalyticsEvent[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@index([slug])
   @@index([status])
@@ -232,12 +232,12 @@ enum ArticleStatus {
 }
 
 model ArticleTag {
-  id        String   @id @default(uuid())
-  articleId String   @map("article_id")
-  tagId     String   @map("tag_id")
+  id        String @id @default(uuid())
+  articleId String @map("article_id")
+  tagId     String @map("tag_id")
 
-  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
-  tag       Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  tag     Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
   @@unique([articleId, tagId])
   @@map("article_tags")
@@ -248,16 +248,16 @@ model ArticleTag {
 // ===========================================
 
 model Tag {
-  id          String   @id @default(uuid())
-  name        String   @unique
-  slug        String   @unique
+  id          String  @id @default(uuid())
+  name        String  @unique
+  slug        String  @unique
   description String?
-  color       String?  // Hex color for UI
-  
-  projects    ProjectTag[]
-  articles    ArticleTag[]
-  
-  createdAt   DateTime @default(now()) @map("created_at")
+  color       String? // Hex color for UI
+
+  projects ProjectTag[]
+  articles ArticleTag[]
+
+  createdAt DateTime @default(now()) @map("created_at")
 
   @@map("tags")
 }
@@ -267,24 +267,24 @@ model Tag {
 // ===========================================
 
 model ContactSubmission {
-  id        String   @id @default(uuid())
-  name      String
-  email     String
-  company   String?
-  subject   String?
-  message   String   @db.Text
-  
+  id      String  @id @default(uuid())
+  name    String
+  email   String
+  company String?
+  subject String?
+  message String  @db.Text
+
   // Metadata
-  ipAddress String?  @map("ip_address")
-  userAgent String?  @map("user_agent")
+  ipAddress String? @map("ip_address")
+  userAgent String? @map("user_agent")
   referrer  String?
-  
+
   // Status
   status    ContactStatus @default(NEW)
   readAt    DateTime?     @map("read_at")
   repliedAt DateTime?     @map("replied_at")
   notes     String?       @db.Text
-  
+
   createdAt DateTime @default(now()) @map("created_at")
 
   @@index([status])
@@ -301,47 +301,47 @@ enum ContactStatus {
 }
 
 model NewsletterSubscriber {
-  id              String   @id @default(uuid())
-  email           String   @unique
-  firstName       String?  @map("first_name")
-  
+  id        String  @id @default(uuid())
+  email     String  @unique
+  firstName String? @map("first_name")
+
   // Double opt-in
-  isConfirmed     Boolean  @default(false) @map("is_confirmed")
-  confirmToken    String?  @unique @map("confirm_token")
-  confirmedAt     DateTime? @map("confirmed_at")
-  
+  isConfirmed  Boolean   @default(false) @map("is_confirmed")
+  confirmToken String?   @unique @map("confirm_token")
+  confirmedAt  DateTime? @map("confirmed_at")
+
   // Unsubscribe
-  isActive        Boolean  @default(true) @map("is_active")
-  unsubscribedAt  DateTime? @map("unsubscribed_at")
-  unsubscribeToken String? @unique @map("unsubscribe_token")
-  
+  isActive         Boolean   @default(true) @map("is_active")
+  unsubscribedAt   DateTime? @map("unsubscribed_at")
+  unsubscribeToken String?   @unique @map("unsubscribe_token")
+
   // Source tracking
-  source          String?
-  
-  createdAt       DateTime @default(now()) @map("created_at")
+  source String?
+
+  createdAt DateTime @default(now()) @map("created_at")
 
   @@index([email])
   @@map("newsletter_subscribers")
 }
 
 model DemoRequest {
-  id          String   @id @default(uuid())
-  name        String
-  email       String
-  company     String?
-  message     String?  @db.Text
-  
+  id      String  @id @default(uuid())
+  name    String
+  email   String
+  company String?
+  message String? @db.Text
+
   // Scheduling
   preferredDate DateTime? @map("preferred_date")
   timezone      String?
-  
+
   // Status
   status      DemoStatus @default(PENDING)
   scheduledAt DateTime?  @map("scheduled_at")
   completedAt DateTime?  @map("completed_at")
   notes       String?    @db.Text
-  
-  createdAt   DateTime @default(now()) @map("created_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
 
   @@index([status])
   @@map("demo_requests")
@@ -359,49 +359,49 @@ enum DemoStatus {
 // ===========================================
 
 model AnalyticsEvent {
-  id          String   @id @default(uuid())
-  
+  id String @id @default(uuid())
+
   // Event info
-  eventType   EventType @map("event_type")
-  eventData   Json?     @map("event_data")
-  
+  eventType EventType @map("event_type")
+  eventData Json?     @map("event_data")
+
   // Resource reference (optional)
-  projectId   String?   @map("project_id")
-  articleId   String?   @map("article_id")
-  
+  projectId String? @map("project_id")
+  articleId String? @map("article_id")
+
   // Visitor info
-  sessionId   String    @map("session_id")
-  visitorId   String?   @map("visitor_id") // Persistent anonymous ID
-  ipAddress   String?   @map("ip_address")
-  
+  sessionId String  @map("session_id")
+  visitorId String? @map("visitor_id") // Persistent anonymous ID
+  ipAddress String? @map("ip_address")
+
   // Geography (from IP)
-  country     String?
-  region      String?
-  city        String?
-  
+  country String?
+  region  String?
+  city    String?
+
   // Device info
-  userAgent   String?   @map("user_agent")
-  browser     String?
+  userAgent      String? @map("user_agent")
+  browser        String?
   browserVersion String? @map("browser_version")
-  os          String?
-  osVersion   String?   @map("os_version")
-  device      String?   // desktop, mobile, tablet
-  
+  os             String?
+  osVersion      String? @map("os_version")
+  device         String? // desktop, mobile, tablet
+
   // Referral
   referrer    String?
-  utmSource   String?   @map("utm_source")
-  utmMedium   String?   @map("utm_medium")
-  utmCampaign String?   @map("utm_campaign")
-  
+  utmSource   String? @map("utm_source")
+  utmMedium   String? @map("utm_medium")
+  utmCampaign String? @map("utm_campaign")
+
   // Page info
-  path        String?
-  duration    Int?      // Time on page in seconds
-  
-  createdAt   DateTime @default(now()) @map("created_at")
+  path     String?
+  duration Int? // Time on page in seconds
+
+  createdAt DateTime @default(now()) @map("created_at")
 
   // Relations
-  project     Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
-  article     Article?  @relation(fields: [articleId], references: [id], onDelete: SetNull)
+  project Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  article Article? @relation(fields: [articleId], references: [id], onDelete: SetNull)
 
   @@index([eventType])
   @@index([sessionId])
@@ -427,9 +427,9 @@ enum EventType {
 }
 
 model AnalyticsSummary {
-  id          String   @id @default(uuid())
-  date        DateTime @db.Date
-  
+  id   String   @id @default(uuid())
+  date DateTime @db.Date
+
   // Totals
   pageViews       Int @default(0) @map("page_views")
   uniqueVisitors  Int @default(0) @map("unique_visitors")
@@ -437,18 +437,18 @@ model AnalyticsSummary {
   articleViews    Int @default(0) @map("article_views")
   resumeDownloads Int @default(0) @map("resume_downloads")
   contactForms    Int @default(0) @map("contact_forms")
-  
+
   // Top content (JSON arrays)
-  topProjects     Json? @map("top_projects")
-  topArticles     Json? @map("top_articles")
-  topReferrers    Json? @map("top_referrers")
-  topCountries    Json? @map("top_countries")
-  
+  topProjects  Json? @map("top_projects")
+  topArticles  Json? @map("top_articles")
+  topReferrers Json? @map("top_referrers")
+  topCountries Json? @map("top_countries")
+
   // Device breakdown
-  deviceBreakdown Json? @map("device_breakdown")
+  deviceBreakdown  Json? @map("device_breakdown")
   browserBreakdown Json? @map("browser_breakdown")
-  
-  createdAt   DateTime @default(now()) @map("created_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
 
   @@unique([date])
   @@index([date])
@@ -460,30 +460,30 @@ model AnalyticsSummary {
 // ===========================================
 
 model CodeExecution {
-  id          String   @id @default(uuid())
-  
+  id String @id @default(uuid())
+
   // Code
-  language    String   // javascript, typescript, python, go
-  code        String   @db.Text
-  input       String?  @db.Text
-  
+  language String // javascript, typescript, python, go
+  code     String  @db.Text
+  input    String? @db.Text
+
   // Result
-  output      String?  @db.Text
-  error       String?  @db.Text
-  exitCode    Int?     @map("exit_code")
-  
+  output   String? @db.Text
+  error    String? @db.Text
+  exitCode Int?    @map("exit_code")
+
   // Performance
   executionTimeMs Int? @map("execution_time_ms")
   memoryUsedKb    Int? @map("memory_used_kb")
-  
+
   // Rate limiting
-  sessionId   String   @map("session_id")
-  ipAddress   String?  @map("ip_address")
-  
+  sessionId String  @map("session_id")
+  ipAddress String? @map("ip_address")
+
   // Cache
-  cacheKey    String?  @unique @map("cache_key")
-  
-  createdAt   DateTime @default(now()) @map("created_at")
+  cacheKey String? @unique @map("cache_key")
+
+  createdAt DateTime @default(now()) @map("created_at")
 
   @@index([sessionId])
   @@index([cacheKey])
@@ -495,25 +495,25 @@ model CodeExecution {
 // ===========================================
 
 model AuditLog {
-  id          String   @id @default(uuid())
-  
-  // Action
-  action      String   // CREATE, UPDATE, DELETE, LOGIN, etc.
-  entity      String   // User, Project, Article, etc.
-  entityId    String?  @map("entity_id")
-  
-  // Changes
-  oldValues   Json?    @map("old_values")
-  newValues   Json?    @map("new_values")
-  
-  // Actor
-  userId      String?  @map("user_id")
-  ipAddress   String?  @map("ip_address")
-  userAgent   String?  @map("user_agent")
-  
-  createdAt   DateTime @default(now()) @map("created_at")
+  id String @id @default(uuid())
 
-  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  // Action
+  action   String // CREATE, UPDATE, DELETE, LOGIN, etc.
+  entity   String // User, Project, Article, etc.
+  entityId String? @map("entity_id")
+
+  // Changes
+  oldValues Json? @map("old_values")
+  newValues Json? @map("new_values")
+
+  // Actor
+  userId    String? @map("user_id")
+  ipAddress String? @map("ip_address")
+  userAgent String? @map("user_agent")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([action])
   @@index([entity])
@@ -536,15 +536,15 @@ model SiteSetting {
 }
 
 model Availability {
-  id              String   @id @default(uuid())
-  isAvailable     Boolean  @default(true) @map("is_available")
-  status          String?  // e.g., "Open to opportunities", "Currently employed"
-  availableFrom   DateTime? @map("available_from")
-  preferredRoles  String[] @default([]) @map("preferred_roles")
-  preferredLocations String[] @default([]) @map("preferred_locations")
-  remoteOnly      Boolean  @default(false) @map("remote_only")
-  notes           String?  @db.Text
-  updatedAt       DateTime @updatedAt @map("updated_at")
+  id                 String    @id @default(uuid())
+  isAvailable        Boolean   @default(true) @map("is_available")
+  status             String? // e.g., "Open to opportunities", "Currently employed"
+  availableFrom      DateTime? @map("available_from")
+  preferredRoles     String[]  @default([]) @map("preferred_roles")
+  preferredLocations String[]  @default([]) @map("preferred_locations")
+  remoteOnly         Boolean   @default(false) @map("remote_only")
+  notes              String?   @db.Text
+  updatedAt          DateTime  @updatedAt @map("updated_at")
 
   @@map("availability")
 }
