@@ -61,8 +61,22 @@ jobs:
         working-directory: ${{ env.WORKING_DIRECTORY }}
         run: npm install
 
+      # DATABASE_URL must be SET, but is never connected to. `prisma validate`
+      # parses the schema, and schema.prisma:11 reads `url = env("DATABASE_URL")`
+      # at parse time -- with the variable absent, Prisma's get-config aborts
+      # with P1012 ("Environment variable not found") before it validates a
+      # single model. That is why this job had failed on every run, on main
+      # included, since 2026-08-02: nothing here was ever broken except the
+      # missing variable.
+      #
+      # The value is a syntactically valid but deliberately unroutable
+      # placeholder -- no credentials, no real host. Reproduced against the
+      # pinned Prisma 5.22.0: absent -> "Validation Error Count: 1";
+      # present -> "The schema at prisma/schema.prisma is valid".
       - name: Validate Prisma schema
         working-directory: ${{ env.WORKING_DIRECTORY }}
+        env:
+          DATABASE_URL: postgresql://localhost:5432/validate_only
         run: npx prisma validate
 
       - name: Format Prisma schema
