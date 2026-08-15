@@ -293,8 +293,15 @@ jobs:
   # so 10+ specs rotted silently and were only found by hand on 2026-08-06 (see
   # docs/decisions/006-chat-launcher-svg-avatar.md). An unrun test is not a test.
   #
-  # Both playwright projects ("chromium" and "mobile"/iPhone 13) are Chromium
-  # devices, so one browser download covers the whole matrix.
+  # Two browsers are required, not one. playwright.config.ts declares a
+  # "chromium" project (Desktop Chrome) and a "mobile" project that spreads
+  # devices["iPhone 13"] -- and that descriptor carries
+  # defaultBrowserType: "webkit", so half the matrix runs on WebKit, not
+  # Chromium. Installing only chromium passes locally on any machine that has
+  # webkit lying around from an earlier `playwright install` and then fails in
+  # CI with "Executable doesn't exist at .../webkit-2336/pw_run.sh".
+  # Verified by pointing PLAYWRIGHT_BROWSERS_PATH at an empty directory and
+  # running --project=mobile: it asks for webkit.
   #
   # playwright.config.ts owns the server: its `webServer` block builds and
   # previews on :5173 with VITE_USE_API=false and VITE_DISABLE_WEBGL=true
@@ -307,7 +314,8 @@ jobs:
     name: E2E Tests
     runs-on: ubuntu-latest
     needs: [quality]
-    timeout-minutes: 20
+    # A hung preview server would otherwise sit at GitHub's 6-hour default.
+    timeout-minutes: 30
 
     steps:
       - name: Checkout code
@@ -329,7 +337,7 @@ jobs:
 
       - name: Install Playwright browsers
         working-directory: ${{ env.WORKING_DIRECTORY }}
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install --with-deps chromium webkit
 
       - name: Run Playwright tests
         working-directory: ${{ env.WORKING_DIRECTORY }}
