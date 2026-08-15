@@ -39,20 +39,33 @@ export default defineConfig({
     //     → initial={false} → header renders at final position immediately,
     //     no 500ms entrance animation window for the button to be unstable.
     reducedMotion: "reduce",
-    // Prevent headless Chromium from throttling rAF for background pages.
-    launchOptions: {
-      args: [
-        "--disable-backgrounding-occluded-windows",
-        "--disable-renderer-backgrounding",
-        "--disable-background-timer-throttling",
-        "--force-device-scale-factor=1",
-      ],
-    },
   },
   projects: [
     {
       name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      use: {
+        ...devices["Desktop Chrome"],
+        // Prevent headless Chromium from throttling rAF for background pages.
+        //
+        // These live on the chromium project, NOT in the shared `use` block.
+        // They are Chromium command-line flags, and the "mobile" project below
+        // is WebKit (devices["iPhone 13"] carries defaultBrowserType:"webkit").
+        // Linux WebKit parses its argv strictly and dies on the first unknown
+        // option — "Cannot parse arguments: Unknown option
+        // --disable-backgrounding-occluded-windows" — so every [mobile] test
+        // failed at browserType.launch on CI while passing on macOS, whose
+        // WebKit build ignores the same flags. Shared-block launch args are a
+        // silent cross-platform trap; keep browser-specific flags on the
+        // browser-specific project.
+        launchOptions: {
+          args: [
+            "--disable-backgrounding-occluded-windows",
+            "--disable-renderer-backgrounding",
+            "--disable-background-timer-throttling",
+            "--force-device-scale-factor=1",
+          ],
+        },
+      },
     },
     {
       name: "mobile",
@@ -69,8 +82,7 @@ export default defineConfig({
         //   which would otherwise crash headless Chromium (no GPU → WebGL context fails →
         //   r3f throws → React unmounts the entire tree including the Navbar).
         // Also avoids HMR (dev server) which triggers full page reloads in headless mode.
-        command:
-          "VITE_USE_API=false VITE_DISABLE_WEBGL=true npm run build && npm run preview",
+        command: "VITE_USE_API=false VITE_DISABLE_WEBGL=true npm run build && npm run preview",
         url: "http://localhost:5173",
         reuseExistingServer: !process.env.CI,
         timeout: 120000,
