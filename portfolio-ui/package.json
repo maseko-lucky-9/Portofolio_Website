@@ -143,7 +143,7 @@
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^15.15.0",
     "gray-matter": "^4.0.3",
-    "jsdom": "^29.0.0",
+    "jsdom": "^30.0.1",
     "lovable-tagger": "^1.1.13",
     "msw": "^2.12.7",
     "postcss": "^8.5.6",
