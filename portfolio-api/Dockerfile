@@ -4,7 +4,7 @@
 # ===========================================
 
 # Stage 1: Build shared package
-FROM node:20-alpine AS shared-builder
+FROM node:24-alpine AS shared-builder
 
 WORKDIR /monorepo/shared
 COPY shared/package*.json ./
@@ -15,7 +15,7 @@ COPY shared/src ./src
 RUN npm run build
 
 # Stage 2: Build API
-FROM node:20-alpine AS builder
+FROM node:24-alpine AS builder
 
 # Install OpenSSL so Prisma generates the correct engine binary
 RUN apk add --no-cache openssl
@@ -49,7 +49,7 @@ RUN npm run build
 RUN test -f dist/index.js || (echo "ERROR: TypeScript build produced no output" && exit 1)
 
 # Stage 3: Production
-FROM node:20-alpine
+FROM node:24-alpine
 
 WORKDIR /monorepo
 

@@ -303,7 +303,7 @@ jobs:
 
             # 6. Smoke test. /ready touches the database; /live is a hardcoded
             #    literal and would pass against a completely broken stack.
-            #    The API image is node:20-alpine with NO curl (its own
+            #    The API image is node:24-alpine with NO curl (its own
             #    HEALTHCHECK uses `node -e` for the same reason) — an exec'd
             #    curl here fails deterministically after a successful rollout,
             #    and with `set -e` the cleanup below would never run.
@@ -344,7 +344,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
         with:
-          node-version: '22.x'
+          node-version: '24.19.0'
 
       - name: Install dependencies
         run: npm install --include=optional --no-audit --no-fund

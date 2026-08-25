@@ -35,7 +35,7 @@ on:
           - prod
 
 env:
-  NODE_VERSION: '22.x'
+  NODE_VERSION: '24.19.0'
   WORKING_DIRECTORY: ./portfolio-api
 
 jobs:
