@@ -1,0 +1,819 @@
+{
+  "history": [
+    {
+      "breakpoints": [],
+      "visible": true,
+      "aspectRatio": 1,
+      "userDownsample": 1,
+      "layerType": "effect",
+      "type": "gradient",
+      "usesPingPong": false,
+      "speed": 0.25,
+      "trackMouse": 0,
+      "trackAxes": "xy",
+      "mouseMomentum": 0,
+      "texture": false,
+      "animating": false,
+      "isMask": 0,
+      "compiledFragmentShaders": "<1 compiled shader(s), 1162 chars \u2014 stripped; refetch from source URL>",
+      "compiledVertexShaders": "<1 compiled shader(s), 293 chars \u2014 stripped; refetch from source URL>",
+      "data": {
+        "downSample": 0.5,
+        "depth": false,
+        "uniforms": {},
+        "isBackground": true
+      },
+      "id": "effect"
+    },
+    {
+      "breakpoints": [],
+      "visible": true,
+      "locked": true,
+      "aspectRatio": 1.6,
+      "layerName": "Border",
+      "userDownsample": 1,
+      "isElement": true,
+      "opacity": 1,
+      "effects": [
+        "7882fee1-eded-4468-83f0-22d86ecaf684"
+      ],
+      "displace": 0,
+      "trackMouse": 0,
+      "anchorPoint": "center",
+      "mouseMomentum": 0,
+      "blendMode": "NORMAL",
+      "bgDisplace": 0,
+      "mask": 0,
+      "maskBackground": {
+        "type": "Vec3",
+        "_x": 0,
+        "_y": 0,
+        "_z": 0
+      },
+      "maskAlpha": 0,
+      "maskDepth": 0,
+      "dispersion": 0,
+      "axisTilt": 0,
+      "states": {
+        "appear": [
+          {
+            "local": {
+              "pendingChanges": {},
+              "changeDebouncer": null,
+              "dragSession": null
+            },
+            "type": "appear",
+            "id": "344fb735-1ec3-46ee-8080-b86aa4ed1770",
+            "prop": "width",
+            "transition": {
+              "ease": "easeInOutQuart",
+              "duration": 5000,
+              "delay": 0
+            },
+            "complete": false,
+            "progress": 0,
+            "value": 0,
+            "endValue": 5000,
+            "initialized": false,
+            "breakpoints": [],
+            "loop": "none",
+            "loopDelay": 0
+          },
+          {
+            "local": {
+              "pendingChanges": {},
+              "changeDebouncer": null,
+              "dragSession": null
+            },
+            "type": "appear",
+            "id": "65d1b831-8c44-48df-83f8-bb17a830e06b",
+            "prop": "height",
+            "transition": {
+              "ease": "easeInOutQuart",
+              "delay": 0,
+              "duration": 5000
+            },
+            "complete": false,
+            "progress": 0,
+            "value": 0,
+            "endValue": 3000,
+            "initialized": false,
+            "breakpoints": [],
+            "loop": "none",
+            "loopDelay": 0
+          }
+        ],
+        "scroll": [],
+        "hover": []
+      },
+      "layerType": "shape",
+      "width": 184,
+      "widthMode": "fixed",
+      "height": 120,
+      "heightMode": "fixed",
+      "left": 0.5,
+      "leftMode": "relative",
+      "top": 0.5,
+      "topMode": "relative",
+      "rotation": 0,
+      "trackAxes": "xy",
+      "pos": {
+        "type": "Vec2",
+        "_x": 0.5,
+        "_y": 0.5
+      },
+      "borderRadius": 0,
+      "gradientAngle": 0,
+      "strokeWidth": 10,
+      "coords": [
+        [
+          0,
+          0
+        ],
+        [
+          184,
+          0
+        ],
+        [
+          184,
+          120
+        ],
+        [
+          0,
+          120
+        ]
+      ],
+      "fill": [
+        "transparent"
+      ],
+      "fitToCanvas": false,
+      "gradientType": "linear",
+      "type": "rectangle",
+      "stroke": [
+        "transparent"
+      ],
+      "numSides": 3,
+      "compiledFragmentShaders": "<1 compiled shader(s), 794 chars \u2014 stripped; refetch from source URL>",
+      "compiledVertexShaders": "<1 compiled shader(s), 845 chars \u2014 stripped; refetch from source URL>",
+      "data": {
+        "uniforms": {}
+      },
+      "id": "shape"
+    },
+    {
+      "breakpoints": [],
+      "visible": true,
+      "locked": true,
+      "aspectRatio": 1.6,
+      "layerName": "sha",
+      "userDownsample": 1,
+      "isElement": true,
+      "opacity": 1,
+      "effects": [
+        "c3a07d2e-cf4a-4799-addc-95da0a7e75fa"
+      ],
+      "displace": 0,
+      "trackMouse": 0,
+      "anchorPoint": "center",
+      "mouseMomentum": 0,
+      "blendMode": "NORMAL",
+      "bgDisplace": 0,
+      "mask": 0,
+      "maskBackground": {
+        "type": "Vec3",
+        "_x": 0,
+        "_y": 0,
+        "_z": 0
+      },
+      "maskAlpha": 0,
+      "maskDepth": 0,
+      "dispersion": 0,
+      "axisTilt": 0,
+      "states": {
+        "appear": [
+          {
+            "local": {
+              "pendingChanges": {},
+              "changeDebouncer": null,
+              "dragSession": null
+            },
+            "type": "appear",
+            "id": "b2e6b877-1169-41ce-a398-5fc6f00373d2",
+            "prop": "width",
+            "transition": {
+              "ease": "easeInOutQuart",
+              "delay": 0,
+              "duration": 5000
+            },
+            "complete": false,
+            "progress": 0,
+            "value": 0,
+            "endValue": 5000,
+            "initialized": false,
+            "breakpoints": [],
+            "loop": "none",
+            "loopDelay": 0
+          },
+          {
+            "local": {
+              "pendingChanges": {},
+              "changeDebouncer": null,
+              "dragSession": null
+            },
+            "type": "appear",
+            "id": "29c4f83c-ef00-4f37-b7c8-1d5c57cb3374",
+            "prop": "height",
+            "transition": {
+              "ease": "easeInOutQuart",
+              "delay": 0,
+              "duration": 5000
+            },
+            "complete": false,
+            "progress": 0,
+            "value": 0,
+            "endValue": 3000,
+            "initialized": false,
+            "breakpoints": [],
+            "loop": "none",
+            "loopDelay": 0
+          }
+        ],
+        "scroll": [],
+        "hover": []
+      },
+      "layerType": "shape",
+      "width": 184,
+      "widthMode": "fixed",
+      "height": 120,
+      "heightMode": "fixed",
+      "left": 0.5,
+      "leftMode": "relative",
+      "top": 0.5,
+      "topMode": "relative",
+      "rotation": 0,
+      "trackAxes": "xy",
+      "pos": {
+        "type": "Vec2",
+        "_x": 0.5,
+        "_y": 0.5
+      },
+      "borderRadius": 0,
+      "gradientAngle": 0,
+      "strokeWidth": 10,
+      "coords": [
+        [
+          0,
+          0
+        ],
+        [
+          184,
+          0
+        ],
+        [
+          184,
+          120
+        ],
+        [
+          0,
+          120
+        ]
+      ],
+      "fill": [
+        "transparent"
+      ],
+      "fitToCanvas": false,
+      "gradientType": "linear",
+      "type": "rectangle",
+      "stroke": [
+        "transparent"
+      ],
+      "numSides": 3,
+      "compiledFragmentShaders": "<1 compiled shader(s), 794 chars \u2014 stripped; refetch from source URL>",
+      "compiledVertexShaders": "<1 compiled shader(s), 845 chars \u2014 stripped; refetch from source URL>",
+      "data": {
+        "uniforms": {}
+      },
+      "id": "shape1"
+    },
+    {
+      "breakpoints": [],
+      "visible": true,
+      "aspectRatio": 1,
+      "userDownsample": 1,
+      "layerType": "effect",
+      "type": "diffuse",
+      "usesPingPong": false,
+      "speed": 0,
+      "trackMouse": 0,
+      "trackAxes": "xy",
+      "mouseMomentum": 0,
+      "texture": false,
+      "parentLayer": "c485daff-d335-4693-b404-76479ad1596e",
+      "animating": true,
+      "isMask": 0,
+      "compiledFragmentShaders": "<1 compiled shader(s), 2120 chars \u2014 stripped; refetch from source URL>",
+      "compiledVertexShaders": "<1 compiled shader(s), 360 chars \u2014 stripped; refetch from source URL>",
+      "data": {
+        "depth": false,
+        "uniforms": {},
+        "isBackground": false
+      },
+      "id": "effect1"
+    },
+    {
+      "breakpoints": [],
+      "visible": true,
+      "locked": true,
+      "aspectRatio": 1.6,
+      "layerName": "Bram no blend",
+      "userDownsample": 1,
+      "isElement": true,
+      "opacity": 1,
+      "effects": [
+        "655edb84-58cc-429a-a272-0a4e8c8c9553",
+        "a6a9fbb5-8ddb-41e9-8062-b96b24ffdba1",
+        "c485daff-d335-4693-b404-76479ad1596e",
+        "eca4b6af-925b-4e3f-95b4-d7588f0bc7aa"
+      ],
+      "displace": 0,
+      "trackMouse": 0,
+      "anchorPoint": "center",
+      "mouseMomentum": 0,
+      "blendMode": "NORMAL",
+      "bgDisplace": 0,
+      "mask": 0,
+      "maskBackground": {
+        "type": "Vec3",
+        "_x": 0,
+        "_y": 0,
+        "_z": 0
+      },
+      "maskAlpha": 0,
+      "maskDepth": 0,
+      "dispersion": 0,
+      "axisTilt": 0,
+      "states": {
+        "appear": [
+          {
+            "local": {
+              "pendingChanges": {},
+              "changeDebouncer": null,
+              "dragSession": null
+            },
+            "type": "appear",
+            "id": "2dbf58f8-ecb6-47d3-8066-395c1c563f44",
+            "prop": "width",
+            "transition": {
+              "delay": 0,
+              "ease": "easeInOutQuart",
+              "duration": 5000
+            },
+            "complete": false,
+            "progress": 0,
+            "value": 0,
+            "endValue": 5000,
+            "initialized": false,
+            "breakpoints": [],
+            "loop": "none",
+            "loopDelay": 0
+          },
+          {
+            "local": {
+              "pendingChanges": {},
+              "changeDebouncer": null,
+              "dragSession": null
+            },
+            "type": "appear",
+            "id": "ba03cb60-c79b-4afa-8478-717b56fc6c75",
+            "prop": "height",
+            "transition": {
+              "delay": 0,
+              "duration": 5000,
+              "ease": "easeInOutQuart"
+            },
+            "complete": false,
+            "progress": 0,
+            "value": 0,
+            "endValue": 3000,
+            "initialized": false,
+            "breakpoints": [],
+            "loop": "none",
+            "loopDelay": 0
+          }
+        ],
+        "scroll": [],
+        "hover": []
+      },
+      "layerType": "shape",
+      "width": 184,
+      "widthMode": "fixed",
+      "height": 120,
+      "heightMode": "fixed",
+      "left": 0.5,
+      "leftMode": "relative",
+      "top": 0.5,
+      "topMode": "relative",
+      "rotation": 0,
+      "trackAxes": "xy",
+      "pos": {
+        "type": "Vec2",
+        "_x": 0.5,
+        "_y": 0.5
+      },
+      "borderRadius": 0,
+      "gradientAngle": 0,
+      "strokeWidth": 10,
+      "coords": [
+        [
+          0,
+          0
+        ],
+        [
+          184,
+          0
+        ],
+        [
+          184,
+          120
+        ],
+        [
+          0,
+          120
+        ]
+      ],
+      "fill": [
+        "transparent"
+      ],
+      "fitToCanvas": false,
+      "gradientType": "linear",
+      "type": "rectangle",
+      "stroke": [
+        "transparent"
+      ],
+      "numSides": 3,
+      "compiledFragmentShaders": "<1 compiled shader(s), 794 chars \u2014 stripped; refetch from source URL>",
+      "compiledVertexShaders": "<1 compiled shader(s), 845 chars \u2014 stripped; refetch from source URL>",
+      "data": {
+        "uniforms": {}
+      },
+      "id": "shape2"
+    },
+    {
+      "breakpoints": [],
+      "visible": true,
+      "locked": false,
+      "aspectRatio": 1,
+      "layerName": "",
+      "userDownsample": 1,
+      "isElement": true,
+      "opacity": 1,
+      "effects": [
+        "e28eccf8-4521-40a6-95a4-37553ff28bae",
+        "209cf712-d8de-48b2-9ba5-30d671a04b37"
+      ],
+      "displace": 0,
+      "trackMouse": 0,
+      "anchorPoint": "center",
+      "mouseMomentum": 0,
+      "blendMode": "OVERLAY",
+      "bgDisplace": 0,
+      "mask": 0,
+      "maskBackground": {
+        "type": "Vec3",
+        "_x": 0,
+        "_y": 0,
+        "_z": 0
+      },
+      "maskAlpha": 0,
+      "maskDepth": 0,
+      "dispersion": 0,
+      "axisTilt": 0,
+      "states": {
+        "appear": [],
+        "scroll": [],
+        "hover": []
+      },
+      "layerType": "text",
+      "justCreated": false,
+      "isSafari": false,
+      "width": 5,
+      "widthMode": "fixed",
+      "height": 65.190625,
+      "heightMode": "fixed",
+      "left": 0.4886067708333333,
+      "leftMode": "relative",
+      "top": 0.5,
+      "topMode": "relative",
+      "rotation": 0,
+      "trackAxes": "xy",
+      "fontSize": 10,
+      "lineHeight": 65.190625,
+      "letterSpacing": 0,
+      "fontFamily": "Inter",
+      "fontStyle": "regular",
+      "fontWeight": "400",
+      "textAlign": "left",
+      "textContent": ".",
+      "fill": [
+        "#FFFFFF"
+      ],
+      "gradientAngle": 0,
+      "gradientType": "linear",
+      "fontSizeMode": "fixed",
+      "noTextAsHtml": false,
+      "fontCSS": {
+        "family": "Inter",
+        "src": "https://assets.unicorn.studio/fonts/google_fonts/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfMZhrib2Bg-4.ttf"
+      },
+      "compiledFragmentShaders": "<1 compiled shader(s), 1262 chars \u2014 stripped; refetch from source URL>",
+      "compiledVertexShaders": "<1 compiled shader(s), 845 chars \u2014 stripped; refetch from source URL>",
+      "data": {
+        "uniforms": {}
+      },
+      "id": "text",
+      "windowWidth": 1440
+    },
+    {
+      "breakpoints": [],
+      "visible": true,
+      "aspectRatio": 1,
+      "userDownsample": 1,
+      "layerType": "effect",
+      "type": "beam",
+      "usesPingPong": false,
+      "speed": 0.43,
+      "trackMouse": 0,
+      "trackAxes": "xy",
+      "mouseMomentum": 0,
+      "texture": false,
+      "parentLayer": "7882fee1-eded-4468-83f0-22d86ecaf684",
+      "animating": false,
+      "isMask": 0,
+      "compiledFragmentShaders": "<1 compiled shader(s), 1633 chars \u2014 stripped; refetch from source URL>",
+      "compiledVertexShaders": "<1 compiled shader(s), 360 chars \u2014 stripped; refetch from source URL>",
+      "data": {
+        "depth": false,
+        "uniforms": {},
+        "isBackground": false
+      },
+      "id": "effect2"
+    },
+    {
+      "breakpoints": [],
+      "visible": true,
+      "aspectRatio": 1,
+      "userDownsample": 1,
+      "layerType": "effect",
+      "type": "beam",
+      "usesPingPong": false,
+      "speed": 0.43,
+      "trackMouse": 0,
+      "trackAxes": "xy",
+      "mouseMomentum": 0,
+      "texture": false,
+      "parentLayer": "c3a07d2e-cf4a-4799-addc-95da0a7e75fa",
+      "animating": false,
+      "isMask": 0,
+      "compiledFragmentShaders": "<1 compiled shader(s), 1633 chars \u2014 stripped; refetch from source URL>",
+      "compiledVertexShaders": "<1 compiled shader(s), 360 chars \u2014 stripped; refetch from source URL>",
+      "data": {
+        "depth": false,
+        "uniforms": {},
+        "isBackground": false
+      },
+      "id": "effect3"
+    },
+    {
+      "breakpoints": [],
+      "visible": true,
+      "aspectRatio": 1,
+      "userDownsample": 1,
+      "layerType": "effect",
+      "type": "beam",
+      "usesPingPong": false,
+      "pos": {
+        "type": "Vec2",
+        "_x": 0.5,
+        "_y": 0.5
+      },
+      "speed": 0.2,
+      "trackMouse": 0,
+      "trackAxes": "xy",
+      "mouseMomentum": 0,
+      "texture": false,
+      "parentLayer": "655edb84-58cc-429a-a272-0a4e8c8c9553",
+      "animating": true,
+      "isMask": 0,
+      "states": {
+        "appear": [
+          {
+            "local": {
+              "pendingChanges": {},
+              "changeDebouncer": null,
+              "dragSession": null
+            },
+            "type": "appear",
+            "id": "19bd6b1b-c9fd-4afa-b6f6-e3b6f28f05f8",
+            "prop": "pos",
+            "transition": {
+              "delay": 0,
+              "duration": 1000,
+              "ease": "easeInOutQuart"
+            },
+            "complete": false,
+            "progress": 0,
+            "value": {
+              "type": "Vec2",
+              "_x": 0.5,
+              "_y": 0.5
+            },
+            "endValue": {
+              "type": "Vec2",
+              "_x": 0.5,
+              "_y": 0.5
+            },
+            "initialized": false,
+            "breakpoints": [],
+            "loop": "none",
+            "loopDelay": 0,
+            "uniformData": {
+              "type": "2f",
+              "name": "uPos"
+            }
+          }
+        ],
+        "scroll": [],
+        "hover": []
+      },
+      "compiledFragmentShaders": "<1 compiled shader(s), 2175 chars \u2014 stripped; refetch from source URL>",
+      "compiledVertexShaders": "<1 compiled shader(s), 360 chars \u2014 stripped; refetch from source URL>",
+      "data": {
+        "depth": false,
+        "uniforms": {},
+        "isBackground": false
+      },
+      "id": "effect4"
+    },
+    {
+      "breakpoints": [],
+      "visible": true,
+      "aspectRatio": 1,
+      "userDownsample": 1,
+      "layerType": "effect",
+      "type": "replicate",
+      "usesPingPong": false,
+      "speed": 0.5,
+      "texture": false,
+      "parentLayer": "e28eccf8-4521-40a6-95a4-37553ff28bae",
+      "animating": false,
+      "mouseMomentum": 0,
+      "isMask": 0,
+      "compiledFragmentShaders": "<1 compiled shader(s), 797 chars \u2014 stripped; refetch from source URL>",
+      "compiledVertexShaders": "<1 compiled shader(s), 360 chars \u2014 stripped; refetch from source URL>",
+      "data": {
+        "depth": false,
+        "uniforms": {},
+        "isBackground": false
+      },
+      "id": "effect5"
+    },
+    {
+      "breakpoints": [],
+      "visible": true,
+      "aspectRatio": 1,
+      "userDownsample": 1,
+      "layerType": "effect",
+      "type": "replicate",
+      "usesPingPong": false,
+      "speed": 0.5,
+      "texture": false,
+      "parentLayer": "209cf712-d8de-48b2-9ba5-30d671a04b37",
+      "animating": false,
+      "mouseMomentum": 0,
+      "isMask": 0,
+      "compiledFragmentShaders": "<1 compiled shader(s), 795 chars \u2014 stripped; refetch from source URL>",
+      "compiledVertexShaders": "<1 compiled shader(s), 360 chars \u2014 stripped; refetch from source URL>",
+      "data": {
+        "depth": false,
+        "uniforms": {},
+        "isBackground": false
+      },
+      "id": "effect6"
+    },
+    {
+      "breakpoints": [],
+      "visible": true,
+      "aspectRatio": 1,
+      "userDownsample": 1,
+      "layerType": "effect",
+      "type": "blur",
+      "usesPingPong": false,
+      "trackMouse": 0,
+      "trackAxes": "xy",
+      "mouseMomentum": 0,
+      "texture": false,
+      "parentLayer": "eca4b6af-925b-4e3f-95b4-d7588f0bc7aa",
+      "animating": false,
+      "isMask": 0,
+      "compiledFragmentShaders": "<4 compiled shader(s), 9559 chars \u2014 stripped; refetch from source URL>",
+      "compiledVertexShaders": "<1 compiled shader(s), 360 chars \u2014 stripped; refetch from source URL>",
+      "data": {
+        "downSample": 0.25,
+        "depth": false,
+        "uniforms": {},
+        "isBackground": false,
+        "passes": [
+          {
+            "prop": "vertical",
+            "value": 1,
+            "downSample": 0.25
+          },
+          {
+            "prop": "vertical",
+            "value": 2,
+            "downSample": 0.5
+          },
+          {
+            "prop": "vertical",
+            "value": 3,
+            "downSample": 0.5
+          }
+        ]
+      },
+      "id": "effect7"
+    },
+    {
+      "breakpoints": [],
+      "visible": true,
+      "aspectRatio": 1,
+      "userDownsample": 1,
+      "layerType": "effect",
+      "type": "noise",
+      "usesPingPong": false,
+      "speed": 0.37,
+      "trackMouse": 0,
+      "trackAxes": "xy",
+      "mouseMomentum": 0,
+      "texture": false,
+      "parentLayer": "a6a9fbb5-8ddb-41e9-8062-b96b24ffdba1",
+      "animating": true,
+      "isMask": 0,
+      "compiledFragmentShaders": "<1 compiled shader(s), 3501 chars \u2014 stripped; refetch from source URL>",
+      "compiledVertexShaders": "<1 compiled shader(s), 360 chars \u2014 stripped; refetch from source URL>",
+      "data": {
+        "depth": false,
+        "uniforms": {},
+        "isBackground": false
+      },
+      "id": "effect8"
+    },
+    {
+      "breakpoints": [],
+      "visible": true,
+      "aspectRatio": 1,
+      "userDownsample": 1,
+      "layerType": "effect",
+      "type": "glyphDither",
+      "usesPingPong": false,
+      "texture": {
+        "src": "https://assets.unicorn.studio/media/glyphs/squares.png",
+        "sampler": "uSprite"
+      },
+      "trackMouse": 0,
+      "trackAxes": "xy",
+      "mouseMomentum": 0,
+      "animating": false,
+      "isMask": 0,
+      "compiledFragmentShaders": "<1 compiled shader(s), 2583 chars \u2014 stripped; refetch from source URL>",
+      "compiledVertexShaders": "<1 compiled shader(s), 360 chars \u2014 stripped; refetch from source URL>",
+      "data": {
+        "depth": false,
+        "uniforms": {},
+        "isBackground": false,
+        "texture": {
+          "src": "",
+          "sampler": "uSprite"
+        }
+      },
+      "id": "effect9"
+    }
+  ],
+  "options": {
+    "name": "Unicorn.studio animation (Remix)",
+    "fps": 60,
+    "dpi": 1.5,
+    "scale": 1,
+    "includeLogo": false,
+    "isProduction": false,
+    "freePlan": false
+  },
+  "version": "1.4.36",
+  "id": "FixNvEwvWwbu3QX9qC3F",
+  "_provenance": {
+    "source_url": "https://storage.googleapis.com/unicornstudio-production/embeds/FixNvEwvWwbu3QX9qC3F?v=1788205698007",
+    "fetched": "2026-08-31",
+    "runtime": "unicornstudio.umd.js v1.4.29 (jsDelivr)",
+    "scene_version": "1.4.36",
+    "note": "compiled GLSL stripped (36515 chars) for readability"
+  }
+}

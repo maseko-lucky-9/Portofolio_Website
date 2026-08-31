@@ -1,0 +1,442 @@
+{
+  "_meta": {
+    "captured": "2026-08-31",
+    "method": "playwright-cli (Chrome, live site https://aura-financial-paid.aura.build/, viewport 1440x900); canvas-element screenshots at 2 Hz; luminance via ffmpeg signalstats YAVG; animation audit via document.getAnimations() inside the about:srcdoc frame",
+    "why": "The 2026-08-11 extraction ran against a locally-served copy on :8899 and probed the top document only, where raw/probes.json recorded canvas:0. The shader lives in the srcdoc iframe."
+  },
+  "canvas": {
+    "found_in": "about:srcdoc iframe (NOT the top document \u2014 cause of the original canvas:0 miss)",
+    "backing_store": [
+      2160,
+      1350
+    ],
+    "css_size": [
+      1440,
+      900
+    ],
+    "dpr_factor": 1.5,
+    "context": "webgl2",
+    "scene_options": {
+      "fps": 60,
+      "dpi": 1.5,
+      "scale": 1,
+      "includeLogo": false,
+      "freePlan": false
+    },
+    "runtime": "unicornstudio.umd.js v1.4.29",
+    "scene_format_version": "1.4.36"
+  },
+  "shader_pulse": {
+    "period_seconds": 2.85,
+    "derivation": "20 luminance peaks spanning t=0.5s..57.5s -> (57.5-0.5)/20",
+    "yavg_min": 30.64,
+    "yavg_max": 48.39,
+    "yavg_mean": 36.29,
+    "swing_ratio": 1.58,
+    "peak_times": [
+      0.5,
+      3.5,
+      6.0,
+      9.0,
+      12.0,
+      15.0,
+      17.5,
+      20.5,
+      23.5,
+      26.0,
+      29.0,
+      32.0,
+      35.0,
+      37.5,
+      40.5,
+      43.5,
+      46.0,
+      49.0,
+      52.0,
+      54.5,
+      57.5
+    ]
+  },
+  "shader_macro_cycle": {
+    "description": "Amorphous vortex/nebula that grows to fill the viewport, then recedes to a small dark lens shape. Not a clean loop \u2014 noise-driven, so it never repeats exactly.",
+    "observed_range_seconds": "roughly 30-60s between full-bright and fully-receded states",
+    "evidence_frames": [
+      "motion/frames/hero-shader-t0003.jpg (near-peak, full-viewport swirl)",
+      "motion/frames/hero-shader-t0022.jpg (receded, dark lens)",
+      "motion/frames/hero-shader-t0042.jpg (receded)",
+      "motion/frames/hero-shader-t0057.jpg (near-peak)"
+    ]
+  },
+  "shader_palette_observed": {
+    "method": "brightest 8% of pixels, quantised to a 24-step cube, from canvas screenshots",
+    "core_cyan": "#00A8C0",
+    "core_cyan_alt": "#00C0C0",
+    "mid_blue": "#0090C0",
+    "wash_blue": "#3078C0",
+    "dim_blue": "#004878",
+    "mean_bright_peak": "#25AED0",
+    "mean_bright_receded": "#39789E",
+    "note": "The shader reads distinctly more teal/cyan than the CSS accent --color-accent #38BDF8. Any CSS substitute keyed only to #38BDF8 will look bluer than the original."
+  },
+  "shader_authored_colours": {
+    "beam_layer_8": "#0081F7",
+    "beam_layer_6": "#459AFF",
+    "note": "#4C961D and #36B612 also appear as vec3 literals but are luma coefficient vectors (0.299,0.587,0.114 and 0.2126,0.7152,0.0722), not colours."
+  },
+  "shader_layer_stack": [
+    {
+      "i": 0,
+      "type": "gradient",
+      "role": "background field",
+      "speed": 0.25,
+      "downSample": 0.5,
+      "isBackground": true
+    },
+    {
+      "i": 1,
+      "type": "rectangle",
+      "role": "shape 'Border'",
+      "strokeWidth": 10
+    },
+    {
+      "i": 2,
+      "type": "rectangle",
+      "role": "shape 'sha'"
+    },
+    {
+      "i": 3,
+      "type": "diffuse",
+      "speed": 0,
+      "animating": true
+    },
+    {
+      "i": 4,
+      "type": "rectangle",
+      "role": "shape 'Bram no blend' \u2014 main composite layer, 4 child effects"
+    },
+    {
+      "i": 5,
+      "type": "text",
+      "role": "single '.' glyph, Inter 10px, blendMode OVERLAY, 2 replicate effects"
+    },
+    {
+      "i": 6,
+      "type": "beam",
+      "speed": 0.43
+    },
+    {
+      "i": 7,
+      "type": "beam",
+      "speed": 0.43
+    },
+    {
+      "i": 8,
+      "type": "beam",
+      "speed": 0.2,
+      "animating": true,
+      "pos": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "i": 9,
+      "type": "replicate",
+      "speed": 0.5
+    },
+    {
+      "i": 10,
+      "type": "replicate",
+      "speed": 0.5
+    },
+    {
+      "i": 11,
+      "type": "blur",
+      "downSample": 0.25,
+      "role": "separable 2-pass (vertical + horizontal)"
+    },
+    {
+      "i": 12,
+      "type": "noise",
+      "speed": 0.37,
+      "animating": true,
+      "role": "drives the organic morph"
+    },
+    {
+      "i": 13,
+      "type": "glyphDither",
+      "role": "halftone dot-matrix",
+      "texture": "https://assets.unicorn.studio/media/glyphs/squares.png"
+    }
+  ],
+  "mouse_reactivity": {
+    "verdict": "NONE",
+    "scene_evidence": "trackMouse=0 and mouseMomentum=0 on all 14 layers",
+    "empirical_ab_test": {
+      "method": "canvas screenshots 2.85s apart (one pulse period); condition A mouse parked at (20,20), condition B mouse swept across the hero; compared within-condition consecutive diffs",
+      "control_mouse_parked_yavg": [
+        11.757,
+        1.112,
+        11.603,
+        18.005,
+        8.878
+      ],
+      "test_mouse_sweeping_yavg": [
+        13.916,
+        19.174,
+        8.874,
+        1.473,
+        5.522
+      ],
+      "control_mean": 10.27,
+      "test_mean": 9.79,
+      "conclusion": "Sweeping the cursor produces no more change than leaving it still \u2014 the field is free-running and cursor-independent."
+    }
+  },
+  "scroll_reactivity": {
+    "verdict": "NONE for the shader itself; what varies with scroll is attenuation, not rendering",
+    "canvas_wrapper": ".aura-background-component \u2014 'top-0 w-full h-screen -z-10 fixed', 900px tall, pinned to viewport rows 0-900",
+    "section_backgrounds": [
+      {
+        "page_y": 1014,
+        "bg": "rgba(0, 0, 0, 0)",
+        "opaque": false
+      },
+      {
+        "page_y": 1100,
+        "bg": "rgba(0, 0, 0, 0.5)",
+        "opaque": false
+      },
+      {
+        "page_y": 2480,
+        "bg": "rgba(3, 3, 3, 0.8)",
+        "opaque": false
+      },
+      {
+        "page_y": 3596,
+        "bg": "rgba(3, 3, 3, 0.5)",
+        "opaque": false
+      },
+      {
+        "page_y": 4511,
+        "bg": "rgba(3, 3, 3, 0.5)",
+        "opaque": false
+      },
+      {
+        "page_y": 5420,
+        "bg": "rgb(3, 3, 3)",
+        "opaque": true
+      }
+    ],
+    "contribution_measurement": {
+      "method": "full-page screenshot at each scroll offset with canvas visibility visible vs hidden; YAVG of the difference blend (ffmpeg signalstats)",
+      "noise_floor_yavg": 0.0408,
+      "noise_floor_method": "two captures 0.4s apart with the shader hidden in both \u2014 isolates CSS-animation drift",
+      "readings": [
+        {
+          "scroll_y": 0,
+          "where": "hero",
+          "yavg": 19.022,
+          "pct_of_hero": 100
+        },
+        {
+          "scroll_y": 1600,
+          "where": "section 2",
+          "yavg": 4.69,
+          "pct_of_hero": 25
+        },
+        {
+          "scroll_y": 3000,
+          "where": "section 3",
+          "yavg": 1.742,
+          "pct_of_hero": 9
+        },
+        {
+          "scroll_y": 6000,
+          "where": "section 6",
+          "yavg": 2.075,
+          "pct_of_hero": 11
+        }
+      ],
+      "conclusion": "The field is NOT hero-only. It contributes a faint 9-25% wash for the full page length, well above the 0.04 noise floor. A substitute that stops at the hero boundary will render the lower page flatter than the original."
+    },
+    "correction_note": "An earlier draft of DESIGN.md 10a claimed the sections were opaque and the field contributed nothing below the hero. This measurement refutes that and the section was rewritten."
+  },
+  "ambient_animation_audit": {
+    "method": "document.getAnimations() on the live page inside the about:srcdoc frame",
+    "total": 42,
+    "infinite": 42,
+    "finite": 0,
+    "running": 42,
+    "paused": 0,
+    "verdict_on_R13": "CONFIRMED \u2014 42 infinite / 0 finite, exactly as claimed by the static CSS read",
+    "effect_level_easing": "linear on all 42 (tokens.css --ease-* apply to transitions, not to these keyframes)",
+    "instances": [
+      {
+        "name": "beam",
+        "duration_ms": 3000,
+        "count": 6
+      },
+      {
+        "name": "pulse",
+        "duration_ms": 2000,
+        "count": 6
+      },
+      {
+        "name": "ping",
+        "duration_ms": 1000,
+        "count": 4
+      },
+      {
+        "name": "sonar-wave",
+        "duration_ms": 3000,
+        "count": 3
+      },
+      {
+        "name": "border-spin",
+        "duration_ms": 2500,
+        "count": 2
+      },
+      {
+        "name": "shimmer",
+        "duration_ms": 4000,
+        "count": 2
+      },
+      {
+        "name": "breathe",
+        "duration_ms": 4500,
+        "count": 2
+      },
+      {
+        "name": "spin",
+        "duration_ms": 15000,
+        "count": 2
+      },
+      {
+        "name": "spin",
+        "duration_ms": 20000,
+        "count": 2
+      },
+      {
+        "name": "spin",
+        "duration_ms": 30000,
+        "count": 2
+      },
+      {
+        "name": "marquee",
+        "duration_ms": 60000,
+        "count": 2
+      },
+      {
+        "name": "spin",
+        "duration_ms": 12000,
+        "count": 1
+      },
+      {
+        "name": "spin",
+        "duration_ms": 40000,
+        "count": 1
+      },
+      {
+        "name": "pulse",
+        "duration_ms": 1500,
+        "count": 1
+      },
+      {
+        "name": "beam",
+        "duration_ms": 4000,
+        "count": 1
+      },
+      {
+        "name": "ping",
+        "duration_ms": 3000,
+        "count": 1
+      },
+      {
+        "name": "ping",
+        "duration_ms": 4000,
+        "count": 1
+      },
+      {
+        "name": "bounce",
+        "duration_ms": 1000,
+        "count": 1
+      },
+      {
+        "name": "bounce",
+        "duration_ms": 4000,
+        "count": 1
+      },
+      {
+        "name": "marquee-reverse",
+        "duration_ms": 60000,
+        "count": 1
+      }
+    ],
+    "corrections_to_prior_table": [
+      "pulse also runs at 1500ms (prior table listed 2s only)",
+      "beam also runs at 4000ms (prior table listed 3s only)",
+      "bounce durations are 1000ms and 4000ms (prior table listed '\u2014')",
+      "counts per keyframe were never recorded before; beam and pulse dominate at 6 instances each"
+    ]
+  },
+  "interaction_states": {
+    "method": "hover/group-hover utility census over raw/template-source.html + live getAnimations() probe",
+    "distinct_hover_utilities": 41,
+    "transition_durations_used": {
+      "duration-300": 47,
+      "duration-500": 16,
+      "duration-700": 3,
+      "duration-1000": 3
+    },
+    "transition_properties": {
+      "transition-colors": 68,
+      "transition-all": 47,
+      "transition-transform": 14,
+      "transition-opacity": 14
+    },
+    "token_alignment": "duration-300/500/700/1000 map exactly onto --duration-component/card/slow/image. No utility uses 150ms, so --duration-micro is not exercised by any hover utility.",
+    "top_hover_utilities": {
+      "hover:grayscale-0": 18,
+      "hover:bg-white/[0.02]": 18,
+      "hover:border-brand-sky/30": 16,
+      "hover:text-brand-sky": 15,
+      "hover:opacity-100": 15,
+      "hover:text-white": 14,
+      "hover:text-brand-sky/50": 14,
+      "hover:border-white/20": 8,
+      "hover:translate-x-0.5": 5,
+      "hover:bg-brand-sky": 5,
+      "hover:text-black": 4,
+      "hover:rotate-90": 4,
+      "hover:border-brand-sky": 4,
+      "hover:scale-110": 3,
+      "hover:scale-105": 3,
+      "hover:-translate-y-0.5": 3
+    },
+    "group_hover_patterns": {
+      "group-hover:text-brand-sky/50": 14,
+      "group-hover:grayscale-0": 14,
+      "group-hover:opacity-100": 13,
+      "group-hover:text-brand-sky": 7,
+      "group-hover:translate-x-0.5": 5,
+      "group-hover:rotate-90": 4,
+      "group-hover:bg-brand-sky": 4
+    },
+    "special_cases": {
+      "marquee_pause_on_hover": {
+        "class": "hover:[animation-play-state:paused]",
+        "verified": true,
+        "evidence": "getAnimations()[0] on the marquee track: playState running (t=370950ms) -> paused (t=371066ms) -> still paused (t=371066ms, frozen across 1.6s) -> running (t=372350ms) after mouse-out"
+      },
+      "shimmer_accelerates_on_hover": {
+        "class": "hover:animate-[shimmer_1.5s_infinite]",
+        "note": "base shimmer is 4000ms; hovering re-declares it at 1.5s \u2014 a 2.7x speed-up"
+      },
+      "accordion": {
+        "class": "hover:h-auto",
+        "note": "height-driven disclosure, no JS toggle needed"
+      }
+    }
+  }
+}
