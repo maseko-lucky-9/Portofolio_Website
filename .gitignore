@@ -118,8 +118,7 @@ backups/
 # Dev screenshots dropped at the repo root by ad-hoc browser runs. 8.7MB of them
 # were tracked and referenced by nothing -- no README embed, no doc, no code.
 # Root-anchored (`/`) on purpose: portfolio-ui/public/ ships real icons and
-# og images, and docs/design-research/ holds committed design references.
-# A bare `*.png` would silently untrack all of those.
+# og images. A bare `*.png` would silently untrack those.
 /*.png
 
 # The cloudflared binary. A 38MB darwin build was committed at the root and used
