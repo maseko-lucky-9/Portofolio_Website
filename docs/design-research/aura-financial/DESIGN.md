@@ -18,13 +18,22 @@ downgraded to observations rather than asserted.
 2. Read **§1 Rules** before anything else. The values in §3–§10 are a vocabulary; §1 is the grammar.
    A rebuild using the right tokens and the wrong rules will not look like this design.
 3. Scaffold with **§2 Grid**, then build components from **§8**.
-4. Before shipping, read **§13 Accessibility** — this template has two defects you must **fix**, not
+4. For anything that moves, read **§9** and **§10a** together — §9 is the CSS layer, §10a is the
+   WebGL field. §10a is measured from the live site; treat it, not §10's sourcing note, as the
+   description of the background.
+5. Before shipping, read **§13 Accessibility** — this template has two defects you must **fix**, not
    inherit.
 
 **What this design is.** A near-black institutional fintech surface with a single sky-blue accent, a
-living WebGL field behind everything, and a hard three-way split of typographic labour: _italic serif_
+living WebGL field behind the hero, and a hard three-way split of typographic labour: _italic serif_
 for display, _sans_ for reading, _uppercase tracked mono_ for machine labels. It reads as
 "instrument panel for serious money" — precise, dark, quietly in motion.
+
+> **Refinement (2026-08-31).** "Behind everything" is true but misleading. The canvas is
+> `position: fixed` at viewport rows 0–900 and never moves; the sections in front are
+> semi-transparent veils, so the field reads at full strength in the hero and at a faint 9–25%
+> wash for the rest of the page. It is not hero-only, and it is not full-strength throughout.
+> Measured in **§10a**.
 
 ---
 
@@ -417,24 +426,37 @@ exception at `cubic-bezier(0.25, 1, 0.5, 1)`.
 There are **no scroll reveals**. Instead, 42 infinite animations run continuously — the page is
 never visually still:
 
-| Keyframe               | Duration                        | Role                                          |
-| ---------------------- | ------------------------------- | --------------------------------------------- |
-| `spin` / `spin-slow`   | 12s / 15s rev / 20s / 30s / 40s | Concentric orbit rings in diagrams            |
-| `sonar-wave`           | 3s                              | Radar pulse, `r: 10px → 80px`, opacity .8 → 0 |
-| `beam`                 | 3s                              | SVG path draw, `stroke-dashoffset 1000 → 0`   |
-| `ping`                 | 1s / 3s / 4s                    | Status-dot halos                              |
-| `pulse`                | 2s                              | Live indicators                               |
-| `marquee` / `-reverse` | 60s                             | Logo wall, opposing directions                |
-| `border-spin`          | 2.5s                            | CTA conic border                              |
-| `shimmer`              | 4s                              | CTA sweep                                     |
-| `breathe`              | 4.5s                            | CTA glow, scale 1 → 1.2                       |
-| `bounce`               | —                               | Draggable affordance                          |
+Verified against live playback on 2026-08-31 via `document.getAnimations()`: **42 total, 42
+infinite, 0 finite, 42 running, 0 paused.** R13 confirmed exactly. The `count` column is the number
+of live instances — it was never recorded before, and it is what tells you which rhythms actually
+dominate the page.
+
+| Keyframe               | Duration (observed)             | Count | Role                                          |
+| ---------------------- | ------------------------------- | ----- | --------------------------------------------- |
+| `beam`                 | 3s ×6, **4s ×1**                | 7     | SVG path draw, `stroke-dashoffset 1000 → 0`   |
+| `pulse`                | 2s ×6, **1.5s ×1**              | 7     | Live indicators                               |
+| `spin` / `spin-slow`   | 12s / 15s / 20s ×2 / 30s ×2 / 40s | 8   | Concentric orbit rings in diagrams            |
+| `ping`                 | 1s ×4, 3s ×1, 4s ×1             | 6     | Status-dot halos                              |
+| `sonar-wave`           | 3s                              | 3     | Radar pulse, `r: 10px → 80px`, opacity .8 → 0 |
+| `marquee` / `-reverse` | 60s                             | 3     | Logo wall, opposing directions                |
+| `border-spin`          | 2.5s                            | 2     | CTA conic border                              |
+| `shimmer`              | 4s                              | 2     | CTA sweep                                     |
+| `breathe`              | 4.5s                            | 2     | CTA glow, scale 1 → 1.2                       |
+| `bounce`               | **1s ×1, 4s ×1**                | 2     | Draggable affordance                          |
+
+Corrections the static CSS read got wrong (bold above): `pulse` also runs at **1.5s**, `beam` also
+at **4s**, and `bounce` — previously logged as `—` — runs at **1s and 4s**. `beam` and `pulse` tie
+as the most-instanced rhythms at 7 each.
+
+**Effect-level easing on all 42 is `linear`.** The `--ease-*` tokens in `tokens.css` govern
+*transitions*, not these keyframes — do not apply them to ambient loops.
 
 The slow orbits (15–40s) are the key to the "instrument panel" feel: motion that is clearly alive
 but too slow to distract.
 
 **Scroll behaviour**: `scroll-behavior: smooth` on `<html>`. No snap, no sticky sections, no
-scroll-jacking library.
+scroll-jacking library. Note that the scroll container is the **`about:srcdoc` iframe**
+(`scrollHeight` 9177px), not the top document — the top document is a fixed 900px shell.
 
 ### Interaction states
 
@@ -448,6 +470,42 @@ scroll-jacking library.
 | **Focus**    | **none — see §13**                                                                        |
 | Disabled     | dimmed to ink 0.3 with an `×` glyph replacing the accent `✓`                              |
 
+#### Hover vocabulary (added 2026-08-31)
+
+The resolved-style census in `raw/census-*.json` records **default** computed styles, so it was
+structurally blind to hover. Counted from `raw/template-source.html`: **41 distinct `hover:`
+utilities** plus a parallel `group-hover:` set. Full inventory in
+`raw/motion-observed.json → interaction_states`.
+
+| Utility                     | Uses | Utility                     | Uses |
+| --------------------------- | ---- | --------------------------- | ---- |
+| `hover:grayscale-0`         | 18   | `hover:text-brand-sky/50`   | 14   |
+| `hover:bg-white/[0.02]`     | 18   | `hover:border-white/20`     | 8    |
+| `hover:border-brand-sky/30` | 16   | `hover:translate-x-0.5`     | 5    |
+| `hover:text-brand-sky`      | 15   | `hover:bg-brand-sky`        | 5    |
+| `hover:opacity-100`         | 15   | `hover:rotate-90`           | 4    |
+| `hover:text-white`          | 14   | `hover:scale-110` / `-105`  | 3+3  |
+
+`group-hover:` mirrors it for compound cards — `group-hover:text-brand-sky/50` (14),
+`group-hover:grayscale-0` (14), `group-hover:opacity-100` (13), `group-hover:rotate-90` (4). The
+dominant idiom is **a whole card lighting up together**, not individually hoverable children.
+
+**Transition budget** — `transition-colors` 68 · `transition-all` 47 · `transition-transform` 14 ·
+`transition-opacity` 14, at `duration-300` (47) · `duration-500` (16) · `duration-700` (3) ·
+`duration-1000` (3). These map exactly onto `--duration-component / card / slow / image`.
+**No hover utility uses 150ms**, so `--duration-micro` is never exercised by a hover — it applies
+only to the link-ink transition above.
+
+#### Three interactions worth copying
+
+1. **The logo marquee pauses on hover** — `hover:[animation-play-state:paused]`. Verified live:
+   the track's animation went `running` (t=370950ms) → `paused` (t=371066ms) → still frozen at
+   371066ms after 1.6s → `running` (t=372350ms) on mouse-out. A 60s marquee that stops when you try
+   to read it, at zero JS cost.
+2. **Shimmer accelerates on hover** — `hover:animate-[shimmer_1.5s_infinite]` against a 4s base: a
+   2.7× speed-up that reads as the element becoming eager.
+3. **The accordion is CSS-only** — `hover:h-auto` drives disclosure with no JS toggle.
+
 ---
 
 ## 10. Background, texture & what CSS cannot reproduce
@@ -456,8 +514,10 @@ Three stacked layers behind all content:
 
 1. **WebGL field** — `z-index: -10`, `position: fixed`, full viewport. A **Unicorn Studio** scene
    (`data-us-project="FixNvEwvWwbu3QX9qC3F"`, `unicornstudio.js v1.4.29` from jsDelivr) rendering a
-   2160×1350 canvas at 1440×900. Masked with
+   2160×1350 `webgl2` canvas at 1440×900 (dpi 1.5, 60fps target). Masked with
    `linear-gradient(transparent, black 0%, black 80%, transparent)` so it fades out at the page foot.
+   Fully characterised in **§10a** below — that section is the observed record; this is just the
+   stacking position.
 2. **Grid overlay** — `z-index: 0`, `position: fixed`. 100×200px grid of 1px `rgba(255,255,255,0.03)`
    lines, masked by `radial-gradient(circle at center, black 40%, transparent 100%)` so it is only
    visible in the middle of the viewport. Pure CSS, fully reproducible.
@@ -489,6 +549,122 @@ fully reproducible from `tokens.css`.
 
 ---
 
+## 10a. The WebGL field, observed
+
+> Added 2026-08-31. The 2026-08-11 pass documented this field only as a **sourcing problem** and
+> recorded nothing about what it looks like or does. `raw/probes.json` reported `canvas: 0` because
+> the probe read the **top document**, while the whole template — canvas included — lives inside an
+> `about:srcdoc` iframe; the capture session also drove a locally-served copy on `:8899`. This
+> section is the empirical record. Evidence: `raw/motion-observed.json`, `raw/unicorn-scene.json`,
+> `motion/frames/hero-shader-*.jpg`.
+
+### What it looks like
+
+A single large **amorphous vortex** — a soft luminous loop with a dark core — drifting across the
+hero, rendered through a **halftone dot-matrix**. The dithering is a real texture, not a CSS
+overlay: the scene's top layer is a `glyphDither` effect sampling
+`assets.unicorn.studio/media/glyphs/squares.png`, which is what gives every bright region its
+visible square-pixel grain (clearest in `motion/frames/hero-shader-t0003.jpg`).
+
+### Two independent timescales
+
+| Timescale     | Period                          | What moves                                                                                  |
+| ------------- | ------------------------------- | ------------------------------------------------------------------------------------------- |
+| **Fast pulse**| **2.85s**                       | Whole-field brightness breathing. Mean luma 36.3, swinging 30.6 → 48.4 (a 1.58× swing).     |
+| **Macro morph**| ~30–60s, **non-repeating**     | The vortex grows to fill the viewport, then recedes to a small dark lens. Noise-driven.     |
+
+The 2.85s figure is measured, not authored: 20 luminance peaks spanning t=0.5s → 57.5s across a
+60s canvas-only capture at 2 Hz → `(57.5 − 0.5) / 20 = 2.85s`. Full series in
+`raw/motion-observed.json → shader_pulse`.
+
+The macro morph never loops cleanly — layer 12 is a `noise` effect at `speed: 0.37`, so the
+silhouette is a continuous random walk. **Do not budget for a loop point.** Compare
+`hero-shader-t0003.jpg` and `t0057.jpg` (near-peak, viewport-filling) against `t0022.jpg` and
+`t0042.jpg` (receded to a dark lens) — 20s apart and structurally unrecognisable.
+
+### Palette — and why it does not match the accent token
+
+Sampled from the brightest 8% of canvas pixels:
+
+| Role                  | Observed   |
+| --------------------- | ---------- |
+| Core cyan             | `#00A8C0` — `#00C0C0` |
+| Mid blue              | `#0090C0`  |
+| Wash blue             | `#3078C0`  |
+| Dim blue              | `#004878`  |
+| Mean bright, at peak  | `#25AED0`  |
+| Mean bright, receded  | `#39789E`  |
+
+> **The shader is measurably more teal than the design system's accent.** `--color-accent` is
+> `#38BDF8` (sky-400, hue ≈ 199°); the shader's core sits at `#00A8C0`–`#00C0C0` (hue ≈ 187–190°,
+> and far more saturated in green). **A CSS substitute keyed only to `#38BDF8` will read visibly
+> bluer and flatter than the original.** Any approximation should push toward cyan for the glow core
+> and reserve `#38BDF8` for the UI accent it actually governs.
+>
+> Authored colours inside the compiled shaders are `#0081F7` (beam layer 8) and `#459AFF` (beam
+> layer 6) — both bluer than what renders, because the `glyphDither` and `blur` passes shift the
+> composite toward cyan. Two other `vec3` literals (`#4C961D`, `#36B612`) are **luma coefficient
+> vectors**, not colours.
+
+### Layer stack (from `raw/unicorn-scene.json`)
+
+14 layers. Scene format `1.4.36` run by runtime `v1.4.29`; `fps: 60`, `dpi: 1.5`, `scale: 1`.
+
+| #  | Type          | Parameters                                        |
+| -- | ------------- | ------------------------------------------------- |
+| 0  | `gradient`    | `speed: 0.25`, `downSample: 0.5`, `isBackground`  |
+| 1  | `rectangle`   | shape "Border", `strokeWidth: 10`                 |
+| 2  | `rectangle`   | shape "sha"                                       |
+| 3  | `diffuse`     | `speed: 0`, animating                             |
+| 4  | `rectangle`   | shape "Bram no blend" — main composite, 4 children|
+| 5  | `text`        | a single `.` glyph, Inter 10px, `blendMode: OVERLAY` |
+| 6  | `beam`        | `speed: 0.43`                                     |
+| 7  | `beam`        | `speed: 0.43`                                     |
+| 8  | `beam`        | `speed: 0.2`, animating, `pos: (0.5, 0.5)`        |
+| 9  | `replicate`   | `speed: 0.5`                                      |
+| 10 | `replicate`   | `speed: 0.5`                                      |
+| 11 | `blur`        | separable 2-pass, `downSample: 0.25`              |
+| 12 | `noise`       | `speed: 0.37`, animating — **drives the morph**   |
+| 13 | `glyphDither` | halftone via `glyphs/squares.png` — **the grain** |
+
+### It does not react to anything
+
+| Input      | Verdict  | Evidence                                                                              |
+| ---------- | -------- | ------------------------------------------------------------------------------------- |
+| **Cursor** | **None** | `trackMouse: 0` and `mouseMomentum: 0` on all 14 layers. A/B test: canvas sampled one pulse period apart, mouse parked vs mouse sweeping — within-condition change was **10.27** parked vs **9.79** sweeping, ranges fully overlapping. Sweeping the cursor changes nothing. |
+| **Scroll** | **None** | The canvas is `position: fixed` (wrapper `.aura-background-component`, `top-0 h-screen -z-10`) and renders identically regardless of scroll offset. |
+
+What *reads* as scroll response is **attenuation**, not repainting. The canvas is fixed at viewport
+rows 0–900 forever; what changes is how much of it the sections in front let through. Those sections
+are **semi-transparent veils, not opaque covers** — `rgba(0,0,0,0.5)`, `rgba(3,3,3,0.8)`,
+`rgba(3,3,3,0.5)` — and only section 6 (`25k-active-institutions-worldwide`, page-y 5420) is a
+solid `rgb(3,3,3)`.
+
+Measured by screenshotting each scroll position twice, once with the canvas visible and once with
+`visibility: hidden`, and taking the luminance of the difference:
+
+| Scroll position     | Shader contribution (YAVG) | vs hero |
+| ------------------- | -------------------------- | ------- |
+| Hero (y = 0)        | **19.02**                  | 100%    |
+| y = 1600 (section 2)| 4.69                       | 25%     |
+| y = 3000 (section 3)| 1.74                       | 9%      |
+| y = 6000 (section 6)| 2.07                       | 11%     |
+
+Noise floor for this method is **0.04** (two captures 0.4s apart with the shader off in both), so
+every figure above is real signal, not measurement drift.
+
+> **Do not read this as "hero-only".** An earlier draft of this section said the field was fully
+> occluded below the hero; the measurement refutes that. The field keeps contributing a faint
+> 9–25% wash all the way down the page, which is part of why the lower sections do not read as flat
+> black despite being near-black. The visible *hard edge* in
+> `motion/frames/scroll-field-occlusion-t0022.jpg` is the veil boundary, not the end of the field.
+
+**Consequence for a rebuild:** most of the shader's visual value is in the hero, but a substitute
+that hard-stops at the hero boundary will make the rest of the page flatter than the original. Carry
+a faint version of the field — or an equivalent low-alpha wash — behind the whole page.
+
+---
+
 ## 11. Section blueprints
 
 10 top-level regions. Slugs are the exact join key shared by `raw/section-anatomy.json`, the
@@ -504,7 +680,7 @@ screenshot filenames (`screens/{slug}-{375,1440}.png`), and this table.
 | 5   | `scale-your-market-exposure` (`#pricing`)           | 909    | `#030303/50`          | 24px     | Two-tone h2 → monthly/annual pill toggle → 3 tiers, middle featured                                            |
 | 6   | `25k-active-institutions-worldwide`                 | 1585   | solid `#030303`       | —        | Stats band + testimonial grid + logo marquee. **Solid — a visual rest**                                        |
 | 7   | `protocol-specifications-decoded-for-clar` (`#faq`) | 977    | `#030303/50`          | 24px     | Accordion, 12px radius rows, 1px bottom borders                                                                |
-| 8   | `uncertain-about-your-allocation-strategy`          | 761    | `#030303/80`          | 24px     | Closing CTA                                                                                                    |
+| 8   | `uncertain-about-your-allocation-strategy`          | 761    | `#030303/80`          | 24px     | Closing CTA. **Contains the page's only large solid-accent fill**: a 1280×504 `bg-brand-sky` (`#38BDF8`) panel at `rounded-[32px]`, page-y 8111. The section background is dark; the panel inside it is the single brightest moment on the page. See `motion/frames/scroll-cta-panel-t0106.jpg`. |
 | 9   | `footer-9`                                          | 434    | solid `#030303`       | —        | 48px padding (not 128) — the one rhythm exception                                                              |
 
 The alternation `translucent → translucent → solid → translucent → solid` is the page's breathing
@@ -592,7 +768,7 @@ cheap it is to reproduce:
 | Staggered middle card (§8)                  | Cheap         |                                                  |
 | 6-stop nav shadow (§6)                      | Cheap         | Copy all six stops                               |
 | `.shiny-cta` (§8)                           | Moderate      | Needs `@property` support                        |
-| **WebGL background (§10)**                  | **Expensive** | Third-party or substitute                        |
+| **WebGL background (§10, §10a)**            | **Expensive** | Third-party or substitute. Target cyan `#00A8C0` (not the `#38BDF8` accent), a 2.85s brightness pulse, and a **non-repeating** morph; skip cursor tracking, the original has none. Full strength in the hero, a faint 9–25% wash below — do not hard-stop it at the hero edge. |
 
 **To adapt to another brand**, change in this order: the accent hue (one token), the serif display
 face (keep it italic), the imagery subject. Keep the ink ladder, the rhythm, the mono labels, and
@@ -615,9 +791,44 @@ links (Google Sans Flex, Oswald, DM Sans, Cormorant — all unused).
 | `raw/derived-rules.json`                   | Every rule with support/violation counts + the full contrast matrix                                        |
 | `screens/`                                 | 4 full-page + 20 section crops at 375 and 1440                                                             |
 | `_starter/index.html`                      | Different-content page built from this spec alone (the acceptance test)                                    |
+| `raw/unicorn-scene.json`                   | **(2026-08-31)** The Unicorn Studio scene for `FixNvEwvWwbu3QX9qC3F` — 14-layer stack with per-layer speeds, `trackMouse` flags, and the `glyphDither` texture URL. Compiled GLSL stripped; refetch from the `_provenance.source_url` inside the file. |
+| `raw/motion-observed.json`                 | **(2026-08-31)** Observed motion: shader pulse period + luminance series, palette sampling, the 42-animation `getAnimations()` audit, the cursor-reactivity A/B test, and the 41-utility hover census |
+| `motion/frames/hero-shader-t{0003,0022,0042,0057}.jpg` | **(2026-08-31)** Canvas-only captures at 1440×900 showing the macro morph at near-peak and receded states |
+| `motion/frames/scroll-*.jpg`               | **(2026-08-31)** Field occlusion below the hero, the knowledge-base glow, and the full-bleed CTA panel     |
+| `raw/watch-report-{hero,scroll,hover}.md`  | **(2026-08-31)** Per-clip `/watch` analyses of the three screen recordings. Narrative sections are filled; entity/quote sections are marked N/A because the source is a silent screen recording. Source `.webm` files are not committed. |
 
 **Method.** Authored CSS text was treated as ground truth; the computed census as corroborating
 evidence, because computed values destroy exactly the authored intent a template needs (`clamp()`
 collapses to one number, `var(--accent)` loses its role, unitless line-height resolves to px). The
 census counts **distinct element signatures** rather than raw occurrences, so a 40-item card grid
 counts as one design decision instead of forty.
+
+**Method — motion pass (2026-08-31).** The static pass could not see motion, and its two blind
+spots were structural, not careless:
+
+1. **Wrong document.** Probes read the top document; the entire template — canvas included — lives
+   in an `about:srcdoc` iframe. That is why `raw/probes.json` says `canvas: 0` and why every
+   library gate reads `false` (Unicorn Studio is loaded by an inline IIFE inside the iframe).
+2. **Wrong target.** The capture session drove a locally-served copy on `:8899`, where the shader
+   never ran.
+
+The motion pass therefore drove the **live** URL in headed Chrome via `playwright-cli`, confirmed
+the canvas was present *and animating* (two screenshots 3s apart differed by YAVG 10.3 on a
+difference blend) before recording anything, and then measured rather than described:
+
+- **Shader timing** from a 60s canvas-element capture at 2 Hz, luminance per frame via ffmpeg
+  `signalstats`, period derived from peak spacing.
+- **Shader parameters** from the scene JSON at
+  `storage.googleapis.com/unicornstudio-production/embeds/FixNvEwvWwbu3QX9qC3F`, not from
+  eyeballing.
+- **Animation inventory** from `document.getAnimations()` on the live page, which both confirmed
+  R13's 42/0 split and corrected three durations the keyframe text had wrong.
+- **Reactivity** from a controlled A/B (mouse parked vs sweeping, sampled one pulse period apart),
+  because a free-running shader makes any two captures differ and a naive before/after diff proves
+  nothing.
+- **Hover states** from a utility census over the authored source plus a live play-state probe,
+  since a resolved-style census is blind to `:hover` by construction.
+
+Video clips (`hero-hold`, `full-scroll`, `hover-pass`) were analysed with the `watch` skill and are
+**not committed** — they are large, reproducible, and their findings are captured in
+`raw/motion-observed.json` and `motion/frames/`.

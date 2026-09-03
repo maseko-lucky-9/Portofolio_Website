@@ -8,3 +8,45 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
+    # Packages that MUST move together or not at all. Ungrouped, Dependabot
+    # opens one PR per package, which splits a peer-pinned pair across two
+    # branches — each red on its own, neither mergeable. That is exactly how
+    # #83 arrived: @vitest/coverage-v8 bumped alone, ERESOLVE against the
+    # exactly-pinned vitest it loads at runtime.
+    #
+    # `applies-to` defaults to version-updates, so each group is mirrored for
+    # security-updates too — otherwise a security bump still arrives split.
+    groups:
+      vitest:
+        applies-to: version-updates
+        patterns:
+          - "vitest"
+          - "@vitest/*"
+      vitest-security:
+        applies-to: security-updates
+        patterns:
+          - "vitest"
+          - "@vitest/*"
+      size-limit:
+        applies-to: version-updates
+        patterns:
+          - "size-limit"
+          - "@size-limit/*"
+      size-limit-security:
+        applies-to: security-updates
+        patterns:
+          - "size-limit"
+          - "@size-limit/*"
+
+  # Actions pinned to majors that target the Node 20 runtime. Node 20 is being
+  # removed from GitHub-hosted runners; workflow logs already warn that
+  # checkout@v4 and setup-node@v4 are "being forced to run on Node.js 24".
+  # Without this ecosystem, nothing here ever gets bumped automatically.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      actions:
+        patterns:
+          - "*"
