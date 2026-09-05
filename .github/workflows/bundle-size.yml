@@ -25,10 +25,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: '24.19.0'
           # No `cache: npm` and `npm install` over `npm ci` — both need a
@@ -48,7 +48,7 @@ jobs:
 
       - name: Upload bundle stats
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: bundle-stats
           path: portfolio-ui/dist/assets/
