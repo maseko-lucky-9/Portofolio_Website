@@ -2,12 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import { animate, createTimeline } from "animejs";
 import { ArrowDown, Github, Linkedin, Twitter } from "lucide-react";
 import { personalData } from "@/data/personal";
-import { DURATION, EASE_FN, useMagnetic, useReducedMotion } from "@/lib/motion";
+import { DURATION, EASE_FN, useMagnetic } from "@/lib/motion";
 import { useAnime } from "@/lib/use-anime";
 import { scrollToSection } from "@/lib/scroll-to-section";
 
 export function HeroSection() {
-  const prefersReducedMotion = useReducedMotion();
   const heroRef = useRef<HTMLElement>(null);
   const pillRef = useRef<HTMLDivElement>(null);
   const scrollIndicatorRef = useRef<HTMLButtonElement>(null);
@@ -156,13 +155,20 @@ export function HeroSection() {
       style={{ background: "var(--gradient-hero)" }}
     >
       {/* Ambient blob layer. Pure CSS — no WebGL, no canvas. The `blur-3xl`
-          class is load-bearing: e2e/hero.spec.ts matches on it. */}
-      {!prefersReducedMotion && (
-        <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-          <div className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full opacity-[0.07] dark:opacity-[0.05] bg-primary blur-3xl animate-blob" />
-          <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] rounded-full opacity-[0.06] dark:opacity-[0.04] bg-secondary blur-3xl animate-blob-delay" />
-        </div>
-      )}
+          class is load-bearing: e2e/hero.spec.ts matches on it.
+
+          Rendered unconditionally on purpose. This used to sit behind
+          `!prefersReducedMotion`, which dropped the layer entirely for
+          reduced-motion users. playwright.config.ts sets reducedMotion:"reduce"
+          on every project and builds the preview with VITE_DISABLE_WEBGL=true,
+          so the hero had neither a canvas nor a fallback and hero.spec.ts could
+          not pass on any branch. The gate was redundant anyway: the global
+          prefers-reduced-motion rule in index.css already flattens every
+          animation to 0.01ms, so the blobs are static for those users. */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full opacity-[0.07] dark:opacity-[0.05] bg-primary blur-3xl animate-blob" />
+        <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] rounded-full opacity-[0.06] dark:opacity-[0.04] bg-secondary blur-3xl animate-blob-delay" />
+      </div>
 
       <div className="section-container relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
