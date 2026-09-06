@@ -78,6 +78,8 @@ playwright-report/
 test-results/
 **/playwright-report/
 **/test-results/
+# Lighthouse CI writes ~7k-line LHR reports per URL per run into the repo root.
+.lighthouseci/
 
 # TypeScript build info
 *.tsbuildinfo
