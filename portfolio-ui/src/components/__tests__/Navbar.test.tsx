@@ -1,76 +1,34 @@
-import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { ThemeProvider } from "@/contexts/ThemeContext";
-import { personalData } from "@/data/personal";
+import { describe, it, expect, vi } from "vitest";
+import { Navbar } from "@/components/Navbar";
 
-// Mock framer-motion to pass through children
-vi.mock("framer-motion", async () => {
-  const actual = await vi.importActual<typeof import("framer-motion")>("framer-motion");
-  return {
-    ...actual,
-  };
-});
+vi.mock("@/lib/scroll-to-section", () => ({ scrollToSection: vi.fn() }));
 
-import { Navbar } from "../Navbar";
-
-function renderNavbar() {
-  return render(
-    <ThemeProvider>
-      <Navbar />
-    </ThemeProvider>,
-  );
-}
+const SECTIONS = ["About", "Skills", "Work", "Experience", "Services"];
 
 describe("Navbar", () => {
-  it("renders all 6 navigation links", () => {
-    renderNavbar();
-    const expectedLinks = ["About", "Skills", "Projects", "Experience", "Blog", "Contact"];
-
-    expectedLinks.forEach((linkText) => {
-      const buttons = screen.getAllByText(linkText);
-      // At least one instance should exist (desktop nav + possibly mobile nav)
-      expect(buttons.length).toBeGreaterThanOrEqual(1);
-    });
+  it("renders the brand as a link back to the top", () => {
+    render(<Navbar />);
+    expect(screen.getByRole("link", { name: /thulani/i })).toHaveAttribute("href", "#main");
   });
 
-  it("renders the brand logo with first name", () => {
-    renderNavbar();
-    const firstName = personalData.name.split(" ")[0];
-    expect(screen.getByText(firstName)).toBeInTheDocument();
+  it("renders the five section controls", () => {
+    render(<Navbar />);
+    for (const label of SECTIONS) {
+      expect(screen.getByRole("button", { name: label })).toBeInTheDocument();
+    }
   });
 
-  it("renders the .dev suffix in brand", () => {
-    renderNavbar();
-    expect(screen.getByText(".dev")).toBeInTheDocument();
+  it("renders the contact CTA", () => {
+    render(<Navbar />);
+    expect(screen.getByRole("link", { name: /get in touch/i })).toHaveAttribute("href", "#contact");
   });
 
-  it("has a theme toggle button", () => {
-    renderNavbar();
-    // "Toggle theme" is provided as accessible name via aria-label, not text node.
-    expect(screen.getByRole("button", { name: /toggle theme/i })).toBeInTheDocument();
-  });
-
-  it("has a mobile menu button", () => {
-    renderNavbar();
-    // The mobile menu button is a Button with variant="ghost" and size="icon"
-    // It contains either a Menu or X icon. It's the md:hidden button.
-    const buttons = screen.getAllByRole("button");
-    // At least the theme toggle button and mobile menu button should exist
-    expect(buttons.length).toBeGreaterThanOrEqual(2);
-  });
-
-  it("keeps the mobile drawer out of document flow", () => {
-    renderNavbar();
-    // In normal flow this ~366px drawer is part of the fixed header's box,
-    // making the header 438px tall on a phone (52% of a 390x844 screen, 77% at
-    // 320px) — its blurred scrim buries every section title and its
-    // pointer-events swallow taps across the top half of the page.
-    // jsdom has no layout engine, so the class contract is the only thing
-    // assertable here; e2e/mobile-layout.spec.ts asserts the real height.
-    // Queried by test id, not role: both <nav>s expose the navigation role and
-    // the closed drawer is aria-hidden, so a role query returns the desktop nav.
-    const drawer = screen.getByTestId("mobile-drawer");
-    expect(drawer.className).toContain("absolute");
-    expect(drawer.className).toContain("top-full");
+  // Dark-only: the toggle, its dropdown and the mobile drawer are all gone.
+  it("has no theme toggle and no mobile drawer", () => {
+    render(<Navbar />);
+    expect(screen.queryByRole("button", { name: /toggle theme/i })).toBeNull();
+    expect(screen.queryByTestId("mobile-drawer")).toBeNull();
+    expect(screen.queryByRole("button", { name: /open menu/i })).toBeNull();
   });
 });
