@@ -78,11 +78,13 @@ export default defineConfig({
     ? undefined
     : {
         // VITE_USE_API=false  → static data, no API calls, no isLoading→isError re-renders
-        // VITE_DISABLE_WEBGL=true → AuroraBackground skips Three.js Canvas entirely,
-        //   which would otherwise crash headless Chromium (no GPU → WebGL context fails →
-        //   r3f throws → React unmounts the entire tree including the Navbar).
+        //
+        // VITE_DISABLE_WEBGL is gone: nothing has read it since the three.js
+        // teardown, and FieldBackground feature-detects WebGL2 itself and falls
+        // back to the CSS gradient — so headless Chromium needs no flag.
+        //
         // Also avoids HMR (dev server) which triggers full page reloads in headless mode.
-        command: "VITE_USE_API=false VITE_DISABLE_WEBGL=true npm run build && npm run preview",
+        command: "VITE_USE_API=false npm run build && npm run preview",
         url: "http://localhost:5173",
         reuseExistingServer: !process.env.CI,
         timeout: 120000,

@@ -12,7 +12,7 @@
  *     is needed.
  *
  * Note on Framer Motion: `useScroll` reads `window.scrollY`, which Lenis
- * keeps in sync as it virtual-scrolls. So <ScrollProgress /> still tracks
+ * keeps in sync as it virtual-scrolls. So scroll-position readers still track
  * correctly when Lenis is active.
  */
 import { useEffect } from "react";

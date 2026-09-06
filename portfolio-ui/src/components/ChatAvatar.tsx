@@ -104,7 +104,7 @@ export function ChatAvatar({ open, responding, celebrateKey }: ChatAvatarProps) 
   }, [open, responding, reduced]);
 
   // Gaze: pointer devices get page-wide cursor tracking (lerp loop that stops
-  // itself once settled — same shape as CustomCursor's); touch/keyboard get
+  // itself once settled); touch/keyboard get
   // occasional random glances instead, and none while the panel is open.
   useEffect(() => {
     const eyes = gazeRef.current;

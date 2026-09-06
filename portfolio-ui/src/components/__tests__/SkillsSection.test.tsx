@@ -9,14 +9,6 @@ vi.mock("@/components/SkillsRadar", () => ({
   SkillsRadar: () => <div data-testid="skills-radar" />,
 }));
 
-// Mock framer-motion to preserve children rendering
-vi.mock("framer-motion", async () => {
-  const actual = await vi.importActual<typeof import("framer-motion")>("framer-motion");
-  return {
-    ...actual,
-  };
-});
-
 import { SkillsSection } from "../SkillsSection";
 
 describe("SkillsSection", () => {

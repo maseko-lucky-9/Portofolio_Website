@@ -82,10 +82,9 @@ export default defineConfig(({ mode }) => {
       //  (2) the parser/eval cost is parallelizable,
       //  (3) main bundle reflects actual app size, not framework weight.
       //
-      // Phase-12 removed three-vendor + charts-vendor (recharts -> SVG,
-      // three.js gone). Phase-13 brought 3D back via @react-three/fiber for
-      // the Scene component — Scene is eagerly imported in Index.tsx, so the
-      // three-vendor chunk is critical-path again. Keep it isolated for cache.
+      // No three-vendor chunk: there is no WebGL library in the bundle. The
+      // ambient field runs on a vendored runtime served from public/field and
+      // loaded at idle, so it never enters the module graph at all.
       modulePreload: { polyfill: true },
       rollupOptions: {
         output: {
@@ -97,16 +96,6 @@ export default defineConfig(({ mode }) => {
               /node_modules\/(react|react-dom|scheduler|react-router|react-router-dom)\//.test(id)
             ) {
               return 'react-vendor';
-            }
-
-            // Three.js + R3F + drei. Eagerly imported by Scene in Index.tsx;
-            // isolating prevents it from doubling the main chunk on every code
-            // change to the app.
-            if (
-              id.includes('/three/') ||
-              id.includes('/@react-three/')
-            ) {
-              return 'three-vendor';
             }
 
             // Animation libs — used across eager + lazy sections.

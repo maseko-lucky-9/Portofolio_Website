@@ -1,6 +1,6 @@
 import "@testing-library/jest-dom/vitest";
 
-// Polyfill IntersectionObserver for jsdom (used by framer-motion viewport features)
+// Polyfill IntersectionObserver for jsdom (LazySection and revealOnScroll)
 class MockIntersectionObserver implements IntersectionObserver {
   readonly root: Element | null = null;
   readonly rootMargin: string = "";
@@ -40,7 +40,7 @@ Element.prototype.scrollTo = function scrollTo() {} as Element["scrollTo"];
 
 // Polyfill localStorage / sessionStorage for jsdom — recent jsdom releases
 // expose these as host objects whose methods are non-callable in some
-// configurations. ThemeContext + AuthContext call getItem/setItem at module
+// configurations. AuthContext calls getItem/setItem at module
 // load, so a reliable replacement keeps the suite green across jsdom upgrades.
 function createStorage(): Storage {
   let store = new Map<string, string>();

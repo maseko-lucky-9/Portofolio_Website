@@ -68,38 +68,6 @@ function ExperienceRow({
     [onScheduleClose],
   );
 
-  const expandedPanel = (
-    <div id={detailsId} className="mt-4 pt-4 border-t border-border/60 space-y-4">
-      <p className="text-sm text-foreground/85 leading-relaxed">{exp.description}</p>
-
-      {exp.achievements.length > 0 && (
-        <ul className="space-y-2">
-          {exp.achievements.map((achievement, i) => (
-            <li key={i} className="flex items-start gap-2.5 text-sm">
-              {/* Emerald, matching the hero availability badge. Step number,
-                  card bar and tech pill stay indigo. */}
-              <span
-                className="mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0"
-                style={{ background: "oklch(var(--secondary))" }}
-              />
-              <span className="text-foreground/85">{achievement}</span>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {exp.technologies.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          {exp.technologies.map((tech) => (
-            <span key={tech} className="tech-badge text-xs">
-              {tech}
-            </span>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-
   return (
     <div
       data-anime-row
