@@ -23,7 +23,17 @@ const baseUrl = process.env.E2E_BASE_URL;
 const expectedHost = baseUrl ? new URL(baseUrl).host : "";
 const expectedOrigin = baseUrl ? new URL(baseUrl).origin : "";
 
-test.skip(!baseUrl, "live-domain checks require E2E_BASE_URL");
+// A localhost target is a container or a preview, not a deployment: HSTS, the
+// HTTPS redirect and every canonical-host assertion below are properties of the
+// real domain and cannot hold there. E2E_FULL_SUITE=1 deliberately points the
+// rest of the suite at exactly such a target, so this spec has to state its own
+// precondition rather than rely on the runner's file filter.
+const isLiveTarget =
+  !!baseUrl &&
+  baseUrl.startsWith("https://") &&
+  !/^(localhost|127\.|\[::1\])/.test(new URL(baseUrl).hostname);
+
+test.skip(!isLiveTarget, "live-domain checks require E2E_BASE_URL pointing at an https deployment");
 
 test.describe("live domain", () => {
   test("serves the portfolio app, not a registrar placeholder", async ({ page }) => {

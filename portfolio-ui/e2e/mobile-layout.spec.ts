@@ -74,13 +74,23 @@ test.describe("mobile layout", () => {
     // Trailing slash matters: without it the preview server falls back to the
     // SPA index and you silently assert against the React app instead.
     const res = await page.goto("/answers/argocd-vs-flux-2026/");
-    test.skip(!res || res.status() >= 400, "static page not present in this build");
 
+    // A status check alone is not enough: this app is served behind an SPA
+    // fallback (nginx try_files, and Vite preview does the same), so a page that
+    // does not exist comes back as 200 with the React shell. The Docker image
+    // builds with `build:app`, which deliberately skips the six SEO scripts, so
+    // the static pages really are absent there. The shell has #root; the
+    // prerendered pages are self-contained and do not.
     const m = await page.evaluate(() => ({
       scroll: document.documentElement.scrollWidth,
       client: document.documentElement.clientWidth,
       tables: document.querySelectorAll("table").length,
+      isSpaShell: !!document.getElementById("root"),
     }));
+    test.skip(
+      !res || res.status() >= 400 || m.isSpaShell,
+      "static page not present in this build (SPA fallback served instead)",
+    );
     expect(m.tables, "expected a real table on this page").toBeGreaterThan(0);
     expect(m.scroll).toBeLessThanOrEqual(m.client + 1);
   });
