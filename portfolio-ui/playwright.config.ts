@@ -7,6 +7,18 @@ import { defineConfig, devices } from "@playwright/test";
 // locally and the tests hit the real deployment.
 const liveBaseUrl = process.env.E2E_BASE_URL;
 
+// E2E_FULL_SUITE=1 lifts the live-domain-only restriction below. It exists for
+// exactly one case: the Docker trial run, where E2E_BASE_URL points at a
+// throwaway container on localhost and the whole suite is precisely what we
+// want to fire at it.
+//
+// Deliberately NOT a second base-URL variable. Two env vars a character apart,
+// with opposite testMatch semantics, is the same footgun the comment below was
+// written to prevent — a typo or a stale export silently picks the wrong one.
+// One URL variable plus a loud, separate opt-in means a leftover E2E_BASE_URL
+// can never aim the full suite at production.
+const fullSuite = process.env.E2E_FULL_SUITE === "1";
+
 export default defineConfig({
   testDir: "./e2e",
   // When targeting a live deployment, restrict to the spec built for that —
@@ -15,7 +27,7 @@ export default defineConfig({
   // script (or a future spec) with E2E_BASE_URL still exported in their
   // shell. Scoping here means production can only ever receive the traffic
   // this file's specs were reviewed for producing.
-  testMatch: liveBaseUrl ? "live-domain.spec.ts" : undefined,
+  testMatch: liveBaseUrl && !fullSuite ? "live-domain.spec.ts" : undefined,
   // 2 local workers (one per project) keeps the preview server from being hit by
   // more concurrent page.goto() calls than it can serve without timeout. CI uses
   // 1 worker sequentially.
