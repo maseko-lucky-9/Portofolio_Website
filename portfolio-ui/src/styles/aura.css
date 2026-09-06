@@ -1244,7 +1244,7 @@ footer a:hover {
    behind the solid section fill, so this section had no texture at all. The
    .wrap is lifted a layer because a positioned pseudo-element otherwise paints
    over non-positioned inline content. ---- */
-#experience::before {
+.sec-texture::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -1257,7 +1257,7 @@ footer a:hover {
   -webkit-mask-image: radial-gradient(ellipse at center, black 40%, transparent 100%);
   mask-image: radial-gradient(ellipse at center, black 40%, transparent 100%);
 }
-#experience > .wrap {
+.sec-texture > .wrap {
   position: relative;
   z-index: 1;
 }

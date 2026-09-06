@@ -54,7 +54,7 @@ function polarToXY(angleRad: number, r: number) {
   };
 }
 
-export function SkillsRadar({ data, color = "oklch(var(--primary))" }: SkillsRadarProps) {
+export function SkillsRadar({ data, color = "oklch(var(--signal))" }: SkillsRadarProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const polygonRef = useRef<SVGPolygonElement>(null);
 
@@ -184,8 +184,12 @@ export function SkillsRadar({ data, color = "oklch(var(--primary))" }: SkillsRad
             y={label.y}
             textAnchor={anchor}
             dominantBaseline="middle"
-            fill="oklch(var(--muted-foreground))"
-            style={{ fontSize: "13px" }}
+            fill="var(--ink-60)"
+            style={{
+              fontSize: "10px",
+              fontFamily: "var(--font-mono)",
+              letterSpacing: "0.08em",
+            }}
           >
             {skill}
           </text>

@@ -7,37 +7,37 @@ import { SkillsRadar } from "@/components/SkillsRadar";
 import { DURATION, EASE_FN, springAnimeSkills, useReducedMotion } from "@/lib/motion";
 import { revealOnScroll, useAnime } from "@/lib/use-anime";
 
+const CATEGORY_LABELS: Record<SkillCategory, string> = {
+  devops: "DevOps & Cloud",
+  backend: "Backend",
+  frontend: "Frontend",
+};
+
 const categoryIcons = {
   frontend: Code2,
   backend: Server,
   devops: Cloud,
 };
 
-// Per-category accent, restored from 4aaa2de. Drives the active toggle,
-// the radar, both column rules and the skill bars, so switching category
-// repaints the whole section.
+// Treatment A: one accent across all three categories.
 //
-// Frontend/backend reuse --primary/--secondary rather than minting their
-// own tokens — that keeps the backend green identical to the hero
-// availability badge and the Experience bullets. Only the devops purple
-// needs a token. All three are theme-aware and every fill clears WCAG AA
-// against an oklch(var(--background)) label (dark 4.65 / 9.65 / 5.26 —
-// light 5.65 / 5.41 / 6.23).
+// The previous per-category palette was a deliberate, contrast-measured choice,
+// not a regression — but this design spends its single high-chroma colour on
+// one signal, and three competing hues in a section that already encodes
+// category by position and label is decoration doing a job nothing asked for.
+// Category is still switchable; it just no longer changes hue.
+//
+// The value stays a token indirection rather than a literal so treatments B/C
+// remain a token edit, not a component rewrite.
+const CATEGORY_TRIPLE = "var(--signal)";
 const categoryColors: Record<SkillCategory, string> = {
-  frontend: "oklch(var(--primary))",
-  backend: "oklch(var(--secondary))",
-  devops: "oklch(var(--cat-devops))",
-};
-
-// Same hues at 0.33 alpha for the active toggle's cast glow.
-const categoryGlows: Record<SkillCategory, string> = {
-  frontend: "0 4px 20px oklch(var(--primary) / 0.33)",
-  backend: "0 4px 20px oklch(var(--secondary) / 0.33)",
-  devops: "0 4px 20px oklch(var(--cat-devops) / 0.33)",
+  frontend: `oklch(${CATEGORY_TRIPLE})`,
+  backend: `oklch(${CATEGORY_TRIPLE})`,
+  devops: `oklch(${CATEGORY_TRIPLE})`,
 };
 
 export function SkillsSection() {
-  const [activeCategory, setActiveCategory] = useState<SkillCategory>("frontend");
+  const [activeCategory, setActiveCategory] = useState<SkillCategory>("devops");
   // `displayed` lags `activeCategory` while the exit animation plays. The
   // list renders against `displayed` so the swap completes cleanly: exit
   // current → setDisplayed → enter new (handled by useAnime keyed on
@@ -154,143 +154,99 @@ export function SkillsSection() {
       // would resolve to the wrapper, hiding this landmark's label from
       // tooling. The heading association below is what matters here.
       aria-labelledby="skills-heading"
-      className="py-20 md:py-28 relative overflow-hidden"
-      style={{ background: "oklch(var(--muted) / var(--opacity-soft))" }}
+      className="s-50"
+      // --cat is what the CSS reads for the active toggle fill, the column
+      // rules and the bar fills, so one property repaints the whole section.
+      style={{ "--cat": CATEGORY_TRIPLE } as React.CSSProperties}
     >
-      {/* Subtle top gradient fade */}
-      <div
-        className="absolute inset-x-0 top-0 h-px"
-        style={{
-          background:
-            "linear-gradient(90deg, transparent, oklch(var(--primary) / 0.25), transparent)",
-        }}
-      />
-
-      <div className="section-container !py-0 py-20 md:py-28">
-        {/* Section header */}
-        <div data-anime-section className="text-center mb-14">
-          <span className="inline-block text-xs font-semibold uppercase tracking-[0.18em] text-primary mb-3">
+      <div className="wrap">
+        <div className="text-center" style={{ marginBottom: 56 }}>
+          <p className="eyebrow mono mb-4" style={{ justifyContent: "center" }} data-anime-section>
+            <span className="dot">
+              <i className="halo" />
+              <i />
+            </span>
             Expertise
-          </span>
-          <h2 id="skills-heading" className="section-title">
-            Skills &amp; Expertise
+          </p>
+          <h2 id="skills-heading" className="display" data-anime-section>
+            Skills &amp; <span className="fade">expertise.</span>
           </h2>
-          <p className="section-subtitle mx-auto">
-            A T-shaped developer with deep expertise in specific areas and broad knowledge across
-            the stack.
+          <p
+            className="lede"
+            style={{ margin: "24px auto 0", textAlign: "center" }}
+            data-anime-section
+          >
+            A T-shaped developer: deep in Kubernetes and .NET, broad across the delivery path around
+            them.
           </p>
         </div>
 
-        {/* Category toggle */}
-        <div data-anime-section className="flex justify-center gap-3 mb-14 flex-wrap">
-          {(["frontend", "backend", "devops"] as SkillCategory[]).map((category) => {
+        <div className="sk-toggles" data-anime-section>
+          {(["devops", "backend", "frontend"] as SkillCategory[]).map((category) => {
             const Icon = categoryIcons[category];
             const isActive = activeCategory === category;
             return (
               <button
                 key={category}
+                type="button"
                 onClick={() => setActiveCategory(category)}
                 // data-active is retained as the stable e2e/visual selector.
-                // The active fill is driven from style (not data-[active]
-                // utilities) because the colour varies per category; the hover
-                // rule is scoped to inactive so it cannot draw a foreground
-                // border across an active fill.
                 data-active={isActive ? "true" : "false"}
-                className="flex items-center gap-2 px-6 py-3 rounded-full font-medium text-sm transition-all
-                           bg-card text-foreground border border-border
-                           data-[active=false]:hover:border-foreground/30"
-                style={{
-                  transition: "all 300ms cubic-bezier(0.16, 1, 0.3, 1)",
-                  ...(isActive
-                    ? {
-                        background: categoryColors[category],
-                        color: "oklch(var(--background))",
-                        borderColor: categoryColors[category],
-                        boxShadow: categoryGlows[category],
-                      }
-                    : { boxShadow: "var(--shadow-sm)" }),
-                }}
+                className="sk-toggle"
               >
-                <Icon className="w-4 h-4" />
-                <span className="capitalize">{category}</span>
+                <Icon className="w-4 h-4" aria-hidden="true" />
+                <span>{CATEGORY_LABELS[category]}</span>
               </button>
             );
           })}
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-10 lg:gap-14 items-start">
-          {/* Radar chart column */}
-          <div data-anime-section className="skill-radar-container">
-            <div className="flex items-center gap-2 mb-6">
-              <div
-                className="w-2 h-6 rounded-full"
-                style={{ background: categoryColors[displayed] }}
-              />
-              <h3 className="text-base font-semibold capitalize">{displayed} Radar</h3>
+        <div className="sk-grid">
+          <div data-anime-section>
+            <div className="sk-head">
+              <span className="bar" />
+              <h3>{CATEGORY_LABELS[displayed]} radar</h3>
             </div>
-            <div className="h-64 sm:h-80 flex items-center justify-center">
+            <div className="sk-panel" style={{ aspectRatio: "11 / 8" }}>
               <SkillsRadar data={currentRadarData} color={categoryColors[displayed]} />
             </div>
           </div>
 
-          {/* Skills list column */}
           <div data-anime-section>
-            <div className="flex items-center gap-2 mb-6">
-              <div
-                className="w-2 h-6 rounded-full"
-                style={{ background: categoryColors[displayed] }}
-              />
-              <h3 className="text-base font-semibold">Technologies &amp; Tools</h3>
+            <div className="sk-head">
+              <span className="bar" />
+              <h3>Technologies &amp; tools</h3>
             </div>
             {/* Category-swap container. The skill rows + bars are keyed off
                 `displayed`, which lags `activeCategory` while the exit
                 animation plays — see the useEffect above. */}
-            <div ref={listRef} className="space-y-5" style={{ opacity: 0 }}>
+            <div ref={listRef} className="sk-list" style={{ opacity: 0 }}>
               {filteredSkills.map((skill) => (
                 <div key={skill.name} data-anime-skill>
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2.5">
-                      <span className="text-sm font-semibold text-foreground">{skill.name}</span>
-                      <span
-                        className="text-[10px] px-2 py-0.5 rounded-full font-medium capitalize"
-                        style={{
-                          background: "oklch(var(--accent))",
-                          color: "oklch(var(--accent-foreground))",
-                        }}
-                      >
-                        {skill.type}
-                      </span>
+                  <div className="sk-row-top">
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 10,
+                        minWidth: 0,
+                      }}
+                    >
+                      <span className="sk-name">{skill.name}</span>
+                      <span className="chip">{skill.type}</span>
                     </div>
-                    <span className="text-xs font-medium text-muted-foreground">
-                      {getProficiencyLabel(skill.proficiency)}
-                    </span>
+                    <span className="mono tiny">{getProficiencyLabel(skill.proficiency)}</span>
                   </div>
-                  <div
-                    className="h-1.5 rounded-full overflow-hidden relative"
-                    style={{ background: "oklch(var(--muted))" }}
-                  >
+                  <div className="sk-track">
                     <div
                       data-anime-bar
-                      className="h-full rounded-full"
+                      className="sk-fill"
                       style={{
                         width: `${skill.proficiency}%`,
                         transform: prefersReducedMotion ? "scaleX(1)" : "scaleX(0)",
-                        transformOrigin: "left center",
-                        background: categoryColors[displayed],
                         willChange: "transform",
                       }}
                     />
-                    {!prefersReducedMotion && (
-                      <div
-                        className="absolute inset-y-0 left-0 pointer-events-none animate-shimmer-once"
-                        style={{
-                          width: `${skill.proficiency}%`,
-                          background:
-                            "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.35) 50%, transparent 100%)",
-                          backgroundSize: "200% 100%",
-                        }}
-                      />
-                    )}
                   </div>
                 </div>
               ))}
@@ -298,15 +254,6 @@ export function SkillsSection() {
           </div>
         </div>
       </div>
-
-      {/* Subtle bottom border */}
-      <div
-        className="absolute inset-x-0 bottom-0 h-px"
-        style={{
-          background:
-            "linear-gradient(90deg, transparent, oklch(var(--primary) / 0.15), transparent)",
-        }}
-      />
     </section>
   );
 }

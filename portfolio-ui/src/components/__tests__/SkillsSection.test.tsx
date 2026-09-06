@@ -20,16 +20,34 @@ vi.mock("framer-motion", async () => {
 import { SkillsSection } from "../SkillsSection";
 
 describe("SkillsSection", () => {
-  it('renders "Skills & Expertise" heading', () => {
+  it("renders the two-tone display heading", () => {
     render(<SkillsSection />);
-    expect(screen.getByText("Skills & Expertise")).toBeInTheDocument();
+    // Split across a <span class="fade"> now, so match the heading's own text
+    // rather than a single text node.
+    const h2 = screen.getByRole("heading", { level: 2, name: /Skills & expertise\./i });
+    expect(h2).toHaveAttribute("id", "skills-heading");
   });
 
-  it("renders 3 category buttons (Frontend, Backend, DevOps)", () => {
+  // DevOps is the strongest category and the one the hero headline claims, so
+  // it is what an unattended screenshot and a first-time visitor land on.
+  it("opens on DevOps", () => {
     render(<SkillsSection />);
-    expect(screen.getByText("frontend")).toBeInTheDocument();
-    expect(screen.getByText("backend")).toBeInTheDocument();
-    expect(screen.getByText("devops")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /DevOps/ })).toHaveAttribute(
+      "data-active",
+      "true",
+    );
+    expect(screen.getByRole("button", { name: /Backend/ })).toHaveAttribute(
+      "data-active",
+      "false",
+    );
+  });
+
+  it("renders the three category buttons in strength order", () => {
+    const { container } = render(<SkillsSection />);
+    const labels = [...container.querySelectorAll(".sk-toggle")].map((b) =>
+      b.textContent?.trim(),
+    );
+    expect(labels).toEqual(["DevOps & Cloud", "Backend", "Frontend"]);
   });
 
   // TODO(test-debt): SkillsSection markup evolved past these assertions —
