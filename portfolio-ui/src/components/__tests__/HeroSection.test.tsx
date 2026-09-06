@@ -1,93 +1,54 @@
-import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { ThemeProvider } from "@/contexts/ThemeContext";
+import { describe, it, expect, vi } from "vitest";
+import { HeroSection } from "@/components/HeroSection";
 import { personalData } from "@/data/personal";
 
-// Mock framer-motion to pass through children without animation
-vi.mock("framer-motion", async () => {
-  const actual = await vi.importActual<typeof import("framer-motion")>("framer-motion");
-  return {
-    ...actual,
-    useReducedMotion: () => false,
-  };
-});
-
-import { HeroSection } from "../HeroSection";
-
-function renderHeroSection() {
-  return render(
-    <ThemeProvider>
-      <HeroSection />
-    </ThemeProvider>,
-  );
-}
+vi.mock("@/lib/scroll-to-section", () => ({ scrollToSection: vi.fn() }));
 
 describe("HeroSection", () => {
-  it("renders the user's name", () => {
-    renderHeroSection();
-    // Name is split into multiple spans (first name + underlined surname) so
-    // getByText (single text node) no longer matches. Use accessible name
-    // composition via heading role.
-    expect(
-      screen.getByRole("heading", {
-        level: 1,
-        name: new RegExp(personalData.name),
-      }),
-    ).toBeInTheDocument();
+  it("renders the two-tone display headline as the h1", () => {
+    render(<HeroSection />);
+    const h1 = screen.getByRole("heading", { level: 1 });
+    expect(h1).toHaveAttribute("id", "hero-heading");
+    expect(h1.textContent).toBe("Kubernetes platformsfor South Africanbanking.");
   });
 
-  it("renders the title", () => {
-    renderHeroSection();
-    expect(screen.getByText(personalData.title)).toBeInTheDocument();
-  });
-
-  it("renders the tagline", () => {
-    renderHeroSection();
+  it("renders the sourced tagline as the lede", () => {
+    render(<HeroSection />);
     expect(screen.getByText(personalData.tagline)).toBeInTheDocument();
   });
 
-  it("has correct GitHub link href", () => {
-    renderHeroSection();
-    const githubLink = screen.getByLabelText("GitHub");
-    expect(githubLink).toHaveAttribute("href", personalData.social.github);
+  it("renders both CTAs pointing at real sections", () => {
+    render(<HeroSection />);
+    expect(screen.getByRole("link", { name: "View the work" })).toHaveAttribute("href", "#work");
+    expect(screen.getByRole("link", { name: /get in touch/i })).toHaveAttribute("href", "#contact");
   });
 
-  it("has correct LinkedIn link href", () => {
-    renderHeroSection();
-    const linkedinLink = screen.getByLabelText("LinkedIn");
-    expect(linkedinLink).toHaveAttribute("href", personalData.social.linkedin);
+  it("renders all three metrics with their labels", () => {
+    const { container } = render(<HeroSection />);
+    const metrics = container.querySelector(".metrics") as HTMLElement;
+    expect(metrics).toBeInTheDocument();
+    for (const v of Object.values(personalData.metrics)) {
+      expect(metrics.textContent).toContain(v);
+    }
+    for (const label of ["Projects", "Experience", "Certifications"]) {
+      expect(metrics.textContent).toContain(label);
+    }
   });
 
-  it("renders projects CTA button", () => {
-    renderHeroSection();
-    expect(screen.getByText("View My Work")).toBeInTheDocument();
+  // The photograph moved to #operator. The hero's right column is the
+  // instrument diagram, which is decorative and must not be exposed to AT.
+  it("has no image, and the instrument is hidden from assistive tech", () => {
+    const { container } = render(<HeroSection />);
+    expect(container.querySelector("img")).toBeNull();
+    const svg = container.querySelector(".instrument svg");
+    expect(svg).toBeInTheDocument();
+    expect(svg).toHaveAttribute("aria-hidden", "true");
   });
 
-  it('renders "Contact Me" button', () => {
-    renderHeroSection();
-    expect(screen.getByText("Contact Me")).toBeInTheDocument();
-  });
-
-  it("renders metric cards with correct values", () => {
-    renderHeroSection();
-    expect(screen.getByText(personalData.metrics.projects)).toBeInTheDocument();
-    expect(screen.getByText(personalData.metrics.experience)).toBeInTheDocument();
-    expect(screen.getByText(personalData.metrics.certifications)).toBeInTheDocument();
-  });
-
-  it("renders the metric card labels", () => {
-    renderHeroSection();
-    // Metrics are three stat cards, each a value above a label.
-    expect(screen.getByText("Projects")).toBeInTheDocument();
-    expect(screen.getByText("Years Exp.")).toBeInTheDocument();
-    expect(screen.getByText("Certifications")).toBeInTheDocument();
-  });
-
-  it("renders profile image with correct alt text", () => {
-    renderHeroSection();
-    // alt is "${name} profile photo" — assert with a partial regex match.
-    const profileImage = screen.getByAltText(new RegExp(personalData.name, "i"));
-    expect(profileImage).toBeInTheDocument();
-    expect(profileImage.tagName).toBe("IMG");
+  it("labels its section for the accessibility tree", () => {
+    const { container } = render(<HeroSection />);
+    const section = container.querySelector("section#hero");
+    expect(section).toHaveAttribute("aria-labelledby", "hero-heading");
   });
 });
