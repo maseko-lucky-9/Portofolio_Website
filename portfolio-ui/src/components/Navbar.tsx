@@ -43,23 +43,27 @@ function Mark() {
 export function Navbar() {
   const headerRef = useRef<HTMLElement>(null);
 
-  useAnime(headerRef, (scope) => {
-    if (scope.matches.reducedMotion) return;
-    const el = headerRef.current;
-    if (!el) return;
-    animate(el, {
-      translateY: [-80, 0],
-      opacity: [0, 1],
-      duration: 500,
-      ease: EASE_FN.emphasized,
-    });
-    animate(el.querySelectorAll("[data-anime-link]"), {
-      opacity: [0, 1],
-      duration: 400,
-      delay: stagger(50, { start: 200 }),
-      ease: EASE_FN.emphasized,
-    });
-  });
+  useAnime(
+    headerRef,
+    (scope) => {
+      if (scope.matches.reducedMotion) return;
+      const el = headerRef.current;
+      if (!el) return;
+      animate(el, {
+        translateY: [-80, 0],
+        opacity: [0, 1],
+        duration: 500,
+        ease: EASE_FN.emphasized,
+      });
+      animate(el.querySelectorAll("[data-anime-link]"), {
+        opacity: [0, 1],
+        duration: 400,
+        delay: stagger(50, { start: 200 }),
+        ease: EASE_FN.emphasized,
+      });
+    },
+    [],
+  );
 
   return (
     <header className="nav" ref={headerRef}>
