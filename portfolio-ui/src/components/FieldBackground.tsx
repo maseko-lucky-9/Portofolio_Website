@@ -85,7 +85,18 @@ export function FieldBackground() {
         if (cancelled) return;
         window.UnicornStudio?.init()
           .then((scenes) => {
-            if (cancelled || !scenes.length) return;
+            // Unmounted while init() was still in flight: the cleanup's
+            // destroy() already ran, before this scene existed. Without this
+            // it would leak a live WebGL context and its RAF loop.
+            if (cancelled) {
+              try {
+                window.UnicornStudio?.destroy();
+              } catch {
+                // already torn down
+              }
+              return;
+            }
+            if (!scenes.length) return;
             showFallback(false);
             const holdStill =
               matchMedia("(prefers-reduced-motion: reduce)").matches ||
