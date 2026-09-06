@@ -1,87 +1,51 @@
+import { render, screen } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { projects as staticProjects } from "@/data/projects";
+import { ProjectsSection } from "@/components/ProjectsSection";
+import { projects } from "@/data/projects";
 
-// Mock the projects hook to return no API data (uses static fallback)
+// The section reads through TanStack Query; with VITE_USE_API=false (the
+// production shape) it falls straight through to the static data.
 vi.mock("@/hooks/use-projects", () => ({
   useFeaturedProjects: () => ({
-    data: null,
+    data: undefined,
     isLoading: false,
     isError: false,
     refetch: vi.fn(),
   }),
 }));
 
-// Mock env to disable API
-vi.mock("@/config/env", () => ({
-  env: {
-    apiUrl: "http://localhost:3000",
-    apiVersion: "v1",
-    wsUrl: "ws://localhost:3000",
-    appName: "Portfolio",
-    appDescription: "Test",
-    useApi: false,
-    enableMsw: false,
-    enableAnalytics: false,
-    enableComments: false,
-    debug: false,
-    mode: "test",
-    isDev: false,
-    isProd: false,
-  },
-  apiUrl: (path: string) => `http://localhost:3000/v1${path}`,
-  wsUrl: (path: string) => `ws://localhost:3000${path}`,
-  default: { useApi: false, enableMsw: false },
-}));
-
-// Mock framer-motion to preserve children rendering
-vi.mock("framer-motion", async () => {
-  const actual = await vi.importActual<typeof import("framer-motion")>("framer-motion");
-  return {
-    ...actual,
-  };
-});
-
-import { ProjectsSection } from "../ProjectsSection";
-
 describe("ProjectsSection", () => {
-  it('renders "Featured Projects" heading', () => {
+  it("renders the two-tone heading", () => {
     render(<ProjectsSection />);
-    expect(screen.getByText("Featured Projects")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 2, name: /Four repositories/ })).toHaveAttribute(
+      "id",
+      "work-heading",
+    );
   });
 
-  it("renders project cards from static data", () => {
-    render(<ProjectsSection />);
-    staticProjects.forEach((project) => {
-      expect(screen.getByText(project.title)).toBeInTheDocument();
-    });
+  it("renders one showcase panel per project", () => {
+    const { container } = render(<ProjectsSection />);
+    expect(container.querySelectorAll(".show-split")).toHaveLength(projects.length);
   });
 
-  it("renders the 'All' technology filter button", () => {
+  // projects.ts exists because invented metrics and 404ing URLs shipped once.
+  // Every card must carry the real URL and the real impact line.
+  it("links each project to its resolving repository and states its impact", () => {
     render(<ProjectsSection />);
-    expect(screen.getByText("All")).toBeInTheDocument();
+    for (const p of projects) {
+      const heading = screen.getByRole("heading", { level: 3, name: p.title });
+      const card = heading.closest("article") as HTMLElement;
+      expect(card).toBeTruthy();
+      const link = card.querySelector('a[href^="https://github.com/"]');
+      expect(link).toHaveAttribute("href", p.githubUrl);
+      expect(link).toHaveAttribute("rel", expect.stringContaining("noopener"));
+      expect(card.textContent).toContain(p.impact);
+    }
   });
 
-  // TODO(test-debt): Filter button assertions reference specific tech names
-  // ("AWS", "Docker", "GraphQL", "E-Commerce Platform") that have drifted as
-  // projects.ts evolved. Pre-existing failure unrelated to UI refresh — refresh
-  // these alongside the next projects-data update by reading staticProjects
-  // dynamically rather than hardcoding tech labels.
-  it.skip("renders technology filter buttons", () => {
-    render(<ProjectsSection />);
-    expect(screen.getByText("AWS")).toBeInTheDocument();
-    expect(screen.getByText("Docker")).toBeInTheDocument();
-  });
-
-  it.skip("clicking a technology filter shows filtered projects", async () => {
-    const user = userEvent.setup();
-    render(<ProjectsSection />);
-    const filterButton = screen.getByRole("button", { name: "GraphQL" });
-    await user.click(filterButton);
-    expect(screen.getByText("Analytics Dashboard")).toBeInTheDocument();
-    await waitFor(() => {
-      expect(screen.queryByText("E-Commerce Platform")).not.toBeInTheDocument();
-    });
+  it("has no technology filter", () => {
+    const { container } = render(<ProjectsSection />);
+    expect(container.querySelector(".tech-badge")).toBeNull();
+    expect(screen.queryByRole("button", { name: /^All$/ })).toBeNull();
   });
 });

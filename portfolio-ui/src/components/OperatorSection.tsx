@@ -1,5 +1,4 @@
 import { useRef } from "react";
-import { useSpotlight } from "@/lib/use-spotlight";
 import { revealOnScroll } from "@/lib/use-anime";
 import { useAnime } from "@/lib/use-anime";
 import { personalData } from "@/data/personal";
@@ -50,7 +49,6 @@ function Portrait() {
 
 export function OperatorSection() {
   const rootRef = useRef<HTMLElement>(null);
-  useSpotlight(rootRef, ".portrait");
 
   useAnime(
     rootRef,

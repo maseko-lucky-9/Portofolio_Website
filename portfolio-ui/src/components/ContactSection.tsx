@@ -1,533 +1,111 @@
-import { useRef, useState } from "react";
-import { animate } from "animejs";
-import { z } from "zod";
-import {
-  Mail,
-  Send,
-  Github,
-  Linkedin,
-  Twitter,
-  Download,
-  Calendar,
-  MapPin,
-  CheckCircle,
-  Loader2,
-} from "lucide-react";
+import { useRef } from "react";
 import { personalData } from "@/data/personal";
-import { env } from "@/config/env";
-import { useContactForm } from "@/hooks/use-contact";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-
-import { DURATION, EASE_FN, shakeFieldAnim, strokeDrawAnim } from "@/lib/motion";
 import { revealOnScroll, useAnime } from "@/lib/use-anime";
 
-// Form validation schema
-const contactSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters").max(100),
-  email: z.string().email("Please enter a valid email address").max(255),
-  subject: z.string().min(5, "Subject must be at least 5 characters").max(200),
-  message: z.string().min(20, "Message must be at least 20 characters").max(1000),
-});
+interface SlabCardProps {
+  href: string;
+  label: string;
+  detail: string;
+  ariaLabel: string;
+}
 
-type ContactFormData = z.infer<typeof contactSchema>;
+function SlabCard({ href, label, detail, ariaLabel }: SlabCardProps) {
+  const external = href.startsWith("http");
+  return (
+    <a
+      className="slab-card"
+      href={href}
+      aria-label={ariaLabel}
+      {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+    >
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          gap: 12,
+        }}
+      >
+        <div>
+          <div style={{ fontWeight: 600, marginBottom: 4 }}>{label}</div>
+          <div className="mono tiny" style={{ color: "oklch(var(--surface-page) / 0.8)" }}>
+            {detail}
+          </div>
+        </div>
+        <span aria-hidden="true">&#8599;</span>
+      </div>
+    </a>
+  );
+}
 
+/**
+ * The closing slab — the page's single brightest surface and its only large
+ * accent fill.
+ *
+ * Ink is near-black, not white: white on this fill measures 2.14:1 and fails
+ * outright, while the page ground on it clears 9.63:1.
+ *
+ * Three direct channels instead of a form. Production has no backend
+ * (VITE_USE_API=false), so the form's own fallback was already a mailto: — this
+ * drops the intermediate step rather than presenting fields that go nowhere.
+ * The full availability string lives here because src/chat.ts quotes it
+ * verbatim and refuses anything beyond it; the hero only paraphrases it.
+ */
 export function ContactSection() {
   const rootRef = useRef<HTMLElement>(null);
-  const successRef = useRef<HTMLDivElement>(null);
-  const [formData, setFormData] = useState<ContactFormData>({
-    name: "",
-    email: "",
-    subject: "",
-    message: "",
-  });
-  const [errors, setErrors] = useState<Partial<ContactFormData>>({});
-  const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const { mutate: submitContact, isPending } = useContactForm();
-
-  // Header + columns: scroll-triggered fade. Columns slide in from
-  // their respective sides (left for info, right for form) — matches the
-  // previous framer x:-20 / x:20 entry. Each item runs its own animate()
-  // because the per-item parameters differ; revealOnScroll handles the
-  // single-anim case but for distinct per-target configs we drop to
-  // animate() + the same onEnter pattern in-place.
   useAnime(
     rootRef,
     (scope) => {
       const root = rootRef.current;
       if (!root) return;
       if (scope.matches.reducedMotion) return;
-
-      const cleanups: Array<() => void> = [];
-
-      // Header uses the canonical fade-up reveal.
-      cleanups.push(revealOnScroll(root, "[data-anime='header']"));
-
-      // Info column slides in from the left.
-      const infoCol = root.querySelector<HTMLElement>("[data-anime='info']");
-      if (infoCol) {
-        cleanups.push(
-          revealOnScroll(root, [infoCol], {
-            anim: {
-              opacity: [0, 1],
-              translateX: [-20, 0],
-              duration: DURATION.base * 1000,
-              ease: EASE_FN.emphasized,
-            },
-          }),
-        );
-      }
-
-      // Form column slides in from the right.
-      const formCol = root.querySelector<HTMLElement>("[data-anime='form']");
-      if (formCol) {
-        cleanups.push(
-          revealOnScroll(root, [formCol], {
-            anim: {
-              opacity: [0, 1],
-              translateX: [20, 0],
-              duration: DURATION.base * 1000,
-              ease: EASE_FN.emphasized,
-            },
-          }),
-        );
-      }
-
-      return () => cleanups.forEach((fn) => fn());
+      return revealOnScroll(root, "[data-anime]", { staggerMs: 90 });
     },
     [],
   );
 
-  // Success-state scale-in (mount-only, not scroll-triggered).
-  // Fires whenever isSubmitted flips true. Layered animation:
-  //   1. Container scales in (existing behaviour).
-  //   2. Checkmark SVG paths draw in via stroke-dashoffset — the delight
-  //      beat. Lucide icons render as <svg><path|circle/></svg>; we target
-  //      every drawable child so both the ring and the tick animate.
-  useAnime(
-    successRef,
-    (scope) => {
-      const el = successRef.current;
-      if (!el) return;
-      if (scope.matches.reducedMotion) return;
-      animate(el, {
-        opacity: [0, 1],
-        scale: [0.9, 1],
-        duration: DURATION.base * 1000,
-        ease: EASE_FN.emphasized,
-      });
-      const strokes = el.querySelectorAll<SVGElement>(
-        '[data-anime="success-icon"] path, [data-anime="success-icon"] circle, [data-anime="success-icon"] polyline',
-      );
-      if (strokes.length) {
-        strokes.forEach((s) => {
-          s.style.strokeDasharray = "200";
-          s.style.strokeDashoffset = "200";
-        });
-        animate(strokes, {
-          ...strokeDrawAnim(),
-          delay: 120,
-        });
-      }
-    },
-    [isSubmitted],
-  );
-
-  // Validation-error feedback: shake invalid fields + fade-in error
-  // messages. Watches `errors` and fires only when it transitions from
-  // empty → populated (i.e. on submit, not on every keystroke that
-  // partially clears an error).
-  useAnime(
-    rootRef,
-    (scope) => {
-      const root = rootRef.current;
-      if (!root) return;
-      if (scope.matches.reducedMotion) return;
-      const errorKeys = Object.keys(errors).filter((k) => !!errors[k as keyof ContactFormData]);
-      if (errorKeys.length === 0) return;
-      const invalidFields = root.querySelectorAll<HTMLElement>('[aria-invalid="true"]');
-      if (invalidFields.length) {
-        animate(invalidFields, shakeFieldAnim());
-      }
-      const errorMsgs = root.querySelectorAll<HTMLElement>('[role="alert"]');
-      if (errorMsgs.length) {
-        animate(errorMsgs, {
-          opacity: [0, 1],
-          translateY: [-4, 0],
-          duration: 180,
-          ease: EASE_FN.out,
-        });
-      }
-    },
-    [errors],
-  );
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    // Clear error on change
-    if (errors[name as keyof ContactFormData]) {
-      setErrors((prev) => ({ ...prev, [name]: undefined }));
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Validate form client-side first
-    const result = contactSchema.safeParse(formData);
-    if (!result.success) {
-      const fieldErrors: Partial<ContactFormData> = {};
-      result.error.errors.forEach((error) => {
-        if (error.path[0]) {
-          fieldErrors[error.path[0] as keyof ContactFormData] = error.message;
-        }
-      });
-      setErrors(fieldErrors);
-      return;
-    }
-
-    // ponytail: the Cloudflare production deploy has no backend, so POSTing
-    // here returned a bare 405 and silently dropped the message. With no API,
-    // hand the draft to the visitor's own mail client instead — a lead that
-    // needs one extra click beats a lead that vanishes. Upgrade path: once
-    // a domain is onboarded to Cloudflare Email Sending, add a send_email
-    // binding + route in src/worker.ts and drop this branch.
-    if (!env.useApi) {
-      const body = `${result.data.message}\n\n— ${result.data.name} <${result.data.email}>`;
-      window.location.href =
-        `mailto:${personalData.email}` +
-        `?subject=${encodeURIComponent(result.data.subject)}` +
-        `&body=${encodeURIComponent(body)}`;
-      setIsSubmitted(true);
-      setFormData({ name: "", email: "", subject: "", message: "" });
-      setErrors({});
-      setTimeout(() => setIsSubmitted(false), 5000);
-      return;
-    }
-
-    // Submit to API
-    submitContact(
-      {
-        name: result.data.name,
-        email: result.data.email,
-        subject: result.data.subject,
-        message: result.data.message,
-      },
-      {
-        onSuccess: () => {
-          setIsSubmitted(true);
-          setFormData({ name: "", email: "", subject: "", message: "" });
-          setErrors({});
-          // Reset success message after 5 seconds
-          setTimeout(() => setIsSubmitted(false), 5000);
-        },
-        onError: () => {
-          // Global error toast handled by QueryClient config
-          // No additional handling needed here
-        },
-      },
-    );
-  };
-
   return (
     <section
       ref={rootRef}
-      // No id — the LazySection wrapper in Index.tsx owns `#contact`; see the
-      // note in SkillsSection.
+      // No id — the LazySection wrapper in Index.tsx owns `#contact`.
       aria-labelledby="contact-heading"
-      // overflow-hidden matches Skills/Services/Experience. Without it the
-      // reveal animation's initial translateX(20px) on a full-width card
-      // pushes 4px past the viewport on WebKit before the reveal fires —
-      // enough for a real horizontal scroll on iOS Safari.
-      className="py-20 section-mesh overflow-hidden"
+      className="s-80"
     >
-      <div className="section-container">
-        {/* Section Header */}
-        <div data-anime="header" className="text-center mb-12">
-          <span className="inline-block text-xs font-semibold uppercase tracking-[0.18em] text-primary mb-3">
-            Contact
-          </span>
-          <h2 id="contact-heading" className="section-title">
-            Say hi
-          </h2>
-          <p className="section-subtitle mx-auto">
-            Have a project in mind or want to discuss opportunities? I&apos;d love to hear from you.
-          </p>
-        </div>
+      <div className="wrap">
+        <div className="slab" data-anime>
+          <div className="orb" aria-hidden="true" />
+          <div className="ripple" aria-hidden="true" />
 
-        <div className="grid lg:grid-cols-2 gap-12 max-w-5xl mx-auto">
-          {/* Contact Info */}
-          <div data-anime="info">
-            <h3 className="text-xl font-bold mb-6">Let&apos;s Connect</h3>
-
-            <div className="space-y-6">
-              {/* Email */}
-              <div className="flex items-center gap-4">
-                <div
-                  className="w-12 h-12 rounded-xl flex items-center justify-center transition-all"
-                  style={{
-                    background: "oklch(var(--primary) / 0.08)",
-                    border: "1px solid oklch(var(--primary) / 0.15)",
-                  }}
-                >
-                  <Mail className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Email</p>
-                  <a
-                    href={`mailto:${personalData.email}`}
-                    className="font-medium hover:text-primary transition-colors"
-                  >
-                    {personalData.email}
-                  </a>
-                </div>
-              </div>
-
-              {/* Location */}
-              <div className="flex items-center gap-4">
-                <div
-                  className="w-12 h-12 rounded-xl flex items-center justify-center transition-all"
-                  style={{
-                    background: "oklch(var(--secondary) / 0.08)",
-                    border: "1px solid oklch(var(--secondary) / 0.15)",
-                  }}
-                >
-                  <MapPin className="w-5 h-5 text-secondary" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Location</p>
-                  <p className="font-medium">{personalData.location}</p>
-                </div>
-              </div>
-
-              {/* Social Links */}
-              <div className="pt-4">
-                <p className="text-sm text-muted-foreground mb-4">Connect with me</p>
-                <div className="flex gap-3">
-                  {[
-                    { href: personalData.social.github, Icon: Github, label: "GitHub" },
-                    { href: personalData.social.linkedin, Icon: Linkedin, label: "LinkedIn" },
-                    { href: personalData.social.twitter, Icon: Twitter, label: "Twitter" },
-                  ]
-                    // Skip unset links — href="" resolves to the current page.
-                    .filter(({ href }) => href)
-                    .map(({ href, Icon, label }) => (
-                      <a
-                        key={label}
-                        href={href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={label}
-                        className="social-link w-11 h-11 md:w-10 md:h-10"
-                      >
-                        <Icon className="w-5 h-5" />
-                      </a>
-                    ))}
-                </div>
-              </div>
-
-              {/* Quick Actions */}
-              <div className="pt-4 space-y-3">
-                <a
-                  href={personalData.resumeUrl}
-                  download
-                  className="flex items-center gap-3 w-full p-4 rounded-xl border transition-all"
-                  style={{
-                    background: "oklch(var(--card))",
-                    boxShadow: "var(--shadow-sm)",
-                    borderColor: "oklch(var(--border))",
-                    transition: "all 300ms cubic-bezier(0.16, 1, 0.3, 1)",
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)";
-                    (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-sm)";
-                    (e.currentTarget as HTMLElement).style.borderColor =
-                      "oklch(var(--primary) / 0.3)";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.transform = "";
-                    (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-sm)";
-                    (e.currentTarget as HTMLElement).style.borderColor = "oklch(var(--border))";
-                  }}
-                >
-                  <Download className="w-5 h-5 text-primary" />
-                  <div>
-                    <p className="font-medium">Download Resume</p>
-                    <p className="text-xs text-muted-foreground">PDF format</p>
-                  </div>
-                </a>
-
-                {/* Only rendered once a booking URL exists. personal.ts ships calendar: ""
-                    until one is set up, and this is the highest-intent control on the page —
-                    an empty href made "Schedule a Call" reload the page instead. */}
-                {personalData.social.calendar && (
-                  <a
-                    href={personalData.social.calendar}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 w-full p-4 rounded-xl border transition-all"
-                    style={{
-                      background: "oklch(var(--card))",
-                      boxShadow: "var(--shadow-sm)",
-                      borderColor: "oklch(var(--border))",
-                      transition: "all 300ms cubic-bezier(0.16, 1, 0.3, 1)",
-                    }}
-                    onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)";
-                      (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-sm)";
-                      (e.currentTarget as HTMLElement).style.borderColor =
-                        "oklch(var(--primary) / 0.3)";
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLElement).style.transform = "";
-                      (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-sm)";
-                      (e.currentTarget as HTMLElement).style.borderColor = "oklch(var(--border))";
-                    }}
-                  >
-                    <Calendar className="w-5 h-5 text-secondary" />
-                    <div>
-                      <p className="font-medium">Schedule a Call</p>
-                      <p className="text-xs text-muted-foreground">30 min meeting</p>
-                    </div>
-                  </a>
-                )}
-              </div>
+          <div className="slab-grid" style={{ position: "relative", display: "grid", gap: 48 }}>
+            <div>
+              <h2 id="contact-heading" className="display" style={{ marginBottom: 24 }}>
+                Need someone who has already <span className="fade">shipped this in a bank?</span>
+              </h2>
+              <p className="body" style={{ maxWidth: "36rem" }}>
+                {personalData.availability}
+              </p>
             </div>
-          </div>
 
-          {/* Contact Form */}
-          <div data-anime="form">
-            <div className="glass-card p-6 md:p-8">
-              <h3 className="text-xl font-bold mb-6">Send a Message</h3>
-
-              {isSubmitted ? (
-                <div
-                  ref={successRef}
-                  className="flex flex-col items-center justify-center py-12 text-center"
-                >
-                  <div
-                    className="w-16 h-16 rounded-full flex items-center justify-center mb-4"
-                    style={{
-                      background: "oklch(var(--secondary) / 0.08)",
-                      border: "1px solid oklch(var(--secondary) / 0.2)",
-                    }}
-                  >
-                    <CheckCircle data-anime="success-icon" className="w-8 h-8 text-secondary" />
-                  </div>
-                  <h4 className="text-lg font-bold mb-2">
-                    {env.useApi ? "Message Sent!" : "Your email is ready"}
-                  </h4>
-                  <p className="text-muted-foreground">
-                    {env.useApi
-                      ? "Thanks for reaching out. I'll get back to you soon."
-                      : "I've opened your email app with the message drafted — just hit send."}
-                  </p>
-                </div>
-              ) : (
-                <form onSubmit={handleSubmit} className="space-y-5" noValidate>
-                  <div className="grid sm:grid-cols-2 gap-5">
-                    <div className="space-y-2">
-                      <Label htmlFor="name">Name</Label>
-                      <Input
-                        id="name"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        placeholder="John Doe"
-                        className={errors.name ? "border-destructive" : ""}
-                        aria-invalid={!!errors.name}
-                        aria-describedby={errors.name ? "name-error" : undefined}
-                      />
-                      {errors.name && (
-                        <p id="name-error" role="alert" className="text-xs text-destructive">
-                          {errors.name}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email</Label>
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        placeholder="john@example.com"
-                        className={errors.email ? "border-destructive" : ""}
-                        aria-invalid={!!errors.email}
-                        aria-describedby={errors.email ? "email-error" : undefined}
-                      />
-                      {errors.email && (
-                        <p id="email-error" role="alert" className="text-xs text-destructive">
-                          {errors.email}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="subject">Subject</Label>
-                    <Input
-                      id="subject"
-                      name="subject"
-                      value={formData.subject}
-                      onChange={handleChange}
-                      placeholder="Project Inquiry"
-                      className={errors.subject ? "border-destructive" : ""}
-                      aria-invalid={!!errors.subject}
-                      aria-describedby={errors.subject ? "subject-error" : undefined}
-                    />
-                    {errors.subject && (
-                      <p id="subject-error" role="alert" className="text-xs text-destructive">
-                        {errors.subject}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="message">Message</Label>
-                    <Textarea
-                      id="message"
-                      name="message"
-                      value={formData.message}
-                      onChange={handleChange}
-                      placeholder="Tell me about your project..."
-                      rows={5}
-                      className={errors.message ? "border-destructive" : ""}
-                      aria-invalid={!!errors.message}
-                      aria-describedby={errors.message ? "message-error" : undefined}
-                    />
-                    {errors.message && (
-                      <p id="message-error" role="alert" className="text-xs text-destructive">
-                        {errors.message}
-                      </p>
-                    )}
-                  </div>
-
-                  <Button
-                    type="submit"
-                    disabled={isPending}
-                    className="w-full btn-hero-primary btn-green !rounded-lg focus-visible:ring-secondary"
-                  >
-                    {isPending ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Sending...
-                      </>
-                    ) : (
-                      <>
-                        <Send className="w-4 h-4" />
-                        Send Message
-                      </>
-                    )}
-                  </Button>
-                </form>
-              )}
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <SlabCard
+                href={`mailto:${personalData.email}`}
+                label="Email directly"
+                detail={personalData.email}
+                ariaLabel="Email"
+              />
+              <SlabCard
+                href={personalData.social.linkedin}
+                label="LinkedIn"
+                detail={personalData.name}
+                ariaLabel="LinkedIn"
+              />
+              <SlabCard
+                href={personalData.social.github}
+                label="GitHub"
+                detail="maseko-lucky-9"
+                ariaLabel="GitHub"
+              />
             </div>
           </div>
         </div>

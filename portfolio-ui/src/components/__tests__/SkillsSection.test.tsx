@@ -32,21 +32,13 @@ describe("SkillsSection", () => {
   // it is what an unattended screenshot and a first-time visitor land on.
   it("opens on DevOps", () => {
     render(<SkillsSection />);
-    expect(screen.getByRole("button", { name: /DevOps/ })).toHaveAttribute(
-      "data-active",
-      "true",
-    );
-    expect(screen.getByRole("button", { name: /Backend/ })).toHaveAttribute(
-      "data-active",
-      "false",
-    );
+    expect(screen.getByRole("button", { name: /DevOps/ })).toHaveAttribute("data-active", "true");
+    expect(screen.getByRole("button", { name: /Backend/ })).toHaveAttribute("data-active", "false");
   });
 
   it("renders the three category buttons in strength order", () => {
     const { container } = render(<SkillsSection />);
-    const labels = [...container.querySelectorAll(".sk-toggle")].map((b) =>
-      b.textContent?.trim(),
-    );
+    const labels = [...container.querySelectorAll(".sk-toggle")].map((b) => b.textContent?.trim());
     expect(labels).toEqual(["DevOps & Cloud", "Backend", "Frontend"]);
   });
 

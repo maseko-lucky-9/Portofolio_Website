@@ -1,53 +1,46 @@
-import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi } from "vitest";
+import { Footer } from "@/components/Footer";
 import { personalData } from "@/data/personal";
-import { Footer } from "../Footer";
+
+vi.mock("@/lib/scroll-to-section", () => ({ scrollToSection: vi.fn() }));
 
 describe("Footer", () => {
-  it("renders copyright with current year", () => {
+  it("renders the wordmark and the sourced role title", () => {
     render(<Footer />);
-    const currentYear = new Date().getFullYear().toString();
-    expect(screen.getByText(new RegExp(`© ${currentYear}`))).toBeInTheDocument();
+    expect(screen.getAllByText(personalData.name).length).toBeGreaterThan(0);
+    // The hero has no title line any more, so this is where it is stated —
+    // and src/chat.ts reads the same field.
+    expect(screen.getByText(personalData.title)).toBeInTheDocument();
   });
 
-  it("renders brand name", () => {
+  it("keeps the cross-route content links alive", () => {
     render(<Footer />);
-    const firstName = personalData.name.split(" ")[0];
-    expect(screen.getByText(firstName)).toBeInTheDocument();
-    expect(screen.getByText(".dev")).toBeInTheDocument();
+    for (const [name, href] of [
+      ["Writing", "/blog"],
+      ["Answers", "/answers"],
+      ["Case studies", "/projects"],
+      ["RSS", "/rss.xml"],
+    ]) {
+      expect(screen.getByRole("link", { name })).toHaveAttribute("href", href);
+    }
   });
 
-  it("renders all 6 navigation links", () => {
-    render(<Footer />);
-    const expectedLinks = ["About", "Skills", "Projects", "Experience", "Blog", "Contact"];
-    expectedLinks.forEach((linkText) => {
-      expect(screen.getByText(linkText)).toBeInTheDocument();
-    });
-  });
-
-  it("renders social links with correct aria-labels", () => {
-    render(<Footer />);
-    expect(screen.getByLabelText("GitHub")).toBeInTheDocument();
-    expect(screen.getByLabelText("LinkedIn")).toBeInTheDocument();
-    // Twitter is deliberately absent: personal.ts ships `twitter: ""` and the
-    // components filter unset links out, because href="" resolves to the current
-    // page rather than being inert. Asserting the absence keeps that intentional.
-    expect(screen.queryByLabelText("Twitter")).not.toBeInTheDocument();
-  });
-
-  it("social links have correct hrefs", () => {
+  it("labels the social links for assistive tech", () => {
     render(<Footer />);
     expect(screen.getByLabelText("GitHub")).toHaveAttribute("href", personalData.social.github);
     expect(screen.getByLabelText("LinkedIn")).toHaveAttribute("href", personalData.social.linkedin);
   });
 
-  // Written against the data rather than a hardcoded list, so it keeps holding when
-  // twitter/calendar are eventually filled in — and still fails if someone drops the
-  // .filter() and reintroduces a link that silently reloads the page.
-  it("never renders a social link with an empty href", () => {
-    render(<Footer />);
-    for (const anchor of screen.getAllByRole("link")) {
-      expect(anchor.getAttribute("href")).toBeTruthy();
+  it("has no empty hrefs", () => {
+    const { container } = render(<Footer />);
+    for (const a of container.querySelectorAll("a")) {
+      expect(a.getAttribute("href")).toBeTruthy();
     }
+  });
+
+  it("shows the current year", () => {
+    render(<Footer />);
+    expect(screen.getByText(new RegExp(`${new Date().getFullYear()}`))).toBeInTheDocument();
   });
 });
