@@ -41,6 +41,40 @@ docker build -t portfolio-frontend .
 docker compose -f ../docker-compose.dev.yml build frontend
 ```
 
+### Trial run: the real image, with the real test suite
+
+Verifies the nginx image rather than the Vite preview — different artifact,
+different headers, and the only way to check that the CSP and the SPA fallback
+behave. Run from the monorepo root:
+
+```bash
+docker build --build-arg VITE_USE_API=false -t portfolio-ui:aura portfolio-ui/
+docker run -d --name aura-trial -p 18080:8080 --add-host backend-api:127.0.0.1 portfolio-ui:aura
+until curl -fsS http://localhost:18080/health >/dev/null; do sleep 1; done
+```
+
+`--add-host` is required standalone: nginx resolves the `backend-api` upstream at
+config-parse time and refuses to start if the name does not exist.
+
+Then point the suite at it. `E2E_FULL_SUITE=1` is the explicit opt-in that lifts
+the live-domain-only restriction `E2E_BASE_URL` normally imposes — without it a
+stale export could aim the whole suite at production:
+
+```bash
+cd portfolio-ui
+E2E_BASE_URL=http://localhost:18080 E2E_FULL_SUITE=1 npx playwright test
+```
+
+The image builds with `build:app` (vite only), so the six SEO scripts do not
+run and `/blog`, `/answers`, `/projects`, `/sitemap.xml`, `/rss.xml` and `/og/*`
+are absent from it. Specs that need them detect the SPA fallback and skip.
+
+## Theme
+
+Dark only. There is no theme toggle and no light palette — `index.html` carries
+`class="dark"` and `color-scheme: dark`, and every token is defined once in a
+single `:root` block. See `docs/decisions/008-aura-signal-field-redesign.md`.
+
 ## Environment Variables (Vite build args)
 
 | Variable | Default | Description |
