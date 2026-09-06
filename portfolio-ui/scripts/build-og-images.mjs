@@ -38,19 +38,26 @@ function loadFont(name) {
 }
 
 // Satori opentype parser can't ingest woff2 directly; decompress to TTF.
-// Variable fonts trip @shuding/opentype.js on the fvar table, so we use
-// the static (per-weight) Inter from @fontsource/inter. Two weights:
-// 400 for the byline, 700 for the headline.
-const REG_WOFF2 = loadFont('@fontsource/inter/files/inter-latin-400-normal.woff2');
-const BOLD_WOFF2 = loadFont('@fontsource/inter/files/inter-latin-700-normal.woff2');
-const FONT_REG = Buffer.from(await wawoff.decompress(REG_WOFF2));
-const FONT_BOLD = Buffer.from(await wawoff.decompress(BOLD_WOFF2));
+// Variable fonts trip @shuding/opentype.js on the fvar table, so both faces
+// here are the STATIC per-weight packages — which is also why the body face is
+// JetBrains Mono rather than Public Sans, whose only build is variable.
+//
+// Spectral italic is the display face and carries the headline, matching the
+// site; the mono carries the kicker and byline, matching its micro-labels.
+const DISPLAY_WOFF2 = loadFont('@fontsource/spectral/files/spectral-latin-400-italic.woff2');
+const MONO_WOFF2 = loadFont('@fontsource/jetbrains-mono/files/jetbrains-mono-latin-400-normal.woff2');
+const MONO_MED_WOFF2 = loadFont('@fontsource/jetbrains-mono/files/jetbrains-mono-latin-500-normal.woff2');
+const FONT_DISPLAY = Buffer.from(await wawoff.decompress(DISPLAY_WOFF2));
+const FONT_MONO = Buffer.from(await wawoff.decompress(MONO_WOFF2));
+const FONT_MONO_MED = Buffer.from(await wawoff.decompress(MONO_MED_WOFF2));
 
-const BG = '#090a11';
-const FG = '#eef2f6';
-const MUTED = '#8796ab';
-const ACCENT = '#5a6ef2';
-const BORDER = 'rgba(238, 242, 246, 0.10)';
+// The site's own tokens, resolved to hex because satori takes no CSS variables:
+// --surface-page, --ink-100, --ink-60, --signal, --border-component.
+const BG = '#020305';
+const FG = '#ffffff';
+const MUTED = 'rgba(255, 255, 255, 0.6)';
+const ACCENT = '#38bdf8';
+const BORDER = 'rgba(255, 255, 255, 0.10)';
 
 const KIND_LABEL = { blog: 'BLOG', answers: 'ANSWERS', projects: 'PROJECTS' };
 
@@ -70,7 +77,7 @@ function card({ kindLabel, title, byline }) {
         padding: '72px 88px',
         background: BG,
         color: FG,
-        fontFamily: 'Inter',
+        fontFamily: 'JetBrains Mono',
         position: 'relative',
       },
       children: [
@@ -85,7 +92,7 @@ function card({ kindLabel, title, byline }) {
                   style: {
                     display: 'flex',
                     fontSize: 22,
-                    fontWeight: 700,
+                    fontWeight: 500,
                     letterSpacing: 4,
                     color: ACCENT,
                   },
@@ -100,7 +107,9 @@ function card({ kindLabel, title, byline }) {
                     fontSize: 64,
                     lineHeight: 1.1,
                     letterSpacing: -1,
-                    fontWeight: 700,
+                    fontFamily: 'Spectral',
+                    fontStyle: 'italic',
+                    fontWeight: 400,
                     color: FG,
                     maxWidth: 1024,
                   },
@@ -131,7 +140,7 @@ function card({ kindLabel, title, byline }) {
                     {
                       type: 'div',
                       props: {
-                        style: { display: 'flex', fontWeight: 600, color: FG, fontSize: 24 },
+                        style: { display: 'flex', fontWeight: 500, color: FG, fontSize: 24 },
                         children: 'Thulani Maseko',
                       },
                     },
@@ -165,8 +174,9 @@ async function renderCard(card, outPath) {
     width: 1200,
     height: 630,
     fonts: [
-      { name: 'Inter', data: FONT_REG, weight: 400, style: 'normal' },
-      { name: 'Inter', data: FONT_BOLD, weight: 700, style: 'normal' },
+      { name: 'JetBrains Mono', data: FONT_MONO, weight: 400, style: 'normal' },
+      { name: 'JetBrains Mono', data: FONT_MONO_MED, weight: 500, style: 'normal' },
+      { name: 'Spectral', data: FONT_DISPLAY, weight: 400, style: 'italic' },
     ],
   });
   const png = new Resvg(svg, { fitTo: { mode: 'width', value: 1200 } }).render().asPng();

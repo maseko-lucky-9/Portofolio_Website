@@ -5,64 +5,58 @@ test.describe("Navigation", () => {
     await page.goto("/");
   });
 
-  test("page loads with hero section visible", async ({ page }) => {
-    await expect(page.locator("#about")).toBeVisible();
-    await expect(page.locator("#about").getByText("Thulani")).toBeVisible();
+  test("page loads with the hero visible", async ({ page }) => {
+    await expect(page.locator("#hero")).toBeVisible();
+    await expect(page.locator("#hero-heading")).toBeVisible();
   });
 
-  test("navbar links scroll to correct sections", async ({ page }) => {
-    // Desktop nav (hidden md:flex) is display:none on mobile. Clicking hidden
-    // buttons is a no-op. The mobile equivalent — tapping a drawer link and
-    // asserting the page actually scrolls to the target — lives in
-    // mobile-layout.spec.ts. (The "mobile menu opens" test below only checks
-    // that the link text is visible; it never clicks one.)
-    // Vacuous pass on mobile viewports.
+  test("nav links scroll to their sections", async ({ page }) => {
+    // The section links are hidden below 768px by design — the pill collapses
+    // to brand + CTA rather than opening a drawer. Vacuous on mobile.
     const vp = page.viewportSize();
     if (!vp || vp.width < 768) return;
 
-    // Click Skills link
-    await page.getByRole("button", { name: "Skills" }).first().click();
-    await expect(page.locator("#skills")).toBeInViewport();
-
-    // Click Projects link
-    await page.getByRole("button", { name: "Projects" }).first().click();
-    await expect(page.locator("#projects")).toBeInViewport();
-
-    // Click Contact link
-    await page.getByRole("button", { name: "Contact" }).first().click();
-    await expect(page.locator("#contact")).toBeInViewport();
+    for (const [label, id] of [
+      ["Skills", "#skills"],
+      ["Work", "#work"],
+      ["Experience", "#experience"],
+    ] as const) {
+      await page.getByRole("button", { name: label, exact: true }).click();
+      await expect(page.locator(id)).toBeInViewport();
+    }
   });
 
-  test("brand logo scrolls to top", async ({ page }) => {
-    // Scroll down first
+  test("brand returns to the top", async ({ page }) => {
     await page.evaluate(() => window.scrollTo(0, 2000));
     await page.waitForTimeout(500);
-
-    // Click brand logo
     await page.locator("header a").first().click();
     await page.waitForTimeout(800);
-
-    const scrollY = await page.evaluate(() => window.scrollY);
-    expect(scrollY).toBeLessThan(100);
+    expect(await page.evaluate(() => window.scrollY)).toBeLessThan(100);
   });
 });
 
-test.describe("Navigation - Mobile", () => {
+test.describe("Navigation — mobile", () => {
   test.use({ viewport: { width: 375, height: 812 } });
 
-  test("mobile menu opens and shows links", async ({ page }) => {
+  // The drawer is gone. With seven scroll-anchors on one page it duplicated the
+  // scroll rather than adding a way to get anywhere; the CTA is the action a
+  // recruiter on a phone actually needs, and it stays visible.
+  test("collapses to brand and CTA, with no drawer", async ({ page }) => {
     await page.goto("/");
-
-    // Address the hamburger and the drawer by their own hooks. Positional
-    // selectors used to work and quietly stopped: `header button` last is now
-    // a drawer link, and `nav` last is the FOOTER's nav, so the assertions
-    // were querying the wrong elements rather than testing the drawer.
-    await page.getByRole("button", { name: "Open menu" }).click();
-
-    const drawer = page.getByTestId("mobile-drawer");
-    await expect(drawer).toHaveAttribute("aria-hidden", "false");
-    for (const label of ["Skills", "Projects", "Contact"]) {
-      await expect(drawer.getByRole("button", { name: label, exact: true })).toBeVisible();
+    await expect(page.locator("header .brand")).toBeVisible();
+    await expect(page.locator("header .btn-light")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Open menu" })).toHaveCount(0);
+    await expect(page.getByTestId("mobile-drawer")).toHaveCount(0);
+    for (const label of ["Skills", "Work", "Experience"]) {
+      await expect(page.getByRole("button", { name: label, exact: true })).toBeHidden();
     }
+  });
+
+  test("the header pill stays inside the viewport", async ({ page }) => {
+    await page.goto("/");
+    const box = await page.locator("header").boundingBox();
+    const width = page.viewportSize()!.width;
+    expect(box!.x).toBeGreaterThanOrEqual(0);
+    expect(box!.x + box!.width).toBeLessThanOrEqual(width);
   });
 });

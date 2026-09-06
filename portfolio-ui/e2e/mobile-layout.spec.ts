@@ -15,33 +15,15 @@ import { test, expect } from "@playwright/test";
  * so they double as a no-regression gate.
  */
 test.describe("mobile layout", () => {
+  // Kept after the drawer was removed: the failure it guards against is a
+  // header that grows to hold navigation, and the pill can still do that if a
+  // future change unhides the section links below md.
   test("header does not reserve drawer height on load", async ({ page }) => {
     await page.goto("/");
     const height = await page.locator("header").evaluate((el) => el.getBoundingClientRect().height);
 
-    // 438px before the fix; 72px at rest / 56px scrolled after.
+    // 438px before the original fix; ~58px now.
     expect(height).toBeLessThan(100);
-  });
-
-  test("header stays collapsed while the drawer is open", async ({ page, isMobile }) => {
-    // The hamburger is itself md:hidden, so this cannot run on the desktop
-    // project — a click would fail actionability. test.skip (not a bare
-    // `return`) so it reports as a visible skip rather than a silent pass.
-    test.skip(!isMobile, "drawer is display:none at md and above");
-
-    await page.goto("/");
-    await page.getByRole("button", { name: /open menu/i }).click();
-
-    const drawer = page.getByTestId("mobile-drawer");
-    await expect(drawer.getByText("Services")).toBeVisible();
-
-    // The bug's signature: header height was IDENTICAL open vs closed.
-    const height = await page.locator("header").evaluate((el) => el.getBoundingClientRect().height);
-    expect(height).toBeLessThan(100);
-
-    // ...and the card floats below the bar rather than inflating it.
-    const drawerTop = await drawer.evaluate((el) => el.getBoundingClientRect().top);
-    expect(drawerTop).toBeGreaterThanOrEqual(height - 1);
   });
 
   test("the top of the screen is not covered by the fixed header", async ({ page, isMobile }) => {
@@ -84,39 +66,6 @@ test.describe("mobile layout", () => {
     expect(m.scroll, "overflow after full-page mount").toBeLessThanOrEqual(m.client + 1);
   });
 
-  // The bridge collapses to h-8 on mobile to reclaim ~65px of dead space, which
-  // put its caption straight on top of the bracket graphic (caption band y8-21
-  // vs graphic ~y16 at 375px). Same shape of regression as the header bug: a
-  // Tailwind class silently reintroducing a broken layout.
-  test("section bridge caption never overlaps its graphic", async ({ page, isMobile }) => {
-    await page.goto("/");
-    const boxes = await page.evaluate(() => {
-      const bridge = document.querySelector("[data-section-bridge]");
-      if (!bridge) return null;
-      const root = bridge.getBoundingClientRect();
-      const captionEl = bridge.querySelector("[data-bridge='caption']");
-      if (!captionEl || getComputedStyle(captionEl).display === "none") {
-        return { captionHidden: true, overlap: false };
-      }
-      const cap = captionEl.getBoundingClientRect();
-      const paths = [...bridge.querySelectorAll("svg path")].map((p) => p.getBoundingClientRect());
-      if (!paths.length) return { captionHidden: false, overlap: false };
-      const gTop = Math.min(...paths.map((r) => r.top));
-      const gBottom = Math.max(...paths.map((r) => r.bottom));
-      return {
-        captionHidden: false,
-        overlap: !(cap.bottom < gTop || cap.top > gBottom),
-        containerHeight: Math.round(root.height),
-      };
-    });
-
-    expect(boxes, "expected a section bridge on the page").not.toBeNull();
-    expect(boxes!.overlap, "caption is drawn on top of the bracket graphic").toBe(false);
-    // Below sm the container is only 32px tall — there is no room for both, so
-    // the caption must be hidden rather than merely nudged.
-    if (isMobile) expect(boxes!.captionHidden).toBe(true);
-  });
-
   // The prerendered content pages are a separate pipeline from the SPA above —
   // remark-gfm emits bare <table> markup into page-template.mjs, which had no
   // table CSS at all. Three shipped pages carry real tables; this checks the
@@ -144,40 +93,4 @@ test.describe("mobile anchor navigation", () => {
   // (The branch itself is unit-tested in src/lib/__tests__/scroll-to-section.test.ts,
   // which is the deterministic proof; this is the integration check.)
   test.use({ reducedMotion: "no-preference" });
-
-  test("drawer link lands the section below the fixed header", async ({ page, isMobile }) => {
-    test.skip(!isMobile, "drawer is display:none at md and above");
-
-    // LazySection bypasses its IntersectionObserver gate when
-    // navigator.webdriver is true, rendering every section eagerly — which
-    // would make the lazy-growth half of this test vacuous. Spoof it off so
-    // the real deferred-mount path runs. Spec-only; no production change.
-    await page.addInitScript(() =>
-      Object.defineProperty(navigator, "webdriver", { get: () => false }),
-    );
-    await page.goto("/");
-
-    await page.getByRole("button", { name: /open menu/i }).click();
-    await page.getByTestId("mobile-drawer").getByText("Services").click();
-    // Exactly one #services exists at any moment: LazySection's placeholder
-    // holds the anchor id until ServicesSection mounts and takes it over.
-    //
-    // Expected landing is scroll-padding-top (5rem = 80px). Before the fix the
-    // target drifted ~4,000px as lazy sections expanded mid-scroll.
-    const landed = () =>
-      page.locator("#services").evaluate((el) => {
-        const top = el.getBoundingClientRect().top;
-        return top > 20 && top < 140;
-      });
-
-    // Poll rather than sleep: the settle loop's own ceiling is
-    // MAX_SETTLE_TRIES(20) x SETTLE_INTERVAL_MS(50) = 1000ms, so any fixed wait
-    // near that races CI contention or a cold chunk cache.
-    await expect.poll(landed, { timeout: 8000 }).toBe(true);
-
-    // ...and it has to *stay* there. Converging and then drifting back out once
-    // the settle loop's budget expires would be the same bug wearing a hat.
-    await page.waitForTimeout(1500);
-    expect(await landed(), "target drifted back out after settling").toBe(true);
-  });
 });

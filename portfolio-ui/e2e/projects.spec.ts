@@ -1,37 +1,42 @@
 import { test, expect } from "@playwright/test";
+import { projects } from "../src/data/projects";
 
-test.describe("Projects Section", () => {
+test.describe("Selected work", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
-    // ProjectsSection is eagerly loaded (no Suspense). With VITE_USE_API=false,
-    // static data renders immediately — no loading skeleton to wait for.
-    await page.locator("#projects").scrollIntoViewIfNeeded();
-    // Short wait for card animations to settle (framer-motion initial → animate)
-    await page.waitForSelector(".card-project", { timeout: 5000 }).catch(() => {});
+    await page.locator("#work").scrollIntoViewIfNeeded();
   });
 
-  test("displays section heading", async ({ page }) => {
-    await expect(page.locator("#projects").getByText("Featured Projects")).toBeVisible();
+  test("renders the section heading", async ({ page }) => {
+    await expect(page.locator("#work-heading")).toContainText("Four repositories");
   });
 
-  test("renders project cards or empty state", async ({ page }) => {
-    // Should have project cards or an empty state message
-    const cards = page.locator(".card-project");
-    const emptyState = page.locator("#projects").getByText(/No projects/);
-
-    const cardCount = await cards.count();
-    const hasEmpty = await emptyState.isVisible().catch(() => false);
-
-    // At least one of these should be true
-    expect(cardCount > 0 || hasEmpty).toBeTruthy();
+  test("renders one showcase panel per project", async ({ page }) => {
+    await expect(page.locator("#work .show-split")).toHaveCount(projects.length);
   });
 
-  test("section has filter area or loading state", async ({ page }) => {
-    // Projects section should contain either filter buttons or skeleton loaders
-    const section = page.locator("#projects");
-    await expect(section).toBeVisible();
+  // src/data/projects.ts exists because entries once shipped with githubUrl
+  // values that 404'd and impact metrics that had never been measured. Both
+  // rules are asserted here, against the data rather than against literals.
+  test("every project links to its real repository", async ({ page }) => {
+    for (const p of projects) {
+      const card = page.locator("#work article").filter({ hasText: p.title });
+      await expect(card.locator('a[href^="https://github.com/"]')).toHaveAttribute(
+        "href",
+        p.githubUrl!,
+      );
+    }
+  });
 
-    // The section heading should always be present
-    await expect(section.getByText("Featured Projects")).toBeVisible();
+  test("every project states its impact", async ({ page }) => {
+    for (const p of projects) {
+      const card = page.locator("#work article").filter({ hasText: p.title });
+      await expect(card).toContainText(p.impact);
+    }
+  });
+
+  test("has no empty state and no technology filter", async ({ page }) => {
+    await expect(page.getByText("No projects")).toHaveCount(0);
+    await expect(page.locator("#work .tech-badge")).toHaveCount(0);
   });
 });

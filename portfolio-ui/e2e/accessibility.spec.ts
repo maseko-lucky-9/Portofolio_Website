@@ -21,9 +21,8 @@ test.describe("Accessibility", () => {
     await page.keyboard.press("Enter");
     await page.waitForTimeout(500);
 
-    // Should scroll to about section
-    const aboutSection = page.locator("#about");
-    await expect(aboutSection).toBeInViewport();
+    // Should land on the main landmark, which now wraps every section.
+    await expect(page.locator("#main")).toBeInViewport();
   });
 
   test("all images have alt text", async ({ page }) => {
@@ -44,7 +43,7 @@ test.describe("Accessibility", () => {
     // The anchor id lives on Index.tsx's LazySection wrapper (it must exist
     // before the section mounts); the labelled landmark is the <section>
     // inside it. Asserting on the wrapper would only ever read null.
-    const sections = ["skills", "projects", "contact"];
+    const sections = ["skills", "work", "contact"];
 
     for (const id of sections) {
       const section = page.locator(`#${id} section`).first();
@@ -68,12 +67,13 @@ test.describe("Accessibility", () => {
     // which would make this pass vacuously. The heading ids only exist once
     // the real component has rendered.
     for (const heading of [
+      "hero-heading",
+      "operator-heading",
       "skills-heading",
-      "projects-heading",
       "experience-heading",
+      "work-heading",
       "services-heading",
-      "case-studies-heading",
-      "blog-heading",
+      "how-heading",
       "contact-heading",
     ]) {
       await page.locator(`#${heading}`).waitFor({ state: "attached", timeout: 20000 });
@@ -98,15 +98,21 @@ test.describe("Accessibility", () => {
     const vp = page.viewportSize();
     if (!vp || vp.width < 768) return;
 
-    // Theme toggle should be focusable
-    const themeButton = page.getByRole("button", { name: "Toggle theme" });
-    await themeButton.focus();
-    await expect(themeButton).toBeFocused();
+    // The theme toggle is gone with light mode; the header CTA is the control
+    // that has to stay reachable, because it is the page's primary action.
+    const cta = page.locator("header .btn-light");
+    await cta.focus();
+    await expect(cta).toBeFocused();
 
     // Nav links should be focusable
     const firstNavLink = page.locator("header nav button").first();
     await firstNavLink.focus();
     await expect(firstNavLink).toBeFocused();
+
+    // The visible focus RING is asserted in design.spec.ts, with real Tab
+    // presses: the ring is :focus-visible, and a programmatic .focus() call
+    // deliberately does not match it. Asserting an outline here would test the
+    // browser's heuristic rather than our styles.
   });
 
   test("social links have aria-labels", async ({ page }) => {

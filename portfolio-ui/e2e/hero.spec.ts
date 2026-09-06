@@ -1,33 +1,54 @@
 import { test, expect } from "@playwright/test";
 import { personalData } from "../src/data/personal";
 
-test.describe("Hero Section", () => {
+test.describe("Hero", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
   });
 
-  test("displays hero content", async ({ page }) => {
-    // Name should be visible (split across elements in hero)
-    await expect(page.locator("#about").getByText("Thulani")).toBeVisible();
-
-    // Title and availability are asserted against personalData rather than literals:
-    // both are load-bearing strings the chatbot reads (availability is quoted verbatim
-    // under chat.ts rule 3), so they change together with the data and a hardcoded
-    // copy here would just go stale silently — as it did.
-    await expect(page.locator("#about").getByText(personalData.title)).toBeVisible();
-    await expect(page.getByText(personalData.availability)).toBeVisible();
+  test("displays the two-tone headline", async ({ page }) => {
+    const h1 = page.locator("#hero-heading");
+    await expect(h1).toBeVisible();
+    await expect(h1).toContainText("Kubernetes platforms");
+    await expect(h1).toContainText("for South African");
+    await expect(h1).toContainText("banking.");
   });
 
-  test("CTA buttons are present", async ({ page }) => {
-    await expect(page.getByRole("button", { name: /View My Work/i })).toBeVisible();
-    await expect(page.getByRole("button", { name: /Contact Me/i })).toBeVisible();
+  test("states the sourced tagline", async ({ page }) => {
+    await expect(page.locator("#hero .lede")).toHaveText(personalData.tagline);
   });
 
-  test("metric cards display values", async ({ page }) => {
+  // The full availability line is quoted verbatim by src/chat.ts, which refuses
+  // to state availability beyond it. The hero only paraphrases it; #contact is
+  // where it has to appear in full, or the site and the bot disagree about the
+  // highest-intent question a recruiter asks.
+  test("states the full availability line on the closing slab", async ({ page }) => {
+    const slab = page.locator("#contact");
+    await slab.scrollIntoViewIfNeeded();
+    await expect(slab.getByText(personalData.availability)).toBeVisible();
+  });
+
+  // The role title moved out of the hero with the redesign. src/chat.ts reads
+  // the same field, so it still has to be stated somewhere on the page.
+  test("states the role title in the footer", async ({ page }) => {
+    await expect(page.locator("footer").getByText(personalData.title)).toBeVisible();
+  });
+
+  test("CTAs point at real sections", async ({ page }) => {
+    await expect(page.getByRole("link", { name: "View the work" })).toHaveAttribute(
+      "href",
+      "#work",
+    );
+    await expect(
+      page.locator("#hero").getByRole("link", { name: /Get in touch/i }),
+    ).toHaveAttribute("href", "#contact");
+  });
+
+  test("metric cards display values and labels", async ({ page }) => {
     // Mirrors personalData.metrics. The third slot used to be `clients: "10+"`
-    // and is now `certifications: "3"` — see the rationale comment in
+    // and is now `certifications: "3"` — see the rationale in
     // src/data/personal.ts; assert the labels so a value edit fails loudly here.
-    const metrics = page.locator('[data-anime-hero="metrics"]');
+    const metrics = page.locator(".metrics");
     await expect(metrics.getByText("20+", { exact: true })).toBeVisible();
     await expect(metrics.getByText("Projects", { exact: true })).toBeVisible();
     await expect(metrics.getByText("8+ Years", { exact: true })).toBeVisible();
@@ -35,24 +56,18 @@ test.describe("Hero Section", () => {
     await expect(metrics.getByText("Certifications", { exact: true })).toBeVisible();
   });
 
-  test("social links are present", async ({ page }) => {
-    const githubLink = page.getByLabel("GitHub").first();
-    await expect(githubLink).toBeVisible();
-    await expect(githubLink).toHaveAttribute("href", /github\.com/);
-
-    const linkedinLink = page.getByLabel("LinkedIn").first();
-    await expect(linkedinLink).toBeVisible();
-    await expect(linkedinLink).toHaveAttribute("href", /linkedin\.com/);
+  test("social links are reachable from the page", async ({ page }) => {
+    const github = page.getByLabel("GitHub").first();
+    await expect(github).toHaveAttribute("href", /github\.com/);
+    const linkedin = page.getByLabel("LinkedIn").first();
+    await expect(linkedin).toHaveAttribute("href", /linkedin\.com/);
   });
 
-  test("WebGL canvas or fallback renders", async ({ page }) => {
-    // Either a canvas element (WebGL) or gradient fallback divs should be present
-    const canvas = page.locator("#about canvas");
-    const gradientFallback = page.locator("#about .blur-3xl");
-
-    const hasCanvas = await canvas.count();
-    const hasFallback = await gradientFallback.count();
-
-    expect(hasCanvas + hasFallback).toBeGreaterThan(0);
+  // The background is an enhancement, never a requirement: the gradient
+  // fallback is what the page is designed around, and the WebGL scene layers
+  // over it. Both layers must exist on every load.
+  test("the ambient field renders its host and its fallback", async ({ page }) => {
+    await expect(page.locator("#aura-bg #us-host")).toHaveCount(1);
+    await expect(page.locator("#field-fallback")).toHaveCount(1);
   });
 });

@@ -24,7 +24,7 @@ describe("OperatorSection", () => {
     const { container } = render(<OperatorSection />);
     const h2 = screen.getByRole("heading", { level: 2 });
     expect(h2.textContent).toContain("Most platform work fails in production");
-    expect(container.querySelector("section#operator")).toHaveAttribute("aria-labelledby", h2.id);
+    expect(container.querySelector("section")).toHaveAttribute("aria-labelledby", h2.id);
   });
 
   it("states the certification and location as sourced credentials", () => {

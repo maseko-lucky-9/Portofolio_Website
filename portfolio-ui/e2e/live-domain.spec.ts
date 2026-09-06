@@ -30,7 +30,7 @@ test.describe("live domain", () => {
     await page.goto("/");
 
     await expect(page.locator("#root")).toBeAttached();
-    await expect(page.locator("#about")).toBeVisible();
+    await expect(page.locator("#hero")).toBeVisible();
 
     // GoDaddy Website Builder's stock tagline. Its presence means DNS is still
     // pointed at the old parked site.

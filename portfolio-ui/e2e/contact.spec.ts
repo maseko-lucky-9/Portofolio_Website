@@ -1,42 +1,42 @@
 import { test, expect } from "@playwright/test";
+import { personalData } from "../src/data/personal";
 
-test.describe("Contact Section", () => {
+test.describe("Contact", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
-    // ContactSection is lazy-loaded (React.lazy + Suspense). Wait for it to
-    // attach to the DOM before scrolling — otherwise scrollIntoViewIfNeeded()
-    // throws "element is not attached to the DOM".
-    await page.locator("#contact").waitFor({ state: "attached", timeout: 15000 });
     await page.locator("#contact").scrollIntoViewIfNeeded();
-    await page.waitForTimeout(500);
   });
 
-  test("displays section heading", async ({ page }) => {
-    await expect(page.getByText("Say hi", { exact: true })).toBeVisible();
+  test("renders the closing slab and its heading", async ({ page }) => {
+    await expect(page.locator("#contact .slab")).toBeVisible();
+    await expect(page.locator("#contact-heading")).toContainText("Need someone who has already");
   });
 
-  test("contact form renders all fields", async ({ page }) => {
-    await expect(page.getByLabel("Name")).toBeVisible();
-    await expect(page.getByLabel("Email")).toBeVisible();
-    await expect(page.getByLabel("Subject")).toBeVisible();
-    await expect(page.getByLabel("Message")).toBeVisible();
+  test("offers three direct channels", async ({ page }) => {
+    await expect(page.locator("#contact .slab-card")).toHaveCount(3);
+    await expect(page.locator("#contact").getByLabel("Email")).toHaveAttribute(
+      "href",
+      `mailto:${personalData.email}`,
+    );
+    await expect(page.locator("#contact").getByLabel("LinkedIn")).toHaveAttribute(
+      "href",
+      personalData.social.linkedin,
+    );
+    await expect(page.locator("#contact").getByLabel("GitHub")).toHaveAttribute(
+      "href",
+      personalData.social.github,
+    );
   });
 
-  test("send button is present", async ({ page }) => {
-    await expect(page.getByRole("button", { name: /Send Message/i })).toBeVisible();
+  // Production builds with VITE_USE_API=false and has no backend, so a form
+  // here would collect nothing. The mailto card is the channel the old form's
+  // own fallback used.
+  test("renders no form", async ({ page }) => {
+    await expect(page.locator("#contact form")).toHaveCount(0);
+    await expect(page.locator("#contact input")).toHaveCount(0);
   });
 
-  test("shows validation errors on empty submit", async ({ page }) => {
-    // Click send without filling form
-    await page.getByRole("button", { name: /Send Message/i }).click();
-
-    // Should show validation errors
-    await expect(page.getByText(/Name must be at least/i)).toBeVisible();
-    await expect(page.getByText(/Please enter a valid email/i)).toBeVisible();
-  });
-
-  test("contact info is displayed", async ({ page }) => {
-    await expect(page.getByText("ltmaseko7@gmail.com")).toBeVisible();
-    await expect(page.getByText(/Gauteng.*South Africa/)).toBeVisible();
+  test("states the location in the footer", async ({ page }) => {
+    await expect(page.locator("footer")).toContainText(/Gauteng.*South Africa/);
   });
 });

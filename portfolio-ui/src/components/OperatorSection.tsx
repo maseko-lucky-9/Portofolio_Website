@@ -62,7 +62,10 @@ export function OperatorSection() {
   );
 
   return (
-    <section id="operator" className="s-80" aria-labelledby="operator-heading" ref={rootRef}>
+    // No id — the LazySection wrapper in Index.tsx owns `#operator` as the
+    // anchor target, because it exists before this section mounts. Carrying it
+    // here too puts two elements with the same id in the document.
+    <section className="s-80" aria-labelledby="operator-heading" ref={rootRef}>
       <div className="wrap">
         <p className="eyebrow mono mb-6" data-anime>
           <span className="dot">
