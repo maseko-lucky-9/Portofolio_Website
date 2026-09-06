@@ -66,8 +66,16 @@ export function FieldBackground() {
       // The runtime swallows a failed scene fetch in a console.error inside
       // minified code, so probe first: "not vendored yet" is a supported state,
       // not an error worth logging on every load.
+      //
+      // `probe.ok` alone is not enough. This app is served with an SPA fallback
+      // (nginx `try_files $uri /index.html`, and Vite preview does the same), so
+      // a missing /field/scene.json comes back as 200 text/html — the probe
+      // passes, the runtime is injected, and the only symptom is a 404 in the
+      // console. The content type is what actually distinguishes "here is the
+      // scene" from "here is the app again".
       const probe = await fetch(SCENE_URL, { method: "HEAD" }).catch(() => null);
-      if (cancelled || !probe?.ok) return;
+      const isJson = probe?.headers.get("content-type")?.includes("json") ?? false;
+      if (cancelled || !probe?.ok || !isJson) return;
 
       script = document.createElement("script");
       script.src = RUNTIME_URL;

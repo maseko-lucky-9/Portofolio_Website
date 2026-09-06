@@ -14,7 +14,7 @@ const App = () => (
     {/* Moved off the default bottom-right: the chat launcher owns that corner now,
         and Sonner renders at z-index 999999999 — react-query fires it on every
         request error (src/lib/react-query.tsx), so it would land on the launcher. */}
-    <Sonner position="top-right" />
+    <Sonner position="top-right" theme="dark" />
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Index />} />

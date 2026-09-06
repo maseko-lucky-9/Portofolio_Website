@@ -1,141 +1,103 @@
 import { lazy, Suspense } from "react";
-import { ThemeProvider } from "@/contexts/ThemeContext";
+import { FieldBackground } from "@/components/FieldBackground";
 import { Navbar } from "@/components/Navbar";
 import { HeroSection } from "@/components/HeroSection";
+import { TrustStrip } from "@/components/TrustStrip";
 import { Footer } from "@/components/Footer";
-import { ScrollProgress } from "@/components/ScrollProgress";
 import { SmoothScroll } from "@/components/SmoothScroll";
-import { CustomCursor } from "@/components/CustomCursor";
-import { SectionBridge } from "@/components/SectionBridge";
-import { Skeleton } from "@/components/ui/skeleton";
 import { LazySection } from "@/components/LazySection";
 import { ChatWidget } from "@/components/ChatWidget";
 
-// Lazy-load below-fold sections. LazySection triggers each chunk when the
-// user scrolls within 300 px of the section. SkillsSection used to
-// pull in recharts (~144 KB gzip) but now uses a hand-rolled SVG radar
-// in SkillsRadar.tsx — chunk is now ~3 KB gzip.
+// Lazy-load below-fold sections. LazySection triggers each chunk when the user
+// scrolls within 300 px of the section.
+const OperatorSection = lazy(() =>
+  import("@/components/OperatorSection").then((m) => ({ default: m.OperatorSection })),
+);
 const SkillsSection = lazy(() =>
   import("@/components/SkillsSection").then((m) => ({ default: m.SkillsSection })),
-);
-const ProjectsSection = lazy(() =>
-  import("@/components/ProjectsSection").then((m) => ({ default: m.ProjectsSection })),
 );
 const ExperienceSection = lazy(() =>
   import("@/components/ExperienceSection").then((m) => ({ default: m.ExperienceSection })),
 );
+const ProjectsSection = lazy(() =>
+  import("@/components/ProjectsSection").then((m) => ({ default: m.ProjectsSection })),
+);
 const ServicesSection = lazy(() =>
   import("@/components/ServicesSection").then((m) => ({ default: m.ServicesSection })),
 );
-const CaseStudiesSection = lazy(() =>
-  import("@/components/CaseStudiesSection").then((m) => ({ default: m.CaseStudiesSection })),
-);
-const BlogSection = lazy(() =>
-  import("@/components/BlogSection").then((m) => ({ default: m.BlogSection })),
+const FaqSection = lazy(() =>
+  import("@/components/FaqSection").then((m) => ({ default: m.FaqSection })),
 );
 const ContactSection = lazy(() =>
   import("@/components/ContactSection").then((m) => ({ default: m.ContactSection })),
 );
 
-function SectionFallback() {
-  return (
-    <div className="py-20">
-      <div className="section-container">
-        <div className="text-center mb-12">
-          <Skeleton className="h-8 w-64 mx-auto mb-4" />
-          <Skeleton className="h-4 w-96 mx-auto" />
-        </div>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className="h-64 w-full rounded-xl" />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
+/** Nothing but reserved height. A skeleton here would be a second design to
+ *  keep in step with the real one, and LazySection already holds the space —
+ *  the fallback is visible for a chunk fetch, not a data fetch. */
+function SectionFallback({ minHeight }: { minHeight: string }) {
+  return <div style={{ minHeight }} aria-hidden="true" />;
 }
+
+/**
+ * Section anchors live on these wrappers, not on the sections themselves: the
+ * wrapper exists before its chunk resolves, so `#skills` is a valid scroll
+ * target on first paint rather than after the lazy import lands.
+ *
+ * minHeight values are measured from the built page at 1440 — Lighthouse is not
+ * a WebDriver, so it takes the observer path and pays real CLS for a wrong
+ * reserve. LazySection short-circuits under navigator.webdriver, which is why
+ * Playwright sees every section mounted at once.
+ */
+const SECTIONS = [
+  { id: "operator", minHeight: "760px", Component: OperatorSection },
+  { id: "skills", minHeight: "1180px", Component: SkillsSection },
+  { id: "experience", minHeight: "1500px", Component: ExperienceSection },
+  { id: "work", minHeight: "1600px", Component: ProjectsSection },
+  { id: "services", minHeight: "1080px", Component: ServicesSection },
+  { id: "how", minHeight: "780px", Component: FaqSection },
+  { id: "contact", minHeight: "620px", Component: ContactSection },
+] as const;
 
 const Index = () => {
   return (
-    <ThemeProvider>
-      <div className="min-h-screen bg-background relative">
-        <a
-          href="#about"
-          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[60] focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-lg focus:outline-none"
-        >
-          Skip to main content
-        </a>
-        <SmoothScroll />
-        <CustomCursor />
-        <ScrollProgress />
-        <Navbar />
-        <main id="hero">
-          <HeroSection />
-          {/* LazySection defers the Suspense boundary until the section
-              approaches the viewport — prevents recharts / etc.
-              from loading their chunks during the initial page load. */}
-          <div id="skills">
-            <LazySection minHeight="800px">
-              <Suspense fallback={<SectionFallback />}>
-                <SkillsSection />
+    <div className="min-h-screen relative">
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[60] focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-lg focus:outline-none"
+      >
+        Skip to main content
+      </a>
+
+      {/* Fixed, z-index -10/0, painted before anything else so the first frame
+          is the finished gradient rather than an empty ground. */}
+      <FieldBackground />
+
+      <SmoothScroll />
+      <Navbar />
+
+      <main id="main">
+        <HeroSection />
+        <TrustStrip />
+
+        {SECTIONS.map(({ id, minHeight, Component }) => (
+          <div id={id} key={id}>
+            <LazySection minHeight={minHeight}>
+              <Suspense fallback={<SectionFallback minHeight={minHeight} />}>
+                <Component />
               </Suspense>
             </LazySection>
           </div>
-          {/* SectionBridge instances render eagerly (outside LazySection)
-              so their scroll observers register on first paint. The
-              animation scrubs forward / backward with scroll position. */}
-          <SectionBridge id="skills-projects" caption="Skills · Projects" />
-          <div id="projects">
-            <LazySection minHeight="800px">
-              <Suspense fallback={<SectionFallback />}>
-                <ProjectsSection />
-              </Suspense>
-            </LazySection>
-          </div>
-          <SectionBridge id="projects-experience" caption="Projects · Experience" />
-          <div id="experience">
-            <LazySection minHeight="600px">
-              <Suspense fallback={<SectionFallback />}>
-                <ExperienceSection />
-              </Suspense>
-            </LazySection>
-          </div>
-          <div id="services">
-            <LazySection minHeight="700px">
-              <Suspense fallback={<SectionFallback />}>
-                <ServicesSection />
-              </Suspense>
-            </LazySection>
-          </div>
-          <div id="casestudies">
-            <LazySection minHeight="600px">
-              <Suspense fallback={<SectionFallback />}>
-                <CaseStudiesSection />
-              </Suspense>
-            </LazySection>
-          </div>
-          <div id="blog">
-            <LazySection minHeight="600px">
-              <Suspense fallback={<SectionFallback />}>
-                <BlogSection />
-              </Suspense>
-            </LazySection>
-          </div>
-          <div id="contact">
-            <LazySection minHeight="700px">
-              <Suspense fallback={<SectionFallback />}>
-                <ContactSection />
-              </Suspense>
-            </LazySection>
-          </div>
-        </main>
-        <Footer />
-        {/* Fixed overlay, so deliberately not wrapped in LazySection (that defers on
-            scroll position, which a fixed element never reaches). Mounted here rather
-            than in App.tsx to keep it off the NotFound route. */}
-        <ChatWidget />
-      </div>
-    </ThemeProvider>
+        ))}
+      </main>
+
+      <Footer />
+
+      {/* Fixed overlay, so deliberately not wrapped in LazySection (that defers on
+          scroll position, which a fixed element never reaches). Mounted here rather
+          than in App.tsx to keep it off the NotFound route. */}
+      <ChatWidget />
+    </div>
   );
 };
 

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
     <!-- viewport-fit=cover is required for env(safe-area-inset-*) to resolve
@@ -9,8 +9,10 @@
     <link rel="alternate icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
-    <meta name="theme-color" content="#090A11" media="(prefers-color-scheme: dark)" />
-    <meta name="theme-color" content="#F5F7F9" media="(prefers-color-scheme: light)" />
+    <!-- Dark-only, so one value: #020305 is oklch(0.097 0.008 236.9), the
+         --surface-page the body actually paints. -->
+    <meta name="theme-color" content="#020305" />
+    <meta name="color-scheme" content="dark" />
     <title>Thulani Maseko — Software Developer, Kubernetes &amp; .NET</title>
     <meta name="description" content="I build production Kubernetes platforms and .NET services. 8+ years, mostly South African banking. Based in Gauteng." />
     <meta name="author" content="Thulani Maseko" />
@@ -121,7 +123,7 @@
                 "@type": "Offer",
                 "itemOffered": {
                   "@type": "Service",
-                  "name": "Kubernetes Operations",
+                  "name": "Kubernetes Platform Operations",
                   "description": "End-to-end cluster lifecycle management — MicroK8s / EKS bootstrap, ArgoCD GitOps, Helm chart authoring, Prometheus/Grafana observability, Cloudflare Tunnel exposure."
                 }
               },
@@ -129,7 +131,7 @@
                 "@type": "Offer",
                 "itemOffered": {
                   "@type": "Service",
-                  "name": "Terraform / Infrastructure as Code",
+                  "name": "Infrastructure as Code",
                   "description": "Declarative infrastructure on AWS and Azure — reusable Terraform module authoring, CI/CD pipeline integration, Policy-as-Code with OPA."
                 }
               },
@@ -137,7 +139,7 @@
                 "@type": "Offer",
                 "itemOffered": {
                   "@type": "Service",
-                  "name": "Backend Engineering",
+                  "name": ".NET \u0026 Java Microservices",
                   "description": "Production-grade APIs and microservices in Java / Spring Boot and C# / ASP.NET Core — Clean Architecture, DDD, Kafka event streaming, Azure integrations, EF Core / JPA, OpenTelemetry."
                 }
               }
@@ -192,19 +194,6 @@
          Google Fonts CDN links removed to eliminate third-party round-trip
          and reduce Speed Index / CLS from font-swap jitter. -->
 
-    <!-- LCP image preload — hero profile photo at the mobile breakpoint.
-         The <picture> in HeroSection picks AVIF if supported, then WebP, then
-         JPEG. Preloading the AVIF at 512w covers the most common viewport;
-         desktop hits the 1024w via srcset and skips the preloaded copy. -->
-    <link
-      rel="preload"
-      as="image"
-      type="image/avif"
-      href="/brand/photo/thulani-512.avif"
-      imagesrcset="/brand/photo/thulani-256.avif 256w, /brand/photo/thulani-512.avif 512w, /brand/photo/thulani-1024.avif 1024w"
-      imagesizes="(min-width: 1024px) 320px, 240px"
-      fetchpriority="high"
-    />
   </head>
 
   <body>

@@ -193,7 +193,7 @@ export function ChatWidget() {
           id="chat-panel"
           role="dialog"
           aria-label="Ask about Thulani's experience"
-          className="glass-card fixed z-[70] flex flex-col overflow-hidden right-0 bottom-0 sm:right-6 sm:bottom-24 md:bottom-28"
+          className="panel fixed z-[70] flex flex-col overflow-hidden right-0 bottom-0 sm:right-6 sm:bottom-24 md:bottom-28"
           style={{
             // min() rather than a sm: breakpoint utility: one inline value covers
             // full-bleed mobile and a 380 px desktop panel, and costs zero CSS bytes
