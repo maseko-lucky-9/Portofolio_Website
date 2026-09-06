@@ -50,6 +50,16 @@ export default defineConfig({
     //  2. Navbar uses initial={prefersReducedMotion ? false : {y:-80,opacity:0}}
     //     → initial={false} → header renders at final position immediately,
     //     no 500ms entrance animation window for the button to be unstable.
+    // INERT on @playwright/test 1.62.1 — kept only so the intent is on record.
+    // Neither this nor a spec-level `test.use({ reducedMotion })` reaches the
+    // page: inside the browser, "(prefers-reduced-motion: reduce)" stays false
+    // and "(no-preference)" stays true. Reproduced against a bare minimal
+    // config, so it is the library rather than anything here.
+    //
+    // Every spec below therefore runs with motion ALLOWED, whatever it says.
+    // A spec that genuinely needs the reduced branch has to ask for it itself,
+    // before navigating:  await page.emulateMedia({ reducedMotion: "reduce" })
+    // — see e2e/field.spec.ts, which does exactly that.
     reducedMotion: "reduce",
   },
   projects: [

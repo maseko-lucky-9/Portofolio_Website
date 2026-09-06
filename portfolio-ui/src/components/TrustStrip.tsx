@@ -25,8 +25,7 @@ export function TrustStrip() {
   ));
 
   return (
-    <div className="wrap trust">
-      <div className="rule" />
+    <div className="trust">
       <div className="mq-row">
         <div className="mq">
           <div className="mq-track">

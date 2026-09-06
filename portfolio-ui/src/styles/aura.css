@@ -59,6 +59,29 @@ body {
     radial-gradient(ellipse 80% 50% at 68% 42%, oklch(var(--field-teal) / 0.22), transparent 62%),
     radial-gradient(ellipse 60% 40% at 20% 8%, oklch(var(--signal) / 0.1), transparent 70%);
 }
+/* Our own pixelated field, painted by DitherField into a canvas. Sits above
+   the gradient fallback (which it hides once it paints) and below the content,
+   so the section translucency rhythm veils it on scroll exactly as the
+   reference does — readable over the hero, half-veiled at the capability
+   cards, gone behind .s-solid. */
+#dither-field {
+  position: fixed;
+  inset: 0;
+  z-index: -9;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  /* The backing store is sized in CSS pixels, so on a 2x screen the compositor
+     upscales it. Nearest-neighbour is the whole point: it keeps the cells hard
+     edged instead of smoothing the dither into a blur. */
+  image-rendering: pixelated;
+  /* The reference frame is three-sided — measured across its four edges, the
+     bottom reads luminance 6 against 145 on the other three. Same mask the
+     mockup put on the field: opaque to 80% of the viewport, then out. */
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 80%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 80%, transparent 100%);
+}
+
 .grid-bg {
   position: fixed;
   inset: 0;
@@ -1451,6 +1474,9 @@ footer a:hover {
   font-size: var(--t-sm);
   font-weight: 500;
   padding: 12px 24px;
+  /* the replica's `transition-all` is Tailwind's 150ms default, not our 300ms
+     component duration — measured 0.15s on the live pill. */
+  transition: all var(--d-micro) var(--ease);
   color: #cbd5e1;
   background: rgba(255, 255, 255, 0.05);
   box-shadow:
@@ -1484,8 +1510,8 @@ footer a:hover {
 .btn-ghost .arw {
   opacity: 0.7;
   transition:
-    opacity var(--d-comp) var(--ease),
-    transform var(--d-comp) var(--ease);
+    opacity var(--d-micro) var(--ease),
+    transform var(--d-micro) var(--ease);
 }
 .btn-ghost:hover .arw {
   opacity: 1;
@@ -1493,7 +1519,7 @@ footer a:hover {
 }
 /* nav pill: the replica nudges its arrow on hover and never shimmers */
 .btn-light svg {
-  transition: transform var(--d-comp) var(--ease);
+  transition: transform var(--d-micro) var(--ease);
 }
 .btn-light:hover svg {
   transform: translateX(2px);
@@ -1510,11 +1536,11 @@ footer a:hover {
   justify-content: space-between;
   gap: 24px;
   width: 100%;
-  padding-block: 24px;
+  padding-block: 24px 0;
   overflow: hidden;
   opacity: 0.5;
 }
-@media (min-width: 1024px) {
+@media (min-width: 768px) {
   .mq-row {
     flex-direction: row;
   }
@@ -1546,12 +1572,16 @@ footer a:hover {
   transition: opacity var(--d-slow) var(--ease);
 }
 
-/* The trust strip is not a <section> — it is a rule + row riding directly under the
-   hero, so it takes no section padding and no top border. */
+/* The trust strip is not a <section> — it is the row riding directly under the
+   hero, so it takes no section padding and no top border. Sized like the
+   replica's own bar: `w-[95%] pb-8`, wider than the page container, and with no
+   divider rule above it (the reference has none — the field is the separator). */
 .trust {
   position: relative;
   z-index: 10;
-  padding-block: 32px 0;
+  width: 95%;
+  margin-inline: auto;
+  padding-bottom: 32px;
 }
 
 /* The asymmetric section header (body-left, headline-right) the mockup repeated

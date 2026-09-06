@@ -63,6 +63,28 @@ Specific choices worth recording:
   only for a project in your own account. The reference template's scene is
   someone else's, so it is used as a visual target and a rebuild recipe and is
   never shipped. `public/field/README.md` holds the hand-off contract.
+- **The dithered edge frame is ours, in Canvas 2D.** Amended 2026-09-06. The
+  frame around the viewport is the most recognisable part of the reference, and
+  waiting on a third-party account for it left the page visibly short of the
+  approved design. It is now `src/lib/dither.ts` + `DitherBorder`: an ordered
+  (Bayer 4x4) quantisation of a squared edge falloff, painted into a canvas —
+  no vendored asset, no licence question, nothing to hand off.
+
+  Canvas 2D rather than WebGL, deliberately. Playwright's WebKit on Linux has
+  no WebGL at all, which is why the scene tests probe and skip; a 2D context
+  exists everywhere, so `e2e/field.spec.ts` asserts real painted pixels on both
+  projects. It obeys the same bail-outs as the field above, plus a browser that
+  refuses a 2D context.
+
+  Its constants are fitted to measurements of the reference render rather than
+  chosen: 5 px cells, a 60 px rim decaying as a square, peak alpha 0.62, and a
+  bottom mask — the reference frame is three-sided, its bottom edge measuring
+  luminance 6 against 145 on the other three. Depth is proportional below
+  desktop: a flat 60 px is a third of a 375 px phone on each side.
+
+  This does not retire the export path; the two layers are independent. If a
+  scene is ever vendored and carries its own border, that is the point to
+  decide which one wins.
 
 **Docker before PR.** The trial runs the real image (`node:24-alpine` build →
 `nginx:1.27-alpine`) and fires the whole Playwright suite at it, gated behind an

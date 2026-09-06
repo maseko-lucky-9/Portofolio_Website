@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { hasLiteParam, hasNoMotionParam } from "@/lib/motion";
+import { DitherField } from "@/components/DitherField";
 
 const SCENE_URL = "/field/scene.json";
 const RUNTIME_URL = "/field/unicornStudio.umd.js";
@@ -31,7 +32,7 @@ function hasWebGL2(): boolean {
 /**
  * The ambient background field.
  *
- * Renders its three layers synchronously so the first paint — and any thumbnail
+ * Renders its four layers synchronously so the first paint — and any thumbnail
  * taken of it — is the finished CSS gradient, never an empty rectangle. The
  * WebGL scene is an upgrade layered on afterwards, off the critical path:
  * nothing is fetched until `load` has fired and the main thread goes idle.
@@ -40,8 +41,11 @@ function hasWebGL2(): boolean {
  * page is complete whether or not the scene ever arrives:
  *   - `VITE_DISABLE_FIELD=true`, `?lite=1`, `?nomo=1`  — opted out
  *   - no WebGL2                                        — cannot run
- *   - no `/field/scene.json`                           — export not vendored yet
+ *   - no `/field/scene.json`                           — no scene vendored
  *   - `webglcontextlost`                               — GPU took it back
+ *
+ * Each of those drops to DitherField, which needs only a 2D context, and from
+ * there to the CSS gradient.
  *
  * Reduced motion, coarse pointers and low-memory devices get one rendered frame
  * and then a hard pause, which is the honest reading of "reduce": the design is
@@ -58,8 +62,16 @@ export function FieldBackground() {
 
     let cancelled = false;
     let script: HTMLScriptElement | null = null;
+
+    // Three tiers, best first: this scene, then the DitherField canvas, then
+    // the CSS gradient. Only one may be visible — DitherField sits at z-index
+    // -9, directly above the scene's host at -10, so leaving it up would paint
+    // our approximation of the field over the field itself.
+    const dither = () => document.getElementById("dither-field");
     const showFallback = (on: boolean) => {
       fallback.style.opacity = on ? "1" : "0";
+      const d = dither();
+      if (d) d.style.display = on ? "" : "none";
     };
 
     const start = async () => {
@@ -97,6 +109,7 @@ export function FieldBackground() {
               return;
             }
             if (!scenes.length) return;
+            // Scene is up: retire both lower tiers.
             showFallback(false);
             const holdStill =
               matchMedia("(prefers-reduced-motion: reduce)").matches ||
@@ -115,6 +128,8 @@ export function FieldBackground() {
             host.querySelector("canvas")?.addEventListener("webglcontextlost", (e) => {
               e.preventDefault();
               host.style.display = "none";
+              // Back down a tier. DitherField's own rAF loop never stopped, so
+              // un-hiding it resumes a live layer, not a frozen one.
               showFallback(true);
             });
           })
@@ -152,6 +167,11 @@ export function FieldBackground() {
       <div id="aura-bg" aria-hidden="true">
         <div id="us-host" data-us-project-src={SCENE_URL} />
       </div>
+      {/* Our own field. Independent of the scene above by choice: if an export
+          is ever vendored, that is the point to decide which one wins, not a
+          coupling worth building for a hypothetical. It hides #field-fallback
+          once it paints, so the smooth gradient never shows through it. */}
+      <DitherField />
       <div className="grid-bg" aria-hidden="true" />
     </>
   );

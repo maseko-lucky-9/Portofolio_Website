@@ -191,10 +191,26 @@ export function HeroSection() {
                 <span>View the work</span>
               </a>
               <a className="btn btn-ghost" href="#contact" onClick={go("#contact")}>
-                Get in touch{" "}
-                <span className="arw" aria-hidden="true">
-                  &#8594;
-                </span>
+                <span>Get in touch</span>
+                {/* The reference's own arrow, path for path: a 16px stroked
+                    glyph, not the "\u2192" character. A text arrow inherits the
+                    label's weight and sits on its baseline, which is why the
+                    pill read a little heavier than the replica's. */}
+                <svg
+                  className="arw"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M5 12h14" />
+                  <path d="m12 5 7 7-7 7" />
+                </svg>
               </a>
             </div>
 
