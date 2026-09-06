@@ -86,3 +86,13 @@ Object.defineProperty(window, "matchMedia", {
     dispatchEvent: () => false,
   }),
 });
+
+// jsdom has no canvas backend, so every getContext() call prints a multi-line
+// "Not implemented" notice through its virtual console. FieldBackground probes
+// for WebGL2 on mount, which means the full-App smoke test would emit that
+// notice on every render and bury real failures. Returning null is exactly what
+// jsdom does after printing it — this only removes the noise, not the behaviour.
+Object.defineProperty(HTMLCanvasElement.prototype, "getContext", {
+  writable: true,
+  value: () => null,
+});

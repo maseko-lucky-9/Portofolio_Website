@@ -157,7 +157,7 @@ export function staggerChildren(stepMs: number = 60, baseDelayMs: number = 0) {
 // scroll, custom cursor) should be replaced by their static defaults.
 
 /** Returns true if `?lite=1` is present in the URL. SSR-safe. */
-function hasLiteParam(): boolean {
+export function hasLiteParam(): boolean {
   if (typeof window === "undefined") return false;
   return new URLSearchParams(window.location.search).get("lite") === "1";
 }
@@ -192,7 +192,7 @@ function subscribeToFlagSources(callback: () => void): () => void {
 }
 
 /** Returns true if `?nomo=1` is present in the URL. SSR-safe. */
-function hasNoMotionParam(): boolean {
+export function hasNoMotionParam(): boolean {
   if (typeof window === "undefined") return false;
   return new URLSearchParams(window.location.search).get("nomo") === "1";
 }
