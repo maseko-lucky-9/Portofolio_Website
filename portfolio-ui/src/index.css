@@ -1,13 +1,16 @@
-/* Self-hosted fonts — eliminates Google Fonts CDN round-trip.
-     Body + display: Inter Variable — single grotesque across the whole
-              interface. Restored 2026-07-19; replaces the Source Serif 4 /
-              Public Sans pair introduced by 70fb956.
-     Mono:    JetBrains Mono — narrow technical use only (tables, code
-              blocks, tabular numerics). NOT a default body face. */
-@import "@fontsource-variable/inter";
-@import "@fontsource/jetbrains-mono/400.css";
-@import "@fontsource/jetbrains-mono/500.css";
-@import "@fontsource/jetbrains-mono/600.css";
+/* Self-hosted fonts — the production CSP is `font-src 'self' data:`, so a
+   Google Fonts stylesheet would be blocked outright and fall back silently.
+     Display: Spectral, italic only (400) plus upright 500 for the wordmark.
+     Body:    Public Sans Variable.
+     Mono:    JetBrains Mono, latin 400/500 — micro-labels and technical text.
+   Subsets are pinned to `latin` where the package offers per-subset files:
+   the previous Inter + 3-weight mono set shipped 25 @font-face blocks and ate
+   20.7 KB gzip of the 40 KB CSS budget on its own. */
+@import "@fontsource-variable/public-sans/wght.css";
+@import "@fontsource/spectral/latin-400-italic.css";
+@import "@fontsource/spectral/latin-500.css";
+@import "@fontsource/jetbrains-mono/latin-400.css";
+@import "@fontsource/jetbrains-mono/latin-500.css";
 
 @tailwind base;
 @tailwind components;
@@ -32,211 +35,152 @@
 */
 
 @layer base {
+  /* ===========================================================================
+     Aura "Signal Field" — one dark token set. There is no light palette and no
+     .dark block any more: the design is dark-only, so a second theme would be a
+     second thing to keep passing contrast, not a feature.
+
+     Everything is an OKLCH bare-component triple because that is this repo's
+     standing contract — tailwind.config.ts wraps every one as oklch(var(--x))
+     and call sites use oklch(var(--x) / a) for alpha.
+
+     Two groups:
+       1. Aura's own vocabulary, ported from the approved mockup.
+       2. shadcn/Radix aliases, so all 50 files under src/components/ui keep
+          working untouched.
+
+     NAMING: Aura's accent is --signal here, NOT --accent. shadcn's --accent is
+     a subtle HOVER SURFACE (dropdown items, command palette rows, calendar
+     cells). Aura's accent is a high-chroma cyan. Both are valid bare OKLCH
+     triples, so a collision would parse cleanly and silently repaint every
+     hover state cyan — a bug with no error message. They are different things
+     and now have different names.
+     ======================================================================== */
   :root {
-    /* Brand — Electric Indigo / Emerald.
-       Light-mode lightness is pulled below the dark-mode value so text
-       clears WCAG AA on BOTH light surfaces — --background (0.975) and
-       the darker --muted (0.944), which NotFound and several cards use
-       as their backdrop. Ratios are quoted against --muted, the harder
-       of the two:
-         --primary   L 0.595 -> 0.516  (5.16:1 as text, 6.09:1 white-on-fill)
-         --secondary L 0.725 -> 0.495  (4.93:1 as text)
-       Dark mode keeps the original 4aaa2de values — it already passes. */
-    --primary: 0.516 0.241 268.7;
-    --primary-foreground: 1 0 90;
-    --primary-glow: 0.652 0.184 273.6;
+    /* ── Aura: the one high-chroma exception (#38BDF8) ── */
+    --signal: 0.754 0.139 232.7;
+    --signal-deep: 0.685 0.148 237.3; /* conic CTA border only */
+    --field-teal: 0.672 0.117 212.5; /* the shader core, NOT the accent */
 
-    --secondary: 0.495 0.103 162.1;
-    --secondary-foreground: 1 0 90;
+    /* ── Aura surfaces: a lightness ladder tinted toward the accent hue.
+       Every one sits at chroma <= 0.012, under the 0.015 dark-neutral ceiling
+       that separates a tinted dark from the cyan-tinted AI-dark trap. ── */
+    --surface-page: 0.097 0.008 236.9;
+    --surface-raised: 0.115 0.009 236.9;
+    --surface-panel: 0.134 0.01 236.9;
+    --surface-inset: 0.145 0.01 236.9;
+    --surface-elevated: 0.196 0.012 236.9;
+    --surface-input: 0.174 0.011 236.9;
 
-    /* Skills category accent. Frontend reuses --primary and backend reuses
-       --secondary (so the Skills backend green matches the hero availability
-       pill and the Experience bullets exactly); only the devops purple needs
-       its own token. Pulled to L 0.500 so an --background label clears AA at
-       6.23:1 — the 4aaa2de original (L 0.636) managed only 3.75:1. */
-    --cat-devops: 0.5 0.2 313;
+    /* ── One ink, alpha-graded. <= 0.4 is decorative only, never text:
+       measured on --surface-page, ink-50 is 5.29:1 and ink-40 is 3.70:1. ── */
+    --ink-100: #fff;
+    --ink-90: rgba(255, 255, 255, 0.9);
+    --ink-80: rgba(255, 255, 255, 0.8);
+    --ink-70: rgba(255, 255, 255, 0.7);
+    --ink-60: rgba(255, 255, 255, 0.6);
+    --ink-50: rgba(255, 255, 255, 0.5);
+    --ink-40: rgba(255, 255, 255, 0.4);
+    --ink-30: rgba(255, 255, 255, 0.3);
+    --ink-20: rgba(255, 255, 255, 0.2);
 
-    /* Opacity scale. */
-    --opacity-subtle: 0.06;
-    --opacity-soft: 0.3;
-    --opacity-overlay: 0.8;
+    --veil-02: rgba(255, 255, 255, 0.02);
+    --veil-03: rgba(255, 255, 255, 0.03);
+    --veil-04: rgba(255, 255, 255, 0.04);
+    --veil-05: rgba(255, 255, 255, 0.05);
+    --veil-06: rgba(255, 255, 255, 0.06);
+    --veil-10: rgba(255, 255, 255, 0.1);
 
-    /* Masthead rule opacity — light mode is paler, needs more weight. */
-    --masthead-opacity: 0.65;
+    --border-section: rgba(255, 255, 255, 0.05);
+    --border-component: rgba(255, 255, 255, 0.1);
+    --border-hover: rgba(255, 255, 255, 0.2);
 
-    /* Light mode neutrals — cool premium off-white. */
-    --background: 0.975 0.004 264.5;
-    --foreground: 0.201 0.027 266.2;
+    /* ── Type: a stepped px ramp. No clamp(), no vw. The 1.333 jump from
+       36 -> 48 is deliberate: a body world (<=36) and a display world (60/72)
+       with nothing in between. ── */
+    --t-2xs: 10px;
+    --t-xs: 12px;
+    --t-sm: 14px;
+    --t-base: 16px;
+    --t-lg: 18px;
+    --t-xl: 20px;
+    --t-2xl: 24px;
+    --t-3xl: 30px;
+    --t-4xl: 36px;
+    --t-5xl: 48px;
+    --t-6xl: 60px;
+    --t-7xl: 72px;
 
-    --card: 1 0 90;
-    --card-foreground: 0.201 0.027 266.2;
+    /* Self-hosted (production CSP is font-src 'self' data:, so Google Fonts
+       would be blocked outright). Spectral is italic-only in display use. */
+    --font-display: "Spectral", Georgia, "Times New Roman", serif;
+    --font-body: "Public Sans Variable", "Public Sans", "Helvetica Neue", Arial, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 
-    --popover: 1 0 90;
-    --popover-foreground: 0.201 0.027 266.2;
+    --track-tight: -0.025em;
+    --track-wide: 0.05em;
+    --track-label: 0.2em;
 
-    --muted: 0.944 0.005 264.5;
-    /* L 0.566 -> 0.523: clears AA on --background (5.06:1) and on the
-       darker --muted surface (4.61:1). */
-    --muted-foreground: 0.523 0.025 264.3;
+    --r-xs: 4px;
+    --r-sm: 8px;
+    --r-md: 12px;
+    --r-lg: 16px;
+    --r-xl: 24px;
+    --r-2xl: 32px;
+    --r-full: 9999px;
 
-    --accent: 0.953 0.02 279;
-    --accent-foreground: 0.428 0.249 265.6;
+    --container: 1280px;
+    --gutter: 24px;
+    --section-y: 128px;
 
-    --destructive: 0.636 0.208 25.4;
-    --destructive-foreground: 1 0 90;
+    --d-micro: 150ms;
+    --d-comp: 300ms;
+    --d-card: 500ms;
+    --d-slow: 700ms;
+    --d-image: 1000ms;
+    --ease: cubic-bezier(0.4, 0, 0.2, 1);
 
-    --border: 0.903 0.009 264.5;
-    --input: 0.903 0.009 264.5;
-    --ring: 0.516 0.241 268.7;
+    /* All six stops. A single 0 10px 30px does not read the same. */
+    --shadow-nav:
+      0 2.8px 2.2px rgba(0, 0, 0, 0.034), 0 6.7px 5.3px rgba(0, 0, 0, 0.048),
+      0 12.5px 10px rgba(0, 0, 0, 0.06), 0 22.3px 17.9px rgba(0, 0, 0, 0.072),
+      0 41.8px 33.4px rgba(0, 0, 0, 0.086), 0 100px 80px rgba(0, 0, 0, 0.12);
+    --glow-text: 0 0 25px oklch(var(--signal) / 0.4);
 
-    --radius: 0.875rem;
+    /* Skills category treatment A: one accent across all three categories. */
+    --cat-frontend: var(--signal);
+    --cat-backend: var(--signal);
+    --cat-devops: var(--signal);
 
-    /* Motion grammar — durations + easings (paired with src/lib/motion.ts) */
-    --duration-instant: 100ms;
-    --duration-fast: 180ms;
-    --duration-base: 280ms;
-    --duration-slow: 480ms;
-
-    --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
-    --ease-out: cubic-bezier(0, 0, 0.2, 1);
-    --ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
-    --ease-decelerate: cubic-bezier(0, 0, 0.2, 1);
-    --ease-accelerate: cubic-bezier(0.4, 0, 1, 1);
-
-    /* Shadow scale (structural, theme-neutral). */
-    --shadow-xs: 0 1px 2px hsl(220 13% 10% / 0.04);
-    --shadow-sm: 0 1px 3px hsl(220 13% 10% / 0.06), 0 1px 2px hsl(220 13% 10% / 0.04);
-    --shadow-md: 0 4px 8px -2px hsl(220 13% 10% / 0.08), 0 2px 4px -2px hsl(220 13% 10% / 0.06);
-    --shadow-lg: 0 12px 24px -4px hsl(220 13% 10% / 0.1), 0 4px 8px -4px hsl(220 13% 10% / 0.06);
-    --shadow-xl: 0 24px 48px -8px hsl(220 13% 10% / 0.14), 0 8px 16px -8px hsl(220 13% 10% / 0.08);
-
-    /* Brand glow — indigo, driven by --primary. */
-    --shadow-glow: 0 0 0 1px oklch(var(--primary) / 0.12), 0 4px 16px oklch(var(--primary) / 0.2);
-    --shadow-glow-secondary:
-      0 0 0 1px oklch(var(--secondary) / 0.12), 0 4px 16px oklch(var(--secondary) / 0.2);
-
-    /* Gradients. The --gradient-primary stops sit slightly darker than
-       --primary so white labels on the CTA fill clear AA (4.66:1). */
-    --gradient-primary: linear-gradient(135deg, oklch(0.574 0.209 271.5), oklch(0.534 0.234 289.8));
-    --gradient-secondary: linear-gradient(
-      135deg,
-      oklch(0.495 0.103 162.1),
-      oklch(0.462 0.091 176.6)
-    );
-    --gradient-hero: linear-gradient(
-      160deg,
-      oklch(0.975 0.004 264.5) 0%,
-      oklch(0.951 0.017 274.6) 50%,
-      oklch(0.957 0.017 296.4) 100%
-    );
-    --gradient-card: linear-gradient(180deg, oklch(1 0 90) 0%, oklch(0.984 0.003 264.5) 100%);
-    --gradient-mesh: radial-gradient(
-      ellipse 80% 60% at 50% -10%,
-      oklch(0.908 0.039 278.7 / 0.6) 0%,
-      transparent 70%
-    );
-
-    /* Sidebar tokens — OKLCH. */
-    --sidebar-background: 0.985 0 90;
-    --sidebar-foreground: 0.37 0.012 285.8;
-    --sidebar-primary: 0.516 0.241 268.7;
-    --sidebar-primary-foreground: 1 0 90;
-    --sidebar-accent: 0.953 0.02 279;
-    --sidebar-accent-foreground: 0.428 0.249 265.6;
-    --sidebar-border: 0.903 0.009 264.5;
-    --sidebar-ring: 0.516 0.241 268.7;
-  }
-
-  .dark {
-    /* Near-OLED deep dark, cool indigo tint (hue ~273). Every value here is
-       a direct OKLCH conversion of the 4aaa2de HSL palette and is left
-       unmodified — measured against axe at WCAG AA, dark mode already
-       passes (foreground 17.57:1, muted-fg 6.55:1, pill 9.66:1,
-       text-primary 4.65:1, white-on-CTA 4.88:1). */
-    --background: 0.148 0.014 273.5;
-    --foreground: 0.96 0.007 247.9;
-
-    --card: 0.18 0.019 273.5;
-    --card-foreground: 0.96 0.007 247.9;
-
-    --popover: 0.19 0.021 273.4;
-    --popover-foreground: 0.96 0.007 247.9;
-
-    --primary: 0.595 0.197 272.4;
-    --primary-foreground: 1 0 90;
-    --primary-glow: 0.64 0.18 273.2;
-
-    --secondary: 0.755 0.157 162.1;
-    /* Ink, not white: dark --secondary is a BRIGHT mint (L 0.755), so a white
-       label on it measures 2.04:1. Against --background it is 9.65:1. Light
-       mode keeps white because its --secondary is dark (L 0.495 → 5.81:1). */
-    --secondary-foreground: 0.148 0.014 273.5;
-
-    /* Skills category accent — see the :root note. hsl(280 65% 62%) converted. */
-    --cat-devops: 0.636 0.195 313;
-
-    --opacity-subtle: 0.06;
-    --opacity-soft: 0.3;
-    --opacity-overlay: 0.8;
-
-    --masthead-opacity: 0.55;
-
-    --muted: 0.221 0.024 273.4;
-    --muted-foreground: 0.668 0.036 256.8;
-
-    --accent: 0.238 0.061 274.3;
-    --accent-foreground: 0.672 0.156 274.8;
-
+    /* ── shadcn/Radix aliases ──────────────────────────────────────────────
+       oklch(1 0 0) is exactly #fff: L=1, C=0. Alpha grades off it, so
+       oklch(var(--foreground) / 0.7) equals --ink-70 by construction. */
+    --background: var(--surface-page);
+    --foreground: 1 0 0;
+    --card: var(--surface-panel);
+    --card-foreground: 1 0 0;
+    --popover: var(--surface-raised);
+    --popover-foreground: 1 0 0;
+    --primary: var(--signal);
+    --primary-foreground: var(--surface-page);
+    --secondary: var(--surface-elevated);
+    --secondary-foreground: 1 0 0;
+    --muted: var(--surface-inset);
+    --muted-foreground: 0.786 0.006 236.9; /* opaque stand-in for ink-70 */
+    --accent: var(--surface-elevated); /* HOVER SURFACE — not --signal */
+    --accent-foreground: 1 0 0;
     --destructive: 0.523 0.185 26.5;
     --destructive-foreground: 0.96 0.007 247.9;
+    --border: 0.24 0.01 236.9;
+    --input: var(--surface-input);
+    --ring: var(--signal);
+    --radius: 16px; /* == --r-lg, so shadcn rounded-lg matches Aura */
+  }
 
-    --border: 0.24 0.028 273.3;
-    --input: 0.24 0.028 273.3;
-    --ring: 0.595 0.197 272.4;
-
-    /* Dark shadows */
-    --shadow-xs: 0 1px 2px hsl(0 0% 0% / 0.2);
-    --shadow-sm: 0 1px 3px hsl(0 0% 0% / 0.3), 0 1px 2px hsl(0 0% 0% / 0.2);
-    --shadow-md: 0 4px 8px -2px hsl(0 0% 0% / 0.4), 0 2px 4px -2px hsl(0 0% 0% / 0.3);
-    --shadow-lg: 0 12px 24px -4px hsl(0 0% 0% / 0.5), 0 4px 8px -4px hsl(0 0% 0% / 0.35);
-    --shadow-xl: 0 24px 48px -8px hsl(0 0% 0% / 0.6), 0 8px 16px -8px hsl(0 0% 0% / 0.4);
-    --shadow-glow: 0 0 0 1px oklch(var(--primary) / 0.2), 0 4px 20px oklch(var(--primary) / 0.25);
-    --shadow-glow-secondary:
-      0 0 0 1px oklch(var(--secondary) / 0.2), 0 4px 20px oklch(var(--secondary) / 0.25);
-
-    /* Dark gradients — cinematic depth. */
-    --gradient-primary: linear-gradient(135deg, oklch(0.563 0.214 271.1), oklch(0.508 0.246 287.8));
-    --gradient-secondary: linear-gradient(
-      135deg,
-      oklch(0.755 0.157 162.1),
-      oklch(0.667 0.13 175.9)
-    );
-    --gradient-hero: linear-gradient(
-      160deg,
-      oklch(0.148 0.014 273.5) 0%,
-      oklch(0.164 0.023 276.8) 50%,
-      oklch(0.166 0.023 297.7) 100%
-    );
-    --gradient-card: linear-gradient(
-      180deg,
-      oklch(0.19 0.021 273.4) 0%,
-      oklch(0.166 0.019 273.5) 100%
-    );
-    --gradient-mesh: radial-gradient(
-      ellipse 80% 60% at 50% -10%,
-      oklch(0.595 0.197 272.4 / 0.08) 0%,
-      transparent 70%
-    );
-
-    /* Dark sidebar */
-    --sidebar-background: 0.159 0.016 273.6;
-    --sidebar-foreground: 0.92 0.013 248;
-    --sidebar-primary: 0.595 0.197 272.4;
-    --sidebar-primary-foreground: 1 0 90;
-    --sidebar-accent: 0.238 0.061 274.3;
-    --sidebar-accent-foreground: 0.672 0.156 274.8;
-    --sidebar-border: 0.24 0.028 273.3;
-    --sidebar-ring: 0.595 0.197 272.4;
+  @media (min-width: 1024px) {
+    :root {
+      --gutter: 48px;
+    }
   }
 }
 
@@ -256,33 +200,32 @@
     text-rendering: optimizeLegibility;
   }
 
+  /* The single focus ring for the whole app. The design reference ships
+     `focus:outline-none` everywhere and never replaces it (WCAG 2.4.7); this
+     is the rule that does not inherit that defect. Deliberately NOT carrying
+     the mockup's `border-radius: inherit` — it reshapes a focused child to its
+     parent's radius, which visibly deforms .slab-card and .acc summary. */
   *:focus-visible {
-    @apply outline-2 outline-offset-2 outline-primary;
-    /* Without an explicit style the outline stays at the UA `auto` default,
-       and Chromium paints its own ring while ignoring outline-color. */
+    outline: 2px solid oklch(var(--signal));
+    outline-offset: 3px;
     outline-style: solid;
   }
 
   body {
     @apply bg-background text-foreground font-sans;
-    font-family: "Inter Variable", "Inter", system-ui, sans-serif;
-    /* Inter character variants: cv02/03/04 = single-storey 'a', open '3',
-       straight-legged 'g'; cv11 = single-storey 'l'. */
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    font-family: var(--font-body);
   }
 
-  /* Display register is the same grotesque as body — weight and size carry
-     the hierarchy, not a contrasting face. `.font-display` is kept as a
-     selector so existing consumers do not need touching. */
+  /* Display register is a contrasting face now: Spectral italic against
+     Public Sans. `.display` (aura.css) is what the design actually uses and
+     sets its own style/weight; this rule only covers bare headings and the
+     legacy `.font-display` consumers. */
   h1,
   h2,
   h3,
   .font-display {
-    font-family: "Inter Variable", "Inter", system-ui, sans-serif;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
-    letter-spacing: -0.012em;
-    /* No text-wrap: balance — 4aaa2de let headings wrap naturally, and
-       balancing changes where the hero subtitle breaks. */
+    font-family: var(--font-display);
+    letter-spacing: var(--track-tight);
   }
 
   code,
@@ -301,95 +244,6 @@
 }
 
 @layer components {
-  /* ── Hero CTA buttons ── */
-  .btn-hero-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl px-7 py-3.5 font-semibold text-sm text-primary-foreground transition-all;
-    background: var(--gradient-primary);
-    box-shadow: var(--shadow-md), var(--shadow-glow);
-    transition-duration: var(--duration-base);
-    transition-timing-function: var(--ease-spring);
-    /* Magnetic offset (set by useMagnetic; 0 when not magnetised). */
-    transform: translate(var(--magnetic-x, 0), var(--magnetic-y, 0));
-  }
-
-  .btn-hero-primary:hover {
-    transform: translate(var(--magnetic-x, 0), calc(var(--magnetic-y, 0) - 2px)) scale(1.02);
-    box-shadow:
-      var(--shadow-xl),
-      0 0 32px oklch(var(--primary) / 0.45);
-  }
-
-  .btn-hero-primary:active {
-    transform: translate(var(--magnetic-x, 0), var(--magnetic-y, 0)) scale(0.98);
-  }
-
-  .btn-hero-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl px-7 py-3.5 font-semibold text-sm text-primary transition-all;
-    border: 1.5px solid oklch(var(--primary) / 0.4);
-    background: oklch(var(--primary) / 0.05);
-    transition-duration: var(--duration-base);
-    transition-timing-function: var(--ease-spring);
-    transform: translate(var(--magnetic-x, 0), var(--magnetic-y, 0));
-  }
-
-  .btn-hero-secondary:hover {
-    background: oklch(var(--primary) / 0.1);
-    border-color: oklch(var(--primary) / 0.7);
-    transform: translate(var(--magnetic-x, 0), calc(var(--magnetic-y, 0) - 2px)) scale(1.02);
-    box-shadow: var(--shadow-glow);
-  }
-
-  .btn-hero-secondary:active {
-    transform: translate(var(--magnetic-x, 0), var(--magnetic-y, 0)) scale(0.98);
-  }
-
-  /* ── Green (emerald) CTA modifier — swaps primary→secondary tokens.
-     Only meaningful compounded with .btn-hero-primary / .btn-hero-secondary;
-     on its own it contributes just the focus-ring colour. ── */
-  .btn-hero-primary.btn-green {
-    @apply text-secondary-foreground;
-    background: var(--gradient-secondary);
-    box-shadow: var(--shadow-md), var(--shadow-glow-secondary);
-  }
-
-  .btn-hero-primary.btn-green:hover {
-    box-shadow:
-      var(--shadow-xl),
-      0 0 32px oklch(var(--secondary) / 0.45);
-  }
-
-  .btn-hero-secondary.btn-green {
-    @apply text-secondary;
-    border-color: oklch(var(--secondary) / 0.4);
-    background: oklch(var(--secondary) / 0.05);
-  }
-
-  .btn-hero-secondary.btn-green:hover {
-    background: oklch(var(--secondary) / 0.1);
-    border-color: oklch(var(--secondary) / 0.7);
-    box-shadow: var(--shadow-glow-secondary);
-  }
-
-  .btn-green:focus-visible {
-    @apply outline-secondary;
-  }
-
-  /* ── Project cards ── */
-  .card-project {
-    @apply rounded-2xl border bg-card overflow-hidden transition-all;
-    background: oklch(var(--card));
-    box-shadow: var(--shadow-md);
-    border-color: oklch(var(--border));
-    transition-duration: 300ms;
-    transition-timing-function: var(--ease-spring);
-  }
-
-  .card-project:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-xl), var(--shadow-sm);
-    border-color: oklch(var(--primary) / 0.35);
-  }
-
   /* ── Tech badges ── */
   .tech-badge {
     @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-medium transition-all;
@@ -552,31 +406,6 @@
   .nav-link.active::after {
     @apply w-full;
   }
-
-  /* ── Section divider mesh ── */
-  .section-mesh {
-    position: relative;
-  }
-
-  .section-mesh::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: var(--gradient-mesh);
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  /* ── Gradient text ── */
-  .text-gradient-primary {
-    @apply bg-clip-text text-transparent;
-    background-image: var(--gradient-primary);
-  }
-
-  .text-gradient-secondary {
-    @apply bg-clip-text text-transparent;
-    background-image: var(--gradient-secondary);
-  }
 }
 
 @layer utilities {
@@ -608,22 +437,6 @@
     animation: shimmer 1.4s linear 1 forwards;
     background-size: 200% 100%;
     will-change: background-position;
-  }
-
-  .animate-blob {
-    animation: blobDrift 12s ease-in-out infinite;
-  }
-
-  .animate-blob-delay {
-    animation: blobDrift 14s ease-in-out infinite reverse;
-    animation-delay: -4s;
-  }
-
-  /* Hero pauses its blob animations when scrolled out of view.
-     The .hero-paused class is toggled by an IntersectionObserver. */
-  .hero-paused .animate-blob,
-  .hero-paused .animate-blob-delay {
-    animation-play-state: paused;
   }
 
   @keyframes float {
@@ -674,19 +487,6 @@
     }
     to {
       background-position: -200% 0;
-    }
-  }
-
-  @keyframes blobDrift {
-    0%,
-    100% {
-      transform: translate(0, 0) scale(1);
-    }
-    33% {
-      transform: translate(20px, -25px) scale(1.05);
-    }
-    66% {
-      transform: translate(-15px, 12px) scale(0.95);
     }
   }
 
@@ -756,6 +556,17 @@
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
+    }
+
+    /* The blanket rule above collapses duration but still runs one iteration,
+       which for the perpetual CTA/marquee loops means a visible jump to a
+       random keyframe. These stop outright instead. */
+    .mq-track,
+    .shiny-cta,
+    .shiny-cta::before,
+    .shiny-cta::after,
+    .shiny-cta span::before {
+      animation: none !important;
     }
   }
 }

@@ -2,7 +2,12 @@ import type { Config } from "tailwindcss";
 
 export default {
   darkMode: ["class"],
-  content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
+  content: [
+    "./pages/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
+  ],
   prefix: "",
   theme: {
     container: {
@@ -14,25 +19,14 @@ export default {
     },
     extend: {
       fontFamily: {
-        // Body: Inter Variable. Single grotesque across the interface.
-        sans: [
-          'Inter Variable',
-          'Inter',
-          'system-ui',
-          'sans-serif',
-        ],
-        // Display is the same face as body — hierarchy comes from weight and
-        // size, not a contrasting serif. The key is retained so the existing
-        // `font-display` consumers keep resolving.
-        display: [
-          'Inter Variable',
-          'Inter',
-          'system-ui',
-          'sans-serif',
-        ],
+        // Body: Public Sans Variable.
+        sans: ["Public Sans Variable", "Public Sans", "Helvetica Neue", "Arial", "sans-serif"],
+        // Display: Spectral, used italic. A contrasting serif against the
+        // grotesque body is the core of the type system, not decoration.
+        display: ["Spectral", "Georgia", "Times New Roman", "serif"],
         // Mono: JetBrains Mono — narrow technical use only (tables,
         // code blocks, tabular numerics). NOT a default body face.
-        mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
+        mono: ["JetBrains Mono", "ui-monospace", "monospace"],
       },
       colors: {
         // OKLCH consumers — tokens are bare-component in :root.
@@ -110,23 +104,9 @@ export default {
           from: { transform: "translateX(100%)" },
           to: { transform: "translateX(0)" },
         },
-        "float": {
-          "0%, 100%": { transform: "translateY(0)" },
-          "50%": { transform: "translateY(-12px)" },
-        },
-        // --primary is an OKLCH triple; hsl() here produced an invalid color.
-        "pulse-glow": {
-          "0%, 100%": { boxShadow: "0 0 0 1px oklch(var(--primary) / 0.15), 0 4px 16px oklch(var(--primary) / 0.25)" },
-          "50%": { boxShadow: "0 0 0 1px oklch(var(--primary) / 0.30), 0 8px 32px oklch(var(--primary) / 0.50)" },
-        },
-        "shimmer": {
+        shimmer: {
           from: { backgroundPosition: "200% 0" },
           to: { backgroundPosition: "-200% 0" },
-        },
-        "blob-drift": {
-          "0%, 100%": { transform: "translate(0, 0) scale(1)" },
-          "33%": { transform: "translate(20px, -25px) scale(1.05)" },
-          "66%": { transform: "translate(-15px, 12px) scale(0.95)" },
         },
         "reveal-up": {
           from: { opacity: "0", transform: "translateY(20px)" },
@@ -140,16 +120,10 @@ export default {
         "fade-out": "fade-out 0.25s ease-in",
         "scale-in": "scale-in 0.25s cubic-bezier(0.16,1,0.3,1)",
         "slide-in-right": "slide-in-right 0.3s cubic-bezier(0.16,1,0.3,1)",
-        "float": "float 7s ease-in-out infinite",
-        "pulse-glow": "pulse-glow 2.5s ease-in-out infinite",
-        "shimmer": "shimmer 2.5s linear infinite",
-        "blob-drift": "blob-drift 12s ease-in-out infinite",
+        shimmer: "shimmer 2.5s linear infinite",
         "reveal-up": "reveal-up 0.5s cubic-bezier(0.16,1,0.3,1) forwards",
       },
     },
   },
-  plugins: [
-    require("tailwindcss-animate"),
-    require("@tailwindcss/container-queries"),
-  ],
+  plugins: [require("tailwindcss-animate"), require("@tailwindcss/container-queries")],
 } satisfies Config;
